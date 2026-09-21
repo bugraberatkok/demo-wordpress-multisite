@@ -307,16 +307,17 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 
 			<p class="nwcs-hint">
 				Ürünün kendisi <a href="<?php echo esc_url( nwcs_pool_url() ); ?>">Ürün Havuzu</a>'nda düzenlenir.
-				Buradaki alanlar <strong>yalnızca bu site için</strong> geçerli istisnalardır; boş bırakılan alan havuzdaki değeri kullanır.
+				Buradaki alanlar <strong>yalnızca bu site için</strong> özelleştirmedir; boş bırakılan alan havuzdaki değeri kullanır.
 			</p>
 
 			<div class="nwcs-products" data-nwcs-products>
 				<?php
-				$position = 0;
+				// "Hepsi" kipinde her urun gosterildigi icin kutular da isaretli gelir.
+				$show_all = 'all' === $settings['mode'];
+
 				foreach ( $ordered as $id => $product ) :
 					$override    = $settings['overrides'][ $id ] ?? array();
-					$is_selected = in_array( $id, $settings['selected'], true );
-					++$position;
+					$is_selected = $show_all || in_array( $id, $settings['selected'], true );
 					?>
 					<div class="nwcs-product<?php echo $is_selected ? ' is-selected' : ''; ?>" data-nwcs-product>
 						<div class="nwcs-product__bar">
@@ -343,16 +344,18 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 							<div class="nwcs-product__tools">
 								<button type="button" class="nwcs-move" data-nwcs-product-move="up" aria-label="Yukarı taşı">↑</button>
 								<button type="button" class="nwcs-move" data-nwcs-product-move="down" aria-label="Aşağı taşı">↓</button>
-								<button type="button" class="nwcs-iconpick__toggle" data-nwcs-product-toggle aria-expanded="false">İstisnalar</button>
+								<button type="button" class="nwcs-iconpick__toggle" data-nwcs-product-toggle aria-expanded="false">Özelleştirilmiş</button>
 							</div>
 						</div>
 
 						<div class="nwcs-product__overrides">
-							<label class="nwcs-product__hide">
-								<input type="checkbox" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][hidden]" value="1"
-									<?php checked( ! empty( $override['hidden'] ) ); ?> />
-								Bu sitede gizle
-							</label>
+							<?php if ( ! empty( $override['hidden'] ) ) : ?>
+								<?php // Gizleme Urun Havuzu'ndaki toplu islemden yonetilir; deger burada korunur. ?>
+								<input type="hidden" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][hidden]" value="1" />
+								<p class="nwcs-hint">
+									Bu ürün <strong>Ürün Havuzu</strong>'ndaki toplu işlemle bu sitede gizlenmiş.
+								</p>
+							<?php endif; ?>
 
 							<div class="nwcs-field">
 								<label class="nwcs-sublabel">Ürün adı (bu sitede)</label>

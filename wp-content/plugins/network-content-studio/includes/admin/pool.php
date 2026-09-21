@@ -69,13 +69,12 @@ function nwcs_render_pool(): void {
 	<div class="wrap nwcs-wrap nwcs-wrap--pool">
 		<header class="nwcs-bar">
 			<div class="nwcs-bar__brand">
-				<button type="button" class="nwcs-menutoggle" data-nwcs-menu
-					aria-label="Yönetim menüsünü aç/kapat" title="Yönetim menüsünü aç/kapat">☰</button>
 				<span class="nwcs-bar__mark" aria-hidden="true"></span>
 				<h1>Ürün Havuzu</h1>
 			</div>
 			<div class="nwcs-bar__tools">
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_pool_url( array( 'yeni' => 1 ) ) ); ?>">+ Yeni ürün</a>
+				<button type="button" class="nwcs-linkout" data-nwcs-csv-open>CSV ile toplu giriş</button>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_media_url() ); ?>">Medya Havuzu ↗</a>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_panel_url( 0 ) ); ?>">İçerik Stüdyosu ↗</a>
 			</div>
@@ -113,9 +112,10 @@ function nwcs_render_pool(): void {
 			<section class="nwcs-pool__form">
 				<?php nwcs_render_pool_form( $editing, $categories, $is_new ); ?>
 				<?php nwcs_render_category_manager( $categories ); ?>
-				<?php nwcs_render_csv_box(); ?>
 			</section>
 		</div>
+
+		<?php nwcs_render_csv_box(); ?>
 	</div>
 	<?php
 }
@@ -321,6 +321,8 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 					value="<?php echo esc_attr( $product['spec'] ?? '' ); ?>" placeholder="örn. 80 × 120 cm" />
 			</div>
 
+			<?php nwcs_render_product_customizations( $product, $media ); ?>
+
 			<div class="nwcs-field">
 				<span class="nwcs-field__label">Kategoriler</span>
 
@@ -414,6 +416,108 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 }
 
 /**
+ * Urunun sitelere gore ozellestirilmis hali.
+ *
+ * Su an yalnizca bilgi verir: hangi sitede hangi alan havuzdakinden farkli
+ * kaydedilmis, urun o sitede gorunuyor mu. Duzenleme su an Icerik Studyosu'nda
+ * yapilir; ileride bu bolumden de yapilabilecek sekilde tasarlandi.
+ */
+function nwcs_render_product_customizations( ?array $product, array $media ): void {
+	if ( ! $product ) {
+		return;
+	}
+
+	$id    = (int) $product['id'];
+	$sites = nwcs_editable_sites();
+	$rows  = array();
+
+	foreach ( $sites as $blog_id => $site ) {
+		$settings = nwcs_site_product_settings( $blog_id );
+		$override = $settings['overrides'][ $id ] ?? array();
+		$visible  = 'all' === $settings['mode'] || in_array( $id, $settings['selected'], true );
+		$diffs    = array();
+
+		if ( ! empty( $override['hidden'] ) ) {
+			$diffs[] = array( 'Görünürlük', 'Görünür', 'Bu sitede gizli' );
+		} elseif ( ! $visible ) {
+			$diffs[] = array( 'Görünürlük', 'Görünür', 'Bu sitede seçili değil' );
+		}
+
+		if ( '' !== ( $override['title'] ?? '' ) ) {
+			$diffs[] = array( 'Ürün adı', $product['title'], $override['title'] );
+		}
+
+		if ( '' !== ( $override['short'] ?? '' ) ) {
+			$diffs[] = array( 'Açıklama', $product['short'], $override['short'] );
+		}
+
+		if ( ! empty( $override['price_override'] ) ) {
+			$diffs[] = array(
+				'Fiyat',
+				'' !== trim( $product['price'] ) ? $product['price'] : 'Teklif al',
+				'' !== trim( (string) ( $override['price'] ?? '' ) ) ? $override['price'] : 'Teklif al',
+			);
+		}
+
+		if ( ! empty( $override['image'] ) ) {
+			$diffs[] = array(
+				'Görsel',
+				$media[ $product['image_id'] ]['title'] ?? '—',
+				$media[ (int) $override['image'] ]['title'] ?? ( '#' . (int) $override['image'] ),
+			);
+		}
+
+		if ( $diffs ) {
+			$rows[] = array(
+				'site'  => $site,
+				'diffs' => $diffs,
+			);
+		}
+	}
+	?>
+	<div class="nwcs-field nwcs-custom">
+		<span class="nwcs-field__label">Özelleştirmeler</span>
+
+		<?php if ( ! $rows ) : ?>
+			<p class="nwcs-hint">
+				Bu ürün bütün sitelerde havuzdaki hâliyle görünüyor; siteye özel bir değişiklik yok.
+			</p>
+		<?php else : ?>
+			<?php foreach ( $rows as $row ) : ?>
+				<div class="nwcs-custom__site">
+					<h3 class="nwcs-custom__title">
+						<?php echo esc_html( $row['site']['label'] ); ?>
+						<a href="<?php echo esc_url( nwcs_panel_url( (int) $row['site']['blog_id'], 'home' ) ); ?>">düzenle ↗</a>
+					</h3>
+
+					<table class="nwcs-custom__table">
+						<thead>
+							<tr><th>Alan</th><th>Havuzdaki</th><th>Bu sitede</th></tr>
+						</thead>
+						<tbody>
+							<?php foreach ( $row['diffs'] as $diff ) : ?>
+								<tr>
+									<td><?php echo esc_html( $diff[0] ); ?></td>
+									<td class="nwcs-custom__from"><?php echo esc_html( $diff[1] ); ?></td>
+									<td class="nwcs-custom__to"><?php echo esc_html( $diff[2] ); ?></td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
+				</div>
+			<?php endforeach; ?>
+		<?php endif; ?>
+
+		<p class="nwcs-hint">
+			Şimdilik bu bölüm yalnızca bilgi verir. Özelleştirme eklemek/değiştirmek için
+			ilgili sitenin <a href="<?php echo esc_url( nwcs_panel_url( 0 ) ); ?>">İçerik Stüdyosu</a>
+			sayfasındaki ürün bölümünü kullanın.
+		</p>
+	</div>
+	<?php
+}
+
+/**
  * Kategori yonetimi kutusu.
  */
 function nwcs_render_category_manager( array $categories ): void {
@@ -458,12 +562,15 @@ function nwcs_render_category_manager( array $categories ): void {
 }
 
 /**
- * CSV ice/disa aktarma kutusu.
+ * CSV ice/disa aktarma — ust seritteki dugmeyle acilan pencere.
  */
 function nwcs_render_csv_box(): void {
 	?>
-	<div class="nwcs-pool__card">
-		<h2 class="nwcs-pool__title">CSV ile toplu giriş</h2>
+	<dialog class="nwcs-modal" id="nwcs-csv-modal">
+		<div class="nwcs-modal__head">
+			<h2 class="nwcs-pool__title">CSV ile toplu giriş</h2>
+			<button type="button" class="nwcs-modal__close" data-nwcs-csv-close aria-label="Kapat">×</button>
+		</div>
 
 		<p class="nwcs-hint">
 			Sütunlar: <code>slug, ad, kisa_aciklama, fiyat, olcu_not, kategoriler, gorseller, detay_metni</code>.
@@ -490,9 +597,10 @@ function nwcs_render_csv_box(): void {
 
 			<div class="nwcs-actions">
 				<button type="submit" class="button button-primary">İçe aktar</button>
+				<button type="button" class="button" data-nwcs-csv-close>Kapat</button>
 			</div>
 		</form>
-	</div>
+	</dialog>
 	<?php
 }
 

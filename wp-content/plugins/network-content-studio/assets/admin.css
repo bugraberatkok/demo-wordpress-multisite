@@ -704,3 +704,50 @@ textarea.nwcs-input { min-height: 76px; line-height: 1.55; }
 
 .nwcs-danger { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--nwcs-line); }
 .nwcs-actions__spacer { flex: 1; }
+
+/* ---------- Açılır pencere (CSV) ---------- */
+.nwcs-modal {
+	width: min(560px, 92vw);
+	border: 0;
+	border-radius: 14px;
+	padding: 20px 22px 22px;
+	box-shadow: 0 24px 60px rgba(23, 28, 43, .28);
+	color: var(--nwcs-ink);
+	font-size: 14px;
+}
+.nwcs-modal::backdrop { background: rgba(23, 28, 43, .45); }
+.nwcs-modal__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.nwcs-modal__head .nwcs-pool__title { margin: 0; }
+.nwcs-modal__close {
+	border: 0; background: transparent; cursor: pointer;
+	font-size: 22px; line-height: 1; color: var(--nwcs-muted);
+	padding: 2px 6px; border-radius: 6px;
+}
+.nwcs-modal__close:hover { background: var(--nwcs-soft); color: var(--nwcs-ink); }
+.nwcs-modal .nwcs-actions { position: static; border-top: 0; padding-left: 0; padding-right: 0; }
+
+button.nwcs-linkout { border: 0; cursor: pointer; font: inherit; }
+
+/* ---------- Özelleştirmeler bölümü ---------- */
+.nwcs-custom__site {
+	border: 1px solid var(--nwcs-line);
+	border-radius: 10px;
+	padding: 10px 12px;
+	margin-bottom: 8px;
+	background: var(--nwcs-soft);
+}
+.nwcs-custom__title {
+	margin: 0 0 8px;
+	font-size: 13px; font-weight: 700;
+	display: flex; align-items: baseline; gap: 10px;
+}
+.nwcs-custom__title a { font-size: 11.5px; font-weight: 600; text-decoration: none; }
+.nwcs-custom__table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.nwcs-custom__table th {
+	text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em;
+	color: var(--nwcs-muted); padding: 3px 6px; border-bottom: 1px solid var(--nwcs-line);
+}
+.nwcs-custom__table td { padding: 5px 6px; border-bottom: 1px solid #eceef5; vertical-align: top; }
+.nwcs-custom__table tr:last-child td { border-bottom: 0; }
+.nwcs-custom__from { color: var(--nwcs-muted); text-decoration: line-through; }
+.nwcs-custom__to { color: var(--nwcs-brand-dark); font-weight: 600; }

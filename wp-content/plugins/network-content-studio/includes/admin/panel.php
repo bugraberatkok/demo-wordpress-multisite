@@ -61,15 +61,20 @@ function nwcs_admin_assets( string $hook ): void {
 }
 
 /**
- * Panel sayfalarinda WordPress yonetim menusu katlanmis baslar; ust seritteki
- * dugme ile acilir ve tercih tarayicida hatirlanir. Boylece onizlemeye yer kalir.
+ * Panel sayfalarinda WordPress yonetim menusu katlanmis baslar; boylece
+ * onizlemeye daha fazla yer kalir.
+ *
+ * Kullanici WordPress'in kendi "Menuyu daralt" dugmesiyle menuyu actiysa
+ * (mfold = o) ona dokunmayiz; tercih kullanicinin kalir.
  */
 add_filter( 'admin_body_class', 'nwcs_fold_admin_menu' );
 function nwcs_fold_admin_menu( string $classes ): string {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca gorunum.
 	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
-	if ( in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG ), true ) ) {
+	$ours = in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG ), true );
+
+	if ( $ours && 'o' !== get_user_setting( 'mfold' ) ) {
 		$classes .= ' folded';
 	}
 
@@ -171,8 +176,6 @@ function nwcs_render_panel(): void {
 
 		<header class="nwcs-bar">
 			<div class="nwcs-bar__brand">
-				<button type="button" class="nwcs-menutoggle" data-nwcs-menu
-					aria-label="Yönetim menüsünü aç/kapat" title="Yönetim menüsünü aç/kapat">☰</button>
 				<span class="nwcs-bar__mark" aria-hidden="true"></span>
 				<h1>İçerik Stüdyosu</h1>
 			</div>

@@ -252,6 +252,27 @@ gösterilebilir ve binlerce ürün her siteye elle girilmez.
 Not: brief'teki "sağda dikey site seçici" şartı, müşterinin bu isteğiyle değişti;
 seçici üst şeride taşınıyor.
 
+## MVP 5 sonrası hot-fix'ler
+
+- **"Hepsi" kipinde tüm ürünler işaretli geliyor.** Kip zaten hepsini gösteriyordu ama
+  kutular boş duruyordu; artık hem sunucu tarafında hem de kipi değiştirdiğiniz anda
+  işaretleniyor.
+- **"Bu sitede gizle" kutusu İçerik Stüdyosu'ndan kaldırıldı.** Gizleme Ürün
+  Havuzu'ndaki toplu işlemden yönetiliyor. Daha önce gizlenmiş bir ürünün değeri
+  kaybolmasın diye form o bilgiyi gizli alanda taşıyor ve kullanıcıya bir satırla
+  bildiriyor.
+- **Üst şeritteki ☰ düğmesi kaldırıldı.** Menü katlaması duruyor ama artık
+  WordPress'in kendi "Menüyü daralt" tercihine saygı gösteriyor: kullanıcı menüyü
+  açtıysa (`mfold = o`) panel onu tekrar katlamıyor.
+- **"İstisna" yerine "Özelleştirilmiş/Özelleştirmeler".** Panelde tek bir dil kullanılıyor.
+- **CSV kutusu açılır pencereye alındı.** Sağ üstteki "CSV ile toplu giriş" düğmesi
+  native `<dialog>` açıyor; tarayıcıda tıklama testiyle doğrulandı.
+- **Ürün formuna "Özelleştirmeler" bölümü eklendi** (Kategoriler'in üstünde). Ürünün
+  hangi sitede hangi alanının havuzdakinden farklı kaydedildiğini üstü çizili/vurgulu
+  bir tabloda gösterir. Şimdilik salt okunur; düzenleme İçerik Stüdyosu'nda yapılıyor.
+  Veri zaten site option'larında tutulduğu için buradan düzenlenebilir hâle getirmek
+  ileride yalnızca form alanı eklemek olacak.
+
 ## MVP 5 — nasıl yapıldı
 
 **Önizleme tıklamasında sayfa anahtarı (hata düzeltmesi)**

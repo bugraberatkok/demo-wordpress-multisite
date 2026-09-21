@@ -271,12 +271,20 @@
 	wrap.addEventListener( 'click', function ( event ) {
 		var target = event.target;
 
-		// Yonetim menusunu ac/kapat (tercih tarayicida hatirlanir)
-		if ( target.closest && target.closest( '[data-nwcs-menu]' ) ) {
-			var opened = document.body.classList.toggle( 'folded' ) === false;
-			try {
-				window.localStorage.setItem( 'nwcsMenuOpen', opened ? '1' : '0' );
-			} catch ( e ) {}
+		// CSV kutusu (Urun Havuzu) — acilir pencere
+		if ( target.closest && target.closest( '[data-nwcs-csv-open]' ) ) {
+			var csvBox = document.getElementById( 'nwcs-csv-modal' );
+			if ( csvBox && csvBox.showModal ) {
+				csvBox.showModal();
+			}
+			return;
+		}
+
+		if ( target.closest && target.closest( '[data-nwcs-csv-close]' ) ) {
+			var openBox = document.getElementById( 'nwcs-csv-modal' );
+			if ( openBox && openBox.close ) {
+				openBox.close();
+			}
 			return;
 		}
 
@@ -356,7 +364,7 @@
 			var card = productToggle.closest( '[data-nwcs-product]' );
 			var isOpen = card.classList.toggle( 'is-open' );
 			productToggle.setAttribute( 'aria-expanded', isOpen ? 'true' : 'false' );
-			productToggle.textContent = isOpen ? 'Kapat' : 'İstisnalar';
+			productToggle.textContent = isOpen ? 'Kapat' : 'Özelleştirilmiş';
 			return;
 		}
 
@@ -616,6 +624,14 @@
 			wrap.querySelectorAll( '.nwcs-mode' ).forEach( function ( label ) {
 				label.classList.toggle( 'is-active', label.contains( event.target ) );
 			} );
+
+			// "Hepsi" kipinde butun urunler gosterilir; kutular da isaretlenir.
+			if ( 'all' === event.target.value ) {
+				wrap.querySelectorAll( '[data-nwcs-product-pick]' ).forEach( function ( box ) {
+					box.checked = true;
+					box.closest( '[data-nwcs-product]' ).classList.add( 'is-selected' );
+				} );
+			}
 		}
 
 		// Ikon secimi
@@ -696,13 +712,6 @@
 		event.preventDefault();
 		event.returnValue = T.confirmLeave || '';
 	} );
-
-	// Menu tercihi: sunucu varsayilan olarak katlar, kullanici actiysa geri acilir.
-	try {
-		if ( '1' === window.localStorage.getItem( 'nwcsMenuOpen' ) ) {
-			document.body.classList.remove( 'folded' );
-		}
-	} catch ( e ) {}
 
 	// Onizleme yuklendiginde gostergeyi kapat
 	if ( frame ) {
