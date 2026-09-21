@@ -168,6 +168,42 @@ Yükseltme öncesi alınan SQL yedeği `/var/www/html` altına düştüğü içi
 indirilebilir hâldeydi (HTTP 200). Fark edilip `/var/backups` altına taşındı. Yedekler
 hiçbir zaman web köküne yazılmamalı.
 
+## MVP 4 kapsamı (kararlaştırıldı, henüz yapılmadı)
+
+Müşteri kararları — 21 Eylül 2026:
+
+**1. Ürün havuzu Ağ Yönetimi'nde durur.**
+Havuz belirli bir alt sitenin sayfası değil; tüm siteleri yöneten en üst seviyedeki
+yönetim panelinde, İçerik Stüdyosu'nun yanında kendi sayfası olur ("Ürün Havuzu").
+Ürünler orada bir kez girilir, siteler oradan beslenir.
+
+**2. Görseller WordPress medya kitaplığında durur.**
+Ürün görselleri havuzun bulunduğu yerin (ağ ana sitesi) medya kitaplığına yüklenir,
+oradan silinir; dış bir depo veya dosya sistemi kullanılmaz. Alt siteler görseli
+referansla gösterir, kopya oluşmaz.
+
+**3. Site bazlı istisnalar gerekli.**
+Müşteri tarafından açıkça istendi: aynı ürün bir sitede farklı başlık/açıklama/görsel
+ile görünebilmeli, bir sitede gizlenebilmeli, sıralaması siteye göre değişebilmeli.
+Havuzdaki kayıt kaynak, site kaydı üzerine yazılan ince bir katman olur.
+
+**4. Site seçimi her sitede üç kipten biri olur:**
+"hepsi" (yeni ürün eklenince otomatik görünür), "seçilenler" (panelden işaretlenenler),
+"kurallı" (ör. belirli kategori). Böylece bir sitede tüm katalog, diğerinde alt küme
+gösterilebilir ve binlerce ürün her siteye elle girilmez.
+
+**5. Panel arayüzü elden geçirilecek** (aşağıdaki istekler):
+- Önizleme alanı belirgin şekilde büyütülecek; asıl odak orası olacak.
+- Sol sütun daraltılıp sıkışıklık giderilecek; alanlar daha rahat nefes alacak.
+- Site seçici sağdaki dikey sütundan **üst şeride** taşınacak; site adları görünür
+  kaldığı sürece küçük olabilir. Böylece ortadaki önizlemeye daha çok yer kalır.
+- Arayüz renklendirilecek; wp-admin'in gri düzeninden ayrışan, daha okunaklı ve
+  kullanıcı dostu bir görünüm hedeflenecek.
+- Teknik bilgisi olmayan site sahibinin tek başına kullanabilmesi ölçüt olacak.
+
+Not: brief'teki "sağda dikey site seçici" şartı, müşterinin bu isteğiyle değişti;
+seçici üst şeride taşınıyor.
+
 ## Açık bırakılanlar
 
 - Taslak/revizyon akışı kapsam dışı: kaydetme davranışı "hemen yayınla".

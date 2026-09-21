@@ -201,9 +201,12 @@ Teknik kararlar ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 - **MVP 3 — tamamlandı**: panel ortasında canlı önizleme ve tıkla-düzenle, ana sayfa
   bölümlerini ↑↓ ile sıralama, Abilities API + resmî MCP Adapter ile Claude Code
   bağlantısı (dört yetenek, en az yetkili).
-- **MVP 4 — sırada**: merkezî ürün havuzu. Ürünler tek yerde tutulacak, her site
-  "hepsi" / "seçilenler" / kurallı seçim ile gösterecek; binlerce ürünü her siteye elle
-  girme ihtiyacı ortadan kalkacak.
+- **MVP 4 — sırada**: merkezî ürün havuzu + panel arayüzünün elden geçirilmesi.
+  Ürünler Ağ Yönetimi'ndeki "Ürün Havuzu" sayfasında bir kez girilecek, görseller
+  WordPress medya kitaplığında duracak, her site "hepsi" / "seçilenler" / kurallı
+  seçimle beslenecek ve site bazlı istisnalar (farklı başlık/görsel, gizleme, sıra)
+  desteklenecek. Panelde önizleme büyütülecek, site seçici üst şeride taşınacak,
+  arayüz renklendirilip sadeleştirilecek. Ayrıntılar: [DECISIONS.md](DECISIONS.md).
 
 Bu demonun kapsamı dışında bırakılanlar (canlıya geçişte ayrı iş): taslak/revizyon akışı,
 gerçek e-posta teslimi ve spam koruması, alan adı eşlemesi, e-ticaret.
