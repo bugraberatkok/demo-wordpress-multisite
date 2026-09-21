@@ -252,6 +252,41 @@ gösterilebilir ve binlerce ürün her siteye elle girilmez.
 Not: brief'teki "sağda dikey site seçici" şartı, müşterinin bu isteğiyle değişti;
 seçici üst şeride taşınıyor.
 
+## MVP 5 kapsamı — demonun son iterasyonu
+
+Müşteri istekleri (21 Eylül 2026):
+
+**1. Kategoriler metin kutusu değil, gerçek liste olacak.**
+Ürün Havuzu'nda kategori oluşturulacak, üründe listeden etiket gibi seçilecek
+(çoklu seçim, yazarken filtreleme, yeni kategori ekleme). Şu anki virgüllü metin
+kutusu yazım hatasıyla mükerrer kategori üretmeye açık.
+
+**2. Bir ürüne birden fazla görsel.**
+Galeri: sıralanabilir görsel listesi. Kartta ilk görsel, detay sayfasında galeri.
+Site istisnasında hangi görselin kullanılacağı seçilebilir.
+
+**3. Adım şeridi ortalanacak.**
+İçerik Stüdyosu ve Ürün Havuzu'ndaki "1 … 2 … 3 …" şeridi şu an sola yapışık.
+
+**4. Medya havuzu sayfası.**
+Görsellerin toplu yüklendiği, arandığı, alt metninin düzenlendiği ve silindiği ayrı
+bir sayfa. Ürün Havuzu'ndaki küçük medya bölümü bunun yerini tutmuyor.
+
+**5. Önizlemede sayfa algısı düzeltilecek (hata).**
+"Ana Sayfa" sekmesindeyken önizlemede üst menü/footer gibi *tüm sayfalara* ait bir
+bileşene tıklanınca "Bölüm yüklenemedi" çıkıyor. Sebep: önizleme mesajı
+`global.header.logo_text` biçiminde geliyor, panel ilk parçayı yok sayıp bileşeni
+açık sayfada (`home`) arıyor. Düzeltme: sayfa anahtarı mesajdan okunacak ve panel
+gerekirse o sayfaya kendiliğinden geçecek.
+
+**6. WordPress sol menüsü katlanacak.**
+Panel açıkken yönetim menüsü varsayılan olarak dar/kapalı olacak, gerektiğinde
+açılabilecek. Böylece önizlemeye daha fazla yer kalır.
+
+**7. Görsel yorgunluğu azaltılacak.**
+Uzun formlarda her yer beyaz olduğu için göz yoruluyor. Daha yumuşak zemin, bölüm
+gruplama, katlanabilir alan grupları ve daha net görsel hiyerarşi.
+
 ## Açık bırakılanlar
 
 - Taslak/revizyon akışı kapsam dışı: kaydetme davranışı "hemen yayınla".

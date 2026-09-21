@@ -243,6 +243,9 @@ Teknik kararlar ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 - **MVP 3 — tamamlandı**: panel ortasında canlı önizleme ve tıkla-düzenle, ana sayfa
   bölümlerini ↑↓ ile sıralama, Abilities API + resmî MCP Adapter ile Claude Code
   bağlantısı (dört yetenek, en az yetkili).
+- **MVP 5 — planlandı**: kategori listesi, çoklu ürün görseli, medya havuzu sayfası,
+  önizleme sayfa algısı düzeltmesi, katlanan yönetim menüsü ve gözü yormayan arayüz.
+  Ayrıntılar: [DECISIONS.md](DECISIONS.md).
 - **MVP 4 — tamamlandı**: merkezî ürün havuzu (Ağ Yönetimi'nde kendi sayfası, WordPress
   medya kitaplığı, hepsi/seçilenler kipleri, site bazlı istisnalar, boş fiyatta
   "Teklif al", örnek ürün detay sayfası) ve panel arayüzünün elden geçirilmesi
