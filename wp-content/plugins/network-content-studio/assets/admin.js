@@ -271,6 +271,16 @@
 	wrap.addEventListener( 'click', function ( event ) {
 		var target = event.target;
 
+		// Yonetim menusunu ac/kapat (ust seritteki uc cizgili marka dugmesi).
+		// Tercih tarayicida hatirlanir; sunucu varsayilan olarak menuyu katlar.
+		if ( target.closest && target.closest( '[data-nwcs-menu]' ) ) {
+			var folded = document.body.classList.toggle( 'folded' );
+			try {
+				window.localStorage.setItem( 'nwcsMenuOpen', folded ? '0' : '1' );
+			} catch ( e ) {}
+			return;
+		}
+
 		// CSV kutusu (Urun Havuzu) — acilir pencere
 		if ( target.closest && target.closest( '[data-nwcs-csv-open]' ) ) {
 			var csvBox = document.getElementById( 'nwcs-csv-modal' );
@@ -712,6 +722,13 @@
 		event.preventDefault();
 		event.returnValue = T.confirmLeave || '';
 	} );
+
+	// Menu tercihi: sunucu katlanmis gonderir, kullanici actiysa geri acilir.
+	try {
+		if ( '1' === window.localStorage.getItem( 'nwcsMenuOpen' ) ) {
+			document.body.classList.remove( 'folded' );
+		}
+	} catch ( e ) {}
 
 	// Onizleme yuklendiginde gostergeyi kapat
 	if ( frame ) {

@@ -69,7 +69,8 @@ function nwcs_render_pool(): void {
 	<div class="wrap nwcs-wrap nwcs-wrap--pool">
 		<header class="nwcs-bar">
 			<div class="nwcs-bar__brand">
-				<span class="nwcs-bar__mark" aria-hidden="true"></span>
+				<button type="button" class="nwcs-bar__mark" data-nwcs-menu
+					aria-label="Yönetim menüsünü aç/kapat" title="Yönetim menüsünü aç/kapat"></button>
 				<h1>Ürün Havuzu</h1>
 			</div>
 			<div class="nwcs-bar__tools">
