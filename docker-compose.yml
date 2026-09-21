@@ -1,0 +1,92 @@
+# Multisite sabitleri hem web hem WP-CLI container'inda ayni olmali; bu yuzden
+# tek bir YAML capasi (anchor) ile paylasiliyor.
+#
+# Isaret dosyasi mutlak yolla aranir: bu blok wp-config.php icinde ABSPATH
+# tanimlanmadan once calisir ve WP-CLI, wp-config.php'yi kendi dosya baglaminda
+# eval ettigi icin __DIR__ de guvenilir degildir.
+x-wp-config-extra: &wp_config_extra |
+  /* Cok siteli ag: ag kurulumu tamamlanmadan MULTISITE tanimlanmaz. */
+  if ( file_exists( '/var/www/html/.multisite-ready' ) ) {
+    define( 'MULTISITE', true );
+    define( 'SUBDOMAIN_INSTALL', false );
+    define( 'DOMAIN_CURRENT_SITE', getenv( 'WP_HOST' ) ?: 'localhost:8080' );
+    define( 'PATH_CURRENT_SITE', '/' );
+    define( 'SITE_ID_CURRENT_SITE', 1 );
+    define( 'BLOG_ID_CURRENT_SITE', 1 );
+  } else {
+    define( 'WP_ALLOW_MULTISITE', true );
+  }
+  define( 'FS_METHOD', 'direct' );
+  define( 'WP_DEBUG_DISPLAY', false );
+
+services:
+  db:
+    image: mariadb:11
+    container_name: dwm-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-wordpress}
+      MARIADB_USER: ${DB_USER:-wordpress}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    image: wordpress:6.8-php8.3-apache
+    container_name: dwm-wp
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${WP_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
+      WORDPRESS_DB_USER: ${DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      WP_HOST: ${WP_HOST:-localhost:8080}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-0}
+      WORDPRESS_CONFIG_EXTRA: *wp_config_extra
+    volumes:
+      - wp_core:/var/www/html
+      - ./wp-content/themes/kocist-theme:/var/www/html/wp-content/themes/kocist-theme
+      - ./wp-content/themes/paletci-theme:/var/www/html/wp-content/themes/paletci-theme
+      - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
+      - ./docker/apache-wp.conf:/etc/apache2/conf-enabled/zz-wp.conf:ro
+      - ./scripts:/scripts:ro
+
+  wpcli:
+    image: wordpress:cli-php8.3
+    container_name: dwm-cli
+    profiles: ["cli"]
+    depends_on:
+      - wordpress
+    user: "33:33"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${DB_NAME:-wordpress}
+      WORDPRESS_DB_USER: ${DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+      WP_HOST: ${WP_HOST:-localhost:8080}
+      WP_ADMIN_USER: ${WP_ADMIN_USER:-admin}
+      WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:-admin123}
+      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL:-admin@example.test}
+      WORDPRESS_CONFIG_EXTRA: *wp_config_extra
+    volumes:
+      - wp_core:/var/www/html
+      - ./wp-content/themes/kocist-theme:/var/www/html/wp-content/themes/kocist-theme
+      - ./wp-content/themes/paletci-theme:/var/www/html/wp-content/themes/paletci-theme
+      - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
+      - ./scripts:/scripts:ro
+    entrypoint: ["wp"]
+
+volumes:
+  db_data:
+  wp_core:

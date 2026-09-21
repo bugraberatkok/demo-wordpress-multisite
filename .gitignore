@@ -1,0 +1,5 @@
+.env
+wp-core/
+wp-content/uploads/
+*.log
+.DS_Store

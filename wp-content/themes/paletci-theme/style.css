@@ -1,0 +1,263 @@
+/*
+Theme Name: Paletci Theme
+Theme URI: http://localhost:8080/paletci/
+Author: Demo
+Description: Istanbul Paletci demo sitesi icin urun/teklif odakli tema. Icerik degerleri Network Content Studio veri katmanindan okunur.
+Version: 0.1.0
+Requires at least: 6.5
+Requires PHP: 8.1
+Text Domain: paletci
+*/
+
+/* ---------- Temel ---------- */
+:root {
+	--forest: #1f4033;
+	--forest-2: #2c5744;
+	--clay: #c2613a;
+	--clay-dark: #a44f2c;
+	--cream: #fbf7f0;
+	--cream-2: #f3ece1;
+	--sand: #e6dac8;
+	--text: #2a2620;
+	--muted: #6f6659;
+	--maxw: 1120px;
+	--radius: 16px;
+	--shadow: 0 12px 30px rgba(43, 34, 22, .09);
+}
+
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	background: var(--cream);
+	color: var(--text);
+	font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+	font-size: 17px;
+	line-height: 1.65;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+
+h1, h2, h3, .p-serif {
+	font-family: Georgia, "Times New Roman", "Iowan Old Style", serif;
+	font-weight: 600;
+	letter-spacing: -.01em;
+}
+
+.p-wrap {
+	width: 100%;
+	max-width: var(--maxw);
+	margin: 0 auto;
+	padding: 0 22px;
+}
+
+.p-section { padding: 76px 0; }
+.p-section--cream { background: var(--cream-2); }
+.p-section--forest { background: var(--forest); color: var(--cream); }
+
+.p-head { max-width: 62ch; margin: 0 auto 44px; text-align: center; }
+.p-head--left { margin-left: 0; text-align: left; }
+.p-title { font-size: clamp(27px, 3.6vw, 39px); line-height: 1.2; margin: 0 0 12px; }
+.p-sub { color: var(--muted); margin: 0; font-size: 17px; }
+.p-section--forest .p-sub { color: #cdd9d1; }
+
+.p-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 14px 26px;
+	border-radius: 999px;
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: none;
+	border: 1.5px solid transparent;
+	transition: transform .12s ease, background .15s, color .15s;
+}
+.p-btn:hover { transform: translateY(-1px); }
+.p-btn--clay { background: var(--clay); color: #fff; }
+.p-btn--clay:hover { background: var(--clay-dark); }
+.p-btn--forest { background: var(--forest); color: var(--cream); }
+.p-btn--forest:hover { background: var(--forest-2); }
+.p-btn--outline { border-color: var(--sand); background: #fff; color: var(--forest); }
+.p-btn--outline:hover { border-color: var(--forest); }
+.p-btn--light { background: var(--cream); color: var(--forest); }
+
+.nwcs-icon, .p-icon { flex: none; }
+
+/* ---------- Header ---------- */
+.p-header { background: var(--cream); border-bottom: 1px solid var(--sand); position: sticky; top: 0; z-index: 30; }
+.p-header__inner { display: flex; align-items: center; gap: 22px; padding: 16px 0; }
+.p-logo { display: flex; align-items: center; gap: 13px; text-decoration: none; }
+.p-logo__img { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; }
+.p-logo__mark {
+	width: 48px; height: 48px; border-radius: 12px;
+	background: var(--forest); color: var(--cream);
+	display: flex; align-items: center; justify-content: center;
+	font-family: Georgia, serif; font-size: 22px; font-weight: 700;
+}
+.p-logo__text { font-family: Georgia, serif; font-size: 21px; font-weight: 600; color: var(--forest); line-height: 1.15; }
+.p-logo__sub { font-size: 12px; color: var(--muted); }
+
+.p-nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+.p-nav a {
+	padding: 9px 14px;
+	border-radius: 999px;
+	font-size: 15px;
+	text-decoration: none;
+	color: var(--text);
+}
+.p-nav a:hover { background: var(--cream-2); color: var(--forest); }
+
+.p-header__actions { display: flex; align-items: center; gap: 12px; }
+.p-header__phone { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; color: var(--forest); font-size: 15px; }
+
+/* ---------- Hero ---------- */
+.p-hero { padding: 70px 0 64px; text-align: center; background:
+	radial-gradient(900px 340px at 50% -80px, #ffffff 0%, rgba(255,255,255,0) 70%), var(--cream); }
+.p-badge {
+	display: inline-flex; align-items: center; gap: 8px;
+	background: var(--cream-2); border: 1px solid var(--sand);
+	color: var(--forest); font-size: 14px; font-weight: 600;
+	padding: 7px 16px; border-radius: 999px; margin-bottom: 20px;
+}
+.p-hero__title { font-size: clamp(33px, 5vw, 56px); line-height: 1.12; margin: 0 auto 18px; max-width: 16ch; }
+.p-hero__sub { color: var(--muted); font-size: 19px; margin: 0 auto 30px; max-width: 58ch; }
+.p-hero__actions { display: flex; flex-wrap: wrap; gap: 13px; justify-content: center; margin-bottom: 34px; }
+.p-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 40px; }
+.p-chip {
+	display: inline-flex; align-items: center; gap: 8px;
+	background: #fff; border: 1px solid var(--sand);
+	padding: 8px 16px; border-radius: 999px; font-size: 14px; color: var(--forest);
+}
+.p-hero__media { border-radius: 24px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--sand); }
+.p-hero__media img { width: 100%; aspect-ratio: 21 / 9; object-fit: cover; }
+
+/* ---------- Urunler ---------- */
+.p-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); gap: 18px; }
+.p-product {
+	background: #fff; border: 1px solid var(--sand); border-radius: var(--radius);
+	overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow);
+}
+.p-product__media { aspect-ratio: 4 / 3; background: var(--cream-2); overflow: hidden; }
+.p-product__media img { width: 100%; height: 100%; object-fit: cover; }
+.p-product__body { padding: 22px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
+.p-product__title { font-size: 21px; margin: 0; color: var(--forest); }
+.p-product__meta {
+	align-self: flex-start; font-size: 13px; color: var(--clay-dark);
+	background: #fdf1eb; border-radius: 999px; padding: 4px 12px; font-weight: 600;
+}
+.p-product__text { color: var(--muted); font-size: 15.5px; margin: 0; flex: 1; }
+.p-product__link { color: var(--clay-dark); font-weight: 600; text-decoration: none; display: inline-flex; gap: 7px; align-items: center; }
+.p-product__link:hover { text-decoration: underline; }
+
+/* ---------- Surec ---------- */
+.p-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 26px; }
+.p-step { position: relative; padding-top: 12px; }
+.p-step__no {
+	font-family: Georgia, serif; font-size: 40px; line-height: 1;
+	color: var(--clay); opacity: .55; margin-bottom: 10px;
+}
+.p-step__title { font-size: 19px; margin: 0 0 7px; }
+.p-step__text { color: var(--muted); font-size: 15.5px; margin: 0; }
+.p-section--forest .p-step__text { color: #c6d3cb; }
+.p-section--forest .p-step__no { color: var(--clay); opacity: .9; }
+
+/* ---------- Neden biz ---------- */
+.p-why { display: grid; grid-template-columns: .95fr 1.05fr; gap: 46px; align-items: center; }
+.p-why__media img { width: 100%; aspect-ratio: 5 / 4; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--sand); }
+.p-why__list { display: grid; gap: 22px; margin: 0; padding: 0; list-style: none; }
+.p-why__item { display: flex; gap: 16px; }
+.p-why__icon {
+	width: 44px; height: 44px; border-radius: 12px; flex: none;
+	background: var(--cream-2); color: var(--forest);
+	display: flex; align-items: center; justify-content: center;
+}
+.p-why__title { font-size: 18px; margin: 0 0 5px; }
+.p-why__text { color: var(--muted); font-size: 15.5px; margin: 0; }
+
+/* ---------- Teklif / demo form ---------- */
+.p-quote { display: grid; grid-template-columns: 1fr 1fr; gap: 42px; align-items: start; }
+.p-quote__card {
+	background: #fff; border: 1px solid var(--sand); border-radius: var(--radius);
+	padding: 28px; box-shadow: var(--shadow);
+}
+.p-field { display: grid; gap: 6px; margin-bottom: 16px; }
+.p-field label { font-size: 14px; font-weight: 600; color: var(--forest); }
+.p-field input, .p-field textarea {
+	font: inherit; font-size: 15px; padding: 11px 13px;
+	border: 1px solid var(--sand); border-radius: 10px; background: var(--cream);
+	color: var(--text); width: 100%;
+}
+.p-field textarea { min-height: 96px; resize: vertical; }
+.p-demo-note {
+	background: #fdf1eb; border: 1px solid #f0d6c8; color: #8a4526;
+	border-radius: 12px; padding: 13px 15px; font-size: 14px; margin: 0 0 18px;
+	display: flex; gap: 10px; align-items: flex-start;
+}
+.p-quote__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+/* ---------- Ic sayfa ---------- */
+.p-pagehead { background: var(--cream-2); padding: 58px 0; text-align: center; border-bottom: 1px solid var(--sand); }
+.p-pagehead__title { font-size: clamp(30px, 4vw, 44px); margin: 0 0 12px; color: var(--forest); }
+.p-pagehead__sub { color: var(--muted); margin: 0 auto; max-width: 60ch; }
+
+.p-intro { display: grid; grid-template-columns: 1.1fr .9fr; gap: 42px; align-items: center; }
+.p-intro__body { color: var(--muted); white-space: pre-line; }
+.p-intro__media img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius); border: 1px solid var(--sand); }
+
+.p-list { display: grid; gap: 14px; }
+.p-list__row {
+	background: #fff; border: 1px solid var(--sand); border-radius: var(--radius);
+	padding: 20px 22px; display: flex; gap: 18px; align-items: flex-start;
+}
+.p-list__icon { color: var(--forest); flex: none; margin-top: 3px; }
+.p-list__title { margin: 0 0 4px; font-size: 19px; }
+.p-list__text { color: var(--muted); margin: 0; font-size: 15.5px; }
+.p-list__meta { margin-left: auto; font-size: 13px; color: var(--clay-dark); font-weight: 600; white-space: nowrap; }
+
+.p-cta-card {
+	background: var(--forest); color: var(--cream); border-radius: 22px;
+	padding: 38px; display: flex; flex-wrap: wrap; gap: 22px;
+	align-items: center; justify-content: space-between;
+}
+.p-cta-card h2 { margin: 0 0 6px; font-size: clamp(22px, 2.8vw, 30px); }
+.p-cta-card p { margin: 0; color: #c9d6ce; }
+
+/* ---------- Footer ---------- */
+.p-footer { background: var(--forest); color: #c6d3cb; padding: 58px 0 26px; }
+.p-footer__grid { display: grid; grid-template-columns: 1.5fr 1fr 1.3fr; gap: 40px; }
+.p-footer h3 { color: var(--cream); font-size: 17px; margin: 0 0 14px; }
+.p-footer p { margin: 0; white-space: pre-line; }
+.p-footer__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.p-footer__list a { text-decoration: none; }
+.p-footer__list a:hover { color: var(--clay); }
+.p-footer__contact { display: grid; gap: 10px; }
+.p-footer__contact a { text-decoration: none; display: inline-flex; gap: 9px; align-items: center; }
+.p-footer__contact a:hover { color: var(--clay); }
+.p-footer__bottom {
+	margin-top: 36px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.12);
+	display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between;
+	font-size: 13.5px; color: #9fb0a6;
+}
+
+/* ---------- Yer tutucu ---------- */
+.p-placeholder {
+	display: flex; align-items: center; justify-content: center;
+	width: 100%; height: 100%; min-height: 170px;
+	background: linear-gradient(135deg, var(--cream-2) 0%, var(--sand) 100%);
+	color: #8c7f6c; font-size: 13px; font-weight: 600; letter-spacing: .04em;
+	text-align: center; padding: 18px;
+}
+.p-hero__media .p-placeholder { aspect-ratio: 21 / 9; }
+.p-product__media .p-placeholder, .p-why__media .p-placeholder, .p-intro__media .p-placeholder { min-height: 220px; }
+
+/* ---------- Duyarli ---------- */
+@media (max-width: 900px) {
+	.p-why, .p-quote, .p-intro, .p-footer__grid { grid-template-columns: 1fr; }
+	.p-header__inner { flex-wrap: wrap; }
+	.p-nav { margin-left: 0; order: 3; width: 100%; }
+	.p-header__actions { margin-left: auto; }
+	.p-list__meta { margin-left: 0; }
+	.p-list__row { flex-wrap: wrap; }
+}
