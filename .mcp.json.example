@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "nwcs-studio": {
+      "type": "http",
+      "url": "http://localhost:8080/wp-json/nwcs/v1/mcp",
+      "headers": {
+        "Authorization": "Basic <scripts/mcp-setup.sh bunu uretir>"
+      }
+    }
+  }
+}

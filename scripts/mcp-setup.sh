@@ -52,17 +52,34 @@ fi
 
 AUTH_HEADER="Authorization: Basic $(printf '%s:%s' "${WP_ADMIN_USER:-admin}" "$APP_PASSWORD" | base64 -w0 2>/dev/null || printf '%s:%s' "${WP_ADMIN_USER:-admin}" "$APP_PASSWORD" | base64)"
 
-echo "==> MCP sunucusu Claude Code'a ekleniyor: ${SERVER_NAME}"
+echo "==> .mcp.json yazılıyor"
+# Claude Code proje kokundeki .mcp.json dosyasini kendiliginden okur; boylece
+# 'claude' CLI kurulu olmasa da (or. yalnizca VS Code eklentisi) baglanti kurulur.
+# Dosya kimlik bilgisi tasidigi icin .gitignore'dadir.
+cat > .mcp.json <<JSON
+{
+  "mcpServers": {
+    "${SERVER_NAME}": {
+      "type": "http",
+      "url": "${MCP_URL}",
+      "headers": {
+        "${AUTH_HEADER%%:*}": "${AUTH_HEADER#*: }"
+      }
+    }
+  }
+}
+JSON
+
+echo ""
+echo "Tamam. Sırada:"
+echo "  1. Claude Code'u (VS Code penceresini) yeniden başlatın."
+echo "  2. Proje MCP sunucusu için çıkan onayı kabul edin."
+echo "  3. /mcp ile bağlantıyı doğrulayın."
+echo ""
+
 if command -v claude >/dev/null 2>&1; then
-	claude mcp remove "${SERVER_NAME}" --scope local >/dev/null 2>&1 || true
-	claude mcp add --scope local --transport http "${SERVER_NAME}" "${MCP_URL}" --header "${AUTH_HEADER}"
-	echo ""
-	echo "Tamam. Claude Code'u yeniden başlatın, ardından /mcp ile bağlantıyı görebilirsiniz."
-else
-	echo ""
-	echo "'claude' komutu PATH'te bulunamadı. Aşağıdaki komutu kendi terminalinizde çalıştırın:"
-	echo ""
-	echo "claude mcp add --scope local --transport http ${SERVER_NAME} ${MCP_URL} --header \"${AUTH_HEADER}\""
+	echo "Not: 'claude' CLI de bulundu. Dilerseniz kullanıcı kapsamına da ekleyebilirsiniz:"
+	echo "  claude mcp add --scope local --transport http ${SERVER_NAME} ${MCP_URL} --header \"<Authorization başlığı>\""
 	echo ""
 fi
 

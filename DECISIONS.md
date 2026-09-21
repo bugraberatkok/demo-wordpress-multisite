@@ -183,9 +183,23 @@ oradan silinir; dış bir depo veya dosya sistemi kullanılmaz. Alt siteler gör
 referansla gösterir, kopya oluşmaz.
 
 **3. Site bazlı istisnalar gerekli.**
-Müşteri tarafından açıkça istendi: aynı ürün bir sitede farklı başlık/açıklama/görsel
-ile görünebilmeli, bir sitede gizlenebilmeli, sıralaması siteye göre değişebilmeli.
-Havuzdaki kayıt kaynak, site kaydı üzerine yazılan ince bir katman olur.
+Müşteri tarafından açıkça istendi. Havuzdaki kayıt kaynaktır; site kaydı onun üzerine
+yazılan ince bir katmandır. Siteye göre ezilebilen alanlar:
+
+| Alan | Site bazında ezilebilir mi |
+| --- | --- |
+| Ürün adı | evet |
+| Ürün açıklaması | evet |
+| Ürün görseli | evet |
+| Ürün fiyatı | evet (boş bırakılabilir) |
+| Gizle / göster | evet |
+| Sıra | evet |
+| Kategori | hayır — havuzdan gelir |
+
+**Fiyat kuralı:** fiyat alanı doludur ya da boştur. Boş olduğunda site, fiyat yerine
+**"Teklif al"** gösterir. Bu kural hem havuzdaki değer hem de site bazlı ezme için
+geçerlidir; yani bir üründe genel fiyat yazılıp tek bir sitede boş bırakılarak o sitede
+"Teklif al" gösterilebilir.
 
 **4. Site seçimi her sitede üç kipten biri olur:**
 "hepsi" (yeni ürün eklenince otomatik görünür), "seçilenler" (panelden işaretlenenler),

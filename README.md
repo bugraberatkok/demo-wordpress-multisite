@@ -145,10 +145,17 @@ Bağlanmak için:
 bash scripts/mcp-setup.sh
 ```
 
-Betik MCP Adapter'ı kurar/etkinleştirir, `admin` için bir **uygulama parolası** üretir ve
-`claude mcp add --scope local` ile sunucuyu kaydeder (`local` kapsam: kimlik bilgisi
-depoya girmez). `claude` komutu PATH'te değilse çalıştırmanız gereken komutu ekrana yazar.
-Ardından Claude Code'u yeniden başlatın ve `/mcp` ile bağlantıyı görün.
+Windows'ta Git Bash'ten çalıştırın (proje klasöründe sağ tık → "Open Git Bash here").
+Docker Desktop açık olmalı.
+
+Betik MCP Adapter'ı kurar/etkinleştirir, `admin` için bir **uygulama parolası** üretir
+(aynı isimli eskiler silinir) ve proje kökünde **`.mcp.json`** dosyasını yazar. Claude Code
+bu dosyayı kendiliğinden okur; ayrıca `claude` CLI kurulu olması gerekmez (VS Code
+eklentisiyle de çalışır). Dosya kimlik bilgisi taşıdığı için `.gitignore`'dadır; depoda
+yalnızca [.mcp.json.example](.mcp.json.example) durur.
+
+Sonra: VS Code penceresini yeniden başlatın → proje MCP sunucusu onayını kabul edin →
+`/mcp` ile bağlantıyı doğrulayın.
 
 Terminalde doğal dille:
 
