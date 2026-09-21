@@ -72,19 +72,52 @@ function nwcs_register_product_type(): void {
 /* Havuz okuma                                                          */
 /* ------------------------------------------------------------------ */
 
+// Anahtar surumlu: urun verisinin sekli degistiginde eski onbellek kendiliginden
+// gecersiz olur, elle temizlemek gerekmez.
+const NWCS_POOL_CACHE_KEY = 'nwcs_pool_products_v2';
+
+/**
+ * Havuz onbellegini temizler. Urun/gorsel degisikliklerinden sonra cagrilir.
+ */
+function nwcs_pool_flush_cache(): void {
+	switch_to_blog( nwcs_pool_blog_id() );
+	delete_transient( NWCS_POOL_CACHE_KEY );
+	restore_current_blog();
+
+	nwcs_pool_products( true );
+}
+
 /**
  * Havuzdaki tum urunler (siralama: menu_order, sonra baslik).
  *
+ * Her sayfa ciziminde havuza gecmemek icin sonuc hem istek ici degiskende hem
+ * de transient'ta tutulur; yazma islemleri onbellegi temizler.
+ *
  * @return array<int, array<string, mixed>>
  */
-function nwcs_pool_products(): array {
+function nwcs_pool_products( bool $reset = false ): array {
 	static $cache = null;
+
+	if ( $reset ) {
+		$cache = null;
+
+		return array();
+	}
 
 	if ( null !== $cache ) {
 		return $cache;
 	}
 
 	switch_to_blog( nwcs_pool_blog_id() );
+
+	$stored = get_transient( NWCS_POOL_CACHE_KEY );
+
+	if ( is_array( $stored ) ) {
+		restore_current_blog();
+		$cache = $stored;
+
+		return $cache;
+	}
 
 	$posts = get_posts(
 		array(
@@ -104,6 +137,8 @@ function nwcs_pool_products(): array {
 		$products[ (int) $post->ID ] = nwcs_pool_product_data( $post );
 	}
 
+	set_transient( NWCS_POOL_CACHE_KEY, $products, HOUR_IN_SECONDS );
+
 	restore_current_blog();
 
 	$cache = $products;
@@ -112,11 +147,101 @@ function nwcs_pool_products(): array {
 }
 
 /**
+ * Yonetim listesi icin filtrelenmis/sayfalanmis sorgu.
+ *
+ * @return array{items: array<int, array>, total: int, pages: int, page: int}
+ */
+function nwcs_pool_query( array $args = array() ): array {
+	$search   = trim( (string) ( $args['search'] ?? '' ) );
+	$category = trim( (string) ( $args['category'] ?? '' ) );
+	$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
+	$per_page = max( 1, (int) ( $args['per_page'] ?? 20 ) );
+
+	$all = nwcs_pool_products();
+
+	$filtered = array_filter(
+		$all,
+		static function ( array $product ) use ( $search, $category ): bool {
+			if ( '' !== $category && ! isset( $product['categories'][ $category ] ) ) {
+				return false;
+			}
+
+			if ( '' === $search ) {
+				return true;
+			}
+
+			$haystack = mb_strtolower( $product['title'] . ' ' . $product['short'] . ' ' . $product['spec'] . ' ' . implode( ' ', $product['categories'] ) );
+
+			return str_contains( $haystack, mb_strtolower( $search ) );
+		}
+	);
+
+	$total = count( $filtered );
+	$pages = max( 1, (int) ceil( $total / $per_page ) );
+	$page  = min( $page, $pages );
+
+	return array(
+		'items' => array_slice( $filtered, ( $page - 1 ) * $per_page, $per_page, true ),
+		'total' => $total,
+		'pages' => $pages,
+		'page'  => $page,
+	);
+}
+
+/**
+ * Havuzdaki kategoriler (slug => [name, count]).
+ */
+function nwcs_pool_categories(): array {
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	$terms = get_terms(
+		array(
+			'taxonomy'   => NWCS_PRODUCT_TAX,
+			'hide_empty' => false,
+			'orderby'    => 'name',
+		)
+	);
+
+	restore_current_blog();
+
+	$out = array();
+
+	if ( is_wp_error( $terms ) ) {
+		return $out;
+	}
+
+	foreach ( $terms as $term ) {
+		$out[ $term->slug ] = array(
+			'id'    => (int) $term->term_id,
+			'name'  => $term->name,
+			'count' => (int) $term->count,
+		);
+	}
+
+	return $out;
+}
+
+/**
  * Tek urunun havuzdaki hali. Havuz baglaminda cagrilmalidir.
  */
 function nwcs_pool_product_data( WP_Post $post ): array {
-	$image_id = (int) get_post_thumbnail_id( $post->ID );
-	$image    = nwcs_image_by_id( $image_id, 'medium_large' );
+	// Galeri: sirali ek kimlikleri. Ilki kart gorseli olarak kullanilir.
+	$gallery = get_post_meta( $post->ID, '_nwcs_gallery', true );
+	$gallery = is_array( $gallery ) ? array_values( array_filter( array_map( 'absint', $gallery ) ) ) : array();
+
+	// Eski kayitlarla uyum: galeri bossa one cikan gorsel kullanilir.
+	if ( ! $gallery ) {
+		$thumb = (int) get_post_thumbnail_id( $post->ID );
+
+		if ( $thumb ) {
+			$gallery = array( $thumb );
+		}
+	}
+
+	$images = array();
+	foreach ( $gallery as $attachment_id ) {
+		$images[] = nwcs_image_by_id( $attachment_id, 'medium_large' );
+	}
 
 	$categories = array();
 	foreach ( wp_get_object_terms( $post->ID, NWCS_PRODUCT_TAX ) as $term ) {
@@ -124,17 +249,19 @@ function nwcs_pool_product_data( WP_Post $post ): array {
 	}
 
 	return array(
-		'id'         => (int) $post->ID,
-		'slug'       => $post->post_name,
-		'title'      => $post->post_title,
-		'short'      => (string) get_post_meta( $post->ID, '_nwcs_short', true ),
-		'body'       => $post->post_content,
-		'price'      => (string) get_post_meta( $post->ID, '_nwcs_price', true ),
-		'spec'       => (string) get_post_meta( $post->ID, '_nwcs_spec', true ),
-		'image_id'   => $image_id,
-		'image'      => $image,
-		'categories' => $categories,
-		'order'      => (int) $post->menu_order,
+		'id'          => (int) $post->ID,
+		'slug'        => $post->post_name,
+		'title'       => $post->post_title,
+		'short'       => (string) get_post_meta( $post->ID, '_nwcs_short', true ),
+		'body'        => $post->post_content,
+		'price'       => (string) get_post_meta( $post->ID, '_nwcs_price', true ),
+		'spec'        => (string) get_post_meta( $post->ID, '_nwcs_spec', true ),
+		'image_id'    => $gallery ? (int) $gallery[0] : 0,
+		'image'       => $images ? $images[0] : nwcs_image_by_id( 0 ),
+		'gallery_ids' => $gallery,
+		'images'      => $images,
+		'categories'  => $categories,
+		'order'       => (int) $post->menu_order,
 	);
 }
 
@@ -292,12 +419,26 @@ function nwcs_site_products( ?int $blog_id = null ): array {
 			? (string) ( $override['price'] ?? '' )
 			: $product['price'];
 
-		$image = $product['image'];
+		// Site istisnasi varsa o gorsel one gecer; galerinin kalani korunur.
+		$images = $product['images'] ?? array();
+
 		if ( ! empty( $override['image'] ) ) {
 			switch_to_blog( nwcs_pool_blog_id() );
-			$image = nwcs_image_by_id( (int) $override['image'], 'medium_large' );
+			$override_image = nwcs_image_by_id( (int) $override['image'], 'medium_large' );
 			restore_current_blog();
+
+			$images = array_merge(
+				array( $override_image ),
+				array_values(
+					array_filter(
+						$product['images'] ?? array(),
+						static fn( array $item ): bool => (int) $item["id"] !== (int) $override["image"]
+					)
+				)
+			);
 		}
+
+		$image = $images ? $images[0] : nwcs_image_by_id( 0 );
 
 		$out[] = array(
 			'id'          => $product['id'],
@@ -310,6 +451,7 @@ function nwcs_site_products( ?int $blog_id = null ): array {
 			'has_price'   => '' !== trim( $price ),
 			'price_label' => '' !== trim( $price ) ? $price : 'Teklif al',
 			'image'       => $image,
+			'images'      => $images,
 			'url'         => nwcs_product_url( $product['slug'], $blog_id ),
 			'categories'  => $product['categories'],
 		);

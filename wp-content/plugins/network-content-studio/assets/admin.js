@@ -34,6 +34,8 @@
 	var dirty = false;
 	var rowCounter = 0;
 	var pendingFocus = null;
+	// Duzenleyicide acik olan sayfa; onizlemeden gelen tiklama ile degisebilir.
+	var activePage = pageKey;
 
 	/* ---------------- yardimcilar ---------------- */
 
@@ -103,17 +105,27 @@
 
 	/* ---------------- duzenleyici yukleme ---------------- */
 
-	function openComponent( componentKey, focus ) {
+	/**
+	 * Bilesen duzenleyicisini yukler.
+	 *
+	 * page: bilesenin ait oldugu sayfa. Onizlemede "Tum Sayfalar" bileseni
+	 * (ust menu, footer) tiklandiginda panel baska bir sayfada olabilir; o yuzden
+	 * sayfa anahtari her zaman acikca tasinir.
+	 */
+	function openComponent( componentKey, focus, page ) {
 		if ( dirty && ! window.confirm( T.confirmDiscard ) ) {
 			return;
 		}
 
+		activePage = page || activePage;
+
 		pendingFocus = focus || null;
 		setDirty( false );
 		showScreen( 'editor' );
+		markActivePage( activePage );
 		editorBox.innerHTML = '<p class="nwcs-empty">' + ( T.loading || '' ) + '</p>';
 
-		post( 'nwcs_editor', { site: siteId, content_page: pageKey, component: componentKey } )
+		post( 'nwcs_editor', { site: siteId, content_page: activePage, component: componentKey } )
 			.then( function ( result ) {
 				if ( ! result || ! result.success ) {
 					editorBox.innerHTML = '<p class="nwcs-empty">Bölüm yüklenemedi.</p>';
@@ -136,10 +148,35 @@
 		} );
 	}
 
+	/**
+	 * Sayfa sekmesini isaretler. Sunucu tarafindaki bolum listesi hala eski
+	 * sayfaya ait oldugundan, "Bolumler"e donuste o sayfaya gidilir.
+	 */
+	function markActivePage( page ) {
+		wrap.querySelectorAll( '.nwcs-pages__tab' ).forEach( function ( tab ) {
+			var tabPage = new URL( tab.href, window.location.origin ).searchParams.get( 'content_page' );
+			tab.classList.toggle( 'is-active', tabPage === page );
+		} );
+	}
+
 	function updateHistory( componentKey ) {
 		var url = new URL( window.location.href );
+		url.searchParams.set( 'content_page', activePage );
 		url.searchParams.set( 'component', componentKey );
 		window.history.replaceState( {}, '', url.toString() );
+	}
+
+	function panelUrl( page, component ) {
+		var url = new URL( window.location.href );
+		url.searchParams.set( 'content_page', page );
+
+		if ( component ) {
+			url.searchParams.set( 'component', component );
+		} else {
+			url.searchParams.delete( 'component' );
+		}
+
+		return url.toString();
 	}
 
 	/**
@@ -214,13 +251,19 @@
 			return;
 		}
 
+		// target: "<sayfa>.<bilesen>[.<alan>[.<altalan>]]"
+		var targetPage = parts[0];
 		var componentKey = parts[1];
 		var fieldPath = parts.slice( 2 ).join( '.' );
 
-		openComponent( componentKey, {
-			field: fieldPath,
-			row: null === event.data.row ? null : event.data.row
-		} );
+		openComponent(
+			componentKey,
+			{
+				field: fieldPath,
+				row: null === event.data.row ? null : event.data.row
+			},
+			targetPage
+		);
 	} );
 
 	/* ---------------- tiklamalar ---------------- */
@@ -228,11 +271,20 @@
 	wrap.addEventListener( 'click', function ( event ) {
 		var target = event.target;
 
-		// Bolum ac
+		// Yonetim menusunu ac/kapat (tercih tarayicida hatirlanir)
+		if ( target.closest && target.closest( '[data-nwcs-menu]' ) ) {
+			var opened = document.body.classList.toggle( 'folded' ) === false;
+			try {
+				window.localStorage.setItem( 'nwcsMenuOpen', opened ? '1' : '0' );
+			} catch ( e ) {}
+			return;
+		}
+
+		// Bolum ac (soldaki liste her zaman sunucudan gelen sayfaya aittir)
 		var opener = target.closest ? target.closest( '[data-nwcs-open-component]' ) : null;
 		if ( opener ) {
 			event.preventDefault();
-			openComponent( opener.getAttribute( 'data-nwcs-open-component' ), null );
+			openComponent( opener.getAttribute( 'data-nwcs-open-component' ), null, pageKey );
 			return;
 		}
 
@@ -240,6 +292,17 @@
 		var back = target.closest ? target.closest( '[data-nwcs-back]' ) : null;
 		if ( back ) {
 			event.preventDefault();
+
+			// Baska bir sayfanin bileseni acildiysa o sayfanin listesine gidilir.
+			if ( activePage !== pageKey ) {
+				if ( dirty && ! window.confirm( T.confirmDiscard ) ) {
+					return;
+				}
+				dirty = false;
+				window.location.href = panelUrl( activePage );
+				return;
+			}
+
 			if ( dirty && ! window.confirm( T.confirmDiscard ) ) {
 				return;
 			}
@@ -261,6 +324,29 @@
 		// Onizlemeyi yenile
 		if ( target.closest && target.closest( '[data-nwcs-reload]' ) ) {
 			reloadPreview();
+			return;
+		}
+
+		// Galeri: sirayi degistir ya da gorseli cikar
+		var galleryMove = target.closest ? target.closest( '[data-nwcs-gallery-move]' ) : null;
+		if ( galleryMove ) {
+			var gItem = galleryMove.closest( '[data-nwcs-gallery-item]' );
+			var gNeighbour = 'up' === galleryMove.getAttribute( 'data-nwcs-gallery-move' )
+				? gItem.previousElementSibling
+				: gItem.nextElementSibling;
+
+			if ( gNeighbour ) {
+				if ( 'up' === galleryMove.getAttribute( 'data-nwcs-gallery-move' ) ) {
+					gItem.parentNode.insertBefore( gItem, gNeighbour );
+				} else {
+					gItem.parentNode.insertBefore( gNeighbour, gItem );
+				}
+			}
+			return;
+		}
+
+		if ( target.closest && target.closest( '[data-nwcs-gallery-remove]' ) ) {
+			target.closest( '[data-nwcs-gallery-item]' ).remove();
 			return;
 		}
 
@@ -475,14 +561,50 @@
 			setDirty( true );
 		}
 	} );
+	// Havuz/medya sayfalarindaki kontroller (duzenleyici formuna bagli degil)
 	wrap.addEventListener( 'change', function ( event ) {
-		var form = currentForm();
+		// Duzenleyici formundaki her degisiklik kaydedilmemis sayilir.
+		if ( currentForm() && currentForm().contains( event.target ) ) {
+			setDirty( true );
+		}
 
-		if ( ! form || ! form.contains( event.target ) ) {
+		// Galeriye kitapliktan gorsel ekle
+		if ( event.target.matches( '[data-nwcs-gallery-add]' ) && event.target.value ) {
+			var picker = event.target;
+			var gallery = picker.closest( '.nwcs-field' ).querySelector( '[data-nwcs-gallery]' );
+			var exists = gallery.querySelector( 'input[value="' + picker.value + '"]' );
+
+			if ( ! exists ) {
+				var node = document.createElement( 'div' );
+				node.className = 'nwcs-gallery__item';
+				node.setAttribute( 'data-nwcs-gallery-item', '' );
+				node.innerHTML =
+					'<input type="hidden" name="gallery[]" value="' + picker.value + '" />' +
+					'<img src="' + picker.selectedOptions[0].getAttribute( 'data-thumb' ) + '" alt="" />' +
+					'<div class="nwcs-gallery__tools">' +
+					'<button type="button" class="nwcs-move" data-nwcs-gallery-move="up" aria-label="Öne al">↑</button>' +
+					'<button type="button" class="nwcs-move" data-nwcs-gallery-move="down" aria-label="Geri al">↓</button>' +
+					'<button type="button" class="nwcs-move nwcs-row__delete" data-nwcs-gallery-remove aria-label="Çıkar">×</button>' +
+					'</div>';
+				gallery.appendChild( node );
+			}
+
+			picker.value = '';
 			return;
 		}
 
-		setDirty( true );
+		// Kategori etiketi
+		if ( event.target.matches( '[data-nwcs-tag]' ) ) {
+			event.target.closest( '.nwcs-tag' ).classList.toggle( 'is-active', event.target.checked );
+		}
+
+		// Toplu islem: tumunu sec
+		if ( event.target.matches( '[data-nwcs-check-all]' ) ) {
+			var checked = event.target.checked;
+			wrap.querySelectorAll( '[data-nwcs-check]' ).forEach( function ( box ) {
+				box.checked = checked;
+			} );
+		}
 
 		// Urun secim kutusu
 		if ( event.target.matches( '[data-nwcs-product-pick]' ) ) {
@@ -574,6 +696,13 @@
 		event.preventDefault();
 		event.returnValue = T.confirmLeave || '';
 	} );
+
+	// Menu tercihi: sunucu varsayilan olarak katlar, kullanici actiysa geri acilir.
+	try {
+		if ( '1' === window.localStorage.getItem( 'nwcsMenuOpen' ) ) {
+			document.body.classList.remove( 'folded' );
+		}
+	} catch ( e ) {}
 
 	// Onizleme yuklendiginde gostergeyi kapat
 	if ( frame ) {

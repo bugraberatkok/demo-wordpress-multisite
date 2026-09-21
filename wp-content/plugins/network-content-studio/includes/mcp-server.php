@@ -24,7 +24,7 @@ function nwcs_register_mcp_server( $adapter ): void {
 		'mcp',
 		'İçerik Stüdyosu',
 		'Yerel demo sitelerinin içerik alanlarını okur ve kontrollü şekilde günceller.',
-		'v0.4.0',
+		'v0.5.0',
 		array( \WP\MCP\Transport\HttpTransport::class ),
 		\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler::class,
 		\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler::class,

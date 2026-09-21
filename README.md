@@ -173,7 +173,13 @@ http://localhost:8080/wp-admin/network/admin.php?page=nwcs-pool
 Ürünler burada **bir kez** girilir; siteler oradan beslenir. Her siteye tek tek ürün
 girme ihtiyacı yoktur.
 
-- Ürün alanları: ad, kart açıklaması, fiyat, ölçü/not, kategoriler, görsel, detay metni.
+- Ürün alanları: ad, kart açıklaması, fiyat, ölçü/not, kategoriler, **görseller (galeri)**, detay metni.
+- **Kategoriler** listeden seçilir; yeni kategori havuz sayfasından eklenir/silinir.
+- **Arama, kategori filtresi ve sayfalama** listenin üstünde.
+- **Toplu işlem**: birden çok ürünü seçip "şu sitede göster/gizle" ya da "kategoriye ekle".
+- **CSV ile toplu giriş**: dışa aktarıp düzenleyin, geri yükleyin. Sütunlar
+  `slug, ad, kisa_aciklama, fiyat, olcu_not, kategoriler, gorseller, detay_metni`;
+  aynı `slug` varsa ürün güncellenir, yoksa oluşturulur.
 - **Görseller** ağ ana sitesinin WordPress medya kitaplığına yüklenir ve oradan silinir.
   Bir ürüne bağlı görsel silinemez; önce ürünün görselini değiştirmeniz gerekir.
 - **Fiyat boş bırakılırsa** sitede fiyat yerine **“Teklif al”** görünür.
@@ -192,6 +198,15 @@ girme ihtiyacı yoktur.
 Demoda: **Koçist** = Hepsi (8 ürün), **İstanbul Paletçi** = Seçilenler (5 palet ürünü),
 iki istisna örneğiyle — Euro Palet bu sitede “Euro Palet (ihracat)” adıyla görünür ve
 İkinci El Palet'in fiyatı bu sitede boş bırakıldığı için “Teklif al” yazar.
+
+## Medya Havuzu
+
+**Ağ Yönetimi → Medya Havuzu**
+http://localhost:8080/wp-admin/network/admin.php?page=nwcs-media
+
+Görsellerin tek yerden yönetildiği sayfa: bir seferde birden fazla dosya yükleyin
+(isteğe bağlı ortak alt metinle), arayın, başlık ve alt metni düzenleyin, silin.
+Her görselin hangi üründe kullanıldığı kartında yazar; kullanımdaki görsel silinemez.
 
 ### Ürün detay sayfası
 
@@ -244,9 +259,9 @@ Teknik kararlar ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 - **MVP 3 — tamamlandı**: panel ortasında canlı önizleme ve tıkla-düzenle, ana sayfa
   bölümlerini ↑↓ ile sıralama, Abilities API + resmî MCP Adapter ile Claude Code
   bağlantısı (dört yetenek, en az yetkili).
-- **MVP 5 — planlandı**: kategori listesi, çoklu ürün görseli, medya havuzu sayfası,
-  önizleme sayfa algısı düzeltmesi, katlanan yönetim menüsü ve gözü yormayan arayüz.
-  Ayrıntılar: [DECISIONS.md](DECISIONS.md).
+- **MVP 5 — tamamlandı**: kategori listesi, çoklu ürün görseli, Medya Havuzu sayfası,
+  önizlemede sayfa algısı düzeltmesi, katlanan yönetim menüsü, gözü yormayan arayüz;
+  ayrıca CSV içe/dışa aktarma, arama-filtre-sayfalama, toplu işlemler ve önbellek.
 - **MVP 4 — tamamlandı**: merkezî ürün havuzu (Ağ Yönetimi'nde kendi sayfası, WordPress
   medya kitaplığı, hepsi/seçilenler kipleri, site bazlı istisnalar, boş fiyatta
   "Teklif al", örnek ürün detay sayfası) ve panel arayüzünün elden geçirilmesi

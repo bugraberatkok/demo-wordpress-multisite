@@ -29,8 +29,12 @@ function nwcs_register_menu(): void {
 
 add_action( 'admin_enqueue_scripts', 'nwcs_admin_assets' );
 function nwcs_admin_assets( string $hook ): void {
-	// Hem Icerik Studyosu hem Urun Havuzu ayni varlıkları kullanir.
-	if ( ! str_contains( $hook, NWCS_MENU_SLUG ) && ! str_contains( $hook, NWCS_POOL_SLUG ) ) {
+	// Icerik Studyosu, Urun Havuzu ve Medya Havuzu ayni varliklari kullanir.
+	$ours = str_contains( $hook, NWCS_MENU_SLUG )
+		|| str_contains( $hook, NWCS_POOL_SLUG )
+		|| str_contains( $hook, NWCS_MEDIA_SLUG );
+
+	if ( ! $ours ) {
 		return;
 	}
 
@@ -54,6 +58,22 @@ function nwcs_admin_assets( string $hook ): void {
 			),
 		)
 	);
+}
+
+/**
+ * Panel sayfalarinda WordPress yonetim menusu katlanmis baslar; ust seritteki
+ * dugme ile acilir ve tercih tarayicida hatirlanir. Boylece onizlemeye yer kalir.
+ */
+add_filter( 'admin_body_class', 'nwcs_fold_admin_menu' );
+function nwcs_fold_admin_menu( string $classes ): string {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca gorunum.
+	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+	if ( in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG ), true ) ) {
+		$classes .= ' folded';
+	}
+
+	return $classes;
 }
 
 /**
@@ -151,6 +171,8 @@ function nwcs_render_panel(): void {
 
 		<header class="nwcs-bar">
 			<div class="nwcs-bar__brand">
+				<button type="button" class="nwcs-menutoggle" data-nwcs-menu
+					aria-label="Yönetim menüsünü aç/kapat" title="Yönetim menüsünü aç/kapat">☰</button>
 				<span class="nwcs-bar__mark" aria-hidden="true"></span>
 				<h1>İçerik Stüdyosu</h1>
 			</div>

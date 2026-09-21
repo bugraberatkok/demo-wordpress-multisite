@@ -252,6 +252,44 @@ gösterilebilir ve binlerce ürün her siteye elle girilmez.
 Not: brief'teki "sağda dikey site seçici" şartı, müşterinin bu isteğiyle değişti;
 seçici üst şeride taşınıyor.
 
+## MVP 5 — nasıl yapıldı
+
+**Önizleme tıklamasında sayfa anahtarı (hata düzeltmesi)**
+Önizleme `sayfa.bileşen.alan` biçiminde mesaj gönderiyordu ama panel ilk parçayı
+yok sayıp bileşeni o an açık sayfada arıyordu; "Tüm Sayfalar"a ait üst menü/footer
+tıklanınca "Bölüm yüklenemedi" çıkıyordu. Artık sayfa anahtarı mesajdan okunuyor,
+sekme kendiliğinden değişiyor ve "← Bölümler" doğru sayfanın listesine dönüyor.
+Tarayıcıda çalışan bir gerileme testiyle doğrulandı (`content_page=global` gidiyor).
+
+**Kategoriler taksonomiye taşındı**
+Virgüllü metin kutusu yerine kategori listesi: havuzda kategori oluşturulup
+silinebiliyor, üründe etiket gibi işaretleniyor, filtre kutusuna besleniyor.
+Ürün formundaki "yeni kategori" alanı hem kategoriyi oluşturur hem ürüne ekler.
+
+**Çoklu görsel**
+Ürün görselleri `_nwcs_gallery` meta'sında sıralı liste. İlk görsel kart görselidir;
+galerinin ilki aynı zamanda öne çıkan görsel olarak da yazılır, böylece eski
+kayıtlar ve tek görselli kod yolları çalışmaya devam eder. Site istisnası bir
+görsel seçtiğinde o görsel başa geçer, galerinin kalanı korunur.
+
+**Medya Havuzu ayrı sayfa**
+Toplu yükleme (tek seferde birden fazla dosya, isteğe bağlı ortak alt metin),
+arama, sayfalama, başlık/alt metin düzenleme ve silme. Bir ürüne bağlı görsel
+silinemiyor; hangi üründe kullanıldığı kartta yazıyor.
+
+**Ölçek işleri**
+CSV dışa/içe aktarma (slug ile eşleşme: varsa günceller, yoksa oluşturur; görsel
+sütununda medya kimliği veya dosya adı kabul edilir), arama + kategori filtresi +
+sayfalama, toplu işlemler (siteye göster/gizle, kategori ata) ve havuz okumasının
+transient ile önbelleğe alınması. Önbellek anahtarı sürümlü: veri şekli değişince
+eski önbellek kendiliğinden geçersiz olur — ilk denemede bu yüzden uyarı almıştık.
+
+**Arayüz**
+Adım şeridi ortalandı. WordPress yönetim menüsü panel sayfalarında katlanmış
+başlıyor, üst şeritteki düğmeyle açılıyor ve tercih tarayıcıda hatırlanıyor.
+Göz yorgunluğu için zemin yumuşatıldı: sol sütun gri, alanlar beyaz kartlar hâline
+geldi, aralarına boşluk kondu.
+
 ## MVP 5 kapsamı — demonun son iterasyonu
 
 Müşteri istekleri (21 Eylül 2026):
@@ -286,6 +324,23 @@ açılabilecek. Böylece önizlemeye daha fazla yer kalır.
 **7. Görsel yorgunluğu azaltılacak.**
 Uzun formlarda her yer beyaz olduğu için göz yoruluyor. Daha yumuşak zemin, bölüm
 gruplama, katlanabilir alan grupları ve daha net görsel hiyerarşi.
+
+Ölçek için eklenenler (öneri üzerine kabul edildi):
+
+**8. CSV içe/dışa aktarma.** Ürün listesi tek dosyayla havuza alınabilecek ve dışa
+aktarılabilecek. "Binlerce ürünü elle girmeyelim" isteğinin asıl karşılığı budur.
+
+**9. Havuzda arama, kategori filtresi ve sayfalama.** Tek listede 200 kayıt sınırı
+50 üründen sonra kullanılamaz hâle geliyor.
+
+**10. Toplu işlemler.** Çoklu seçimle "şu sitede göster/gizle" ve "kategori ata".
+
+**11. Havuz okumasının önbelleğe alınması.** Her sayfa çiziminde havuza geçiliyor;
+ürün sayısı büyüdüğünde yavaşlar.
+
+**Yeni ürün alanı eklenmeyecek.** Stok durumu / teslim süresi / minimum sipariş
+sorusu soruldu; mevcut alanlar (ad, açıklama, fiyat, ölçü/not, kategori, görseller,
+detay metni) yeterli görüldü.
 
 ## Açık bırakılanlar
 
