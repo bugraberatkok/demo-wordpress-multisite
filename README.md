@@ -164,6 +164,41 @@ Terminalde doğal dille:
 Uç nokta: `http://localhost:8080/wp-json/nwcs/v1/mcp` (streamable HTTP; `initialize` →
 `Mcp-Session-Id` → `tools/call`).
 
+## Ürün Havuzu
+
+**Ağ Yönetimi → Ürün Havuzu**
+http://localhost:8080/wp-admin/network/admin.php?page=nwcs-pool
+
+Ürünler burada **bir kez** girilir; siteler oradan beslenir. Her siteye tek tek ürün
+girme ihtiyacı yoktur.
+
+- Ürün alanları: ad, kart açıklaması, fiyat, ölçü/not, kategoriler, görsel, detay metni.
+- **Görseller** ağ ana sitesinin WordPress medya kitaplığına yüklenir ve oradan silinir.
+  Bir ürüne bağlı görsel silinemez; önce ürünün görselini değiştirmeniz gerekir.
+- **Fiyat boş bırakılırsa** sitede fiyat yerine **“Teklif al”** görünür.
+- Tabloda her ürünün hangi sitelerde göründüğü yazar.
+
+### Hangi site neyi gösterir
+
+İçerik Stüdyosu'nda ürün bölümünü açtığınızda:
+
+| Ayar | Ne yapar |
+| --- | --- |
+| **Hepsi** | Havuzdaki tüm ürünler görünür; yeni ürün eklenince otomatik çıkar |
+| **Seçilenler** | Yalnızca işaretledikleriniz; sırayı ↑↓ ile siz verirsiniz |
+| **İstisnalar** | Bu siteye özel ad, açıklama, görsel, fiyat; ya da ürünü bu sitede gizleme |
+
+Demoda: **Koçist** = Hepsi (8 ürün), **İstanbul Paletçi** = Seçilenler (5 palet ürünü),
+iki istisna örneğiyle — Euro Palet bu sitede “Euro Palet (ihracat)” adıyla görünür ve
+İkinci El Palet'in fiyatı bu sitede boş bırakıldığı için “Teklif al” yazar.
+
+### Ürün detay sayfası
+
+Bir ürünün **detay sayfası metni** doldurulursa o ürün kendi sayfasını kazanır:
+http://localhost:8080/paletci/urun/euro-palet/ — kart da oraya bağlanır. Metin boşsa
+ürünün sayfası yoktur (adres 404 verir) ve kart doğrudan teklif bölümüne gider.
+Detay sayfası da site istisnalarını uygular.
+
 ## Depoda ne var, ne yok
 
 ```
@@ -208,12 +243,11 @@ Teknik kararlar ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 - **MVP 3 — tamamlandı**: panel ortasında canlı önizleme ve tıkla-düzenle, ana sayfa
   bölümlerini ↑↓ ile sıralama, Abilities API + resmî MCP Adapter ile Claude Code
   bağlantısı (dört yetenek, en az yetkili).
-- **MVP 4 — sırada**: merkezî ürün havuzu + panel arayüzünün elden geçirilmesi.
-  Ürünler Ağ Yönetimi'ndeki "Ürün Havuzu" sayfasında bir kez girilecek, görseller
-  WordPress medya kitaplığında duracak, her site "hepsi" / "seçilenler" / kurallı
-  seçimle beslenecek ve site bazlı istisnalar (farklı başlık/görsel, gizleme, sıra)
-  desteklenecek. Panelde önizleme büyütülecek, site seçici üst şeride taşınacak,
-  arayüz renklendirilip sadeleştirilecek. Ayrıntılar: [DECISIONS.md](DECISIONS.md).
+- **MVP 4 — tamamlandı**: merkezî ürün havuzu (Ağ Yönetimi'nde kendi sayfası, WordPress
+  medya kitaplığı, hepsi/seçilenler kipleri, site bazlı istisnalar, boş fiyatta
+  "Teklif al", örnek ürün detay sayfası) ve panel arayüzünün elden geçirilmesi
+  (site seçici üst şeritte, büyük canlı önizleme, renklendirilmiş düzen,
+  katlanabilir ikon seçici).
 
 Bu demonun kapsamı dışında bırakılanlar (canlıya geçişte ayrı iş): taslak/revizyon akışı,
 gerçek e-posta teslimi ve spam koruması, alan adı eşlemesi, e-ticaret.

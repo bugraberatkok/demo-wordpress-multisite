@@ -56,6 +56,13 @@ function nwcs_save_component( int $blog_id, array $manifest, string $page_key, s
 	foreach ( $fields as $field_key => $definition ) {
 		$type = $definition['type'] ?? 'text';
 
+		// Urun secimi nwcs_content'e degil, sitenin urun ayarlarina yazilir.
+		if ( 'products' === $type ) {
+			nwcs_save_site_product_settings( nwcs_posted_products() );
+
+			continue;
+		}
+
 		if ( 'repeater' === $type ) {
 			$value = nwcs_collect_repeater( $field_key, $definition, $posted[ $field_key ] ?? array(), $media_updates );
 		} elseif ( 'image' === $type ) {
@@ -75,6 +82,20 @@ function nwcs_save_component( int $blog_id, array $manifest, string $page_key, s
 		'fields' => count( $fields ),
 		'media'  => $media_updates,
 		'errors' => nwcs_add_save_error( '' ),
+	);
+}
+
+/**
+ * POST'tan gelen ham urun secimi (temizleme nwcs_save_site_product_settings icinde).
+ */
+function nwcs_posted_products(): array {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- temizleme kaydedicide.
+	$posted = isset( $_POST['products'] ) && is_array( $_POST['products'] ) ? wp_unslash( $_POST['products'] ) : array();
+
+	return array(
+		'mode'      => $posted['mode'] ?? 'all',
+		'selected'  => $posted['selected'] ?? array(),
+		'overrides' => $posted['overrides'] ?? array(),
 	);
 }
 

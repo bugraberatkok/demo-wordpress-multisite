@@ -43,6 +43,12 @@ function nwcs_render_field( string $field_key, array $definition, $value, array 
 		return;
 	}
 
+	if ( 'products' === $type ) {
+		nwcs_render_products_field( $definition, $blog_id );
+
+		return;
+	}
+
 	// data-nwcs-field: onizlemeden gelen tiklamada dogru alana odaklanmak icin.
 	printf(
 		'<div class="nwcs-field nwcs-field--%1$s" data-nwcs-field="%2$s"%3$s>',
@@ -136,8 +142,27 @@ function nwcs_render_image_field( string $id, string $name, string $path, int $v
 
 /**
  * Ikon alani: sinirli listeden secim.
+ *
+ * Varsayilan olarak yalnizca secili ikon gosterilir; liste "Değiştir" ile acilir.
+ * Boylece form sikisik gorunmez.
  */
 function nwcs_render_icon_field( string $id, string $name, string $value ): void {
+	$library = nwcs_icon_library();
+	$current = $library[ $value ] ?? null;
+	?>
+	<div class="nwcs-iconpick">
+		<span class="nwcs-iconpick__current" data-nwcs-icon-current>
+			<?php if ( $current ) : ?>
+				<?php nwcs_the_icon( $value, 'nwcs-icon__svg', 20 ); ?>
+				<?php echo esc_html( $current['label'] ); ?>
+			<?php else : ?>
+				<?php echo esc_html( 'İkon yok' ); ?>
+			<?php endif; ?>
+		</span>
+		<button type="button" class="nwcs-iconpick__toggle" data-nwcs-icon-toggle aria-expanded="false">Değiştir</button>
+	</div>
+	<?php
+
 	echo '<div class="nwcs-icons" id="' . esc_attr( $id ) . '">';
 
 	printf(
@@ -226,6 +251,154 @@ function nwcs_render_repeater_row( string $field_key, array $sub_defs, array $ro
 			}
 			?>
 		</div>
+	</div>
+	<?php
+}
+
+/**
+ * Urun havuzu secimi alani.
+ *
+ * Deger nwcs_content icinde degil, sitenin kendi urun ayarlarinda tutulur
+ * (nwcs_products_mode / _selected / _overrides). Bu yuzden ayri POST
+ * anahtarlari kullanilir: products[...]
+ */
+function nwcs_render_products_field( array $definition, int $blog_id ): void {
+	$pool     = nwcs_pool_products();
+	$settings = nwcs_site_product_settings( $blog_id );
+	$media    = nwcs_pool_media();
+
+	// Once secili olanlar (kayitli sirada), sonra kalanlar.
+	$ordered = array();
+
+	foreach ( $settings['selected'] as $id ) {
+		if ( isset( $pool[ $id ] ) ) {
+			$ordered[ $id ] = $pool[ $id ];
+		}
+	}
+
+	foreach ( $pool as $id => $product ) {
+		if ( ! isset( $ordered[ $id ] ) ) {
+			$ordered[ $id ] = $product;
+		}
+	}
+	?>
+	<div class="nwcs-field nwcs-field--products" data-nwcs-field="pool">
+		<span class="nwcs-field__label"><?php echo esc_html( $definition['label'] ?? 'Ürünler' ); ?></span>
+
+		<?php if ( ! $pool ) : ?>
+			<p class="nwcs-hint">
+				Havuzda henüz ürün yok.
+				<a href="<?php echo esc_url( nwcs_pool_url( array( 'yeni' => 1 ) ) ); ?>">Ürün Havuzu</a> sayfasından ekleyin.
+			</p>
+		<?php else : ?>
+
+			<div class="nwcs-modes" role="radiogroup" aria-label="Ürün seçim kipi">
+				<label class="nwcs-mode<?php echo 'all' === $settings['mode'] ? ' is-active' : ''; ?>">
+					<input type="radio" name="products[mode]" value="all" <?php checked( 'all', $settings['mode'] ); ?> data-nwcs-mode />
+					<span class="nwcs-mode__title">Hepsi</span>
+					<span class="nwcs-mode__text">Havuzdaki tüm ürünler görünür; yeni ürün eklenince otomatik çıkar.</span>
+				</label>
+				<label class="nwcs-mode<?php echo 'selected' === $settings['mode'] ? ' is-active' : ''; ?>">
+					<input type="radio" name="products[mode]" value="selected" <?php checked( 'selected', $settings['mode'] ); ?> data-nwcs-mode />
+					<span class="nwcs-mode__title">Seçilenler</span>
+					<span class="nwcs-mode__text">Yalnızca işaretledikleriniz; sırayı da siz belirlersiniz.</span>
+				</label>
+			</div>
+
+			<p class="nwcs-hint">
+				Ürünün kendisi <a href="<?php echo esc_url( nwcs_pool_url() ); ?>">Ürün Havuzu</a>'nda düzenlenir.
+				Buradaki alanlar <strong>yalnızca bu site için</strong> geçerli istisnalardır; boş bırakılan alan havuzdaki değeri kullanır.
+			</p>
+
+			<div class="nwcs-products" data-nwcs-products>
+				<?php
+				$position = 0;
+				foreach ( $ordered as $id => $product ) :
+					$override    = $settings['overrides'][ $id ] ?? array();
+					$is_selected = in_array( $id, $settings['selected'], true );
+					++$position;
+					?>
+					<div class="nwcs-product<?php echo $is_selected ? ' is-selected' : ''; ?>" data-nwcs-product>
+						<div class="nwcs-product__bar">
+							<label class="nwcs-product__pick">
+								<input type="checkbox" name="products[selected][]" value="<?php echo esc_attr( (string) $id ); ?>"
+									<?php checked( $is_selected ); ?> data-nwcs-product-pick />
+								<span class="nwcs-product__thumb">
+									<?php if ( $product['image']['url'] ) : ?>
+										<img src="<?php echo esc_url( $product['image']['url'] ); ?>" alt="" />
+									<?php endif; ?>
+								</span>
+								<span class="nwcs-product__name">
+									<?php echo esc_html( $product['title'] ); ?>
+									<small>
+										<?php
+										echo '' !== trim( $product['price'] )
+											? esc_html( $product['price'] )
+											: '<em>Teklif al</em>'; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit metin.
+										?>
+									</small>
+								</span>
+							</label>
+
+							<div class="nwcs-product__tools">
+								<button type="button" class="nwcs-move" data-nwcs-product-move="up" aria-label="Yukarı taşı">↑</button>
+								<button type="button" class="nwcs-move" data-nwcs-product-move="down" aria-label="Aşağı taşı">↓</button>
+								<button type="button" class="nwcs-iconpick__toggle" data-nwcs-product-toggle aria-expanded="false">İstisnalar</button>
+							</div>
+						</div>
+
+						<div class="nwcs-product__overrides">
+							<label class="nwcs-product__hide">
+								<input type="checkbox" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][hidden]" value="1"
+									<?php checked( ! empty( $override['hidden'] ) ); ?> />
+								Bu sitede gizle
+							</label>
+
+							<div class="nwcs-field">
+								<label class="nwcs-sublabel">Ürün adı (bu sitede)</label>
+								<input class="nwcs-input" type="text"
+									name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][title]"
+									value="<?php echo esc_attr( $override['title'] ?? '' ); ?>"
+									placeholder="<?php echo esc_attr( $product['title'] ); ?>" />
+							</div>
+
+							<div class="nwcs-field">
+								<label class="nwcs-sublabel">Açıklama (bu sitede)</label>
+								<textarea class="nwcs-input" rows="2"
+									name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][short]"
+									placeholder="<?php echo esc_attr( $product['short'] ); ?>"><?php echo esc_textarea( $override['short'] ?? '' ); ?></textarea>
+							</div>
+
+							<div class="nwcs-field">
+								<label class="nwcs-product__priceflag">
+									<input type="checkbox" value="1"
+										name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][price_override]"
+										<?php checked( ! empty( $override['price_override'] ) ); ?> />
+									Fiyatı bu sitede değiştir
+								</label>
+								<input class="nwcs-input" type="text"
+									name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][price]"
+									value="<?php echo esc_attr( $override['price'] ?? '' ); ?>"
+									placeholder="<?php echo esc_attr( $product['price'] ); ?>" />
+								<p class="nwcs-hint">İşaretleyip boş bırakırsanız bu sitede <em>“Teklif al”</em> görünür.</p>
+							</div>
+
+							<div class="nwcs-field">
+								<label class="nwcs-sublabel">Görsel (bu sitede)</label>
+								<select class="nwcs-input" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][image]">
+									<option value="0">— Havuzdaki görsel —</option>
+									<?php foreach ( $media as $item ) : ?>
+										<option value="<?php echo esc_attr( (string) $item['id'] ); ?>" <?php selected( $item['id'], $override['image'] ?? 0 ); ?>>
+											<?php echo esc_html( $item['title'] ); ?>
+										</option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+						</div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
 	</div>
 	<?php
 }

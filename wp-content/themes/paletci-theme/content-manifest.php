@@ -124,26 +124,11 @@ return array(
 					'fields' => array(
 						'title'    => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
 						'subtitle' => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Beş ana ürün grubunda üretim ve tedarik yapıyoruz.' ),
-						'items'    => array(
-							'label'   => 'Ürün Kartları',
-							'type'    => 'repeater',
-							'max'     => 8,
-							'fields'  => array(
-								'image'      => array( 'label' => 'Görsel', 'type' => 'image' ),
-								'title'      => array( 'label' => 'Ürün Adı', 'type' => 'text' ),
-								'text'       => array( 'label' => 'Açıklama', 'type' => 'textarea' ),
-								'meta'       => array( 'label' => 'Ölçü / Not', 'type' => 'text' ),
-								'link_label' => array( 'label' => 'Bağlantı Metni', 'type' => 'text' ),
-								'link_url'   => array( 'label' => 'Bağlantı', 'type' => 'url' ),
-							),
-							'default' => array(
-								array( 'image' => 0, 'title' => 'Ahşap Palet', 'text' => 'Taşıma ve depolama için standart ölçülerde ahşap palet.', 'meta' => 'Ölçü: talebe göre', 'link_label' => 'Teklif iste', 'link_url' => '#teklif' ),
-								array( 'image' => 0, 'title' => 'Euro Palet', 'text' => 'Avrupa standardı ölçülerde palet; ihracat sevkiyatına uygun.', 'meta' => '80 × 120 cm', 'link_label' => 'Teklif iste', 'link_url' => '#teklif' ),
-								array( 'image' => 0, 'title' => 'Ahşap Kafes', 'text' => 'Hacimli ürünlerin taşınması için kafes tipi ambalaj.', 'meta' => 'Özel ölçü', 'link_label' => 'Teklif iste', 'link_url' => '#teklif' ),
-								array( 'image' => 0, 'title' => 'Ahşap Sandık', 'text' => 'Makine ve yedek parça sevkiyatı için kapalı sandık.', 'meta' => 'Özel ölçü', 'link_label' => 'Teklif iste', 'link_url' => '#teklif' ),
-								array( 'image' => 0, 'title' => 'İkinci El Palet', 'text' => 'Kontrol edilip onarılmış, yeniden kullanıma uygun paletler.', 'meta' => 'Stok durumuna göre', 'link_label' => 'Teklif iste', 'link_url' => '#teklif' ),
-							),
+						'pool'     => array(
+							'label' => 'Ürünler (merkezî havuzdan)',
+							'type'  => 'products',
 						),
+						'cta_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Teklif iste' ),
 					),
 				),
 

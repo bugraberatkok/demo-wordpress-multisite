@@ -115,6 +115,9 @@ create_site() {
 create_site kocist "Koçist"
 create_site paletci "İstanbul Paletçi"
 
+echo "==> merkezi urun havuzu dolduruluyor"
+wpc eval-file /scripts/seed-products.php --url="${BASE_URL}/"
+
 setup_site() {
 	slug="$1"
 	theme="$2"

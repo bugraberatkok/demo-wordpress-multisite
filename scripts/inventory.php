@@ -23,6 +23,7 @@ $types = array(
 	'image'    => 'görsel (medya kaydı + alt metin)',
 	'icon'     => 'ikon (sınırlı listeden)',
 	'repeater' => 'tekrarlı satırlar',
+	'products' => 'merkezî ürün havuzundan seçim (kip + site istisnaları)',
 );
 
 $out   = array();

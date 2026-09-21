@@ -20,10 +20,33 @@ düzenleme formlarını yine buradan üretir.
 | Koçist | Kurumsal (örnek alt sayfa) | http://localhost:8080/kocist/kurumsal/ |
 | İstanbul Paletçi | Anasayfa | http://localhost:8080/paletci/ |
 | İstanbul Paletçi | Ürünlerimiz (örnek alt sayfa) | http://localhost:8080/paletci/urunlerimiz/ |
+| İstanbul Paletçi | Euro Palet (örnek ürün detayı) | http://localhost:8080/paletci/urun/euro-palet/ |
 
-Toplam düzenlenebilir alan: **Koçist 81**, **İstanbul Paletçi 85** (tekrarlı satırların
+Toplam düzenlenebilir alan: **Koçist 77**, **İstanbul Paletçi 80** (tekrarlı satırların
 alt alanları dahil). Her iki sitede üst menüden footer'a kadar görünen tüm metinler,
 bağlantı metin ve hedefleri, görseller (alt metinleriyle) ve ikonlar bu listededir.
+
+## Ürünler bu listede değil — merkezî havuzda
+
+Ürün kartları artık sayfaya gömülü değil; **Ağ Yönetimi → Ürün Havuzu**'nda tek yerde
+durur. Her ürünün havuzdaki alanları: ad, kart açıklaması, fiyat, ölçü/not, kategoriler,
+görsel, detay sayfası metni.
+
+Her site kendi panelinde yalnızca şunu belirler:
+
+| Ayar | Anlamı |
+| --- | --- |
+| Kip: **Hepsi** | Havuzdaki tüm ürünler görünür; yeni ürün otomatik çıkar (Koçist böyle) |
+| Kip: **Seçilenler** | Yalnızca işaretlenenler, verilen sırada (İstanbul Paletçi böyle) |
+| İstisna: ürün adı | Bu sitede farklı ad |
+| İstisna: açıklama | Bu sitede farklı kart metni |
+| İstisna: görsel | Bu sitede farklı görsel (havuzun medya kitaplığından) |
+| İstisna: fiyat | Bu sitede farklı fiyat; **boş bırakılırsa "Teklif al"** |
+| İstisna: gizle | Ürün bu sitede hiç görünmez |
+
+**Fiyat kuralı:** fiyat serbest metindir (`450 TL`, `1.250 TL'den başlayan`). Boşsa site
+fiyat yerine **"Teklif al"** gösterir. Demoda İkinci El Palet bunun örneğidir: Koçist'te
+`180 TL`, İstanbul Paletçi'de site istisnasıyla "Teklif al".
 
 ## Bilinçli olarak sabit bırakılanlar
 
@@ -49,7 +72,6 @@ bağlantı metin ve hedefleri, görseller (alt metinleriyle) ve ikonlar bu liste
   ana sayfa + bir örnek alt sayfa + menü/footer ile sınırlı tutuldu.
 
 ---
-
 ## Koçist (`kocist`)
 
 ### Sayfa: Tüm Sayfalar (Üst Bilgi, Menü, Footer)  `global`
@@ -128,7 +150,8 @@ Sıralanabilir bölümler: `capabilities`, `catalog`, `references`, `ctaband` (h
 | --- | --- | --- |
 | `title` | Bölüm Başlığı | tek satır metin |
 | `subtitle` | Bölüm Alt Başlığı | çok satırlı metin |
-| `items` | Grup Kartları | tekrarlı satırlar → `image` (görsel (medya kaydı + alt metin)), `title` (tek satır metin), `text` (çok satırlı metin), `link_label` (tek satır metin), `link_url` (bağlantı) |
+| `pool` | Ürünler (merkezî havuzdan) | merkezî ürün havuzundan seçim (kip + site istisnaları) |
+| `cta_label` | Kart Bağlantı Metni | tek satır metin |
 
 **Kullanım Alanları** — `home / references`
 
@@ -174,7 +197,7 @@ Sıralanabilir bölümler: `capabilities`, `catalog`, `references`, `ctaband` (h
 | `title` | Bölüm Başlığı | tek satır metin |
 | `items` | Kartlar | tekrarlı satırlar → `icon` (ikon (sınırlı listeden)), `title` (tek satır metin), `text` (çok satırlı metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 81._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 77._
 
 
 ## İstanbul Paletçi (`paletci`)
@@ -239,7 +262,8 @@ Sıralanabilir bölümler: `products`, `process`, `why`, `quote` (header ve foot
 | --- | --- | --- |
 | `title` | Bölüm Başlığı | tek satır metin |
 | `subtitle` | Bölüm Alt Başlığı | çok satırlı metin |
-| `items` | Ürün Kartları | tekrarlı satırlar → `image` (görsel (medya kaydı + alt metin)), `title` (tek satır metin), `text` (çok satırlı metin), `meta` (tek satır metin), `link_label` (tek satır metin), `link_url` (bağlantı) |
+| `pool` | Ürünler (merkezî havuzdan) | merkezî ürün havuzundan seçim (kip + site istisnaları) |
+| `cta_label` | Kart Bağlantı Metni | tek satır metin |
 
 **Üretim Süreci** — `home / process`
 
@@ -305,5 +329,5 @@ Sıralanabilir bölümler: `products`, `process`, `why`, `quote` (header ve foot
 | `button_label` | Buton Metni | tek satır metin |
 | `button_url` | Buton Bağlantısı | bağlantı |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 85._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 80._
 

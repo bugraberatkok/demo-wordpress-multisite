@@ -168,7 +168,41 @@ Yükseltme öncesi alınan SQL yedeği `/var/www/html` altına düştüğü içi
 indirilebilir hâldeydi (HTTP 200). Fark edilip `/var/backups` altına taşındı. Yedekler
 hiçbir zaman web köküne yazılmamalı.
 
-## MVP 4 kapsamı (kararlaştırıldı, henüz yapılmadı)
+## MVP 4 — nasıl yapıldı
+
+**Havuz ağın ana sitesinde bir custom post type**
+`nwcs_product` (+ `nwcs_product_cat` taksonomisi) ağ ana sitesinde tutulur; alt siteler
+`switch_to_blog()` ile okur, kopya çıkarmaz. Post type her sitede kayıtlıdır (PHP
+sürecinde global olduğu için), kayıtlar yalnızca havuz sitesinde bulunur. `show_ui`
+kapalı: tek arayüz Ağ Yönetimi'ndeki Ürün Havuzu sayfasıdır.
+
+**Site tarafında yalnızca üç option**
+`nwcs_products_mode` (all/selected), `nwcs_products_selected` (sıralı kimlik listesi) ve
+`nwcs_products_overrides` (ürün başına istisna). Ürün metni/görseli tekrar edilmez;
+site yalnızca "neyi, hangi sırayla, hangi istisnayla gösteriyorum" bilgisini tutar.
+
+**Fiyat serbest metin, boşluk anlamlı**
+`450 TL`, `1.250 TL'den başlayan` gibi yazılabilir. Boş fiyat "Teklif al" demektir.
+Site istisnasında "hiç dokunulmadı" ile "bilerek boşaltıldı" ayrımı için ayrı bir
+`price_override` bayrağı tutulur; olmasaydı bir sitede fiyatı kaldırmak mümkün olmazdı.
+
+**Detay sayfası: rewrite kuralı, gerçek post değil**
+Alt sitede `/urun/<slug>/` adresi `nwcs_product` sorgu değişkenine bağlanır; şablon
+havuzdan okur ve site istisnalarını uygular. Detay metni boş olan ürünün sayfası yoktur
+(404). İlk denemede eksik eşleşme ana sayfayı döndürüyordu; ayrıca temalarda `404.php`
+olmadığı için yedek şablon zinciri (`404` → `index`) eklendi.
+
+**Arayüz: site seçici üstte, önizleme büyük**
+Brief'teki "sağda dikey site seçici" şartı müşteri isteğiyle değişti. Seçici üst şeritte
+hap biçiminde duruyor (adlar görünür), sağ sütun tamamen kalktı ve önizleme o alanı
+aldı. İkon ızgarası varsayılan olarak kapalı ("Değiştir" ile açılıyor) — asıl sıkışıklık
+oradan geliyordu. Renk olarak wp-admin grisinden ayrışan indigo/teal bir palet kullanıldı.
+
+**Panel varlıkları iki sayfada da yükleniyor**
+İlk denemede CSS yalnızca İçerik Stüdyosu'na yükleniyordu; Ürün Havuzu sayfası biçimsiz
+açıldı. Enqueue koşulu iki menü anahtarını da kapsayacak şekilde düzeltildi.
+
+## MVP 4 kapsamı (müşteri kararları)
 
 Müşteri kararları — 21 Eylül 2026:
 

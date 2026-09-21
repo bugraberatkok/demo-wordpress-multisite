@@ -264,6 +264,45 @@
 			return;
 		}
 
+		// Urun istisnalarini ac/kapat
+		var productToggle = target.closest ? target.closest( '[data-nwcs-product-toggle]' ) : null;
+		if ( productToggle ) {
+			var card = productToggle.closest( '[data-nwcs-product]' );
+			var isOpen = card.classList.toggle( 'is-open' );
+			productToggle.setAttribute( 'aria-expanded', isOpen ? 'true' : 'false' );
+			productToggle.textContent = isOpen ? 'Kapat' : 'İstisnalar';
+			return;
+		}
+
+		// Urun sirasi
+		var productMove = target.closest ? target.closest( '[data-nwcs-product-move]' ) : null;
+		if ( productMove ) {
+			var item = productMove.closest( '[data-nwcs-product]' );
+			var neighbour = 'up' === productMove.getAttribute( 'data-nwcs-product-move' )
+				? item.previousElementSibling
+				: item.nextElementSibling;
+
+			if ( neighbour ) {
+				if ( 'up' === productMove.getAttribute( 'data-nwcs-product-move' ) ) {
+					item.parentNode.insertBefore( item, neighbour );
+				} else {
+					item.parentNode.insertBefore( neighbour, item );
+				}
+				setDirty( true );
+			}
+			return;
+		}
+
+		// Ikon listesini ac/kapat
+		var iconToggle = target.closest ? target.closest( '[data-nwcs-icon-toggle]' ) : null;
+		if ( iconToggle ) {
+			var grid = iconToggle.closest( '.nwcs-field' ).querySelector( '.nwcs-icons' );
+			var opened = grid.classList.toggle( 'is-open' );
+			iconToggle.setAttribute( 'aria-expanded', opened ? 'true' : 'false' );
+			iconToggle.textContent = opened ? 'Kapat' : 'Değiştir';
+			return;
+		}
+
 		// Bolum sirasi
 		var move = target.closest ? target.closest( '.nwcs-section__move [data-nwcs-move]' ) : null;
 		if ( move ) {
@@ -445,12 +484,42 @@
 
 		setDirty( true );
 
+		// Urun secim kutusu
+		if ( event.target.matches( '[data-nwcs-product-pick]' ) ) {
+			event.target.closest( '[data-nwcs-product]' ).classList.toggle( 'is-selected', event.target.checked );
+		}
+
+		// Urun secim kipi
+		if ( event.target.matches( '[data-nwcs-mode]' ) ) {
+			wrap.querySelectorAll( '.nwcs-mode' ).forEach( function ( label ) {
+				label.classList.toggle( 'is-active', label.contains( event.target ) );
+			} );
+		}
+
 		// Ikon secimi
 		if ( event.target.matches( '.nwcs-icons input[type="radio"]' ) ) {
 			var group = event.target.closest( '.nwcs-icons' );
+			var chosen = null;
+
 			group.querySelectorAll( '.nwcs-icon' ).forEach( function ( label ) {
-				label.classList.toggle( 'is-active', label.contains( event.target ) );
+				var active = label.contains( event.target );
+				label.classList.toggle( 'is-active', active );
+				if ( active ) {
+					chosen = label;
+				}
 			} );
+
+			// Kapali gorunumdeki ozeti guncelle.
+			var summary = event.target.closest( '.nwcs-field' ).querySelector( '[data-nwcs-icon-current]' );
+			if ( summary && chosen ) {
+				summary.innerHTML = '';
+				var svg = chosen.querySelector( 'svg' );
+				if ( svg ) {
+					summary.appendChild( svg.cloneNode( true ) );
+				}
+				var name = chosen.querySelector( '.nwcs-icon__label' );
+				summary.appendChild( document.createTextNode( name ? name.textContent : 'İkon yok' ) );
+			}
 		}
 
 		// Yeni gorsel onizlemesi

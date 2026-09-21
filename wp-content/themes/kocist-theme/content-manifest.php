@@ -158,24 +158,11 @@ return array(
 					'fields' => array(
 						'title'    => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Ürün Grupları' ),
 						'subtitle' => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Demo kapsamında dört ana grup gösteriliyor.' ),
-						'items'    => array(
-							'label'   => 'Grup Kartları',
-							'type'    => 'repeater',
-							'max'     => 6,
-							'fields'  => array(
-								'image'      => array( 'label' => 'Görsel', 'type' => 'image' ),
-								'title'      => array( 'label' => 'Başlık', 'type' => 'text' ),
-								'text'       => array( 'label' => 'Açıklama', 'type' => 'textarea' ),
-								'link_label' => array( 'label' => 'Bağlantı Metni', 'type' => 'text' ),
-								'link_url'   => array( 'label' => 'Bağlantı', 'type' => 'url' ),
-							),
-							'default' => array(
-								array( 'image' => 0, 'title' => 'Kereste', 'text' => 'Çam ve karaçam kereste, sunta ve kontrplak levha.', 'link_label' => 'Detay', 'link_url' => '#kereste' ),
-								array( 'image' => 0, 'title' => 'Ahşap Ambalaj', 'text' => 'Palet, kafes, sandık ve ihracat ambalajı.', 'link_label' => 'Detay', 'link_url' => '#ambalaj' ),
-								array( 'image' => 0, 'title' => 'Dekorasyon', 'text' => 'Kamelya, salıncak, pergola ve bahçe ürünleri.', 'link_label' => 'Detay', 'link_url' => '#dekorasyon' ),
-								array( 'image' => 0, 'title' => 'Hırdavat', 'text' => 'Bağlantı elemanları ve tamamlayıcı hırdavat grubu.', 'link_label' => 'Detay', 'link_url' => '#hirdavat' ),
-							),
+						'pool'      => array(
+							'label' => 'Ürünler (merkezî havuzdan)',
+							'type'  => 'products',
 						),
+						'cta_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Detay' ),
 					),
 				),
 

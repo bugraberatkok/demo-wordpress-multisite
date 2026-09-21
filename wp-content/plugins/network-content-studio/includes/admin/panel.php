@@ -29,7 +29,8 @@ function nwcs_register_menu(): void {
 
 add_action( 'admin_enqueue_scripts', 'nwcs_admin_assets' );
 function nwcs_admin_assets( string $hook ): void {
-	if ( ! str_contains( $hook, NWCS_MENU_SLUG ) ) {
+	// Hem Icerik Studyosu hem Urun Havuzu ayni varlıkları kullanir.
+	if ( ! str_contains( $hook, NWCS_MENU_SLUG ) && ! str_contains( $hook, NWCS_POOL_SLUG ) ) {
 		return;
 	}
 
@@ -148,27 +149,39 @@ function nwcs_render_panel(): void {
 		data-nwcs-site="<?php echo esc_attr( (string) $blog_id ); ?>"
 		data-nwcs-page="<?php echo esc_attr( $page_key ); ?>">
 
-		<div class="nwcs-topbar">
-			<div class="nwcs-topbar__title">
-				<span class="dashicons dashicons-edit-page" aria-hidden="true"></span>
+		<header class="nwcs-bar">
+			<div class="nwcs-bar__brand">
+				<span class="nwcs-bar__mark" aria-hidden="true"></span>
 				<h1>İçerik Stüdyosu</h1>
 			</div>
 
-			<div class="nwcs-topbar__tools">
+			<nav class="nwcs-bar__sites" aria-label="Site seçici">
+				<?php foreach ( $sites as $id => $s ) : ?>
+					<a class="nwcs-sitepill<?php echo $id === $blog_id ? ' is-active' : ''; ?>"
+						href="<?php echo esc_url( nwcs_panel_url( $id ) ); ?>"
+						<?php echo $id === $blog_id ? 'aria-current="page"' : ''; ?>>
+						<span class="nwcs-sitepill__dot" aria-hidden="true"></span>
+						<span class="nwcs-sitepill__name"><?php echo esc_html( $s['label'] ); ?></span>
+						<span class="nwcs-sitepill__path"><?php echo esc_html( $s['path'] ); ?></span>
+					</a>
+				<?php endforeach; ?>
+			</nav>
+
+			<div class="nwcs-bar__tools">
 				<div class="nwcs-device" role="group" aria-label="Önizleme genişliği">
-					<button type="button" class="is-active" data-nwcs-device="desktop">Masaüstü</button>
-					<button type="button" data-nwcs-device="mobile">Telefon</button>
+					<button type="button" class="is-active" data-nwcs-device="desktop" title="Masaüstü genişliği">Masaüstü</button>
+					<button type="button" data-nwcs-device="mobile" title="Telefon genişliği">Telefon</button>
 				</div>
-				<a class="button" href="<?php echo esc_url( $site['url'] ); ?>" target="_blank" rel="noopener">Siteyi yeni sekmede aç ↗</a>
+				<a class="nwcs-linkout" href="<?php echo esc_url( $site['url'] ); ?>" target="_blank" rel="noopener">Siteyi aç ↗</a>
 			</div>
-		</div>
+		</header>
 
 		<?php nwcs_render_notices(); ?>
 
 		<p class="nwcs-help">
-			<strong>Nasıl çalışır?</strong>
-			Sağdan siteyi seçin, ortadaki önizlemede değiştirmek istediğiniz <em>yazıya veya görsele tıklayın</em>,
-			soldaki formda düzenleyip <em>Kaydet ve Yayınla</em> deyin. Kaydettiğiniz anda sitede görünür.
+			<span class="nwcs-help__step"><b>1</b> Üstten siteyi seçin</span>
+			<span class="nwcs-help__step"><b>2</b> Önizlemede değiştirmek istediğiniz yazıya veya görsele tıklayın</span>
+			<span class="nwcs-help__step"><b>3</b> Soldaki formu doldurup <em>Kaydet ve Yayınla</em> deyin</span>
 		</p>
 
 		<div class="nwcs-app">
@@ -185,7 +198,10 @@ function nwcs_render_panel(): void {
 
 				<!-- Ekran 1: bolum listesi -->
 				<div class="nwcs-screen nwcs-screen--list<?php echo $component_key ? '' : ' is-active'; ?>" data-nwcs-screen="list">
-					<p class="nwcs-screen__hint">Bir bölüme tıklayın ya da önizlemede düzenlemek istediğiniz yere tıklayın.</p>
+					<p class="nwcs-screen__hint">
+						Bir bölüme tıklayın ya da önizlemede düzenlemek istediğiniz yere tıklayın.
+						Değişiklik yalnızca <strong><?php echo esc_html( $site['label'] ); ?></strong> sitesine kaydedilir.
+					</p>
 
 					<ul class="nwcs-sections" data-nwcs-sections>
 						<?php
@@ -236,11 +252,12 @@ function nwcs_render_panel(): void {
 				</div>
 			</div>
 
-			<!-- Orta: calisan onizleme -->
+			<!-- Sag: calisan onizleme -->
 			<div class="nwcs-preview" data-nwcs-preview-wrap>
 				<div class="nwcs-preview__bar">
+					<span class="nwcs-preview__badge">Canlı önizleme</span>
 					<span class="nwcs-preview__url"><?php echo esc_html( str_replace( array( 'http://', 'https://' ), '', $preview ) ); ?></span>
-					<button type="button" class="button button-small" data-nwcs-reload>Yenile</button>
+					<button type="button" class="nwcs-reload" data-nwcs-reload>Yenile</button>
 				</div>
 				<div class="nwcs-preview__frame">
 					<iframe
@@ -250,23 +267,6 @@ function nwcs_render_panel(): void {
 				</div>
 			</div>
 
-			<!-- Sag: dikey site secici -->
-			<aside class="nwcs-sites" aria-label="Site seçici">
-				<div class="nwcs-sites__inner">
-					<h2 class="nwcs-sites__title">Site</h2>
-					<?php foreach ( $sites as $id => $s ) : ?>
-						<a class="nwcs-site<?php echo $id === $blog_id ? ' is-active' : ''; ?>"
-							href="<?php echo esc_url( nwcs_panel_url( $id ) ); ?>">
-							<span class="nwcs-site__name"><?php echo esc_html( $s['label'] ); ?></span>
-							<span class="nwcs-site__path"><?php echo esc_html( $s['path'] ); ?></span>
-						</a>
-					<?php endforeach; ?>
-
-					<p class="nwcs-sites__note">
-						Yaptığınız değişiklik yalnızca seçili siteye kaydedilir; diğer site etkilenmez.
-					</p>
-				</div>
-			</aside>
 		</div>
 
 		<div class="nwcs-toast" data-nwcs-toast hidden></div>
