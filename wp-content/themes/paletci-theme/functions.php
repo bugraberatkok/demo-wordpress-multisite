@@ -23,6 +23,7 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 		return array( 'id' => 0, 'url' => '', 'alt' => '' );
 	}
 	function nwcs_the_icon( $key, $class = '', $size = 24 ) {}
+	function nwcs_edit_attr( $page, $component, $field = '', $row = null, $sub = '' ) {}
 	function nwcs_section_order( $page = 'home' ) {
 		return array( 'products', 'process', 'why', 'quote' );
 	}

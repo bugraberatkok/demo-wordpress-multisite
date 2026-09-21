@@ -22,6 +22,7 @@ Tek bir WordPress **Multisite** ağı altında, tasarımları birbirinden bağı
 - Boş portlar: **8080** (WordPress). Veritabanı host'a açılmaz, 3306 çakışması olmaz.
 
 Başka bir şey kurmanız gerekmiyor: PHP, MySQL ve WP-CLI container içinde gelir.
+WordPress **7.1.1** kullanılır (MCP için gereken Abilities API, 6.9'dan beri çekirdekte).
 
 ## Kurulum (sıfırdan)
 
@@ -54,6 +55,13 @@ docker compose stop
 # Demo içeriğini yeniden üret (kurulumu bozmadan)
 docker compose --profile cli run --rm --entrypoint sh wpcli /scripts/seed-only.sh
 
+# Claude Code'u MCP ile bağla
+bash scripts/mcp-setup.sh
+
+# İmaj etiketi yükseltildiğinde WordPress çekirdeğini eşitle
+docker compose exec wordpress sh /scripts/update-core.sh
+docker compose --profile cli run --rm wpcli --path=/var/www/html core update-db --network
+
 # İçerik envanterini manifestten yeniden üret
 docker compose --profile cli run --rm --entrypoint sh wpcli -c \
   "wp --path=/var/www/html eval-file /scripts/inventory.php --url=http://localhost:8080/kocist/ --quiet"
@@ -77,11 +85,17 @@ http://localhost:8080/wp-admin/network/admin.php?page=nwcs-studio
 
 Panelin düzeni:
 
-- **Sağda dikey site seçici** — Koçist / İstanbul Paletçi. Seçim değiştiğinde tüm panel o
-  sitenin manifestine göre yeniden kurulur.
-- **Solda sayfa ve bileşen listesi** — Türkçe adlarıyla (Hero, Ürün Kartları, Footer…),
-  yanlarında alan sayısı.
-- **Ortada düzenleyici** — seçili bileşenin bütün alanları.
+- **Ortada sitenin çalışan önizlemesi.** Değiştirmek istediğiniz yazıya, görsele veya
+  butona doğrudan tıklarsınız; ilgili alan solda açılır ve seçili alan vurgulanır.
+  Üstte masaüstü/telefon genişliği arasında geçiş yapılır.
+- **Solda sayfa sekmeleri ve bölüm listesi** — Türkçe adlarıyla (Hero, Ürün Kartları,
+  Footer…). Bölümün yanındaki **↑ ↓** okları ana sayfa sırasını değiştirir; üst menü ve
+  footer "sabit" olarak işaretlidir. Bir bölüme tıklandığında aynı sütun düzenleyiciye
+  döner, **← Bölümler** ile geri dönülür.
+- **Sağda dikey site seçici** — Koçist / İstanbul Paletçi.
+
+Teknik bilgi gerekmez: manifest, alan anahtarı gibi kavramlar panelde görünmez;
+her alan kendi Türkçe adıyla listelenir.
 
 Yapabilecekleriniz:
 
@@ -96,11 +110,52 @@ Yapabilecekleriniz:
 | Sıra değiştirme (menü dahil) | Satırlardaki **↑ ↓** düğmeleri |
 | Yayınlama | **Kaydet ve Yayınla** — kaydettiğiniz anda sitede görünür |
 | Vazgeçme | **Vazgeç** — kaydedilmemiş değişiklikleri atıp son kayıtlı hâle döner |
-| Önizleme | Sağ üstteki **Sayfayı önizle ↗** bağlantısı sayfayı yeni sekmede açar |
+| Bölüm sırası | Bölüm listesindeki **↑ ↓** okları; kaydetme gerekmez, anında yayınlanır |
+| Önizleme | Ortadaki canlı önizleme; kaydettikten sonra kendiliğinden yenilenir |
 
 Panel başlığının altındaki uyarı taslak olmadığını açıkça söyler; formda değişiklik
-yaptığınızda "Kaydedilmemiş değişiklik var" rozeti çıkar ve sayfadan ayrılmak isterseniz
-tarayıcı uyarır.
+yaptığınızda "kaydedilmedi" rozeti çıkar ve sayfadan ayrılmak isterseniz tarayıcı uyarır.
+
+JavaScript kapalıyken de panel çalışır: bölüm bağlantıları normal sayfa geçişi olur ve
+form klasik yolla gönderilir. Bu durumda tıkla-düzenle ve anlık yenileme devre dışı kalır.
+
+## Claude Code ↔ WordPress (MCP)
+
+WordPress 6.9 ile **Abilities API** çekirdeğe girdi; bu demo o API'yi kullanır ve
+resmî [WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter) eklentisiyle
+MCP'ye açar. Adapter her şeyi kendiliğinden açmaz — hangi yeteneklerin sunulacağı
+[mcp-server.php](wp-content/plugins/network-content-studio/includes/mcp-server.php)
+içinde tek tek sayılır. Bu demoda açılan dört yetenek:
+
+| Araç | Ne yapar |
+| --- | --- |
+| `nwcs-list-sites` | Demo sitelerini listeler (okuma) |
+| `nwcs-describe-site` | Sitenin sayfa/bileşen/alan yapısını verir (okuma) |
+| `nwcs-get-field` | Tek alanın değerini okur |
+| `nwcs-update-field` | Tek alanı günceller (yazma) |
+
+Yazma korumaları: `manage_network_options` yetkisi, yalnızca ağdaki manifestli demo
+siteleri, yalnızca yerel adresler (`localhost`, `127.0.0.1`, `.test`, `.local`),
+yalnızca manifestte tanımlı alanlar, panelle aynı tür bazlı temizleme. Görsel alanları
+ve toplu değişiklikler bu yüzeyin dışındadır.
+
+Bağlanmak için:
+
+```bash
+bash scripts/mcp-setup.sh
+```
+
+Betik MCP Adapter'ı kurar/etkinleştirir, `admin` için bir **uygulama parolası** üretir ve
+`claude mcp add --scope local` ile sunucuyu kaydeder (`local` kapsam: kimlik bilgisi
+depoya girmez). `claude` komutu PATH'te değilse çalıştırmanız gereken komutu ekrana yazar.
+Ardından Claude Code'u yeniden başlatın ve `/mcp` ile bağlantıyı görün.
+
+Terminalde doğal dille:
+
+> Paletçi ana sayfasındaki hero başlığını "Ölçüye özel ahşap palet" yap
+
+Uç nokta: `http://localhost:8080/wp-json/nwcs/v1/mcp` (streamable HTTP; `initialize` →
+`Mcp-Session-Id` → `tools/call`).
 
 ## Depoda ne var, ne yok
 
@@ -143,8 +198,12 @@ Teknik kararlar ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 - **MVP 2 — tamamlandı**: Network Admin içinde İçerik Stüdyosu; sağda dikey site seçici,
   sayfa/bileşen listesi, tüm metin/görsel/ikon/bağlantı alanlarının düzenlenmesi, satır
   ekle-sil-sırala, hemen yayınla + vazgeç.
-- **MVP 3 — sırada**: panel ortasında canlı önizleme ve tıkla-düzenle, ana sayfa bölümlerini
-  Yukarı/Aşağı ile sıralama, Claude Code ↔ WordPress MCP ile kontrollü alan güncelleme.
+- **MVP 3 — tamamlandı**: panel ortasında canlı önizleme ve tıkla-düzenle, ana sayfa
+  bölümlerini ↑↓ ile sıralama, Abilities API + resmî MCP Adapter ile Claude Code
+  bağlantısı (dört yetenek, en az yetkili).
+- **MVP 4 — sırada**: merkezî ürün havuzu. Ürünler tek yerde tutulacak, her site
+  "hepsi" / "seçilenler" / kurallı seçim ile gösterecek; binlerce ürünü her siteye elle
+  girme ihtiyacı ortadan kalkacak.
 
 Bu demonun kapsamı dışında bırakılanlar (canlıya geçişte ayrı iş): taslak/revizyon akışı,
 gerçek e-posta teslimi ve spam koruması, alan adı eşlemesi, e-ticaret.

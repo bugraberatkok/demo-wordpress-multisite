@@ -2,8 +2,11 @@
 /**
  * Ag yonetimindeki tek giris noktasi: Icerik Studyosu.
  *
- * Duzen: solda sayfa/bilesen listesi, ortada duzenleyici, sagda dikey site
- * secici. Tum yazma islemleri admin-post.php uzerinden save.php'ye gider.
+ * Duzen: solda sayfa secimi + bolum listesi + duzenleyici, ortada sitenin
+ * calisan onizlemesi, sagda dikey site secici.
+ *
+ * JavaScript kapaliyken de calisir: bolum baglantilari normal baglanti,
+ * duzenleyici sunucu tarafinda cizilir ve form admin-post.php'ye gider.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,7 +29,7 @@ function nwcs_register_menu(): void {
 
 add_action( 'admin_enqueue_scripts', 'nwcs_admin_assets' );
 function nwcs_admin_assets( string $hook ): void {
-	if ( 'toplevel_page_' . NWCS_MENU_SLUG . '-network' !== $hook && 'toplevel_page_' . NWCS_MENU_SLUG !== $hook ) {
+	if ( ! str_contains( $hook, NWCS_MENU_SLUG ) ) {
 		return;
 	}
 
@@ -34,12 +37,20 @@ function nwcs_admin_assets( string $hook ): void {
 	wp_enqueue_script( 'nwcs-admin', NWCS_URL . 'assets/admin.js', array(), NWCS_VERSION, true );
 	wp_localize_script(
 		'nwcs-admin',
-		'nwcsL10n',
+		'nwcsPanel',
 		array(
-			'confirmDiscard' => 'Kaydedilmemiş değişiklikler var. Son kaydedilen hâle dönülsün mü?',
-			'confirmLeave'   => 'Kaydedilmemiş değişiklikleriniz var.',
-			'unsaved'        => 'Kaydedilmemiş değişiklik var',
-			'confirmRow'     => 'Bu satır silinsin mi? Kaydettiğinizde kalıcı olur.',
+			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+			'nonce'      => wp_create_nonce( 'nwcs_panel' ),
+			'previewOrigin' => untrailingslashit( network_site_url() ),
+			'text'       => array(
+				'confirmDiscard' => 'Kaydedilmemiş değişiklikleriniz var. Son kaydedilen hâle dönülsün mü?',
+				'confirmLeave'   => 'Kaydedilmemiş değişiklikleriniz var.',
+				'confirmRow'     => 'Bu satır silinsin mi? Kaydettiğinizde kalıcı olur.',
+				'saving'         => 'Kaydediliyor…',
+				'saved'          => 'Yayınlandı',
+				'saveError'      => 'Kaydedilemedi. Lütfen tekrar deneyin.',
+				'loading'        => 'Yükleniyor…',
+			),
 		)
 	);
 }
@@ -68,6 +79,24 @@ function nwcs_editable_sites(): array {
 	}
 
 	return $sites;
+}
+
+/**
+ * Sayfadaki bilesenleri gosterim sirasina gore verir: once sabit bilesenler
+ * (manifest sirasi), sonra kayitli siraya gore siralanabilir bolumler.
+ */
+function nwcs_ordered_components( array $manifest, string $page_key, int $blog_id ): array {
+	$components = array_keys( $manifest['pages'][ $page_key ]['components'] ?? array() );
+	$sortable   = nwcs_sortable_sections( $manifest, $page_key );
+
+	if ( ! $sortable ) {
+		return $components;
+	}
+
+	$fixed  = array_values( array_diff( $components, $sortable ) );
+	$sorted = nwcs_section_order( $page_key, $blog_id, $manifest );
+
+	return array_merge( $fixed, $sorted );
 }
 
 /**
@@ -102,78 +131,127 @@ function nwcs_render_panel(): void {
 
 	$page_key = isset( $_GET['content_page'] ) ? sanitize_key( wp_unslash( $_GET['content_page'] ) ) : '';
 	if ( ! isset( $pages[ $page_key ] ) ) {
-		$page_key = (string) array_key_first( $pages );
+		$page_key = isset( $pages['home'] ) ? 'home' : (string) array_key_first( $pages );
 	}
 
-	$components    = $pages[ $page_key ]['components'];
 	$component_key = isset( $_GET['component'] ) ? sanitize_key( wp_unslash( $_GET['component'] ) ) : '';
-	if ( ! isset( $components[ $component_key ] ) ) {
-		$component_key = (string) array_key_first( $components );
+	if ( ! isset( $pages[ $page_key ]['components'][ $component_key ] ) ) {
+		$component_key = '';
 	}
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-	$component = $components[ $component_key ];
-	$values    = nwcs_get_all( $blog_id );
-	$preview   = nwcs_preview_url( $blog_id, $manifest, $page_key );
-
+	$ordered  = nwcs_ordered_components( $manifest, $page_key, $blog_id );
+	$sortable = nwcs_sortable_sections( $manifest, $page_key );
+	$preview  = nwcs_preview_url( $blog_id, $manifest, $page_key );
 	?>
-	<div class="wrap nwcs-wrap">
-		<h1 class="nwcs-page-title">
-			İçerik Stüdyosu
-			<span class="nwcs-page-title__sub">tek panel, iki site</span>
-		</h1>
+	<div class="wrap nwcs-wrap"
+		data-nwcs-site="<?php echo esc_attr( (string) $blog_id ); ?>"
+		data-nwcs-page="<?php echo esc_attr( $page_key ); ?>">
+
+		<div class="nwcs-topbar">
+			<div class="nwcs-topbar__title">
+				<span class="dashicons dashicons-edit-page" aria-hidden="true"></span>
+				<h1>İçerik Stüdyosu</h1>
+			</div>
+
+			<div class="nwcs-topbar__tools">
+				<div class="nwcs-device" role="group" aria-label="Önizleme genişliği">
+					<button type="button" class="is-active" data-nwcs-device="desktop">Masaüstü</button>
+					<button type="button" data-nwcs-device="mobile">Telefon</button>
+				</div>
+				<a class="button" href="<?php echo esc_url( $site['url'] ); ?>" target="_blank" rel="noopener">Siteyi yeni sekmede aç ↗</a>
+			</div>
+		</div>
 
 		<?php nwcs_render_notices(); ?>
 
-		<div class="nwcs-layout">
-			<!-- Sol: sayfa ve bilesen listesi -->
-			<nav class="nwcs-col nwcs-nav" aria-label="Sayfa ve bileşenler">
-				<?php foreach ( $pages as $key => $page ) : ?>
-					<?php $is_current_page = ( $key === $page_key ); ?>
-					<div class="nwcs-nav__group<?php echo $is_current_page ? ' is-open' : ''; ?>">
-						<a class="nwcs-nav__page<?php echo $is_current_page ? ' is-active' : ''; ?>"
+		<p class="nwcs-help">
+			<strong>Nasıl çalışır?</strong>
+			Sağdan siteyi seçin, ortadaki önizlemede değiştirmek istediğiniz <em>yazıya veya görsele tıklayın</em>,
+			soldaki formda düzenleyip <em>Kaydet ve Yayınla</em> deyin. Kaydettiğiniz anda sitede görünür.
+		</p>
+
+		<div class="nwcs-app">
+			<!-- Sol: bolum listesi + duzenleyici -->
+			<div class="nwcs-side">
+				<div class="nwcs-pages" role="tablist" aria-label="Sayfalar">
+					<?php foreach ( $pages as $key => $page ) : ?>
+						<a class="nwcs-pages__tab<?php echo $key === $page_key ? ' is-active' : ''; ?>"
 							href="<?php echo esc_url( nwcs_panel_url( $blog_id, $key ) ); ?>">
-							<?php echo esc_html( $page['label'] ); ?>
+							<?php echo esc_html( nwcs_short_page_label( $page['label'] ) ); ?>
 						</a>
+					<?php endforeach; ?>
+				</div>
 
-						<?php if ( $is_current_page ) : ?>
-							<ul class="nwcs-nav__components">
-								<?php foreach ( $page['components'] as $c_key => $c ) : ?>
-									<li>
-										<a class="<?php echo $c_key === $component_key ? 'is-active' : ''; ?>"
-											href="<?php echo esc_url( nwcs_panel_url( $blog_id, $key, $c_key ) ); ?>">
-											<?php echo esc_html( $c['label'] ); ?>
-											<span class="nwcs-nav__count"><?php echo (int) count( $c['fields'] ); ?></span>
-										</a>
-									</li>
-								<?php endforeach; ?>
-							</ul>
-						<?php endif; ?>
+				<!-- Ekran 1: bolum listesi -->
+				<div class="nwcs-screen nwcs-screen--list<?php echo $component_key ? '' : ' is-active'; ?>" data-nwcs-screen="list">
+					<p class="nwcs-screen__hint">Bir bölüme tıklayın ya da önizlemede düzenlemek istediğiniz yere tıklayın.</p>
+
+					<ul class="nwcs-sections" data-nwcs-sections>
+						<?php
+						foreach ( $ordered as $index => $key ) :
+							$component   = $pages[ $page_key ]['components'][ $key ] ?? null;
+							$is_sortable = in_array( $key, $sortable, true );
+
+							if ( ! $component ) {
+								continue;
+							}
+							?>
+							<li class="nwcs-section<?php echo $is_sortable ? ' is-sortable' : ''; ?>" data-nwcs-section-key="<?php echo esc_attr( $key ); ?>">
+								<a class="nwcs-section__open<?php echo $key === $component_key ? ' is-active' : ''; ?>"
+									href="<?php echo esc_url( nwcs_panel_url( $blog_id, $page_key, $key ) ); ?>"
+									data-nwcs-open-component="<?php echo esc_attr( $key ); ?>">
+									<span class="nwcs-section__name"><?php echo esc_html( $component['label'] ); ?></span>
+									<span class="nwcs-section__meta"><?php echo (int) count( $component['fields'] ); ?> alan</span>
+								</a>
+
+								<?php if ( $is_sortable ) : ?>
+									<span class="nwcs-section__move">
+										<button type="button" class="nwcs-move" data-nwcs-move="up" aria-label="Yukarı taşı" title="Yukarı taşı">↑</button>
+										<button type="button" class="nwcs-move" data-nwcs-move="down" aria-label="Aşağı taşı" title="Aşağı taşı">↓</button>
+									</span>
+								<?php else : ?>
+									<span class="nwcs-section__fixed" title="Bu bölümün yeri sabittir">sabit</span>
+								<?php endif; ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+
+					<?php if ( $sortable ) : ?>
+						<p class="nwcs-screen__hint nwcs-screen__hint--muted">
+							Okları kullanarak bölümlerin sırasını değiştirebilirsiniz. Üst menü ve footer sabittir.
+						</p>
+					<?php endif; ?>
+				</div>
+
+				<!-- Ekran 2: duzenleyici -->
+				<div class="nwcs-screen nwcs-screen--editor<?php echo $component_key ? ' is-active' : ''; ?>" data-nwcs-screen="editor">
+					<div class="nwcs-editor" data-nwcs-editor>
+						<?php
+						if ( $component_key ) {
+							nwcs_render_editor_form( $blog_id, $manifest, $page_key, $component_key );
+						}
+						?>
 					</div>
-				<?php endforeach; ?>
-			</nav>
+				</div>
+			</div>
 
-			<!-- Orta: duzenleyici -->
-			<main class="nwcs-col nwcs-editor">
-				<?php
-				nwcs_render_editor_form(
-					array(
-						'blog_id'       => $blog_id,
-						'site'          => $site,
-						'manifest'      => $manifest,
-						'page_key'      => $page_key,
-						'page'          => $pages[ $page_key ],
-						'component_key' => $component_key,
-						'component'     => $component,
-						'values'        => $values,
-						'preview'       => $preview,
-					)
-				);
-				?>
-			</main>
+			<!-- Orta: calisan onizleme -->
+			<div class="nwcs-preview" data-nwcs-preview-wrap>
+				<div class="nwcs-preview__bar">
+					<span class="nwcs-preview__url"><?php echo esc_html( str_replace( array( 'http://', 'https://' ), '', $preview ) ); ?></span>
+					<button type="button" class="button button-small" data-nwcs-reload>Yenile</button>
+				</div>
+				<div class="nwcs-preview__frame">
+					<iframe
+						data-nwcs-preview
+						title="Site önizlemesi"
+						src="<?php echo esc_url( add_query_arg( 'nwcs_preview', '1', $preview ) ); ?>"></iframe>
+				</div>
+			</div>
 
 			<!-- Sag: dikey site secici -->
-			<aside class="nwcs-col nwcs-sites" aria-label="Site seçici">
+			<aside class="nwcs-sites" aria-label="Site seçici">
 				<div class="nwcs-sites__inner">
 					<h2 class="nwcs-sites__title">Site</h2>
 					<?php foreach ( $sites as $id => $s ) : ?>
@@ -185,13 +263,24 @@ function nwcs_render_panel(): void {
 					<?php endforeach; ?>
 
 					<p class="nwcs-sites__note">
-						Değişiklikler yalnızca seçili siteye yazılır; diğer site etkilenmez.
+						Yaptığınız değişiklik yalnızca seçili siteye kaydedilir; diğer site etkilenmez.
 					</p>
 				</div>
 			</aside>
 		</div>
+
+		<div class="nwcs-toast" data-nwcs-toast hidden></div>
 	</div>
 	<?php
+}
+
+/**
+ * Sekmelerde kisa sayfa adi.
+ */
+function nwcs_short_page_label( string $label ): string {
+	$short = preg_replace( '/\s*\(.*\)$/u', '', $label );
+
+	return $short ? $short : $label;
 }
 
 /**
@@ -224,51 +313,27 @@ function nwcs_preview_url( int $blog_id, array $manifest, string $page_key ): st
 }
 
 /**
- * Kaydetme sonrasi bildirimleri.
- */
-function nwcs_render_notices(): void {
-	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- yalnizca bildirim gosterimi.
-	if ( isset( $_GET['nwcs_saved'] ) ) {
-		$count = absint( $_GET['nwcs_saved'] );
-		$media = isset( $_GET['nwcs_media'] ) ? absint( $_GET['nwcs_media'] ) : 0;
-
-		$message = sprintf( '%d alan kaydedildi ve sitede yayınlandı.', $count );
-
-		if ( $media ) {
-			$message .= sprintf( ' %d görsel güncellendi.', $media );
-		}
-
-		printf(
-			'<div class="notice notice-success is-dismissible"><p><strong>Yayınlandı.</strong> %s</p></div>',
-			esc_html( $message )
-		);
-	}
-
-	if ( isset( $_GET['nwcs_error'] ) ) {
-		printf(
-			'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
-			esc_html( sanitize_text_field( wp_unslash( $_GET['nwcs_error'] ) ) )
-		);
-	}
-	// phpcs:enable WordPress.Security.NonceVerification.Recommended
-}
-
-/**
  * Secili bilesenin duzenleme formu.
+ *
+ * JavaScript acikken AJAX ile bu HTML alinip yerine konur; kapaliyken sunucu
+ * tarafinda ayni cikti basilir ve form admin-post.php'ye gider.
  */
-function nwcs_render_editor_form( array $args ): void {
-	$blog_id       = $args['blog_id'];
-	$page_key      = $args['page_key'];
-	$component_key = $args['component_key'];
-	$component     = $args['component'];
-	$values        = $args['values'];
-	$manifest      = $args['manifest'];
+function nwcs_render_editor_form( int $blog_id, array $manifest, string $page_key, string $component_key ): void {
+	$component = $manifest['pages'][ $page_key ]['components'][ $component_key ] ?? null;
 
-	$media = nwcs_site_media( $blog_id );
+	if ( ! $component ) {
+		echo '<p class="nwcs-empty">Bu bölüm bulunamadı.</p>';
+
+		return;
+	}
+
+	$values = nwcs_get_all( $blog_id );
+	$media  = nwcs_site_media( $blog_id );
 	?>
 	<?php // admin-post.php yalnizca wp-admin kokunde bulunur; ag dizininde yoktur. ?>
 	<form class="nwcs-form" method="post" enctype="multipart/form-data"
-		action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+		data-nwcs-form>
 
 		<input type="hidden" name="action" value="nwcs_save" />
 		<input type="hidden" name="site" value="<?php echo esc_attr( (string) $blog_id ); ?>" />
@@ -276,25 +341,10 @@ function nwcs_render_editor_form( array $args ): void {
 		<input type="hidden" name="component" value="<?php echo esc_attr( $component_key ); ?>" />
 		<?php wp_nonce_field( 'nwcs_save_' . $blog_id . '_' . $page_key . '_' . $component_key ); ?>
 
-		<header class="nwcs-editor__head">
-			<div>
-				<p class="nwcs-editor__crumb">
-					<?php echo esc_html( $args['site']['label'] ); ?>
-					<span aria-hidden="true">›</span>
-					<?php echo esc_html( $args['page']['label'] ); ?>
-				</p>
-				<h2 class="nwcs-editor__title"><?php echo esc_html( $component['label'] ); ?></h2>
-			</div>
-
-			<a class="button" href="<?php echo esc_url( $args['preview'] ); ?>" target="_blank" rel="noopener">
-				Sayfayı önizle ↗
-			</a>
+		<header class="nwcs-form__head">
+			<a class="nwcs-back" href="<?php echo esc_url( nwcs_panel_url( $blog_id, $page_key ) ); ?>" data-nwcs-back>← Bölümler</a>
+			<h2 class="nwcs-form__title"><?php echo esc_html( $component['label'] ); ?></h2>
 		</header>
-
-		<p class="nwcs-publish-note">
-			<strong>Kaydettiğiniz anda yayınlanır.</strong> Bu demoda taslak/revizyon akışı yoktur.
-			Kaydetmeden önce <em>Vazgeç</em> ile son kaydedilen hâle dönebilirsiniz.
-		</p>
 
 		<div class="nwcs-fields">
 			<?php
@@ -306,10 +356,11 @@ function nwcs_render_editor_form( array $args ): void {
 		</div>
 
 		<footer class="nwcs-actions">
-			<button type="submit" class="button button-primary button-hero">Kaydet ve Yayınla</button>
-			<button type="button" class="button button-hero" data-nwcs-discard>Vazgeç</button>
-			<span class="nwcs-dirty" data-nwcs-dirty hidden>● Kaydedilmemiş değişiklik var</span>
+			<button type="submit" class="button button-primary">Kaydet ve Yayınla</button>
+			<button type="button" class="button" data-nwcs-discard>Vazgeç</button>
+			<span class="nwcs-dirty" data-nwcs-dirty hidden>● kaydedilmedi</span>
 		</footer>
+		<p class="nwcs-actions__note">Kaydettiğiniz anda sitede yayınlanır; taslak tutulmaz.</p>
 	</form>
 	<?php
 }

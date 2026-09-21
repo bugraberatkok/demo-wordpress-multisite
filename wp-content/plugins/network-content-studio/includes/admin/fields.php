@@ -43,7 +43,13 @@ function nwcs_render_field( string $field_key, array $definition, $value, array 
 		return;
 	}
 
-	echo '<div class="nwcs-field nwcs-field--' . esc_attr( $type ) . '">';
+	// data-nwcs-field: onizlemeden gelen tiklamada dogru alana odaklanmak icin.
+	printf(
+		'<div class="nwcs-field nwcs-field--%1$s" data-nwcs-field="%2$s"%3$s>',
+		esc_attr( $type ),
+		esc_attr( '' === $row_id ? $field_key : $field_key . '.' . $sub_key ),
+		'' === $row_id ? '' : ' data-nwcs-field-row="' . esc_attr( $row_id ) . '"'
+	);
 	printf( '<label class="nwcs-field__label" for="%s">%s</label>', esc_attr( $id ), esc_html( $label ) );
 
 	switch ( $type ) {
@@ -166,7 +172,7 @@ function nwcs_render_repeater( string $field_key, array $definition, $value, arr
 	$max       = (int) ( $definition['max'] ?? 20 );
 	$sortable  = true;
 	?>
-	<div class="nwcs-repeater" data-nwcs-repeater data-field="<?php echo esc_attr( $field_key ); ?>" data-max="<?php echo esc_attr( (string) $max ); ?>">
+	<div class="nwcs-repeater" data-nwcs-repeater data-nwcs-field="<?php echo esc_attr( $field_key ); ?>" data-field="<?php echo esc_attr( $field_key ); ?>" data-max="<?php echo esc_attr( (string) $max ); ?>">
 		<div class="nwcs-repeater__head">
 			<span class="nwcs-field__label"><?php echo esc_html( $definition['label'] ?? $field_key ); ?></span>
 			<span class="nwcs-repeater__meta">en fazla <?php echo (int) $max; ?> satır<?php echo $sortable ? ' · sırayı yukarı/aşağı taşıyabilirsiniz' : ''; ?></span>
@@ -200,7 +206,7 @@ function nwcs_render_repeater( string $field_key, array $definition, $value, arr
  */
 function nwcs_render_repeater_row( string $field_key, array $sub_defs, array $row, string $row_id, int $sort, array $media, int $blog_id ): void {
 	?>
-	<div class="nwcs-row" data-nwcs-row>
+	<div class="nwcs-row" data-nwcs-row data-nwcs-row-index="<?php echo esc_attr( (string) $sort ); ?>">
 		<div class="nwcs-row__bar">
 			<span class="nwcs-row__handle" data-nwcs-row-number><?php echo esc_html( (string) ( $sort + 1 ) ); ?></span>
 			<div class="nwcs-row__tools">

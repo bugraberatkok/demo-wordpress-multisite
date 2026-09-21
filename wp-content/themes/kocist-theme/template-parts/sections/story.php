@@ -12,14 +12,14 @@ $points = nwcs_rows( 'inner', 'story', 'points' );
 	<div class="k-wrap k-story">
 		<div>
 			<div class="k-section-head">
-				<h2 class="k-section-title"><?php echo esc_html( nwcs_field( 'inner', 'story', 'title' ) ); ?></h2>
+				<h2 class="k-section-title" <?php nwcs_edit_attr( 'inner', 'story', 'title' ); ?>><?php echo esc_html( nwcs_field( 'inner', 'story', 'title' ) ); ?></h2>
 			</div>
-			<div class="k-story__body"><?php echo esc_html( nwcs_field( 'inner', 'story', 'body' ) ); ?></div>
+			<div class="k-story__body" <?php nwcs_edit_attr( 'inner', 'story', 'body' ); ?>><?php echo esc_html( nwcs_field( 'inner', 'story', 'body' ) ); ?></div>
 
 			<?php if ( $points ) : ?>
 				<ul class="k-points">
-					<?php foreach ( $points as $point ) : ?>
-						<li>
+					<?php foreach ( $points as $index => $point ) : ?>
+						<li <?php nwcs_edit_attr( 'inner', 'story', 'points', $index, 'text' ); ?>>
 							<?php nwcs_the_icon( $point['icon'] ?? '', 'k-icon', 20 ); ?>
 							<span><?php echo esc_html( $point['text'] ?? '' ); ?></span>
 						</li>
@@ -28,7 +28,7 @@ $points = nwcs_rows( 'inner', 'story', 'points' );
 			<?php endif; ?>
 		</div>
 
-		<div class="k-story__media">
+		<div class="k-story__media" <?php nwcs_edit_attr( 'inner', 'story', 'image' ); ?>>
 			<?php echo kocist_image_tag( $image, '', 'Örnek görsel — kurumsal' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</div>
 	</div>

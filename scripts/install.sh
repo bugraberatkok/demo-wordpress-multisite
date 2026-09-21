@@ -87,6 +87,19 @@ wpc theme enable paletci-theme --network >/dev/null
 echo "==> eklenti ag genelinde etkinlestiriliyor"
 wpc plugin activate network-content-studio --network >/dev/null
 
+# MCP Adapter (resmi WordPress eklentisi) — Claude Code baglantisi icin.
+# Internet erisimi yoksa kurulum atlanir; panel ve siteler bundan etkilenmez.
+if wpc plugin is-installed mcp-adapter >/dev/null 2>&1; then
+	wpc plugin activate mcp-adapter --network >/dev/null 2>&1 || true
+else
+	echo "==> MCP Adapter kuruluyor (istege bagli)"
+	if wpc plugin install "https://github.com/WordPress/mcp-adapter/releases/download/v0.6.1/mcp-adapter.zip" >/dev/null 2>&1; then
+		wpc plugin activate mcp-adapter --network >/dev/null 2>&1 || true
+	else
+		echo "    atlandi: indirilemedi (MCP olmadan da her sey calisir)"
+	fi
+fi
+
 create_site() {
 	slug="$1"
 	title="$2"

@@ -18,6 +18,8 @@ x-wp-config-extra: &wp_config_extra |
   }
   define( 'FS_METHOD', 'direct' );
   define( 'WP_DEBUG_DISPLAY', false );
+  /* Yerel ortam: uygulama parolalari HTTPS olmadan da uretilebilsin (MCP baglantisi icin). */
+  define( 'WP_ENVIRONMENT_TYPE', 'local' );
 
 services:
   db:
@@ -38,7 +40,7 @@ services:
       retries: 20
 
   wordpress:
-    image: wordpress:6.8-php8.3-apache
+    image: wordpress:php8.3-apache
     container_name: dwm-wp
     restart: unless-stopped
     depends_on:

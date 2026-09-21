@@ -1,0 +1,42 @@
+/* Panel içindeki canlı önizleme: düzenlenebilir alan işaretleri */
+
+.nwcs-preview-mode [data-nwcs-edit] {
+	outline: 1px dashed rgba(34, 113, 177, .45);
+	outline-offset: 2px;
+	cursor: pointer;
+	transition: outline-color .12s ease, background-color .12s ease;
+}
+
+.nwcs-preview-mode [data-nwcs-edit]:hover {
+	outline: 2px solid #2271b1;
+	outline-offset: 3px;
+	background-color: rgba(34, 113, 177, .07);
+}
+
+.nwcs-preview-mode [data-nwcs-edit].is-nwcs-active {
+	outline: 2px solid #b26200;
+	outline-offset: 3px;
+	background-color: rgba(178, 98, 0, .1);
+}
+
+/* Fare imlecinin yanındaki alan adı balonu */
+#nwcs-tip {
+	position: fixed;
+	z-index: 2147483647;
+	pointer-events: none;
+	background: #1d2327;
+	color: #fff;
+	font: 600 12px/1.3 -apple-system, "Segoe UI", Roboto, sans-serif;
+	padding: 6px 10px;
+	border-radius: 4px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+	max-width: 260px;
+	transform: translate(-50%, calc(-100% - 12px));
+	opacity: 0;
+	transition: opacity .1s ease;
+}
+#nwcs-tip.is-visible { opacity: 1; }
+#nwcs-tip small { display: block; font-weight: 400; opacity: .75; margin-top: 2px; }
+
+/* Gezinme kilidi açıkken bağlantılar tıklanmaz; kullanıcıya belli edilir */
+.nwcs-preview-mode.nwcs-lock-links a { cursor: pointer; }

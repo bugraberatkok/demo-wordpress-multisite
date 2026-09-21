@@ -11,11 +11,11 @@ $image = nwcs_image( 'inner', 'intro', 'image' );
 	<div class="p-wrap p-intro">
 		<div>
 			<div class="p-head p-head--left">
-				<h2 class="p-title"><?php echo esc_html( nwcs_field( 'inner', 'intro', 'title' ) ); ?></h2>
+				<h2 class="p-title" <?php nwcs_edit_attr( 'inner', 'intro', 'title' ); ?>><?php echo esc_html( nwcs_field( 'inner', 'intro', 'title' ) ); ?></h2>
 			</div>
-			<div class="p-intro__body"><?php echo esc_html( nwcs_field( 'inner', 'intro', 'body' ) ); ?></div>
+			<div class="p-intro__body" <?php nwcs_edit_attr( 'inner', 'intro', 'body' ); ?>><?php echo esc_html( nwcs_field( 'inner', 'intro', 'body' ) ); ?></div>
 		</div>
-		<div class="p-intro__media">
+		<div class="p-intro__media" <?php nwcs_edit_attr( 'inner', 'intro', 'image' ); ?>>
 			<?php echo paletci_image_tag( $image, '', 'Örnek görsel — ürünler' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</div>
 	</div>

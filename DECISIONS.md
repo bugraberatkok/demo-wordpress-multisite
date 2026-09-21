@@ -115,10 +115,64 @@ seferinde yalnızca hedef sitenin değiştiği, diğerinin değişmediği ve `do
 down && up` sonrasında değerlerin korunduğu doğrulandı. Sonrasında demo içeriği seed ile
 temiz hâle getirildi.
 
+## MVP 3
+
+**Önizleme aynı origin'de iframe; tıklama postMessage ile geliyor**
+Alt dizin tabanlı Multisite sayesinde panel ve siteler aynı origin'de. Tema şablonları
+`nwcs_edit_attr()` ile her düzenlenebilir öğeye `data-nwcs-edit="sayfa.bileşen.alan"`
+basar; önizleme içindeki küçük script tıklamayı yakalayıp panele `postMessage` gönderir.
+İki taraf da mesajın origin'ini doğrular. Gömülü tıklama çalıştığı için belgelenmiş
+yedek (yalnızca bölüm listesinden seçim) devreye girmedi; JavaScript kapalıyken zaten
+o yedek davranış geçerli.
+
+**Önizleme modu yalnızca yetkili kullanıcıda açılır**
+`?nwcs_preview=1` tek başına yetmez; her istekte `manage_network_options` kontrol edilir.
+Ziyaretçi aynı adresi açtığında hiçbir işaret, script veya ek veri gönderilmez (doğrulandı:
+yetkisiz istekte 0 işaret). Admin çubuğu önizlemeye sızmasın diye `show_admin_bar` filtresi
+erken (init'ten önce) eklenir — `template_redirect` çok geç kalıyordu.
+
+**Düzenleyici AJAX ile yükleniyor, form hâlâ klasik yolla da çalışıyor**
+Önizlemeden gelen tıklama sayfayı yenilemeden ilgili formu açar ve alanı vurgular.
+Aynı HTML, JavaScript kapalıyken sunucu tarafında basılır ve form `admin-post.php`'ye
+gider. Tek yazma mantığı (`nwcs_save_component`) her iki yolda da ortaktır.
+
+**Bölüm sırası anında kaydediliyor**
+↑↓ okları DOM'da taşır ve sırayı hemen `nwcs_order` ucuna yazar; kaydet düğmesi
+beklemez. Sıra manifestteki "sıralanabilir" listesiyle doğrulanır, header/footer/hero
+dışarıdadır. Yeniden başlatma sonrası korunduğu doğrulandı.
+
+**WordPress 6.8 → 7.1.1 yükseltmesi**
+Resmî MCP yolu Abilities API'yi gerektiriyor; bu API WordPress **6.9** ile çekirdeğe
+girdi (ayrı eklenti dönemi bitti, `wordpress/abilities-api` deposu arşivlendi). Bu yüzden
+çekirdek güncellendi. Resmî imaj dolu bir kuruluma dokunmadığı için
+[update-core.sh](scripts/update-core.sh) dosyaları imajın içindeki `/usr/src/wordpress`
+sürümünden eşitler (indirme yok, deterministik), ardından `core update-db --network`
+çalışır. Yükseltme öncesi veritabanı yedeği alındı.
+
+**MCP: resmî adapter + kendi yeteneklerimiz**
+Çekirdek yalnızca üç okuma yeteneği kaydediyor (`core/get-site-info`, `get-user-info`,
+`get-environment-info`) — içerik yazma yeteneği yok. Adapter da her şeyi kendiliğinden
+açmaz; sunucu oluştururken hangi yeteneklerin araç olacağı tek tek sayılır. Bu demoda
+kendi dört yeteneğimiz tanımlandı ve yalnızca onlar sunuldu. Yazma tarafında: yetki
+kontrolü, yalnızca manifestli demo siteleri, yalnızca yerel adresler, manifestte olmayan
+alanın reddi, görsel/repeater alanlarının bu yüzeyden dışlanması. Site kimliği her
+çağrıda açıkça geçirilir (`site: "paletci"` ya da sayısal blog kimliği).
+
+**Kimlik doğrulama: WordPress uygulama parolası**
+Ayrı bir token sistemi kurulmadı. `WP_ENVIRONMENT_TYPE=local` tanımlandığı için uygulama
+parolaları HTTPS olmadan da üretilebiliyor; bu yalnızca yerel demo içindir.
+`claude mcp add --scope local` kullanılır, böylece kimlik bilgisi depoya girmez.
+
+**Yedek dosyası web kökünden çıkarıldı**
+Yükseltme öncesi alınan SQL yedeği `/var/www/html` altına düştüğü için tarayıcıdan
+indirilebilir hâldeydi (HTTP 200). Fark edilip `/var/backups` altına taşındı. Yedekler
+hiçbir zaman web köküne yazılmamalı.
+
 ## Açık bırakılanlar
 
-- Gömülü önizleme ve bölüm sıralama arayüzü (MVP 3) henüz yok; `nwcs_section_order`
-  altyapısı hazır, panelde karşılığı yok.
 - Taslak/revizyon akışı kapsam dışı: kaydetme davranışı "hemen yayınla".
-- MCP entegrasyonu MVP 3'te değerlendirilecek; en az yetkili alan okuma/güncelleme
-  yetenekleri eklenti içinde tanımlanacak.
+- Görsel yükleme ve tekrarlı satır ekleme MCP yüzeyinde yok; panelden yapılır.
+- Ürün havuzu (MVP 4): ürünler tek merkezde tutulup her sitede "hepsi" / "seçilenler" /
+  kurallı gösterim ile sunulacak. Havuzun yeri (ana site mi ayrı bir havuz sitesi mi),
+  görsellerin hangi sitenin medya kitaplığında duracağı ve site bazlı istisnalar
+  (farklı başlık/fiyat/gizleme) o aşamada kararlaştırılacak.

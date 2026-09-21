@@ -13,12 +13,12 @@ defined( 'ABSPATH' ) || exit;
 	<div class="p-wrap p-quote">
 		<div>
 			<div class="p-head p-head--left">
-				<h2 class="p-title"><?php echo esc_html( nwcs_field( 'home', 'quote', 'title' ) ); ?></h2>
-				<p class="p-sub"><?php echo esc_html( nwcs_field( 'home', 'quote', 'text' ) ); ?></p>
+				<h2 class="p-title" <?php nwcs_edit_attr( 'home', 'quote', 'title' ); ?>><?php echo esc_html( nwcs_field( 'home', 'quote', 'title' ) ); ?></h2>
+				<p class="p-sub" <?php nwcs_edit_attr( 'home', 'quote', 'text' ); ?>><?php echo esc_html( nwcs_field( 'home', 'quote', 'text' ) ); ?></p>
 			</div>
 
 			<div class="p-quote__actions">
-				<a class="p-btn p-btn--forest" href="<?php echo esc_url( paletci_link( nwcs_field( 'home', 'quote', 'call_url' ) ) ); ?>">
+				<a class="p-btn p-btn--forest" href="<?php echo esc_url( paletci_link( nwcs_field( 'home', 'quote', 'call_url' ) ) ); ?>" <?php nwcs_edit_attr( 'home', 'quote', 'call_label' ); ?>>
 					<?php nwcs_the_icon( 'phone', 'p-icon', 18 ); ?>
 					<?php echo esc_html( nwcs_field( 'home', 'quote', 'call_label' ) ); ?>
 				</a>
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
 		</div>
 
 		<div class="p-quote__card">
-			<p class="p-demo-note">
+			<p class="p-demo-note" <?php nwcs_edit_attr( 'home', 'quote', 'demo_notice' ); ?>>
 				<?php nwcs_the_icon( 'shield', 'p-icon', 18 ); ?>
 				<span><?php echo esc_html( nwcs_field( 'home', 'quote', 'demo_notice' ) ); ?></span>
 			</p>

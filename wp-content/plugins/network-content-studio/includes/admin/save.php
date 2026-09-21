@@ -1,50 +1,57 @@
 <?php
 /**
- * Panel kaydetme islemi.
+ * Panel yazma islemleri.
  *
- * Guvenlik zinciri: yetki -> nonce -> hedef sitenin ag icinde ve manifestli
- * oldugunun dogrulanmasi -> switch_to_blog -> tur bazli temizleme -> tek
- * option yazimi -> restore_current_blog.
+ * Guvenlik zinciri (her yol icin ayni):
+ *   yetki -> nonce -> hedef sitenin ag icinde ve manifestli oldugunun
+ *   dogrulanmasi -> switch_to_blog -> tur bazli temizleme -> tek option
+ *   yazimi -> restore_current_blog
  *
- * Yalnizca manifestte tanimli alanlar yazilir; POST'tan gelen fazlalik
- * anahtarlar sessizce yok sayilir.
+ * Yalnizca manifestte tanimli alanlar yazilir; fazlalik POST anahtarlari
+ * sessizce yok sayilir.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'admin_post_nwcs_save', 'nwcs_handle_save' );
-function nwcs_handle_save(): void {
-	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
-		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
-	}
+/* ------------------------------------------------------------------ */
+/* Ortak cekirdek                                                       */
+/* ------------------------------------------------------------------ */
 
-	$blog_id       = isset( $_POST['site'] ) ? absint( $_POST['site'] ) : 0;
-	$page_key      = isset( $_POST['content_page'] ) ? sanitize_key( wp_unslash( $_POST['content_page'] ) ) : '';
-	$component_key = isset( $_POST['component'] ) ? sanitize_key( wp_unslash( $_POST['component'] ) ) : '';
-
-	check_admin_referer( 'nwcs_save_' . $blog_id . '_' . $page_key . '_' . $component_key );
-
+/**
+ * Hedef siteyi ve bileseni dogrular; gecerliyse manifesti dondurur.
+ */
+function nwcs_validate_target( int $blog_id, string $page_key, string $component_key ) {
 	$sites = nwcs_editable_sites();
 
 	if ( ! isset( $sites[ $blog_id ] ) ) {
-		nwcs_redirect_error( $blog_id, $page_key, $component_key, 'Geçersiz site seçimi.' );
+		return new WP_Error( 'nwcs_site', 'Geçersiz site seçimi.' );
 	}
 
 	$manifest = $sites[ $blog_id ]['manifest'];
-	$fields   = $manifest['pages'][ $page_key ]['components'][ $component_key ]['fields'] ?? null;
 
-	if ( null === $fields ) {
-		nwcs_redirect_error( $blog_id, $page_key, $component_key, 'Bu bileşen manifestte bulunamadı.' );
+	if ( ! isset( $manifest['pages'][ $page_key ] ) ) {
+		return new WP_Error( 'nwcs_page', 'Sayfa bulunamadı.' );
 	}
 
-	$posted = isset( $_POST['fields'] ) && is_array( $_POST['fields'] )
-		? wp_unslash( $_POST['fields'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- tur bazli temizleme asagida.
-		: array();
+	if ( '' !== $component_key && ! isset( $manifest['pages'][ $page_key ]['components'][ $component_key ] ) ) {
+		return new WP_Error( 'nwcs_component', 'Bölüm bulunamadı.' );
+	}
+
+	return $manifest;
+}
+
+/**
+ * Bir bilesenin alanlarini secili siteye yazar.
+ *
+ * @return array{fields:int, media:int, errors:string[]}
+ */
+function nwcs_save_component( int $blog_id, array $manifest, string $page_key, string $component_key, array $posted ): array {
+	$fields        = $manifest['pages'][ $page_key ]['components'][ $component_key ]['fields'];
+	$media_updates = 0;
 
 	switch_to_blog( $blog_id );
 
-	$media_updates = 0;
-	$data          = nwcs_get_all();
+	$data = nwcs_get_all();
 
 	foreach ( $fields as $field_key => $definition ) {
 		$type = $definition['type'] ?? 'text';
@@ -64,20 +71,163 @@ function nwcs_handle_save(): void {
 
 	restore_current_blog();
 
+	return array(
+		'fields' => count( $fields ),
+		'media'  => $media_updates,
+		'errors' => nwcs_add_save_error( '' ),
+	);
+}
+
+/**
+ * POST'tan gelen ham alan dizisi (temizleme asagida tur bazli yapilir).
+ */
+function nwcs_posted_fields(): array {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- tur bazli temizleme nwcs_sanitize_value icinde.
+	return isset( $_POST['fields'] ) && is_array( $_POST['fields'] ) ? wp_unslash( $_POST['fields'] ) : array();
+}
+
+/* ------------------------------------------------------------------ */
+/* JavaScript kapaliyken: klasik form gonderimi                         */
+/* ------------------------------------------------------------------ */
+
+add_action( 'admin_post_nwcs_save', 'nwcs_handle_save' );
+function nwcs_handle_save(): void {
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
+	}
+
+	$blog_id       = isset( $_POST['site'] ) ? absint( $_POST['site'] ) : 0;
+	$page_key      = isset( $_POST['content_page'] ) ? sanitize_key( wp_unslash( $_POST['content_page'] ) ) : '';
+	$component_key = isset( $_POST['component'] ) ? sanitize_key( wp_unslash( $_POST['component'] ) ) : '';
+
+	check_admin_referer( 'nwcs_save_' . $blog_id . '_' . $page_key . '_' . $component_key );
+
+	$manifest = nwcs_validate_target( $blog_id, $page_key, $component_key );
+
+	if ( is_wp_error( $manifest ) ) {
+		nwcs_redirect_error( $blog_id, $page_key, $component_key, $manifest->get_error_message() );
+	}
+
+	$result = nwcs_save_component( $blog_id, $manifest, $page_key, $component_key, nwcs_posted_fields() );
+
 	$args = array(
-		'nwcs_saved' => count( $fields ),
-		'nwcs_media' => $media_updates,
+		'nwcs_saved' => $result['fields'],
+		'nwcs_media' => $result['media'],
 	);
 
-	$errors = nwcs_add_save_error( '' );
-
-	if ( $errors ) {
-		$args['nwcs_error'] = rawurlencode( implode( ' ', $errors ) );
+	if ( $result['errors'] ) {
+		$args['nwcs_error'] = rawurlencode( implode( ' ', $result['errors'] ) );
 	}
 
 	wp_safe_redirect( add_query_arg( $args, nwcs_panel_url( $blog_id, $page_key, $component_key ) ) );
 	exit;
 }
+
+/* ------------------------------------------------------------------ */
+/* JavaScript acikken: AJAX uclari                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Bilesenin duzenleme formunu dondurur.
+ */
+add_action( 'wp_ajax_nwcs_editor', 'nwcs_ajax_editor' );
+function nwcs_ajax_editor(): void {
+	check_ajax_referer( 'nwcs_panel', 'nonce' );
+
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_send_json_error( array( 'message' => 'Yetkiniz yok.' ), 403 );
+	}
+
+	$blog_id       = isset( $_POST['site'] ) ? absint( $_POST['site'] ) : 0;
+	$page_key      = isset( $_POST['content_page'] ) ? sanitize_key( wp_unslash( $_POST['content_page'] ) ) : '';
+	$component_key = isset( $_POST['component'] ) ? sanitize_key( wp_unslash( $_POST['component'] ) ) : '';
+
+	$manifest = nwcs_validate_target( $blog_id, $page_key, $component_key );
+
+	if ( is_wp_error( $manifest ) ) {
+		wp_send_json_error( array( 'message' => $manifest->get_error_message() ), 400 );
+	}
+
+	ob_start();
+	nwcs_render_editor_form( $blog_id, $manifest, $page_key, $component_key );
+	$html = ob_get_clean();
+
+	wp_send_json_success( array( 'html' => $html ) );
+}
+
+/**
+ * Alanlari kaydeder (dosya yuklemeleri dahil).
+ */
+add_action( 'wp_ajax_nwcs_save_ajax', 'nwcs_ajax_save' );
+function nwcs_ajax_save(): void {
+	check_ajax_referer( 'nwcs_panel', 'nonce' );
+
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_send_json_error( array( 'message' => 'Yetkiniz yok.' ), 403 );
+	}
+
+	$blog_id       = isset( $_POST['site'] ) ? absint( $_POST['site'] ) : 0;
+	$page_key      = isset( $_POST['content_page'] ) ? sanitize_key( wp_unslash( $_POST['content_page'] ) ) : '';
+	$component_key = isset( $_POST['component'] ) ? sanitize_key( wp_unslash( $_POST['component'] ) ) : '';
+
+	$manifest = nwcs_validate_target( $blog_id, $page_key, $component_key );
+
+	if ( is_wp_error( $manifest ) ) {
+		wp_send_json_error( array( 'message' => $manifest->get_error_message() ), 400 );
+	}
+
+	$result = nwcs_save_component( $blog_id, $manifest, $page_key, $component_key, nwcs_posted_fields() );
+
+	wp_send_json_success(
+		array(
+			'message' => $result['errors']
+				? implode( ' ', $result['errors'] )
+				: sprintf( '%d alan yayınlandı.', $result['fields'] ),
+			'hasError' => (bool) $result['errors'],
+		)
+	);
+}
+
+/**
+ * Ana sayfa bolum sirasini kaydeder.
+ */
+add_action( 'wp_ajax_nwcs_order', 'nwcs_ajax_order' );
+function nwcs_ajax_order(): void {
+	check_ajax_referer( 'nwcs_panel', 'nonce' );
+
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_send_json_error( array( 'message' => 'Yetkiniz yok.' ), 403 );
+	}
+
+	$blog_id  = isset( $_POST['site'] ) ? absint( $_POST['site'] ) : 0;
+	$page_key = isset( $_POST['content_page'] ) ? sanitize_key( wp_unslash( $_POST['content_page'] ) ) : '';
+
+	$manifest = nwcs_validate_target( $blog_id, $page_key, '' );
+
+	if ( is_wp_error( $manifest ) ) {
+		wp_send_json_error( array( 'message' => $manifest->get_error_message() ), 400 );
+	}
+
+	$posted = isset( $_POST['order'] ) && is_array( $_POST['order'] )
+		? array_map( 'sanitize_key', wp_unslash( $_POST['order'] ) )
+		: array();
+
+	switch_to_blog( $blog_id );
+	nwcs_set_section_order( $page_key, $posted, $manifest );
+	$saved = nwcs_section_order( $page_key, null, $manifest );
+	restore_current_blog();
+
+	wp_send_json_success(
+		array(
+			'order'   => $saved,
+			'message' => 'Bölüm sırası kaydedildi.',
+		)
+	);
+}
+
+/* ------------------------------------------------------------------ */
+/* Alan toplayicilar                                                    */
+/* ------------------------------------------------------------------ */
 
 /**
  * Tekrarli alan satirlarini toplar: _sort'a gore siralar, gorselleri isler.
@@ -208,4 +358,33 @@ function nwcs_redirect_error( int $blog_id, string $page_key, string $component_
 		)
 	);
 	exit;
+}
+
+/**
+ * Kaydetme sonrasi bildirimleri (JavaScript kapali akis icin).
+ */
+function nwcs_render_notices(): void {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- yalnizca bildirim gosterimi.
+	if ( isset( $_GET['nwcs_saved'] ) ) {
+		$count   = absint( $_GET['nwcs_saved'] );
+		$media   = isset( $_GET['nwcs_media'] ) ? absint( $_GET['nwcs_media'] ) : 0;
+		$message = sprintf( '%d alan kaydedildi ve sitede yayınlandı.', $count );
+
+		if ( $media ) {
+			$message .= sprintf( ' %d görsel güncellendi.', $media );
+		}
+
+		printf(
+			'<div class="notice notice-success is-dismissible"><p><strong>Yayınlandı.</strong> %s</p></div>',
+			esc_html( $message )
+		);
+	}
+
+	if ( isset( $_GET['nwcs_error'] ) ) {
+		printf(
+			'<div class="notice notice-error is-dismissible"><p>%s</p></div>',
+			esc_html( sanitize_text_field( wp_unslash( $_GET['nwcs_error'] ) ) )
+		);
+	}
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 }
