@@ -70,6 +70,38 @@ docker compose --profile cli run --rm --entrypoint sh wpcli /scripts/install.sh
 > Git Bash kullanıyorsanız `/scripts/...` yolunun Windows yoluna çevrilmesini
 > engellemek için komutların başına `MSYS_NO_PATHCONV=1` ekleyin.
 
+## İçerik Stüdyosu paneli
+
+Giriş yaptıktan sonra **Ağ Yönetimi → İçerik Stüdyosu**:
+http://localhost:8080/wp-admin/network/admin.php?page=nwcs-studio
+
+Panelin düzeni:
+
+- **Sağda dikey site seçici** — Koçist / İstanbul Paletçi. Seçim değiştiğinde tüm panel o
+  sitenin manifestine göre yeniden kurulur.
+- **Solda sayfa ve bileşen listesi** — Türkçe adlarıyla (Hero, Ürün Kartları, Footer…),
+  yanlarında alan sayısı.
+- **Ortada düzenleyici** — seçili bileşenin bütün alanları.
+
+Yapabilecekleriniz:
+
+| İşlem | Nasıl |
+| --- | --- |
+| Metin / bağlantı düzenleme | Alanı doldurun; bağlantılarda `/kurumsal/`, `#teklif`, `tel:`, `mailto:` kabul edilir |
+| Görsel değiştirme | Medya kitaplığından seçin **veya** yeni dosya yükleyin (seçili sitenin medya kitaplığına gider) |
+| Görsel kaldırma | Seçim kutusunda "— Görsel yok (kaldır) —" |
+| Alt metin | Görselin altındaki alan; WordPress medya kaydına yazılır |
+| İkon değiştirme | 16 ikonluk listeden seçim |
+| Satır ekleme / silme | Tekrarlı bileşenlerde **+ Satır ekle** / **Sil** |
+| Sıra değiştirme (menü dahil) | Satırlardaki **↑ ↓** düğmeleri |
+| Yayınlama | **Kaydet ve Yayınla** — kaydettiğiniz anda sitede görünür |
+| Vazgeçme | **Vazgeç** — kaydedilmemiş değişiklikleri atıp son kayıtlı hâle döner |
+| Önizleme | Sağ üstteki **Sayfayı önizle ↗** bağlantısı sayfayı yeni sekmede açar |
+
+Panel başlığının altındaki uyarı taslak olmadığını açıkça söyler; formda değişiklik
+yaptığınızda "Kaydedilmemiş değişiklik var" rozeti çıkar ve sayfadan ayrılmak isterseniz
+tarayıcı uyarır.
+
 ## Depoda ne var, ne yok
 
 ```
@@ -108,10 +140,11 @@ Teknik kararlar ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 ## Durum
 
 - **MVP 1 — tamamlandı**: Multisite ağı, iki bağımsız tema, demo içerik, örnek alt sayfalar.
-- **MVP 2 — sırada**: Network Admin içinde "İçerik Stüdyosu" paneli; sağda dikey site seçici,
-  sayfa/bileşen listesi, tüm alanların düzenlenmesi, hemen yayınla + vazgeç.
-- **MVP 3 — sonra**: panel ortasında canlı önizleme ve tıkla-düzenle, bölüm sıralama
-  (Yukarı/Aşağı), Claude Code ↔ WordPress MCP ile kontrollü alan güncelleme.
+- **MVP 2 — tamamlandı**: Network Admin içinde İçerik Stüdyosu; sağda dikey site seçici,
+  sayfa/bileşen listesi, tüm metin/görsel/ikon/bağlantı alanlarının düzenlenmesi, satır
+  ekle-sil-sırala, hemen yayınla + vazgeç.
+- **MVP 3 — sırada**: panel ortasında canlı önizleme ve tıkla-düzenle, ana sayfa bölümlerini
+  Yukarı/Aşağı ile sıralama, Claude Code ↔ WordPress MCP ile kontrollü alan güncelleme.
 
 Bu demonun kapsamı dışında bırakılanlar (canlıya geçişte ayrı iş): taslak/revizyon akışı,
 gerçek e-posta teslimi ve spam koruması, alan adı eşlemesi, e-ticaret.

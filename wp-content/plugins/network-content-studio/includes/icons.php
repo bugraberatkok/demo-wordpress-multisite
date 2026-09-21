@@ -22,31 +22,31 @@ function nwcs_icon_library(): array {
 			'path'  => '<path d="M12 3 3 7.5V17l9 4.5 9-4.5V7.5z"/><path d="M3 7.5 12 12l9-4.5"/><path d="M12 12v9.5"/>',
 		),
 		'factory'  => array(
-			'label' => 'Fabrika / Uretim',
+			'label' => 'Fabrika / Üretim',
 			'path'  => '<path d="M3 20V10l5 3V10l5 3V7l6 3v10z"/><path d="M7 20v-3"/><path d="M12 20v-3"/><path d="M17 20v-3"/>',
 		),
 		'tools'    => array(
-			'label' => 'Alet / Hirdavat',
+			'label' => 'Alet / Hırdavat',
 			'path'  => '<path d="M14.5 5.5a3.5 3.5 0 0 0 4.6 4.6L21 12l-9 9-3-3 9-9z"/><path d="M6 6l4 4"/><path d="M3 9l3-6 3 3-3 6z"/>',
 		),
 		'tree'     => array(
-			'label' => 'Agac / Orman Urunu',
+			'label' => 'Ağaç / Orman Ürünü',
 			'path'  => '<path d="M12 3 6 12h3l-4 6h14l-4-6h3z"/><path d="M12 18v3"/>',
 		),
 		'recycle'  => array(
-			'label' => 'Geri Donusum',
+			'label' => 'Geri Dönüşüm',
 			'path'  => '<path d="M7 8 4 13l3 2"/><path d="M12 4l3 5-3 2"/><path d="M20 13l-3 5h-4"/><path d="M4 13h4l3-5"/><path d="M15 9l3 4"/>',
 		),
 		'shield'   => array(
-			'label' => 'Guvence / Sertifika',
+			'label' => 'Güvence / Sertifika',
 			'path'  => '<path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6z"/><path d="m9 12 2 2 4-4"/>',
 		),
 		'ruler'    => array(
-			'label' => 'Olcu / Ozel Uretim',
+			'label' => 'Ölçü / Özel Üretim',
 			'path'  => '<path d="m3 15 6-6 6 6-6 6z" transform="rotate(-45 12 12)"/><path d="M8 10.5 9.5 12"/><path d="M11 8 12.5 9.5"/><path d="M14 5.5 15.5 7"/>',
 		),
 		'clock'    => array(
-			'label' => 'Saat / Zamaninda Teslim',
+			'label' => 'Saat / Zamanında Teslim',
 			'path'  => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
 		),
 		'phone'    => array(
@@ -70,7 +70,7 @@ function nwcs_icon_library(): array {
 			'path'  => '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
 		),
 		'star'     => array(
-			'label' => 'Yildiz / One Cikan',
+			'label' => 'Yıldız / Öne Çıkan',
 			'path'  => '<path d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4L4.2 9.7l5.4-.8z"/>',
 		),
 		'arrow'    => array(

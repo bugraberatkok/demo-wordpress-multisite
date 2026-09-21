@@ -69,10 +69,56 @@ Bilgisayarda kurulu Chrome `--headless --screenshot` ile dört sayfanın ekran g
 alındı ve incelendi; ayrıca HTTP durum kodları, görsel yüklenmesi ve PHP hata günlüğü
 kontrol edildi. Ek bir araç kurulmadı.
 
+## MVP 2
+
+**Panel sunucu tarafında çiziliyor, JavaScript yalnızca yardımcı**
+Formlar normal HTML; JS sadece satır ekle/sil/taşı, kaydedilmemiş değişiklik uyarısı ve
+ikon/görsel önizlemesi için var. JS kapalıyken de alanlar düzenlenip kaydedilebilir.
+Panelde içerik yazan tek yol form gönderimidir; ikinci bir AJAX yazma yolu açılmadı.
+
+**Form `admin_url('admin-post.php')` adresine gönderiliyor**
+`admin-post.php` yalnızca `wp-admin/` kökünde bulunur; `wp-admin/network/` altında yoktur.
+İlk denemede ağ adresine gönderildiği için 404 alındı, düzeltildi.
+
+**Güvenlik zinciri**
+`manage_network_options` yetkisi → bileşene özel nonce (`nwcs_save_<site>_<sayfa>_<bileşen>`)
+→ hedef sitenin ağ içinde ve manifestli olduğunun doğrulanması → `switch_to_blog()` →
+tür bazlı temizleme → tek `update_option` → `restore_current_blog()`. POST'tan gelen,
+manifestte karşılığı olmayan anahtarlar sessizce yok sayılır; çıktı tarafında her değer
+`esc_html`/`esc_url`/`esc_attr` ile basılır.
+
+**Medya için wp.media yerine sunucu tarafı yükleme**
+Ağ yönetiminde `wp.media` modalı admin-ajax'ı ana site bağlamında çağırır; dosya yanlış
+sitenin medya kitaplığına düşer. Bunun yerine form içinde dosya girdisi kullanıldı ve
+`media_handle_upload()` `switch_to_blog()` içinde çalıştırıldı — dosya doğru alt sitenin
+`uploads/sites/<id>/` klasörüne gidiyor. Mevcut görseller de yine o sitenin kitaplığından
+listeleniyor. Alt metin gerçek medya kaydına (`_wp_attachment_image_alt`) yazılıyor.
+
+**Sıralama gizli `_sort` alanıyla**
+PHP, form dizilerini DOM sırasına göre değil anahtarlara göre kurar; bu yüzden ↑/↓
+düğmeleri satırı DOM'da taşırken her satırın gizli `_sort` değerini de günceller, sunucu
+da satırları buna göre sıralayıp yeniden indeksler. Sürükle bırak eklenmedi (demo şartı
+değil), sayfa yenilemeden çalışır.
+
+**"Vazgeç" sayfayı yeniden yüklüyor**
+`form.reset()` JS ile eklenen satırları geri almaz. Vazgeç, kaydedilmemiş değişiklik varsa
+onay sorup sayfayı yeniden yükler; böylece her zaman veritabanındaki son kayıtlı hâl gelir.
+
+**Tamamen boş tekrarlı satırlar kaydedilmiyor**
+Kullanıcı satır ekleyip doldurmazsa sitede boş kart çıkmasın diye, hiçbir alanı dolu
+olmayan satırlar yazılmadan eleniyor.
+
+**Panel gerçek kaydetmelerle sınandı**
+Oturum açıp formu ayrıştıran ve gönderen bir test betiğiyle: hero başlığı, footer metni,
+ikon değişimi, menü sırası, ürün kartı silme ve gerçek görsel yükleme denendi; her
+seferinde yalnızca hedef sitenin değiştiği, diğerinin değişmediği ve `docker compose
+down && up` sonrasında değerlerin korunduğu doğrulandı. Sonrasında demo içeriği seed ile
+temiz hâle getirildi.
+
 ## Açık bırakılanlar
 
-- Panel arayüzü (MVP 2) ve önizleme/sıralama (MVP 3) henüz yok; veri katmanı ve
-  `nwcs_section_order` altyapısı hazır.
-- Taslak/revizyon akışı kapsam dışı: kaydetme davranışı "hemen yayınla" olacak.
+- Gömülü önizleme ve bölüm sıralama arayüzü (MVP 3) henüz yok; `nwcs_section_order`
+  altyapısı hazır, panelde karşılığı yok.
+- Taslak/revizyon akışı kapsam dışı: kaydetme davranışı "hemen yayınla".
 - MCP entegrasyonu MVP 3'te değerlendirilecek; en az yetkili alan okuma/güncelleme
   yetenekleri eklenti içinde tanımlanacak.
