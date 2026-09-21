@@ -92,7 +92,8 @@ Panelin düzeni:
   Footer…). Bölümün yanındaki **↑ ↓** okları ana sayfa sırasını değiştirir; üst menü ve
   footer "sabit" olarak işaretlidir. Bir bölüme tıklandığında aynı sütun düzenleyiciye
   döner, **← Bölümler** ile geri dönülür.
-- **Sağda dikey site seçici** — Koçist / İstanbul Paletçi.
+- **Üst şeritte site seçici** — Koçist / İstanbul Paletçi. Seçim değiştiğinde panel o
+  sitenin manifestine göre yeniden kurulur.
 
 Teknik bilgi gerekmez: manifest, alan anahtarı gibi kavramlar panelde görünmez;
 her alan kendi Türkçe adıyla listelenir.
