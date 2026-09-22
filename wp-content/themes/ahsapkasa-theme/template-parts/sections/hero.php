@@ -56,13 +56,13 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $row ) {
 
 		<div class="mt-11 flex flex-wrap items-center justify-center gap-3">
 			<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'home', 'hero', 'primary_url' ) ) ); ?>"
-				class="rounded-pill bg-forest px-8 py-4 font-display text-base font-semibold text-bone transition-colors duration-200 hover:bg-forest-deep"
+				class="btn btn--lg btn--solid"
 				<?php nwcs_edit_attr( 'home', 'hero', 'primary_label' ); ?>>
 				<?php echo esc_html( nwcs_field( 'home', 'hero', 'primary_label' ) ); ?>
 			</a>
 
 			<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'home', 'hero', 'secondary_url' ) ) ); ?>"
-				class="rounded-pill border border-bone/45 px-8 py-4 font-display text-base font-medium text-bone transition-colors duration-200 hover:border-bone hover:bg-bone/12"
+				class="btn btn--lg btn--light-outline"
 				<?php nwcs_edit_attr( 'home', 'hero', 'secondary_label' ); ?>>
 				<?php echo esc_html( nwcs_field( 'home', 'hero', 'secondary_label' ) ); ?>
 			</a>

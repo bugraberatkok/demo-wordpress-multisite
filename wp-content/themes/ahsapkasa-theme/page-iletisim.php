@@ -22,7 +22,7 @@ $products = nwcs_rows( 'services', 'grid', 'items' );
 $requested = isset( $_GET['urun'] ) ? sanitize_text_field( wp_unslash( $_GET['urun'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $picked    = '' !== ( $values['product'] ?? '' ) ? $values['product'] : $requested;
 
-$field  = 'w-full rounded-sm border border-ink/18 bg-bone px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/30';
+$field  = 'w-full rounded-sm border border-ink/18 bg-surface px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/30';
 $broken = 'w-full rounded-sm border border-alert bg-alert-soft px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-alert focus:outline-none focus:ring-2 focus:ring-alert/30';
 $label  = 'mb-2 block font-display text-sm font-medium text-ink/80';
 
@@ -98,7 +98,7 @@ $details = array(
 					</p>
 
 					<a href="<?php echo esc_url( home_url( '/iletisim/' ) ); ?>"
-						class="mt-7 inline-flex rounded-pill border border-ink/20 px-6 py-3 font-display text-sm font-medium text-ink transition-colors hover:border-ink/45 hover:bg-bone-deep">
+						class="btn btn--sm btn--outline mt-7">
 						Yeni bir istek gönderin
 					</a>
 				</div>
@@ -211,7 +211,7 @@ $details = array(
 
 					<div class="flex flex-col gap-4 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
 						<button type="submit"
-							class="shrink-0 whitespace-nowrap rounded-pill bg-forest px-8 py-4 font-display text-base font-semibold text-bone transition-colors duration-200 hover:bg-forest-deep"
+							class="btn btn--md btn--solid shrink-0"
 							<?php nwcs_edit_attr( 'contact', 'form', 'submit_label' ); ?>>
 							<?php echo esc_html( nwcs_field( 'contact', 'form', 'submit_label' ) ); ?>
 						</button>

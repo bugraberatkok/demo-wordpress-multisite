@@ -20,7 +20,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 <body <?php body_class( 'bg-bone text-ink antialiased' ); ?>>
 <?php wp_body_open(); ?>
 
-<a href="#icerik" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:rounded-pill focus:bg-forest focus:px-5 focus:py-3 focus:font-display focus:text-sm focus:text-bone">
+<a href="#icerik" class="btn btn--sm btn--solid sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60]">
 	İçeriğe geç
 </a>
 
@@ -68,7 +68,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 
 		<div class="flex items-center gap-2">
 			<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'global', 'header', 'cta_url' ) ) ); ?>"
-				class="hidden rounded-pill bg-forest px-5 py-2.5 font-display text-sm font-semibold text-bone transition-all duration-200 hover:bg-forest-deep md:inline-flex"
+				class="btn btn--sm btn--solid hidden md:inline-flex"
 				<?php nwcs_edit_attr( 'global', 'header', 'cta_label' ); ?>>
 				<?php echo esc_html( nwcs_field( 'global', 'header', 'cta_label' ) ); ?>
 			</a>
@@ -95,7 +95,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 			<?php endforeach; ?>
 
 			<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'global', 'header', 'cta_url' ) ) ); ?>"
-				class="mt-3 translate-y-2 rounded-pill bg-forest px-5 py-3 text-center font-display text-sm font-semibold text-bone opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[290ms]">
+				class="btn btn--sm btn--solid mt-3 w-full translate-y-2 opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[290ms]">
 				<?php echo esc_html( nwcs_field( 'global', 'header', 'cta_label' ) ); ?>
 			</a>
 		</nav>

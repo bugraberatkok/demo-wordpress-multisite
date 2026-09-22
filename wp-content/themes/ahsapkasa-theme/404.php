@@ -14,8 +14,8 @@ get_header();
 		Bağlantı eski olabilir. Ürünlerimize hizmetlerimiz sayfasından, teklif için iletişim sayfasından ulaşabilirsiniz.
 	</p>
 	<div class="mt-9 flex flex-wrap gap-3">
-		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="rounded-pill bg-forest px-7 py-3.5 font-display text-base font-semibold text-bone transition-colors hover:bg-forest-deep">Ana sayfaya dön</a>
-		<a href="<?php echo esc_url( home_url( '/iletisim/' ) ); ?>" class="rounded-pill border border-ink/20 px-7 py-3.5 font-display text-base font-medium transition-colors hover:border-ink/45 hover:bg-bone-deep">Teklif alın</a>
+		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="btn btn--md btn--solid">Ana sayfaya dön</a>
+		<a href="<?php echo esc_url( home_url( '/iletisim/' ) ); ?>" class="btn btn--md btn--outline">Teklif alın</a>
 	</div>
 </section>
 <?php

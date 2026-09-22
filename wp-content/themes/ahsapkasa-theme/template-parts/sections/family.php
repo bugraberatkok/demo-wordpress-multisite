@@ -26,7 +26,7 @@ $items = nwcs_rows( 'home', 'family', 'items' );
 				<a href="<?php echo esc_url( ahsapkasa_link( $item['url'] ?? '' ) ); ?>"
 					class="group block h-full overflow-hidden rounded-sm border border-timber/25 bg-bone-deep transition-colors duration-200 hover:border-timber/70">
 
-					<span class="block h-44 overflow-hidden bg-dust">
+					<span class="block aspect-[4/3] overflow-hidden bg-dust">
 						<?php if ( ! empty( $thumb['url'] ) ) : ?>
 							<img src="<?php echo esc_url( $thumb['url'] ); ?>"
 								alt="<?php echo esc_attr( $thumb['alt'] ?: ( $item['label'] ?? '' ) ); ?>"

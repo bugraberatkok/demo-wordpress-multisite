@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 		</p>
 
 		<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'home', 'ctaband', 'button_url' ) ) ); ?>"
-			class="mx-auto mt-10 block w-full max-w-[24rem] rounded-pill bg-bone px-10 py-5 text-center font-display text-lg font-semibold text-forest-deep transition-colors duration-200 hover:bg-timber-soft"
+			class="btn btn--lg btn--light mx-auto mt-10 w-full max-w-[24rem]"
 			<?php nwcs_edit_attr( 'home', 'ctaband', 'button_label' ); ?>>
 			<?php echo esc_html( nwcs_field( 'home', 'ctaband', 'button_label' ) ); ?>
 		</a>

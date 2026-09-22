@@ -617,3 +617,49 @@ Fiyat için ayrı bir işaret kutusu var, çünkü boş fiyat anlamlı bir değe
 Görünüm tercihi kullanıcı başına `nwcs_media_view` meta alanında saklanır; adres çubuğundaki
 `gorunum` parametresi geldiğinde yazılır, gelmediğinde son tercih kullanılır. JavaScript
 gerektirmez, yer imi verilebilir.
+
+---
+
+## Yüzey, düğme ve görsel standardı (revizyon)
+
+Müşteri geri bildirimi: hizmet kutularının rengi kötü, yazılar sıkışık, görsel çerçevesiz ve
+alakasız duruyor, düğmelerin standardı yok.
+
+### Düğme sistemi
+
+Denetim yapınca sitede **yedi farklı dolgu ve dört farklı punto** çıktı: `px-8/py-4`,
+`px-7/py-3.5`, `px-5/py-2.5`, `px-6/py-3`, `px-5/py-3`, `px-10/py-5`, `px-3/py-1`. Her düğme
+yazıldığı yerde elle ölçülendirilmiş. Eleştiri yerindeydi.
+
+Yerine tek bir bileşen: `.btn` + üç boy (`sm` / `md` / `lg`) + dört çeşit (`solid`, `outline`,
+`light`, `light-outline`). Şablonlarda elle dolgu ya da punto yazılmıyor. Sitedeki on bir
+düğmenin tamamı bu sisteme bağlı.
+
+Yuvarlak köşe artık bilgi taşıyor: **hap köşe yalnızca düğmelere ait** (yuvarlak = basılabilir),
+kart ve çerçeveler 4px köşede kalıyor. Tek yarıçapı her şeye uygulamak yaygın bir yapay-zekâ
+kalıbı; iki yarıçaplı ayrım bilinçli.
+
+### Yüzey tonları
+
+Kart (`#e6e8e4`) sayfadan (`#eff0ee`) **daha koyuydu**. Sayfadan koyu bir kart nesne gibi değil,
+çukur gibi okunur. Mantık tersine çevrildi: sayfa biraz derinleşti (`#e9ebe7`), kart beyaza
+yaklaştı (yeni `surface` = `#f7f8f5`). Ayrım gölgeyle değil, yükselme + saç çizgisiyle sağlanıyor
+— gölgeli kart yığını da bir kalıp.
+
+**Ahşap tonu kenarlık rengi olmaktan çıkarıldı.** Baştaki kural "timber = ölçü ve yapı" idi;
+kart kenarına %26 saydamlıkla sürülünce hem anlamını kaybediyor hem gri üstünde çamurlaşıyordu.
+Kenarlıklar nötr `line` (`#d3d8cf`) oldu; ahşap tonu yalnızca ölçü çizgisinde, `.panel` sol
+çentiğinde ve galeri noktalarında kaldı.
+
+### Görsel standardı
+
+Tek kural: **3:4 dikey, çerçeve içinde.** Hizmet kartlarındaki bütün ürün görselleri aynı
+`.frame` bileşenini kullanıyor — Hakkımızda sayfasındaki görselle aynı dil. Ana sayfadaki ürün
+kartları farklı bir bağlam (görsel önde, kenardan kenara) olduğu için 4:3 oranında sabitlendi;
+kendi içinde tutarlı, ayrı bir muamele.
+
+### Mobilde yatay taşma
+
+Yan yana dizilimde `.btn`'in `white-space: nowrap` özelliği, dar metin kolonunu düğmenin
+genişliğine zorluyor ve sayfayı 2px taşırıyordu. Kart telefonda dikey diziliyor (görsel üstte,
+metin tam genişlikte), 640px üstünde yan yana geçiyor. Oran her iki dizilimde de 3:4.

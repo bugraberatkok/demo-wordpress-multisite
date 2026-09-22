@@ -16,9 +16,13 @@
  *   timber  = olcu    (centik, cizgi, teknik etiket)
  * ------------------------------------------------------------------ */
 @theme {
-	--color-bone:         #eff0ee;
-	--color-bone-deep:    #e6e8e4;
-	--color-dust:         #dde0dc;
+	/* Yuzeyler: sayfa derin, kart acik. Kart sayfadan koyu olursa nesne gibi
+	   degil, cukur gibi okunuyordu. */
+	--color-bone:         #e9ebe7;
+	--color-surface:      #f7f8f5;
+	--color-bone-deep:    #dfe2dc;
+	--color-dust:         #dcdfd8;
+	--color-line:         #d3d8cf;
 	--color-moss:         #6b716b;
 	--color-ink:          #212a24;
 	--color-ink-soft:     #2c362f;
@@ -235,19 +239,21 @@ body.admin-bar [data-header] {
 		margin-top: 1.4em;
 	}
 
-	/* Sade kutu: gri zemin, ahsap tonunda ince cerceve. */
+	/* Kart: sayfadan acik yuzey, notr sac cizgisi. Ahsap tonu kenarlik rengi
+	   degildir; o yalnizca olcu ve yapi isareti olarak kullanilir. */
 	.card {
-		background: var(--color-bone-deep);
-		border: 1px solid color-mix(in srgb, var(--color-timber) 26%, transparent);
+		background: var(--color-surface);
+		border: 1px solid var(--color-line);
 		border-radius: 4px;
 	}
 
-	/* Gorsel cercevesi: kutu ile ayni dil, icerideki gorsel biraz kucuk durur. */
+	/* Gorsel cercevesi: kart ile ayni dil. Sitedeki butun urun ve icerik
+	   gorselleri bu cerceveyi kullanir. */
 	.frame {
-		background: var(--color-bone-deep);
-		border: 1px solid color-mix(in srgb, var(--color-timber) 26%, transparent);
+		background: var(--color-surface);
+		border: 1px solid var(--color-line);
 		border-radius: 4px;
-		padding: 0.5rem;
+		padding: 0.375rem;
 	}
 
 	.frame > img,
@@ -258,11 +264,101 @@ body.admin-bar [data-header] {
 
 	/* Basligi olan icerik kutusu: solda ahsap tonunda centik. */
 	.panel {
-		background: var(--color-bone-deep);
-		border: 1px solid color-mix(in srgb, var(--color-timber) 28%, transparent);
+		background: var(--color-surface);
+		border: 1px solid var(--color-line);
 		border-left-width: 3px;
 		border-left-color: var(--color-timber);
-		border-radius: 3px;
+		border-radius: 4px;
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Dugme sistemi
+	 *
+	 * Uc boy, dort cesit. Sablonlarda elle dolgu/punto yazilmaz; boylece
+	 * sayfadan sayfaya ayni dugme ayni boyda durur.
+	 *
+	 * Yuvarlak kose yalnizca dugmelere ait: yuvarlak = basilabilir.
+	 * Kart ve cerceveler 4px kosede kalir.
+	 * ---------------------------------------------------------------- */
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: var(--radius-pill);
+		border: 1px solid transparent;
+		font-family: var(--font-display);
+		font-weight: 600;
+		line-height: 1.15;
+		white-space: nowrap;
+		text-decoration: none;
+		cursor: pointer;
+		transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+	}
+
+	.btn--sm {
+		padding: 0.625rem 1.25rem;
+		font-size: var(--text-sm);
+	}
+
+	.btn--md {
+		padding: 0.875rem 1.75rem;
+		font-size: 1.0625rem;
+	}
+
+	.btn--lg {
+		padding: 1.0625rem 2.25rem;
+		font-size: var(--text-lg);
+	}
+
+	/* Dolu yesil: sayfadaki birincil eylem. */
+	.btn--solid {
+		background: var(--color-forest);
+		color: var(--color-bone);
+	}
+
+	.btn--solid:hover,
+	.btn--solid:focus-visible {
+		background: var(--color-forest-deep);
+		color: var(--color-bone);
+	}
+
+	/* Cerceveli: acik zeminde ikincil eylem. */
+	.btn--outline {
+		border-color: color-mix(in srgb, var(--color-ink) 22%, transparent);
+		color: var(--color-ink);
+	}
+
+	.btn--outline:hover,
+	.btn--outline:focus-visible {
+		border-color: color-mix(in srgb, var(--color-ink) 45%, transparent);
+		background: var(--color-bone-deep);
+		color: var(--color-ink);
+	}
+
+	/* Koyu ya da yesil zemin uzerinde birincil eylem. */
+	.btn--light {
+		background: var(--color-surface);
+		color: var(--color-forest-deep);
+	}
+
+	.btn--light:hover,
+	.btn--light:focus-visible {
+		background: var(--color-timber-soft);
+		color: var(--color-ink);
+	}
+
+	/* Koyu zemin uzerinde ikincil eylem. */
+	.btn--light-outline {
+		border-color: color-mix(in srgb, var(--color-bone) 45%, transparent);
+		color: var(--color-bone);
+	}
+
+	.btn--light-outline:hover,
+	.btn--light-outline:focus-visible {
+		border-color: var(--color-bone);
+		background: color-mix(in srgb, var(--color-bone) 12%, transparent);
+		color: var(--color-bone);
 	}
 
 	/* Hizmetler karesinin ortasindaki dugme, dort bolmenin kesisimine oturur. */
