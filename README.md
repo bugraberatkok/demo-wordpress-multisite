@@ -264,6 +264,15 @@ npm run watch        # dosyaları izleyerek sürekli derleme
 depoya dahildir; yani siteyi çalıştırmak için Node kurmanız gerekmez, yalnızca
 tasarımı değiştirecekseniz gerekir.
 
+### Hero slaytı ve görsel büyütme
+
+Ana sayfadaki hero, İçerik Stüdyosu'ndan yönetilen bir slayt gösterisidir (Ana Sayfa →
+Giriş (Hero) → Arka Plan Slaytları). Slayt eklemek/çıkarmak için satır ekleyip görsel seçmek
+yeterli; tek slayt kalırsa noktalar kendiliğinden gizlenir.
+
+Hizmetler sayfasında her ürünün dört görsel alanı vardır. Kapak görseline tıklandığında
+görsel büyür ve o ürünün diğer görselleri arasında ok tuşlarıyla veya düğmelerle gezilebilir.
+
 ### Teklif formu
 
 İletişim sayfasındaki form sahte bir başarı ekranı göstermez. Gönderim

@@ -84,7 +84,19 @@ return array(
 						'primary_url'     => array( 'label' => 'Birinci Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
 						'secondary_label' => array( 'label' => 'İkinci Düğme Metni', 'type' => 'text', 'default' => 'Ürünlerimizi görün' ),
 						'secondary_url'   => array( 'label' => 'İkinci Düğme Adresi', 'type' => 'url', 'default' => '/hizmetlerimiz/' ),
-						'image'           => array( 'label' => 'Arka Plan Fotoğrafı', 'type' => 'image', 'default' => 0 ),
+						'slides'          => array(
+							'label'   => 'Arka Plan Slaytları',
+							'type'    => 'repeater',
+							'max'     => 6,
+							'fields'  => array(
+								'image' => array( 'label' => 'Fotoğraf', 'type' => 'image' ),
+							),
+							'default' => array(
+								array( 'image' => 0 ),
+								array( 'image' => 0 ),
+								array( 'image' => 0 ),
+							),
+						),
 					),
 				),
 
@@ -146,16 +158,16 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hakkımızda' ),
-						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Koçist Orman Ürünleri; sektördeki 40 yıllık tecrübesi ile istediğiniz ölçü ve ebatlarda ahşap sandık, ahşap kafes, ahşap palet üretimi yapmaktadır.' ),
-						'image' => array( 'label' => 'Sayfa Görseli', 'type' => 'image', 'default' => 0 ),
+						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Kırk yıllık tecrübeyle, istediğiniz ölçü ve ebatta ahşap sandık, kafes ve palet üretiyoruz. Kaliteli, dürüst ve hızlı.' ),
+						'image' => array( 'label' => 'Arka Plan Fotoğrafı', 'type' => 'image', 'default' => 0 ),
 					),
 				),
 
 				'story' => array(
 					'label'  => 'Firma Metni',
 					'fields' => array(
-						'p1' => array( 'label' => 'Birinci Paragraf', 'type' => 'textarea', 'default' => 'Yeni bir ürün için yaptıracağınız veya mevcut kullanımınızın yerini alacak her ölçüde kereste, palet, sandık ve kafes için sizin çıkarlarınız doğrultusunda en uygun şekilde dizayn eder ve size sunar veya mevcut kullandığınız palet, sandık ve kafes ölçülerini, spesifikasyonlarını veya proje çizimlerini alarak sizin istekleriniz doğrultusunda en hızlı şekilde üretime geçer. Firmamız tüm palet, sandık, kafes elemanlarını içeren demonte paketlerini yaparak size sevk eder.' ),
-						'p2' => array( 'label' => 'İkinci Paragraf', 'type' => 'textarea', 'default' => 'Kaliteli, dürüst ve hızlı bir pazarlama ilkesi benimsemiş olan firmamız müşterilerini memnun etmek amacı ile özel boy ve ebatta kereste, palet, sandık, kafes vb. ahşap ambalaj malzemeleri üretmekte. Bu amaçla yola çıkan firmamız kalitesinden ve dürüstlüğünden taviz vermeden hizmetlerine devam etmektedir.' ),
+						'p1' => array( 'label' => 'Birinci Paragraf', 'type' => 'textarea', 'default' => 'Yeni bir ürün için ya da kullandığınız ambalajın yerine; her ölçüde kereste, palet, sandık ve kafesi ihtiyacınıza göre tasarlar, size sunarız.' ),
+						'p2' => array( 'label' => 'İkinci Paragraf', 'type' => 'textarea', 'default' => 'Ölçülerinizi, spesifikasyonları veya proje çizimini alır, en hızlı şekilde üretime geçeriz. Tüm parçaları içeren demonte paketler hâlinde sevk ederiz.' ),
 					),
 				),
 
@@ -204,12 +216,15 @@ return array(
 							'type'    => 'repeater',
 							'max'     => 4,
 							'fields'  => array(
-								'title' => array( 'label' => 'Ürün Adı', 'type' => 'text' ),
-								'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea' ),
-								'image' => array( 'label' => 'Görsel', 'type' => 'image' ),
+								'title'   => array( 'label' => 'Ürün Adı', 'type' => 'text' ),
+								'text'    => array( 'label' => 'Açıklama', 'type' => 'textarea' ),
+								'image'   => array( 'label' => 'Kapak Görseli', 'type' => 'image' ),
+								'image_2' => array( 'label' => '2. Görsel', 'type' => 'image' ),
+								'image_3' => array( 'label' => '3. Görsel', 'type' => 'image' ),
+								'image_4' => array( 'label' => '4. Görsel', 'type' => 'image' ),
 							),
 							'default' => array(
-								array( 'title' => 'Ahşap palet', 'text' => 'Standart dışı, istediğiniz ölçü ve ebatlarda ahşap palet üretimi yapmaktayız. Kardonlu palet ihtiyaçlarınızda da bizimle irtibat kurabilirsiniz.', 'image' => 0 ),
+								array( 'title' => 'Ahşap palet', 'text' => 'Standart dışı, istediğiniz ölçü ve ebatlarda ahşap palet üretimi yapmaktayız. Kardonlu palet ihtiyaçlarınızda da bizimle irtibat kurabilirsiniz.', 'image' => 0, 'image_2' => 0, 'image_3' => 0, 'image_4' => 0 ),
 								array( 'title' => 'Ahşap sandık', 'text' => 'Standart dışı, istediğiniz ölçü ve ebatlarda ahşap sandık üretimi yapmaktayız. Fiyatlarımız ve cazip tekliflerimiz için lütfen bizimle irtibat kurunuz.', 'image' => 0 ),
 								array( 'title' => 'Ahşap kafes', 'text' => 'Standart dışı, istediğiniz ölçü ve ebatlarda ahşap kafes üretimi yapmaktayız. Size özel teklif ve cazip fiyat seçeneklerimiz için lütfen bizimle irtibat kurunuz.', 'image' => 0 ),
 								array( 'title' => 'Ahşap ambalaj', 'text' => 'İhracat şartnamenize uygun, ölçüye göre ahşap ambalaj çözümleri üretiyoruz. Parçaları içeren demonte paketler hâlinde sevk ediyoruz.', 'image' => 0 ),

@@ -129,7 +129,10 @@ update_option( 'show_on_front', 'posts' );
 $media = array(
 	'logo'    => ahsapkasa_seed_media( 'logo coreldraw.png', 'kocist-logo', 'Koçist Orman Ürünleri logosu', 'Koçist Orman Ürünleri logosu' ),
 	'atolye'  => ahsapkasa_seed_media( 'home_slide04.jpg', 'kocist-atolye', 'Atölyede ahşap sandık üretimi', 'İkitelli atölyesinde ölçüye göre üretilen ahşap sandık' ),
-	'orman'   => ahsapkasa_seed_media( 'background02.jpg', 'kocist-orman', 'Çam ormanı', 'Ahşabın geldiği yer: çam ormanı ve demiryolu hattı' ),
+	'dag'     => ahsapkasa_seed_media( 'background01.jpg', 'kocist-dag', 'Sisli dağ manzarası', 'Sisler arasında dağ yamacı' ),
+	'slide1'  => ahsapkasa_seed_media( 'home_slide01.jpg', 'kocist-slide-1', 'Ahşap sandık ve kasa üretimi', 'Farklı ölçülerde üretilmiş ahşap sandık ve kasalar' ),
+	'slide2'  => ahsapkasa_seed_media( 'home_slide02.jpg', 'kocist-slide-2', 'Sevkiyata hazır ahşap sandıklar', 'Tesis önünde sevkiyata hazır bekleyen ahşap sandıklar' ),
+	'slide3'  => ahsapkasa_seed_media( 'home_slide03.jpg', 'kocist-slide-3', 'Atölyede ahşap kasa üretimi', 'Atölyede istiflenmiş ahşap kasa ve sandıklar' ),
 	'palet'   => ahsapkasa_seed_media( 'featured01.jpg', 'kocist-palet', 'Ahşap paletler', 'Üst üste dizilmiş ahşap paletler' ),
 	'sandik'  => ahsapkasa_seed_media( 'featured02.jpg', 'kocist-sandik', 'Ahşap sandık', 'Sevkiyata hazır kapalı ahşap sandık' ),
 	'kafes'   => ahsapkasa_seed_media( '4.jpg', 'kocist-kafes', 'Ahşap kafes', 'Ölçüye göre üretilmiş ahşap kafes' ),
@@ -156,17 +159,35 @@ foreach ( $manifest['pages'] as $page_key => $page ) {
  * 4. Gercek gorselleri yerlestir
  * ---------------------------------------------------------------- */
 $content['global']['header']['logo_image'] = $media['logo'];
-$content['home']['hero']['image']          = $media['atolye'];
-$content['about']['head']['image']         = $media['orman'];
+$content['about']['head']['image']         = $media['dag'];
 
-$gallery = array( $media['palet'], $media['sandik'], $media['kafes'], $media['atolye'] );
+// Hero slayt gosterisi: uc fotograf.
+$content['home']['hero']['slides'] = array(
+	array( 'image' => $media['slide1'] ),
+	array( 'image' => $media['slide2'] ),
+	array( 'image' => $media['slide3'] ),
+);
+
+// Her urunun kapak gorseli ve buyutuldugunde gezilecek ek gorselleri.
+// Demoda elimizdeki fotograflardan derlenmistir.
+$galleries = array(
+	array( $media['palet'],  $media['slide2'], $media['slide3'] ),
+	array( $media['sandik'], $media['slide1'], $media['atolye'] ),
+	array( $media['kafes'],  $media['slide3'], $media['slide1'] ),
+	array( $media['atolye'], $media['slide2'], $media['slide1'] ),
+);
 
 foreach ( $content['services']['grid']['items'] as $index => $item ) {
-	$content['services']['grid']['items'][ $index ]['image'] = $gallery[ $index ] ?? 0;
+	$set = $galleries[ $index ] ?? array();
+
+	$content['services']['grid']['items'][ $index ]['image']   = $set[0] ?? 0;
+	$content['services']['grid']['items'][ $index ]['image_2'] = $set[1] ?? 0;
+	$content['services']['grid']['items'][ $index ]['image_3'] = $set[2] ?? 0;
+	$content['services']['grid']['items'][ $index ]['image_4'] = $set[3] ?? 0;
 }
 
 foreach ( $content['home']['family']['items'] as $index => $item ) {
-	$content['home']['family']['items'][ $index ]['image'] = $gallery[ $index ] ?? 0;
+	$content['home']['family']['items'][ $index ]['image'] = $galleries[ $index ][0] ?? 0;
 }
 
 update_option( 'nwcs_content', $content );

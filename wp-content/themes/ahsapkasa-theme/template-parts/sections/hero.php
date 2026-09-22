@@ -1,20 +1,34 @@
 <?php
 /**
- * Ana sayfa girisi: kenardan kenara fotograf, uzerinde koyu perde,
+ * Ana sayfa girisi: arka planda slayt gosterisi, uzerinde koyu perde,
  * ortada baslik, olcu cizgisi ve dugmeler.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$image = nwcs_image( 'home', 'hero', 'image', 'full' );
+$slides = array();
+
+foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $row ) {
+	$image = nwcs_image_by_id( $row['image'] ?? 0, 'full' );
+
+	if ( ! empty( $image['url'] ) ) {
+		$slides[] = $image;
+	}
+}
 ?>
 <section class="relative isolate flex min-h-[32rem] items-center justify-center overflow-hidden md:min-h-[40rem]">
 
-	<?php if ( ! empty( $image['url'] ) ) : ?>
-		<img src="<?php echo esc_url( $image['url'] ); ?>"
-			alt="<?php echo esc_attr( $image['alt'] ?: 'Koçist atölyesi' ); ?>"
-			class="absolute inset-0 -z-20 h-full w-full object-cover"
-			fetchpriority="high" decoding="async" />
+	<?php if ( $slides ) : ?>
+		<div class="absolute inset-0 -z-20" data-slideshow <?php nwcs_edit_attr( 'home', 'hero', 'slides' ); ?>>
+			<?php foreach ( $slides as $index => $slide ) : ?>
+				<img src="<?php echo esc_url( $slide['url'] ); ?>"
+					alt="<?php echo esc_attr( $slide['alt'] ?: 'Koçist üretiminden bir kare' ); ?>"
+					data-slide
+					class="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-out <?php echo 0 === $index ? 'opacity-100' : 'opacity-0'; ?>"
+					<?php echo 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
+					decoding="async" />
+			<?php endforeach; ?>
+		</div>
 	<?php else : ?>
 		<span class="absolute inset-0 -z-20 bg-ink" aria-hidden="true"></span>
 	<?php endif; ?>
@@ -23,7 +37,7 @@ $image = nwcs_image( 'home', 'hero', 'image', 'full' );
 	<span class="absolute inset-0 -z-10 bg-night/78" aria-hidden="true"></span>
 	<span class="absolute inset-0 -z-10 bg-gradient-to-b from-night/55 via-night/20 to-night/75" aria-hidden="true"></span>
 
-	<div class="mx-auto w-full max-w-[54rem] px-6 py-24 text-center" <?php nwcs_edit_attr( 'home', 'hero', 'image' ); ?>>
+	<div class="mx-auto w-full max-w-[54rem] px-6 py-24 text-center">
 
 		<h1 class="font-display text-[2.5rem] font-semibold leading-[1.06] text-bone md:text-5xl lg:text-6xl"
 			<?php nwcs_edit_attr( 'home', 'hero', 'title' ); ?>>
@@ -54,4 +68,15 @@ $image = nwcs_image( 'home', 'hero', 'image', 'full' );
 			</a>
 		</div>
 	</div>
+
+	<?php if ( count( $slides ) > 1 ) : ?>
+		<div class="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 gap-2.5" data-slideshow-dots role="tablist" aria-label="Fotoğraflar">
+			<?php foreach ( $slides as $index => $slide ) : ?>
+				<button type="button" role="tab" data-slide-dot
+					aria-label="<?php echo esc_attr( sprintf( '%d. fotoğraf', $index + 1 ) ); ?>"
+					aria-selected="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+					class="h-2.5 w-2.5 rounded-full bg-bone/45 transition-all duration-300 hover:bg-bone/80 aria-selected:w-7 aria-selected:bg-bone"></button>
+			<?php endforeach; ?>
+		</div>
+	<?php endif; ?>
 </section>

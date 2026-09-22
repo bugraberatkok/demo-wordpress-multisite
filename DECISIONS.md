@@ -504,3 +504,29 @@ Müşteri geri bildirimi sonrası yapılan değişiklikler:
    `md:p-8` kısayolu onu eziyor.
 5. **Renk.** Alt bilgi yeşile çalan koyu tondan nötr koyuya (`night`) alındı; kullanılmayan
    `forest-light` jetonu silindi. Sayfada tek yeşil kaldı ve yalnızca eylem anlamına geliyor.
+
+### Hero slayt gösterisi ve görsel büyütme
+
+**Hero slaytı.** `home.hero.slides` bir tekrarlayıcıdır; her satırda bir fotoğraf. Geçiş
+çapraz solma (opaklık), süre 6 saniye. Fare üzerindeyken, odak içerideyken ve sekme arka
+plandayken durur; `prefers-reduced-motion` seçiliyse otomatik ilerleme hiç başlamaz, slaytlar
+yalnızca noktalarla gezilir. Tek slayt varsa noktalar basılmaz.
+
+**Görsel büyütme.** Hizmetler sayfasındaki her kutu `data-gallery` içinde kendi görsellerini
+JSON olarak taşır; kapak ve küçük görseller `data-lightbox-open="<sıra>"` ile hangi görselden
+açılacağını söyler. Pencere yerli `<dialog>` üzerine kuruludur: `showModal()` odak tuzağını ve
+Esc ile kapanmayı kendi halleder, üzerine ok tuşları ve ileri/geri düğmeleri eklendi. Kitaplık
+kullanılmadı.
+
+Ürün başına dört görsel alanı var (`image`, `image_2`, `image_3`, `image_4`). Eklentinin
+tekrarlayıcısı iç içe tekrarlayıcı desteklemediği için galeri bu şekilde düz alanlarla kuruldu;
+hepsi İçerik Stüdyosu'ndan düzenlenebilir.
+
+**Hizmetler dizilimi.** Satır arası boşluk, ortadaki teklif düğmesini tamamen içine alacak
+kadar geniş tutuldu (`sm:gap-y-44`). Böylece dört kutu da birebir aynı yapıda kalıyor ve
+görseller aynı hizada duruyor; düğme hiçbir kutunun üzerine binmiyor. Önceki sürümde kutulara
+pay bırakılıyordu, bu da alt sıradaki görselleri aşağı kaydırıyordu.
+
+**Hakkımızda hero.** Sayfa, ana sayfayla aynı kurguya geçti: fotoğraf + koyu perde + ortalanmış
+başlık. Dağ fotoğrafı zaten açık ve düşük kontrastlı olduğu için perde burada daha hafif
+(`night/66`, ana sayfada `night/78`). Firma metni kısaltıldı; uzun hâli git geçmişinde duruyor.

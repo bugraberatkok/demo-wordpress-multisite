@@ -58,6 +58,7 @@ function ahsapkasa_assets(): void {
 	wp_enqueue_style( 'ahsapkasa-style', get_stylesheet_uri(), array( 'ahsapkasa-tailwind' ), $version );
 
 	wp_enqueue_script( 'ahsapkasa-nav', get_theme_file_uri( 'assets/nav.js' ), array(), $version, true );
+	wp_enqueue_script( 'ahsapkasa-media', get_theme_file_uri( 'assets/media.js' ), array(), $version, true );
 }
 
 add_action( 'wp_head', 'ahsapkasa_preconnect', 1 );

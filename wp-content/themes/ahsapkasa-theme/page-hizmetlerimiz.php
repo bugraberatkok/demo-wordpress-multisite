@@ -1,11 +1,11 @@
 <?php
 /**
- * Hizmetlerimiz. Dort bagimsiz kutu, aralarinda bosluk; birlikte karemsi bir
- * dizilim olusturur. Her kutuda solda yazi, sagda gorsel. Kutularin kesistigi
- * bosluga tek bir teklif dugmesi oturur.
+ * Hizmetlerimiz. Dort bagimsiz kutu; her kutuda once gorsel, altinda metin.
+ * Gorseller tiklaninca buyur ve urune ait diger gorseller arasinda gezilir.
  *
- * Kutu iceriginin ic tarafinda dugmeye pay birakilir. 'md:' kademesi ayrica
- * yazilmalidir, yoksa 'md:p-8' kisayolu bu payi ezer.
+ * Satirlar arasindaki bosluk, ortadaki teklif dugmesini tamamen icine alacak
+ * kadar genis; boylece dugme hicbir kutunun uzerine binmez ve dort kutu da
+ * ayni yapida kalir (gorseller ayni hizada).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,13 +13,6 @@ defined( 'ABSPATH' ) || exit;
 get_header();
 
 $items = nwcs_rows( 'services', 'grid', 'items' );
-
-$cell_align = array(
-	0 => 'sm:pb-16 md:pb-20',
-	1 => 'sm:pb-16 md:pb-20',
-	2 => 'sm:pt-16 md:pt-20',
-	3 => 'sm:pt-16 md:pt-20',
-);
 ?>
 <article>
 
@@ -37,13 +30,59 @@ $cell_align = array(
 
 		<div class="relative mx-auto max-w-[72rem]">
 
-			<div class="grid gap-7 sm:grid-cols-2 sm:gap-10" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
-				<?php foreach ( $items as $index => $item ) :
-					$thumb = nwcs_image_by_id( $item['image'] ?? 0, 'medium_large' );
-					?>
-					<div class="card flex items-start gap-5 p-7 md:gap-7 md:p-8 <?php echo esc_attr( $cell_align[ $index ] ?? '' ); ?>">
+			<div class="grid gap-8 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-44" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
+				<?php foreach ( $items as $item ) :
 
-						<div class="min-w-0 flex-1">
+					// Kapak + ek gorseller tek galeriye toplanir.
+					$gallery = array();
+
+					foreach ( array( 'image', 'image_2', 'image_3', 'image_4' ) as $key ) {
+						$picture = nwcs_image_by_id( $item[ $key ] ?? 0, 'large' );
+
+						if ( ! empty( $picture['url'] ) ) {
+							$gallery[] = array(
+								'url' => $picture['url'],
+								'alt' => $picture['alt'] ?: ( $item['title'] ?? '' ),
+							);
+						}
+					}
+					?>
+					<div class="card flex flex-col overflow-hidden" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
+
+						<?php if ( $gallery ) : ?>
+							<button type="button" data-lightbox-open="0"
+								class="group relative block h-60 w-full overflow-hidden md:h-64"
+								aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $item['title'] ?? '' ) ); ?>">
+
+								<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>"
+									alt="<?php echo esc_attr( $gallery[0]['alt'] ); ?>"
+									class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+									loading="lazy" decoding="async" />
+
+								<span class="absolute inset-0 flex items-center justify-center bg-night/0 transition-colors duration-200 group-hover:bg-night/30" aria-hidden="true">
+									<span class="flex h-12 w-12 scale-90 items-center justify-center rounded-full bg-bone/95 text-ink opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100">
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" />
+										</svg>
+									</span>
+								</span>
+							</button>
+						<?php endif; ?>
+
+						<?php if ( count( $gallery ) > 1 ) : ?>
+							<div class="flex gap-2 px-5 pt-4">
+								<?php foreach ( array_slice( $gallery, 1 ) as $position => $picture ) : ?>
+									<button type="button" data-lightbox-open="<?php echo esc_attr( $position + 1 ); ?>"
+										class="h-14 w-20 shrink-0 overflow-hidden rounded-sm border border-timber/25 transition-colors hover:border-timber"
+										aria-label="<?php echo esc_attr( sprintf( '%d. görseli büyüt', $position + 2 ) ); ?>">
+										<img src="<?php echo esc_url( $picture['url'] ); ?>" alt=""
+											class="h-full w-full object-cover" loading="lazy" decoding="async" />
+									</button>
+								<?php endforeach; ?>
+							</div>
+						<?php endif; ?>
+
+						<div class="px-5 pb-7 pt-5 md:px-7">
 							<h2 class="font-display text-2xl font-semibold md:text-[1.625rem]">
 								<?php echo esc_html( $item['title'] ?? '' ); ?>
 							</h2>
@@ -52,30 +91,22 @@ $cell_align = array(
 								<?php echo esc_html( $item['text'] ?? '' ); ?>
 							</p>
 						</div>
-
-						<?php if ( ! empty( $thumb['url'] ) ) : ?>
-							<img src="<?php echo esc_url( $thumb['url'] ); ?>"
-								alt="<?php echo esc_attr( $thumb['alt'] ?: ( $item['title'] ?? '' ) ); ?>"
-								class="h-32 w-32 shrink-0 rounded-sm object-cover md:h-40 md:w-40"
-								loading="lazy" decoding="async" />
-						<?php endif; ?>
 					</div>
 				<?php endforeach; ?>
 			</div>
 
 			<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'services', 'grid', 'center_url' ) ) ); ?>"
-				class="quadbtn absolute left-1/2 top-1/2 z-10 hidden h-[8.5rem] w-[8.5rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-forest text-center font-display text-base font-semibold leading-tight text-bone ring-8 ring-bone hover:bg-forest-deep sm:flex"
+				class="quadbtn absolute left-1/2 top-1/2 z-10 hidden h-[8.5rem] w-[8.5rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-forest text-center font-display text-base font-semibold leading-tight text-bone hover:bg-forest-deep sm:flex"
 				<?php nwcs_edit_attr( 'services', 'grid', 'center_label' ); ?>>
 				<?php echo esc_html( nwcs_field( 'services', 'grid', 'center_label' ) ); ?>
+				<span class="mt-1 block font-display text-xs font-normal text-bone/75" <?php nwcs_edit_attr( 'services', 'grid', 'center_note' ); ?>>
+					<?php echo esc_html( nwcs_field( 'services', 'grid', 'center_note' ) ); ?>
+				</span>
 			</a>
 		</div>
 
-		<p class="mt-6 text-center font-display text-sm text-moss" <?php nwcs_edit_attr( 'services', 'grid', 'center_note' ); ?>>
-			<?php echo esc_html( nwcs_field( 'services', 'grid', 'center_note' ) ); ?>
-		</p>
-
 		<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'services', 'grid', 'center_url' ) ) ); ?>"
-			class="mt-6 block rounded-pill bg-forest px-7 py-4 text-center font-display text-base font-semibold text-bone transition-colors hover:bg-forest-deep sm:hidden">
+			class="mt-8 block rounded-pill bg-forest px-7 py-4 text-center font-display text-base font-semibold text-bone transition-colors hover:bg-forest-deep sm:hidden">
 			<?php echo esc_html( nwcs_field( 'services', 'grid', 'center_label' ) ); ?>
 		</a>
 	</section>
@@ -91,5 +122,8 @@ $cell_align = array(
 		</div>
 	</section>
 </article>
+
 <?php
+get_template_part( 'template-parts/lightbox' );
+
 get_footer();
