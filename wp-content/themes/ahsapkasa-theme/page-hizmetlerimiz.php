@@ -28,9 +28,9 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 
 	<section class="mx-auto max-w-[80rem] px-6 pt-12 md:pt-16">
 
-		<div class="relative mx-auto max-w-[72rem]">
+		<div class="relative mx-auto max-w-[64rem]">
 
-			<div class="grid gap-8 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-44" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
+			<div class="grid gap-7 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-40" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
 				<?php foreach ( $items as $item ) :
 
 					// Kapak + ek gorseller tek galeriye toplanir.
@@ -51,7 +51,7 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 
 						<?php if ( $gallery ) : ?>
 							<button type="button" data-lightbox-open="0"
-								class="group relative block h-60 w-full overflow-hidden md:h-64"
+								class="group relative block h-48 w-full overflow-hidden md:h-52"
 								aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $item['title'] ?? '' ) ); ?>">
 
 								<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>"
@@ -69,25 +69,28 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 							</button>
 						<?php endif; ?>
 
+						<?php // Kucuk gorseller yerine nokta: cok daha az yer kaplar,
+						      // tiklaninca ayni sekilde o gorseli acar. ?>
 						<?php if ( count( $gallery ) > 1 ) : ?>
-							<div class="flex gap-2 px-5 pt-4">
-								<?php foreach ( array_slice( $gallery, 1 ) as $position => $picture ) : ?>
-									<button type="button" data-lightbox-open="<?php echo esc_attr( $position + 1 ); ?>"
-										class="h-14 w-20 shrink-0 overflow-hidden rounded-sm border border-timber/25 transition-colors hover:border-timber"
-										aria-label="<?php echo esc_attr( sprintf( '%d. görseli büyüt', $position + 2 ) ); ?>">
-										<img src="<?php echo esc_url( $picture['url'] ); ?>" alt=""
-											class="h-full w-full object-cover" loading="lazy" decoding="async" />
-									</button>
+							<div class="flex items-center gap-2 px-5 pt-4 md:px-6">
+								<?php foreach ( $gallery as $position => $picture ) : ?>
+									<button type="button" data-lightbox-open="<?php echo esc_attr( $position ); ?>"
+										class="h-2 w-2 rounded-full bg-timber/45 transition-all duration-200 hover:scale-125 hover:bg-timber"
+										aria-label="<?php echo esc_attr( sprintf( '%d. görseli büyüt', $position + 1 ) ); ?>"></button>
 								<?php endforeach; ?>
+
+								<span class="ml-1 font-display text-xs tabular-nums text-moss">
+									<?php echo esc_html( sprintf( '%d görsel', count( $gallery ) ) ); ?>
+								</span>
 							</div>
 						<?php endif; ?>
 
-						<div class="px-5 pb-7 pt-5 md:px-7">
-							<h2 class="font-display text-2xl font-semibold md:text-[1.625rem]">
+						<div class="px-5 pb-6 pt-4 md:px-6">
+							<h2 class="font-display text-xl font-semibold md:text-2xl">
 								<?php echo esc_html( $item['title'] ?? '' ); ?>
 							</h2>
 
-							<p class="mt-3 text-[1.0625rem] leading-[1.7] text-ink/75">
+							<p class="mt-2 text-base leading-[1.65] text-ink/75">
 								<?php echo esc_html( $item['text'] ?? '' ); ?>
 							</p>
 						</div>

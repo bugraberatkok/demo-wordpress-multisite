@@ -166,6 +166,8 @@ return array(
 				'story' => array(
 					'label'  => 'Firma Metni',
 					'fields' => array(
+						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Nasıl çalışıyoruz' ),
+						'lead'  => array( 'label' => 'Bölüm Alt Metni', 'type' => 'text', 'default' => 'Ölçüden sevkiyata kadar izlenen yol.' ),
 						'p1' => array( 'label' => 'Birinci Paragraf', 'type' => 'textarea', 'default' => 'Yeni bir ürün için ya da kullandığınız ambalajın yerine; her ölçüde kereste, palet, sandık ve kafesi ihtiyacınıza göre tasarlar, size sunarız.' ),
 						'p2' => array( 'label' => 'İkinci Paragraf', 'type' => 'textarea', 'default' => 'Ölçülerinizi, spesifikasyonları veya proje çizimini alır, en hızlı şekilde üretime geçeriz. Tüm parçaları içeren demonte paketler hâlinde sevk ederiz.' ),
 					),

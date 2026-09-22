@@ -41,8 +41,20 @@ $blocks = array( 'purpose', 'quality' );
 		</div>
 	</section>
 
+	<?php // Basliksiz birakildiginda bu blok ne hero'ya ne alttaki kutulara
+	      // ait gorunuyordu; kendi basligiyla ayri bir bolum oldu. ?>
 	<section class="mx-auto max-w-[76rem] px-6 pt-16 md:pt-20">
-		<div class="card mx-auto grid max-w-[66rem] gap-8 px-8 py-10 md:grid-cols-2 md:gap-12 md:px-14 md:py-12">
+
+		<div class="mx-auto max-w-[66rem] text-center">
+			<h2 class="font-display text-2xl font-semibold md:text-3xl" <?php nwcs_edit_attr( 'about', 'story', 'title' ); ?>>
+				<?php echo esc_html( nwcs_field( 'about', 'story', 'title' ) ); ?>
+			</h2>
+			<p class="mt-3 text-base text-moss" <?php nwcs_edit_attr( 'about', 'story', 'lead' ); ?>>
+				<?php echo esc_html( nwcs_field( 'about', 'story', 'lead' ) ); ?>
+			</p>
+		</div>
+
+		<div class="card mx-auto mt-8 grid max-w-[66rem] gap-8 px-8 py-10 md:grid-cols-2 md:gap-12 md:px-14 md:py-12">
 			<?php foreach ( $story as $key ) : ?>
 				<p class="text-[1.0625rem] leading-[1.75] text-ink/85" <?php nwcs_edit_attr( 'about', 'story', $key ); ?>>
 					<?php echo esc_html( nwcs_field( 'about', 'story', $key ) ); ?>
