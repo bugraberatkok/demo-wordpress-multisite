@@ -17,6 +17,11 @@ $success = $state['success'];
 
 $products = nwcs_rows( 'services', 'grid', 'items' );
 
+// Hizmetler sayfasindaki "bu urun icin teklif al" dugmesi urun adini adresle
+// tasir. Hatali gonderimden sonra kullanicinin kendi secimi oncelikli.
+$requested = isset( $_GET['urun'] ) ? sanitize_text_field( wp_unslash( $_GET['urun'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$picked    = '' !== ( $values['product'] ?? '' ) ? $values['product'] : $requested;
+
 $field  = 'w-full rounded-sm border border-ink/18 bg-bone px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/30';
 $broken = 'w-full rounded-sm border border-alert bg-alert-soft px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-alert focus:outline-none focus:ring-2 focus:ring-alert/30';
 $label  = 'mb-2 block font-display text-sm font-medium text-ink/80';
@@ -177,7 +182,7 @@ $details = array(
 							<?php foreach ( $products as $product ) :
 								$title = $product['title'] ?? '';
 								?>
-								<option value="<?php echo esc_attr( $title ); ?>" <?php selected( $values['product'] ?? '', $title ); ?>>
+								<option value="<?php echo esc_attr( $title ); ?>" <?php selected( $picked, $title ); ?>>
 									<?php echo esc_html( $title ); ?>
 								</option>
 							<?php endforeach; ?>

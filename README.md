@@ -326,6 +326,13 @@ npm run watch        # dosyaları izleyerek sürekli derleme
 depoya dahildir; yani siteyi çalıştırmak için Node kurmanız gerekmez, yalnızca
 tasarımı değiştirecekseniz gerekir.
 
+### Ürün bazlı teklif düğmesi
+
+Hizmetlerimiz sayfasındaki her kutuda kendi **"Bu ürün için teklif al"** düğmesi vardır.
+Düğme iletişim sayfasına `?urun=<ürün adı>#teklif` adresiyle gider; form o ürünü kendiliğinden
+seçili getirir ve doğrudan forma kaydırır. Hatalı gönderimden sonra kullanıcının kendi seçimi
+adresteki değerin önüne geçer.
+
 ### Hero slaytı ve görsel büyütme
 
 Ana sayfadaki hero, İçerik Stüdyosu'ndan yönetilen bir slayt gösterisidir (Ana Sayfa →
@@ -334,6 +341,10 @@ yeterli; tek slayt kalırsa noktalar kendiliğinden gizlenir.
 
 Hizmetler sayfasında her ürünün dört görsel alanı vardır. Kapak görseline tıklandığında
 görsel büyür ve o ürünün diğer görselleri arasında ok tuşlarıyla veya düğmelerle gezilebilir.
+
+Büyütülmüş görselde ayrıca **yakınlaştırma** vardır: fare tekerleği, alttaki −/+ düğmeleri,
+görsele tıklama (%100 ↔ %200) ve klavyede `+` / `−` / `0`. Yakınken görsel sürüklenerek
+gezilir. Görsel değiştirildiğinde veya pencere kapandığında yakınlaştırma sıfırlanır.
 
 ### Teklif formu
 

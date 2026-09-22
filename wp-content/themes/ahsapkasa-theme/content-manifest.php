@@ -210,9 +210,8 @@ return array(
 				'grid' => array(
 					'label'  => 'Dörtlü Ürün Karesi',
 					'fields' => array(
-						'center_label' => array( 'label' => 'Ortadaki Düğme Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
-						'center_url'   => array( 'label' => 'Ortadaki Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
-						'center_note'  => array( 'label' => 'Düğme Altı Notu', 'type' => 'text', 'default' => 'Dördü için tek form' ),
+						'cta_label'    => array( 'label' => 'Ürün Düğmesi Metni', 'type' => 'text', 'default' => 'Bu ürün için teklif al' ),
+						'cta_url'      => array( 'label' => 'Ürün Düğmesi Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
 						'items'        => array(
 							'label'   => 'Ürünler',
 							'type'    => 'repeater',

@@ -2,6 +2,9 @@
 /**
  * Gorsel buyutme penceresi. Sayfada bir kez basilir; hangi galerinin
  * gosterilecegini tiklanan dugme belirler (assets/media.js).
+ *
+ * Buyutulmus gorselde ayrica yakinlastirma var: tekerlek, +/- dugmeleri ve
+ * tiklama ile yakinlasir, yakinken surukleyerek gezilir.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -11,8 +14,13 @@ defined( 'ABSPATH' ) || exit;
 
 	<div class="relative">
 
-		<img data-lightbox-image src="" alt=""
-			class="mx-auto max-h-[78vh] w-auto max-w-full rounded-sm bg-night object-contain" />
+		<div data-lightbox-stage
+			class="relative mx-auto max-h-[78vh] overflow-hidden rounded-sm bg-night"
+			style="cursor: zoom-in; touch-action: none;">
+			<img data-lightbox-image src="" alt=""
+				class="mx-auto block max-h-[78vh] w-auto max-w-full select-none object-contain"
+				style="transform-origin: center center;" draggable="false" />
+		</div>
 
 		<form method="dialog" class="absolute right-3 top-3">
 			<button type="submit" aria-label="Kapat"
@@ -35,6 +43,20 @@ defined( 'ABSPATH' ) || exit;
 					<path d="M9 18l6-6-6-6" />
 				</svg>
 			</button>
+		</div>
+
+		<?php // Yakinlastirma denetimleri ?>
+		<div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-pill bg-night/75 px-2 py-1.5 backdrop-blur">
+			<button type="button" data-zoom-out aria-label="Uzaklaştır"
+				class="flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none text-bone transition-colors hover:bg-bone/15">−</button>
+
+			<span data-zoom-level class="min-w-[3.5rem] text-center font-display text-xs tabular-nums text-bone/85">%100</span>
+
+			<button type="button" data-zoom-in aria-label="Yakınlaştır"
+				class="flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none text-bone transition-colors hover:bg-bone/15">+</button>
+
+			<button type="button" data-zoom-reset
+				class="ml-1 rounded-pill px-3 py-1 font-display text-xs text-bone/85 transition-colors hover:bg-bone/15">Sığdır</button>
 		</div>
 	</div>
 
