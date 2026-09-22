@@ -84,14 +84,14 @@ return array(
 						'primary_url'     => array( 'label' => 'Birinci Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
 						'secondary_label' => array( 'label' => 'İkinci Düğme Metni', 'type' => 'text', 'default' => 'Ürünlerimizi görün' ),
 						'secondary_url'   => array( 'label' => 'İkinci Düğme Adresi', 'type' => 'url', 'default' => '/hizmetlerimiz/' ),
-						'image'           => array( 'label' => 'Geniş Fotoğraf Şeridi', 'type' => 'image', 'default' => 0 ),
-						'image_caption'   => array( 'label' => 'Fotoğraf Altyazısı', 'type' => 'text', 'default' => 'İkitelli atölyemizde ölçüye göre sandık üretimi' ),
+						'image'           => array( 'label' => 'Arka Plan Fotoğrafı', 'type' => 'image', 'default' => 0 ),
 					),
 				),
 
 				'intro' => array(
 					'label'  => 'Giriş Paragrafı',
 					'fields' => array(
+						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Kırk yıldır aynı işi yapıyoruz' ),
 						'lead' => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Koçist Orman Ürünleri; sektördeki 40 yıllık tecrübesi ile istediğiniz ölçü ve ebatlarda ahşap sandık, ahşap kafes, ahşap palet üretimi yapmaktadır.' ),
 						'text' => array( 'label' => 'Paragraf', 'type' => 'textarea', 'default' => 'Elinizdeki ölçüleri, proje çizimini ya da hâlihazırda kullandığınız ambalajı iletin; ürününüze uygun paleti, sandığı veya kafesi tasarlayıp üretelim. Tüm parçaları içeren demonte paketler hâlinde sevk ediyoruz.' ),
 					),
@@ -108,13 +108,15 @@ return array(
 							'max'     => 6,
 							'fields'  => array(
 								'label' => array( 'label' => 'Ürün Adı', 'type' => 'text' ),
+								'note'  => array( 'label' => 'Kısa Not', 'type' => 'text' ),
+								'image' => array( 'label' => 'Görsel', 'type' => 'image' ),
 								'url'   => array( 'label' => 'Bağlantı Adresi', 'type' => 'url' ),
 							),
 							'default' => array(
-								array( 'label' => 'Ahşap palet', 'url' => '/hizmetlerimiz/' ),
-								array( 'label' => 'Ahşap sandık', 'url' => '/hizmetlerimiz/' ),
-								array( 'label' => 'Ahşap kafes', 'url' => '/hizmetlerimiz/' ),
-								array( 'label' => 'Ahşap ambalaj', 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap palet', 'note' => 'Standart dışı ölçülerde, kardonlu seçenekle', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap sandık', 'note' => 'İhracata uygun, demonte sevk edilebilir', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap kafes', 'note' => 'Ürününüzün ölçüsüne göre kafes iskeleti', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap ambalaj', 'note' => 'Şartnamenize uygun paketleme çözümleri', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
 							),
 						),
 					),

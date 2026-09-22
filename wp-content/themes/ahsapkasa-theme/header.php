@@ -27,7 +27,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 <header
 	data-header
 	data-stuck="false"
-	class="group fixed inset-x-0 top-0 z-50 transition-colors duration-300 ease-out data-[stuck=true]:bg-bone/92 data-[stuck=true]:backdrop-blur data-[stuck=true]:shadow-[0_1px_0_0_var(--color-dust)]">
+	class="group fixed inset-x-0 top-0 z-50 bg-bone transition-shadow duration-300 ease-out data-[stuck=true]:shadow-[0_1px_0_0_var(--color-dust)]">
 
 	<div class="mx-auto flex h-[88px] max-w-[76rem] items-center justify-between gap-8 px-6 transition-[height] duration-300 ease-out group-data-[stuck=true]:h-[64px]">
 

@@ -165,6 +165,10 @@ foreach ( $content['services']['grid']['items'] as $index => $item ) {
 	$content['services']['grid']['items'][ $index ]['image'] = $gallery[ $index ] ?? 0;
 }
 
+foreach ( $content['home']['family']['items'] as $index => $item ) {
+	$content['home']['family']['items'][ $index ]['image'] = $gallery[ $index ] ?? 0;
+}
+
 update_option( 'nwcs_content', $content );
 update_option( 'nwcs_section_order', array( 'home' => array( 'intro', 'family', 'ctaband' ) ) );
 

@@ -9,7 +9,7 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 ?>
 </main>
 
-<footer class="mt-24 bg-ink text-bone/85">
+<footer class="mt-24 bg-night text-bone/85">
 	<div class="mx-auto max-w-[76rem] px-6 py-16">
 
 		<div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">

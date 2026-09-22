@@ -3,8 +3,8 @@
  * Hizmetlerimiz. Dort urun tek bir karenin dort bolmesi olarak durur;
  * bolmelerin kesistigi noktada tek bir teklif dugmesi oturur.
  *
- * Bolme icerikleri disa dogru hizalanir (ust sira yukari, alt sira asagi),
- * boylece ortadaki dugme hicbir metnin uzerine binmez.
+ * Bolme icerikleri ortalanir ve disa dogru hizalanir (ust sira yukari,
+ * alt sira asagi); boylece ortadaki dugme hicbir metnin uzerine binmez.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,41 +13,40 @@ get_header();
 
 $items = nwcs_rows( 'services', 'grid', 'items' );
 
-// Ust sira yukari, alt sira asagi hizalanir; ortadaki dugmeye pay birakilir.
-// md: kademesi ayrica yazilmalidir, yoksa 'md:p-9' kisayolu bu payi ezer.
+// md: kademesi ayrica yazilmalidir, yoksa 'md:p-10' kisayolu bu payi ezer.
 $cell_align = array(
-	0 => 'justify-start sm:pb-32 md:pb-40',
-	1 => 'justify-start sm:pb-32 md:pb-40',
-	2 => 'justify-end sm:pt-32 md:pt-40',
-	3 => 'justify-end sm:pt-32 md:pt-40',
+	0 => 'justify-start sm:pb-28 md:pb-36',
+	1 => 'justify-start sm:pb-28 md:pb-36',
+	2 => 'justify-end sm:pt-28 md:pt-36',
+	3 => 'justify-end sm:pt-28 md:pt-36',
 );
 ?>
 <article>
 
-	<header class="mx-auto max-w-[76rem] px-6 pt-14 md:pt-20">
+	<header class="mx-auto max-w-[76rem] px-6 pt-14 text-center md:pt-20">
 		<h1 class="font-display text-[2.5rem] font-semibold leading-[1.06] md:text-5xl" <?php nwcs_edit_attr( 'services', 'head', 'title' ); ?>>
 			<?php echo esc_html( nwcs_field( 'services', 'head', 'title' ) ); ?>
 		</h1>
 
-		<p class="reading mt-8 text-xl leading-[1.55] md:text-2xl md:leading-[1.5]" <?php nwcs_edit_attr( 'services', 'head', 'lead' ); ?>>
+		<p class="mx-auto mt-7 max-w-[42rem] text-xl leading-[1.55] md:text-2xl md:leading-[1.5]" <?php nwcs_edit_attr( 'services', 'head', 'lead' ); ?>>
 			<?php echo esc_html( nwcs_field( 'services', 'head', 'lead' ) ); ?>
 		</p>
 	</header>
 
-	<section class="mx-auto max-w-[76rem] px-6 pt-14 md:pt-20">
+	<section class="mx-auto max-w-[80rem] px-6 pt-14 md:pt-20">
 
-		<div class="relative mx-auto max-w-[64rem]">
+		<div class="relative mx-auto max-w-[74rem]">
 
-			<div class="grid gap-px overflow-hidden rounded-sm bg-timber/40 p-px sm:grid-cols-2" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
+			<div class="grid gap-px overflow-hidden rounded-sm bg-timber/45 p-px sm:grid-cols-2" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
 				<?php foreach ( $items as $index => $item ) :
-					$thumb = nwcs_image_by_id( $item['image'] ?? 0, 'medium' );
+					$thumb = nwcs_image_by_id( $item['image'] ?? 0, 'medium_large' );
 					?>
-					<div class="flex min-h-[19rem] flex-col bg-bone p-7 md:min-h-[22rem] md:p-9 <?php echo esc_attr( $cell_align[ $index ] ?? 'justify-start' ); ?>">
+					<div class="flex min-h-[21rem] flex-col items-center bg-bone-deep p-7 text-center md:min-h-[24rem] md:p-10 <?php echo esc_attr( $cell_align[ $index ] ?? 'justify-start' ); ?>">
 
 						<?php if ( ! empty( $thumb['url'] ) ) : ?>
 							<img src="<?php echo esc_url( $thumb['url'] ); ?>"
 								alt="<?php echo esc_attr( $thumb['alt'] ?: ( $item['title'] ?? '' ) ); ?>"
-								class="mb-5 h-28 w-40 rounded-sm object-cover md:h-32 md:w-48"
+								class="mb-6 h-40 w-full max-w-[22rem] rounded-sm object-cover md:h-48"
 								loading="lazy" decoding="async" />
 						<?php endif; ?>
 
@@ -55,7 +54,7 @@ $cell_align = array(
 							<?php echo esc_html( $item['title'] ?? '' ); ?>
 						</h2>
 
-						<p class="mt-3 max-w-[30rem] text-base text-ink/75">
+						<p class="mx-auto mt-3 max-w-[26rem] text-[1.0625rem] leading-[1.7] text-ink/75">
 							<?php echo esc_html( $item['text'] ?? '' ); ?>
 						</p>
 					</div>
@@ -63,7 +62,7 @@ $cell_align = array(
 			</div>
 
 			<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'services', 'grid', 'center_url' ) ) ); ?>"
-				class="quadbtn absolute left-1/2 top-1/2 z-10 hidden h-[9.5rem] w-[9.5rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-forest text-center font-display text-lg font-semibold leading-tight text-bone ring-[10px] ring-bone hover:bg-forest-deep sm:flex"
+				class="quadbtn absolute left-1/2 top-1/2 z-10 hidden h-[10.5rem] w-[10.5rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-forest text-center font-display text-lg font-semibold leading-tight text-bone ring-[12px] ring-bone-deep hover:bg-forest-deep sm:flex"
 				<?php nwcs_edit_attr( 'services', 'grid', 'center_label' ); ?>>
 				<?php echo esc_html( nwcs_field( 'services', 'grid', 'center_label' ) ); ?>
 			</a>
@@ -80,11 +79,11 @@ $cell_align = array(
 	</section>
 
 	<section class="mx-auto max-w-[76rem] px-6 pt-16 md:pt-24">
-		<div class="grid gap-4 border-t border-timber/35 py-10 md:grid-cols-[17rem_1fr] md:gap-12 md:py-12">
+		<div class="panel p-7 text-center md:p-10">
 			<h2 class="font-display text-xl font-semibold md:text-2xl" <?php nwcs_edit_attr( 'services', 'note', 'title' ); ?>>
 				<?php echo esc_html( nwcs_field( 'services', 'note', 'title' ) ); ?>
 			</h2>
-			<p class="reading text-base text-ink/85" <?php nwcs_edit_attr( 'services', 'note', 'text' ); ?>>
+			<p class="mx-auto mt-4 max-w-[46rem] text-[1.0625rem] leading-[1.7] text-ink/80" <?php nwcs_edit_attr( 'services', 'note', 'text' ); ?>>
 				<?php echo esc_html( nwcs_field( 'services', 'note', 'text' ) ); ?>
 			</p>
 		</div>

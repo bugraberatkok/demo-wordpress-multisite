@@ -22,9 +22,10 @@
 	--color-moss:         #6b716b;
 	--color-ink:          #212a24;
 	--color-ink-soft:     #2c362f;
+	/* Alt bilgi ve hero perdesi: notr koyu. Yesil yalnizca eylem rengi kalsin. */
+	--color-night:        #1c1e1d;
 	--color-forest:       #2e5e3b;
 	--color-forest-deep:  #234a2d;
-	--color-forest-light: #4a8257;
 	--color-timber:       #b98a4b;
 	--color-timber-soft:  #d7b988;
 	--color-alert:        #8c3a2b;
@@ -103,6 +104,22 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * WordPress yonetim seridi acikken sabit ust menu onun altinda kalmasin.
+ * Serit masaustunde 32px, 782px altinda 46px yuksekliktedir.
+ * ------------------------------------------------------------------ */
+/* Katman DISINDA tanimli: Tailwind'in 'top-0' yardimci sinifi @layer utilities
+   icinde durur ve katmanli kurallari ezer. Katmansiz kural ise hepsini gecer. */
+body.admin-bar [data-header] {
+	top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+	body.admin-bar [data-header] {
+		top: 46px;
+	}
+}
+
+/* ------------------------------------------------------------------ *
  * Olcu cizgisi - sayfanin tek gosterisli ogesi.
  * Teknik cizimdeki kot/olcu okunun aynisi: uclarda centik, ortada etiket.
  * ------------------------------------------------------------------ */
@@ -161,6 +178,24 @@
 		white-space: nowrap;
 	}
 
+	/* Koyu zemin uzerinde (hero) daha acik ahsap tonu. */
+	.measure--light .measure__tick,
+	.measure--light .measure__line {
+		background: var(--color-timber-soft);
+	}
+
+	.measure--light .measure__line::before {
+		border-right-color: var(--color-timber-soft);
+	}
+
+	.measure--light .measure__line::after {
+		border-left-color: var(--color-timber-soft);
+	}
+
+	.measure--light .measure__label {
+		color: var(--color-timber-soft);
+	}
+
 	/* Sayfa acilisindaki tek hareket: olcu cizgisi soldan saga cizilir. */
 	.measure--draw {
 		clip-path: inset(0 100% 0 0);
@@ -198,6 +233,15 @@
 
 	.reading p + p {
 		margin-top: 1.4em;
+	}
+
+	/* Icerik kutusu: ahsap tonunda ince sol centik, gri zemin. */
+	.panel {
+		background: var(--color-bone-deep);
+		border: 1px solid color-mix(in srgb, var(--color-timber) 28%, transparent);
+		border-left-width: 3px;
+		border-left-color: var(--color-timber);
+		border-radius: 3px;
 	}
 
 	/* Hizmetler karesinin ortasindaki dugme, dort bolmenin kesisimine oturur. */
