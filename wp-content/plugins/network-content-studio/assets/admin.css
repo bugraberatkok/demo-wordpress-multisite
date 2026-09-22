@@ -1075,3 +1075,202 @@ button.nwcs-linkout[data-nwcs-csv-open]:hover { background: #0d9488; }
 	border-color: #0f766e;
 	color: #0f766e;
 }
+
+/* ====================================================================== *
+ * Ozellestirmeler (site bazli istisnalar)
+ * ====================================================================== */
+
+.nwcs-ovr {
+	margin: 10px 0 0;
+	border: 1px solid #e3e6e4;
+	border-radius: 6px;
+	background: #fafbfa;
+	overflow: hidden;
+}
+
+.nwcs-ovr__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 10px 14px;
+	cursor: pointer;
+	list-style: none;
+	font-size: 13px;
+}
+
+.nwcs-ovr__head::-webkit-details-marker {
+	display: none;
+}
+
+.nwcs-ovr__head::before {
+	content: "▸";
+	margin-right: 2px;
+	color: #8a918c;
+	transition: transform .15s ease;
+}
+
+.nwcs-ovr[open] .nwcs-ovr__head::before {
+	transform: rotate( 90deg );
+}
+
+.nwcs-ovr__name {
+	flex: 1 1 auto;
+	font-weight: 600;
+}
+
+.nwcs-ovr__tag {
+	flex: none;
+	padding: 2px 10px;
+	border-radius: 999px;
+	background: #e6eae8;
+	color: #6b716b;
+	font-size: 11px;
+}
+
+.nwcs-ovr__tag--on {
+	background: #d8ece7;
+	color: #0f766e;
+}
+
+.nwcs-ovr__tag--off {
+	background: #f0e3e0;
+	color: #8c3a2b;
+}
+
+.nwcs-ovr__body {
+	padding: 4px 14px 14px;
+	border-top: 1px solid #eef1ef;
+	background: #fff;
+}
+
+.nwcs-ovr__body .nwcs-field {
+	margin-top: 12px;
+}
+
+.nwcs-check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 6px;
+	font-size: 13px;
+}
+
+.nwcs-ovr__status {
+	font-size: 12px;
+	color: #0f766e;
+}
+
+.nwcs-ovr__status.is-error {
+	color: #8c3a2b;
+}
+
+.nwcs-ovr__body .button-primary {
+	background: #0f766e;
+	border-color: #0f766e;
+	color: #fff;
+	box-shadow: none;
+	text-shadow: none;
+}
+
+.nwcs-ovr__body .button-primary:hover:not(:disabled) {
+	background: #0d9488;
+	border-color: #0d9488;
+}
+
+/* ====================================================================== *
+ * Medya Havuzu: gorunum secici ve liste gorunumu
+ * ====================================================================== */
+
+.nwcs-viewtoggle {
+	display: inline-flex;
+	border: 1px solid #d5dbd8;
+	border-radius: 6px;
+	overflow: hidden;
+	margin-left: 10px;
+}
+
+.nwcs-viewtoggle a {
+	padding: 5px 14px;
+	font-size: 12px;
+	text-decoration: none;
+	color: #5b6b65;
+	background: #fff;
+}
+
+.nwcs-viewtoggle a + a {
+	border-left: 1px solid #d5dbd8;
+}
+
+.nwcs-viewtoggle a:hover {
+	background: #f2f7f5;
+}
+
+.nwcs-viewtoggle a.is-active {
+	background: #0f766e;
+	color: #fff;
+}
+
+.nwcs-medialist {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.nwcs-medialist th {
+	text-align: left;
+	padding: 8px 10px;
+	background: #f6f8f7;
+	border-bottom: 1px solid #e3e6e4;
+	font-size: 11px;
+	letter-spacing: .05em;
+	color: #6b716b;
+}
+
+.nwcs-medialist td {
+	padding: 10px;
+	border-bottom: 1px solid #eef1ef;
+	vertical-align: middle;
+}
+
+.nwcs-medialist__pic {
+	width: 56px;
+}
+
+.nwcs-medialist__pic img {
+	width: 44px;
+	height: 44px;
+	object-fit: cover;
+	border-radius: 4px;
+	display: block;
+	background: #eef1ef;
+}
+
+.nwcs-medialist__name {
+	display: block;
+	font-weight: 600;
+	word-break: break-all;
+}
+
+.nwcs-medialist__size {
+	display: block;
+	color: #8a918c;
+	font-size: 11px;
+}
+
+.nwcs-medialist__form {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.nwcs-medialist__form .nwcs-input {
+	flex: 1 1 140px;
+	min-width: 120px;
+}
+
+.nwcs-medialist__used {
+	color: #6b716b;
+	max-width: 200px;
+}

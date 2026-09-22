@@ -99,6 +99,27 @@ function nwcs_media_query( string $search, int $page ): array {
 }
 
 /**
+ * Gorunum tercihi: kart mi liste mi. Adres cubugunda gelirse kullanici
+ * basina kaydedilir, yoksa son tercih kullanilir.
+ */
+function nwcs_media_view(): string {
+	$user = get_current_user_id();
+
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca gorunum tercihi.
+	$asked = isset( $_GET['gorunum'] ) ? sanitize_key( wp_unslash( $_GET['gorunum'] ) ) : '';
+
+	if ( in_array( $asked, array( 'grid', 'list' ), true ) ) {
+		update_user_meta( $user, 'nwcs_media_view', $asked );
+
+		return $asked;
+	}
+
+	$saved = (string) get_user_meta( $user, 'nwcs_media_view', true );
+
+	return 'list' === $saved ? 'list' : 'grid';
+}
+
+/**
  * Sayfa govdesi.
  */
 function nwcs_render_media(): void {
@@ -111,6 +132,7 @@ function nwcs_render_media(): void {
 	$page   = isset( $_GET['sayfa'] ) ? max( 1, absint( $_GET['sayfa'] ) ) : 1;
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
+	$view   = nwcs_media_view();
 	$result = nwcs_media_query( $search, $page );
 	$usage  = nwcs_media_usage();
 	?>
@@ -148,10 +170,79 @@ function nwcs_render_media(): void {
 						<?php endif; ?>
 					</form>
 					<span class="nwcs-toolbar__count"><?php echo (int) $result['total']; ?> görsel</span>
+
+					<div class="nwcs-viewtoggle" role="group" aria-label="Görünüm">
+						<a class="<?php echo 'grid' === $view ? 'is-active' : ''; ?>"
+							href="<?php echo esc_url( nwcs_media_url( array( 'ara' => $search, 'gorunum' => 'grid' ) ) ); ?>">Kart</a>
+						<a class="<?php echo 'list' === $view ? 'is-active' : ''; ?>"
+							href="<?php echo esc_url( nwcs_media_url( array( 'ara' => $search, 'gorunum' => 'list' ) ) ); ?>">Liste</a>
+					</div>
 				</div>
 
 				<?php if ( ! $result['items'] ) : ?>
 					<p class="nwcs-empty">Görsel bulunamadı.</p>
+				<?php elseif ( 'list' === $view ) : ?>
+					<table class="nwcs-medialist">
+						<thead>
+							<tr>
+								<th class="nwcs-medialist__pic"></th>
+								<th>Dosya</th>
+								<th>Başlık ve alt metin</th>
+								<th>Kullanım</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach ( $result['items'] as $item ) : ?>
+								<?php $used = $usage[ $item['id'] ] ?? array(); ?>
+								<tr>
+									<td class="nwcs-medialist__pic">
+										<?php if ( $item['thumb'] ) : ?>
+											<img src="<?php echo esc_url( $item['thumb'] ); ?>" alt="<?php echo esc_attr( $item['alt'] ); ?>" />
+										<?php endif; ?>
+									</td>
+
+									<td>
+										<span class="nwcs-medialist__name"><?php echo esc_html( $item['name'] ); ?></span>
+										<?php if ( $item['size'] ) : ?>
+											<span class="nwcs-medialist__size"><?php echo esc_html( $item['size'] ); ?></span>
+										<?php endif; ?>
+									</td>
+
+									<td>
+										<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="nwcs-medialist__form">
+											<input type="hidden" name="action" value="nwcs_media_update" />
+											<input type="hidden" name="attachment" value="<?php echo esc_attr( (string) $item['id'] ); ?>" />
+											<?php wp_nonce_field( 'nwcs_media_update_' . $item['id'] ); ?>
+
+											<input class="nwcs-input" type="text" name="title"
+												value="<?php echo esc_attr( $item['title'] ); ?>" aria-label="Başlık" />
+											<input class="nwcs-input" type="text" name="alt"
+												value="<?php echo esc_attr( $item['alt'] ); ?>"
+												placeholder="Alt metin" aria-label="Alt metin" />
+											<button type="submit" class="button button-small">Kaydet</button>
+										</form>
+									</td>
+
+									<td class="nwcs-medialist__used">
+										<?php echo $used ? esc_html( implode( ', ', $used ) ) : '—'; ?>
+									</td>
+
+									<td>
+										<?php if ( ! $used ) : ?>
+											<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+												onsubmit="return confirm('Bu görsel kalıcı olarak silinsin mi?');">
+												<input type="hidden" name="action" value="nwcs_media_delete" />
+												<input type="hidden" name="attachment" value="<?php echo esc_attr( (string) $item['id'] ); ?>" />
+												<?php wp_nonce_field( 'nwcs_media_delete_' . $item['id'] ); ?>
+												<button type="submit" class="button button-small nwcs-row__delete">Sil</button>
+											</form>
+										<?php endif; ?>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
 				<?php else : ?>
 					<div class="nwcs-mediagrid">
 						<?php foreach ( $result['items'] as $item ) : ?>

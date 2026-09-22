@@ -207,6 +207,28 @@ Demoda: **Koçist** = Hepsi (8 ürün), **İstanbul Paletçi** = Seçilenler (5 
 iki istisna örneğiyle — Euro Palet bu sitede “Euro Palet (ihracat)” adıyla görünür ve
 İkinci El Palet'in fiyatı bu sitede boş bırakıldığı için “Teklif al” yazar.
 
+## Ürün kodu
+
+Her ürünün kendine ait bir kodu vardır. Havuz formundan yazabilir, boş bırakırsanız
+`URN-0006` biçiminde kimliğinden üretilir. Aynı kod iki üründe kullanılamaz.
+
+Kod, Excel yüklemesinde eşleştirme anahtarıdır: yüklenen satırın kodu havuzdaki bir ürünle
+tutuyorsa o ürün güncellenir, tutmuyorsa yeni ürün eklenir. CSV dışa/içe aktarmada da
+`urun_kodu` sütunu olarak yer alır.
+
+## Site bazlı özelleştirme (Özelleştirmeler)
+
+Bir ürün bütün sitelerde havuzdaki hâliyle görünür. Bir site için farklı bir ad, kart
+açıklaması, fiyat ya da öne çıkan görsel isteniyorsa, Ürün Havuzu'nda ürünü düzenlerken
+**Özelleştirmeler** bölümünden site site girilir. Sayfadan ayrılmadan kaydedilir.
+
+- Boş bıraktığınız alan havuzdaki değeri kullanır.
+- "Bu sitede farklı fiyat" işaretlenip boş bırakılırsa o sitede *"Teklif al"* görünür.
+- **Özelleştirmeyi kaldır** o sitenin bütün istisnalarını siler, ürün havuzdaki hâline döner.
+- Temasında ürün bölümü olmayan siteler burada listelenmez, ayrıca belirtilir.
+
+Ürünün hangi sitede görüneceği burada değil, İçerik Stüdyosu'ndaki ürün bölümünden seçilir.
+
 ## Excel'den toplu ürün yükleme
 
 Ürün Havuzu sayfasındaki **"Excel'den ürün yükle"** düğmesi üç adımlı bir pencere açar:

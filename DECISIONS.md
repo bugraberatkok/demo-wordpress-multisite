@@ -582,3 +582,38 @@ düzenlemeleri yönetmeyi gerektirirdi; istenen "son yüklemeyi geri al" davran�
 - Satır sınırı 20.000; üstü okunmuyor ve kullanıcıya bildiriliyor.
 - Yükleme 100'erli parçalar hâlinde işleniyor. Beklenen ölçek birkaç yüz ürün olsa da parçalı
   yapı hem ilerleme çubuğunu besliyor hem de ölçek büyürse yeniden yazmayı gerektirmiyor.
+
+---
+
+## Ürün kodu, site bazlı özelleştirme ve medya görünümü
+
+### Ürün kodu neden eklendi
+
+Excel sihirbazının ilk sürümünde "Ürün Kodu" sütunu eşleştirilebiliyordu ama havuzda böyle
+bir alan yoktu; kod yalnızca kısa ad (`post_name`) üretmek için kullanılıyordu. Yani arayüz
+olmayan bir alana işaret ediyordu.
+
+Alanı kaldırmak yerine gerçeğini ekledik: `_nwcs_code`. Boş bırakılırsa ürünün kimliğinden
+`URN-0006` biçiminde üretilir, böylece her ürünün değişmeyen bir kimliği olur. Aynı kodun iki
+üründe kullanılması engellenir. Excel yüklemesi önce bu kodla eşleştirir, bulamazsa kısa ada
+düşer — müşterinin kendi stok kodunu kullanabilmesi için.
+
+### Özelleştirmeler artık düzenlenebilir
+
+Bölüm önce yalnızca bilgi veriyordu; düzenleme İçerik Stüdyosu'nda yapılıyordu. Aynı ürün için
+iki ayrı ekran arasında gidip gelmek gereksizdi. Veri katmanı (`nwcs_products_overrides`)
+zaten yerinde olduğu için eklenen tek şey arayüz ve iki AJAX ucu oldu.
+
+Görünürlük bilerek dışarıda bırakıldı: "bu sitede gizle" anahtarı daha önce panelden
+kaldırılmıştı, aynı işlevi ikinci bir yerden geri getirmek kafa karıştırırdı. Ürünün hangi
+sitede görüneceğini sitenin kendi seçimi belirler; burada yalnızca durumu okunur olarak
+gösteriliyor.
+
+Fiyat için ayrı bir işaret kutusu var, çünkü boş fiyat anlamlı bir değer: "Teklif al" demek.
+İşaret kutusu olmadan "fiyatı boşalt" ile "fiyatı özelleştirme" ayırt edilemezdi.
+
+### Medya görünümü
+
+Görünüm tercihi kullanıcı başına `nwcs_media_view` meta alanında saklanır; adres çubuğundaki
+`gorunum` parametresi geldiğinde yazılır, gelmediğinde son tercih kullanılır. JavaScript
+gerektirmez, yer imi verilebilir.
