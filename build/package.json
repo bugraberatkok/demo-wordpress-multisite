@@ -1,0 +1,14 @@
+{
+  "name": "ahsapkasa-build",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tailwind derleyicisi: ahsapkasa-theme icin CSS uretir.",
+  "scripts": {
+    "build": "tailwindcss -i ./tailwind.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --minify",
+    "watch": "tailwindcss -i ./tailwind.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "tailwindcss": "^4.1.11"
+  }
+}

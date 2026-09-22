@@ -371,3 +371,110 @@ detay metni) yeterli görüldü.
   kurallı gösterim ile sunulacak. Havuzun yeri (ana site mi ayrı bir havuz sitesi mi),
   görsellerin hangi sitenin medya kitaplığında duracağı ve site bazlı istisnalar
   (farklı başlık/fiyat/gizleme) o aşamada kararlaştırılacak.
+
+---
+
+## ahsapkasa yeniden tasarımı — tasarım kararları
+
+Kapsam: ahsapkasa.com (Koçist Orman Ürünleri) sitesinin yeniden tasarımı. Ağa
+`ahsapkasa-theme` ile üçüncü alt site olarak eklendi. Dört sayfa: ana sayfa,
+hakkımızda, hizmetlerimiz, iletişim. Üst menü ve alt bilgi dört sayfada da aynı.
+
+### Taşıyıcı fikir: ölçü
+
+Mevcut sitedeki her ürün açıklaması "istediğiniz ölçü ve ebatlarda" diye başlıyor.
+Firmanın kimliği kalite ya da kıdem değil, **müşterinin verdiği ölçüye göre üretmek**.
+Tasarımın tek gösterişli öğesi bu yüzden teknik çizimdeki **ölçü çizgisi**: uçlarında
+çentik, ortasında etiket. Hero başlığının altında bir kez kullanılır ve sayfa açılışında
+soldan sağa bir kez çizilir (`prefers-reduced-motion` seçiliyse çizilmez). Başka hiçbir
+yerde tekrarlanmaz.
+
+### Renk
+
+Brief: gri taban, ahşap ve ağaç yeşili.
+
+| Jeton | Değer | İşi |
+| --- | --- | --- |
+| `bone` | `#eff0ee` | sayfa zemini — yeşile çalan açık gri |
+| `dust` | `#dde0dc` | ikincil zemin, kenarlık |
+| `moss` | `#6b716b` | ikincil metin |
+| `ink` | `#212a24` | metin ve alt bilgi zemini |
+| `forest` | `#2e5e3b` | **eylem** |
+| `timber` | `#b98a4b` | **ölçü / yapı** |
+
+Renk kuralı bilgi taşır: yeşil her zaman "tıklanabilir" demektir (bağlantı, düğme, odak
+halkası), ahşap tonu her zaman "ölçü veya yapı" demektir (çentik, bölme çizgisi, teknik
+etiket). Gölge, degrade ve dekoratif renk kullanılmaz.
+
+### Tipografi
+
+- **Archivo** (değişken genişlik ekseni, `wdth 112`) — başlık, menü, düğme, etiket.
+  Geniş eksende kurulan başlıklar, sandık üstüne şablonla vurulan sevkiyat yazısını
+  andırır; konuyla doğrudan ilgili bir seçim.
+- **Literata** — okuma metni. Uzun soluklu okuma için tasarlanmış bir serif; Hakkımızda
+  sayfasındaki uzun paragrafların 19px/1.75 ve ~66 karakterlik satırla rahat okunmasını
+  sağlıyor.
+
+Yaygın kalıbın tersi tercih edildi: başlıkta grotesk, gövdede serif.
+
+### Eleme
+
+Plan, yazılmadan önce "her benzer brief'te çıkacak varsayılan" olup olmadığı açısından
+gözden geçirildi ve üç şey değiştirildi:
+
+1. Gövde için ilk seçenek Source Serif'ti; fazla alışıldık olduğu için Literata'ya geçildi.
+2. Hero'ya konması düşünülen "40 yıl / 4 ürün" rakam şeridi çıkarıldı — büyük rakam +
+   küçük etiket + istatistik dizilimi en bilindik kalıplardan biri.
+3. Ölçü rakamları için düşünülen monospace yazı tipinden vazgeçildi; aynı kalıbın parçası.
+
+Ayrıca bilinçli olarak kullanılmayanlar: krem zemin, tümü büyük harf etiketler,
+başlıkta tek kelimeyi renklendirme, düğme metnine "→" ekleme, orta noktayla birleştirilmiş
+meta satırları, her bölüme ayrı gölgeli kart.
+
+### Dörtlü ürün karesi
+
+Mevcut sitede de dört ürünün ortasında "Teklif Alın" düğmesi var; fikir korundu, yeniden
+kuruldu. Tek bir kare, `gap-px` ile ahşap tonunda ince çizgilerle dört bölmeye ayrılıyor;
+kesişim noktasında zemin rengiyle halkalanmış dairesel bir düğme oturuyor.
+
+Bölme içerikleri **dışa** hizalanır (üst sıra yukarı, alt sıra aşağı) ve iç tarafta düğmeye
+pay bırakılır; böylece düğme hiçbir metnin üstüne binmez. Bu payın `md:` kademesi ayrıca
+yazılmak zorunda: Tailwind'de `md:p-9` kısayolu, daha önce gelen `sm:pb-32` uzun yazımını
+ezer. Mobilde daire gizlenir, kare tek sütuna iner ve düğme listenin altında tam genişlikte
+görünür.
+
+### Üst menü
+
+Tailwind sınıflarıyla, durum değişimi küçük bir betikle (`assets/nav.js`):
+
+- Sayfa kaydırılınca şerit 88px'den 64px'e iner, zemin ve alt çizgi kazanır (`data-stuck`).
+- Menü bağlantısının altında tam alt çizgi yerine kısa bir çentik; ortadan dışa doğru açılır.
+  Bulunulan sayfada sabit durur (`aria-current="page"`).
+- Mobilde hamburger düğmesi çarpıya dönüşür, panel kademeli olarak açılır (`data-open`),
+  Esc ve panel dışına tıklama ile kapanır.
+
+Logo görseli firma adını zaten taşıdığı için yanında ayrıca yazı gösterilmez; `logo_text`
+ve `logo_sub` alanları görselin alt metnini ve alt bilgiyi besler.
+
+### Metin
+
+Hakkımızda, Amacımız ve Kalite Politikamız metinleri ahsapkasa.com'daki içeriğin aynısıdır.
+Yalnızca üç açık yazım hatası düzeltildi: "doğrultusun da" → "doğrultusunda",
+"sepeklerini" → "spesifikasyonlarını", "ahsap" → "ahşap". Sitede karşılığı olmayan
+(dolayısıyla yazılan) metinler: hero başlığı, ana sayfa giriş paragrafı, "Ahşap ambalaj"
+ürün açıklaması, teklif şeridi, iletişim sayfası açıklamaları ve form metinleri.
+
+### Teklif formu
+
+Mevcut sitede form yok; sıfırdan kuruldu. Demoda sahte başarı ekranı gösterilmemesi
+kuralı gereği gönderim gerçekten kaydediliyor: nonce doğrulaması, zorunlu alan kontrolü
+(ad, e-posta, ölçü), görünmez bot tuzağı, ürün seçeneklerinin manifeste göre doğrulanması,
+ardından `ak_quote` kayıt türüne özel kayıt. Hata durumunda alan alan mesaj gösterilir ve
+girilen değerler korunur.
+
+### Görseller
+
+`resources/` klasöründeki fotoğraflar firmanın kendi sitesinden geliyor; yer tutucu
+üretilmedi. `background01.jpg` (sisli dağ) konuyla ilgisiz olduğu için kullanılmadı;
+`background02.jpg` (çam ormanı) yalnızca Hakkımızda sayfasında, firmanın hammaddesine
+işaret ettiği için kullanıldı.

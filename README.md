@@ -1,6 +1,6 @@
-# İki WordPress sitesi, tek içerik paneli — yerel demo
+# WordPress siteleri, tek içerik paneli — yerel demo
 
-Tek bir WordPress **Multisite** ağı altında, tasarımları birbirinden bağımsız iki demo sitesi:
+Tek bir WordPress **Multisite** ağı altında, tasarımları birbirinden bağımsız üç demo sitesi:
 
 | Ne | Yerel adres |
 | --- | --- |
@@ -8,12 +8,20 @@ Tek bir WordPress **Multisite** ağı altında, tasarımları birbirinden bağı
 | — örnek alt sayfa | http://localhost:8080/kocist/kurumsal/ |
 | İstanbul Paletçi (ürün / teklif odaklı tema) | http://localhost:8080/paletci/ |
 | — örnek alt sayfa | http://localhost:8080/paletci/urunlerimiz/ |
+| Koçist / ahsapkasa.com yeniden tasarımı (Tailwind) | http://localhost:8080/ahsapkasa/ |
+| — Hakkımızda | http://localhost:8080/ahsapkasa/hakkimizda/ |
+| — Hizmetlerimiz | http://localhost:8080/ahsapkasa/hizmetlerimiz/ |
+| — İletişim (çalışan teklif formu) | http://localhost:8080/ahsapkasa/iletisim/ |
 | Ağ yönetimi (Network Admin) | http://localhost:8080/wp-admin/network/ |
 | Giriş | http://localhost:8080/wp-login.php |
 
-> Bu tamamen yerel bir demodur. Gerçek `kocist.com.tr` / `istanbulpaletci.com`
-> alan adlarına, DNS'e veya canlı sitelere dokunulmaz. Tüm görseller "ÖRNEK GÖRSEL"
-> yazılı yer tutuculardır; gerçek marka varlığı değildir.
+> Bu tamamen yerel bir demodur. Gerçek `kocist.com.tr` / `istanbulpaletci.com` /
+> `ahsapkasa.com` alan adlarına, DNS'e veya canlı sitelere dokunulmaz.
+>
+> Koçist ve Paletçi sitelerindeki görseller "ÖRNEK GÖRSEL" yazılı yer tutuculardır.
+> `ahsapkasa` sitesi bir yeniden tasarım çalışması olduğu için oradaki fotoğraflar
+> firmanın kendi sitesinden alınan gerçek üretim fotoğraflarıdır (`resources/`);
+> metinler de ahsapkasa.com'daki içeriğin kendisidir.
 
 ## Gereksinimler
 
@@ -231,6 +239,40 @@ wp-content/plugins/network-content-studio/
 WordPress core Git'e **kopyalanmaz**; `wp_core` adlı Docker volume'unda durur.
 Yüklenen medya da volume'dadır (`.gitignore`).
 
+## ahsapkasa yeniden tasarımı (Tailwind)
+
+`ahsapkasa-theme`, ahsapkasa.com'un (Koçist Orman Ürünleri) yeniden tasarımıdır.
+Diğer iki temadan farkı, görünümünü elle yazılmış CSS yerine **Tailwind ile derlenmiş**
+bir stil dosyasından almasıdır. Panele bağlanma biçimi aynıdır: kök dizinindeki
+`content-manifest.php` sayesinde İçerik Stüdyosu bu siteyi de tanır, eklentide
+hiçbir değişiklik gerekmez.
+
+Tasarım kararları ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
+
+### CSS'i yeniden derleme
+
+Şablonlarda yeni bir Tailwind sınıfı kullandığınızda CSS'i yeniden üretmek gerekir:
+
+```bash
+cd build
+npm install          # yalnızca ilk seferde
+npm run build        # tek seferlik derleme
+npm run watch        # dosyaları izleyerek sürekli derleme
+```
+
+Çıktı `wp-content/themes/ahsapkasa-theme/assets/tailwind.css` dosyasına yazılır ve
+depoya dahildir; yani siteyi çalıştırmak için Node kurmanız gerekmez, yalnızca
+tasarımı değiştirecekseniz gerekir.
+
+### Teklif formu
+
+İletişim sayfasındaki form sahte bir başarı ekranı göstermez. Gönderim
+`admin-post.php` üzerinden doğrulanır (nonce, zorunlu alanlar, bot tuzağı) ve
+`Teklif İstekleri` kayıt türüne **özel** olarak yazılır. Gelen istekleri
+`http://localhost:8080/ahsapkasa/wp-admin/edit.php?post_type=ak_quote`
+adresinden görebilirsiniz. Demoda e-posta gönderimi yoktur; kayıt WordPress
+içinde tutulur.
+
 ## Mimari özet
 
 - **Alan manifesti**: her tema kökünde `content-manifest.php` — sayfa → bileşen → alan
@@ -270,3 +312,8 @@ Teknik kararlar ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 
 Bu demonun kapsamı dışında bırakılanlar (canlıya geçişte ayrı iş): taslak/revizyon akışı,
 gerçek e-posta teslimi ve spam koruması, alan adı eşlemesi, e-ticaret.
+
+- **ahsapkasa yeniden tasarımı — tamamlandı**: ahsapkasa.com'un dört sayfalık yeniden
+  tasarımı (ana sayfa, hakkımızda, hizmetlerimiz, iletişim), Tailwind ile derlenen
+  stil, animasyonlu üst menü, dörtlü ürün karesi ve ortasındaki tek teklif düğmesi,
+  çalışan teklif formu. Ağdaki üçüncü site olarak İçerik Stüdyosu'ndan yönetilir.

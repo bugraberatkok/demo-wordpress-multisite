@@ -60,9 +60,11 @@ services:
       - wp_core:/var/www/html
       - ./wp-content/themes/kocist-theme:/var/www/html/wp-content/themes/kocist-theme
       - ./wp-content/themes/paletci-theme:/var/www/html/wp-content/themes/paletci-theme
+      - ./wp-content/themes/ahsapkasa-theme:/var/www/html/wp-content/themes/ahsapkasa-theme
       - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
       - ./docker/apache-wp.conf:/etc/apache2/conf-enabled/zz-wp.conf:ro
       - ./scripts:/scripts:ro
+      - ./resources:/resources:ro
 
   wpcli:
     image: wordpress:cli-php8.3
@@ -85,8 +87,10 @@ services:
       - wp_core:/var/www/html
       - ./wp-content/themes/kocist-theme:/var/www/html/wp-content/themes/kocist-theme
       - ./wp-content/themes/paletci-theme:/var/www/html/wp-content/themes/paletci-theme
+      - ./wp-content/themes/ahsapkasa-theme:/var/www/html/wp-content/themes/ahsapkasa-theme
       - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
       - ./scripts:/scripts:ro
+      - ./resources:/resources:ro
     entrypoint: ["wp"]
 
 volumes:
