@@ -772,3 +772,301 @@ button.nwcs-linkout[data-nwcs-csv-open] {
 	font-weight: 600;
 }
 button.nwcs-linkout[data-nwcs-csv-open]:hover { background: #0d9488; }
+
+/* ====================================================================== *
+ * Excel yukleme sihirbazi
+ * ====================================================================== */
+
+.nwcs-linkout--accent {
+	background: #0f766e;
+	box-shadow: inset 0 0 0 1px rgba( 255, 255, 255, .28 );
+	font-weight: 600;
+}
+
+.nwcs-linkout--accent:hover {
+	background: #0d9488;
+}
+
+/* Son yuklemeyi geri alma seridi */
+.nwcs-undo {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+	margin: 0 0 16px;
+	padding: 12px 16px;
+	border: 1px solid #c7d2cd;
+	border-left: 4px solid #0f766e;
+	border-radius: 6px;
+	background: #f2f7f5;
+}
+
+.nwcs-undo__text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 13px;
+}
+
+.nwcs-undo__text span {
+	color: #5b6b65;
+}
+
+/* Sihirbaz penceresi */
+.nwcs-wizard {
+	width: min( 92vw, 860px );
+	max-height: 88vh;
+	padding: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.nwcs-wizard .nwcs-modal__head {
+	padding: 18px 22px;
+	border-bottom: 1px solid #e3e6e4;
+	margin: 0;
+}
+
+.nwcs-wizard__sub {
+	margin: 4px 0 0;
+	font-size: 13px;
+	color: #6b716b;
+}
+
+/* Adim seridi */
+.nwcs-steps {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 28px;
+	margin: 0;
+	padding: 16px 22px;
+	list-style: none;
+	background: #f6f8f7;
+	border-bottom: 1px solid #e3e6e4;
+}
+
+.nwcs-steps li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	font-size: 13px;
+	color: #8a918c;
+}
+
+.nwcs-steps li span {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 999px;
+	background: #e1e6e3;
+	color: #6b716b;
+	font-weight: 600;
+	font-size: 12px;
+}
+
+.nwcs-steps li.is-active {
+	color: #0f766e;
+	font-weight: 600;
+}
+
+.nwcs-steps li.is-active span {
+	background: #0f766e;
+	color: #fff;
+}
+
+.nwcs-steps li.is-done span {
+	background: #b9ded7;
+	color: #0f766e;
+}
+
+.nwcs-wizard__body {
+	padding: 22px;
+	overflow: auto;
+	flex: 1 1 auto;
+}
+
+.nwcs-wizard__title {
+	margin: 0 0 14px;
+	font-size: 15px;
+}
+
+/* Dosya birakma alani */
+.nwcs-drop {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 36px 20px;
+	border: 2px dashed #c7d2cd;
+	border-radius: 8px;
+	background: #fafbfa;
+	cursor: pointer;
+	text-align: center;
+	transition: border-color .15s ease, background .15s ease;
+}
+
+.nwcs-drop:hover {
+	border-color: #0f766e;
+	background: #f2f7f5;
+}
+
+.nwcs-drop span {
+	font-size: 12px;
+	color: #6b716b;
+}
+
+.nwcs-drop input[type="file"] {
+	margin-top: 10px;
+}
+
+/* Eslestirme tablosu */
+.nwcs-maptable {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+}
+
+.nwcs-maptable th {
+	text-align: left;
+	padding: 10px 12px;
+	background: #f6f8f7;
+	border-bottom: 1px solid #e3e6e4;
+	font-size: 11px;
+	letter-spacing: .06em;
+	color: #6b716b;
+}
+
+.nwcs-maptable td {
+	padding: 10px 12px;
+	border-bottom: 1px solid #eef1ef;
+	vertical-align: middle;
+}
+
+.nwcs-maptable tr:nth-child(even) td {
+	background: #fafbfa;
+}
+
+.nwcs-maptable code {
+	background: #eef1ef;
+	padding: 3px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+}
+
+.nwcs-maptable__sample {
+	color: #6b716b;
+	max-width: 260px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.nwcs-maptable select {
+	width: 100%;
+	max-width: 260px;
+}
+
+/* Ilerleme */
+.nwcs-progress {
+	height: 10px;
+	border-radius: 999px;
+	background: #e6eae8;
+	overflow: hidden;
+}
+
+.nwcs-progress__bar {
+	height: 100%;
+	width: 0;
+	background: #0f766e;
+	border-radius: 999px;
+	transition: width .25s ease;
+}
+
+.nwcs-wizard__status {
+	margin: 12px 0 0;
+	font-size: 13px;
+	color: #6b716b;
+}
+
+.nwcs-wizard__report {
+	margin-top: 18px;
+	padding: 16px;
+	border: 1px solid #e3e6e4;
+	border-radius: 6px;
+	background: #fafbfa;
+}
+
+.nwcs-report__list {
+	margin: 0;
+	padding-left: 18px;
+	font-size: 13px;
+}
+
+.nwcs-report__skips {
+	margin: 6px 0 0;
+	padding-left: 18px;
+	font-size: 12px;
+	color: #8a918c;
+}
+
+/* Alt serit */
+.nwcs-wizard__foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 22px;
+	border-top: 1px solid #e3e6e4;
+	background: #f6f8f7;
+}
+
+.nwcs-wizard__count {
+	font-size: 13px;
+	color: #6b716b;
+	margin-left: auto;
+	margin-right: 12px;
+}
+
+/* Sihirbaz dugmeleri yonetim temasinin renginden etkilenmesin. */
+.nwcs-wizard__foot .button-primary,
+.nwcs-undo .button {
+	background: #0f766e;
+	border-color: #0f766e;
+	color: #fff;
+	box-shadow: none;
+	text-shadow: none;
+}
+
+.nwcs-wizard__foot .button-primary:hover:not(:disabled),
+.nwcs-wizard__foot .button-primary:focus:not(:disabled),
+.nwcs-undo .button:hover,
+.nwcs-undo .button:focus {
+	background: #0d9488;
+	border-color: #0d9488;
+	color: #fff;
+}
+
+.nwcs-wizard__foot .button-primary:disabled {
+	background: #9bb8b3;
+	border-color: #9bb8b3;
+	color: #fff;
+	opacity: 1;
+}
+
+.nwcs-wizard__foot .button:not(.button-primary) {
+	background: #fff;
+	border-color: #c7d2cd;
+	color: #3c4a44;
+	box-shadow: none;
+}
+
+.nwcs-wizard__foot .button:not(.button-primary):hover {
+	border-color: #0f766e;
+	color: #0f766e;
+}

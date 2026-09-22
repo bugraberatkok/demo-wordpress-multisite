@@ -75,6 +75,7 @@ function nwcs_render_pool(): void {
 			</div>
 			<div class="nwcs-bar__tools">
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_pool_url( array( 'yeni' => 1 ) ) ); ?>">+ Yeni ürün</a>
+				<button type="button" class="nwcs-linkout nwcs-linkout--accent" data-nwcs-import-open>Excel'den ürün yükle</button>
 				<button type="button" class="nwcs-linkout" data-nwcs-csv-open>CSV ile toplu giriş</button>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_media_url() ); ?>">Medya Havuzu ↗</a>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_panel_url( 0 ) ); ?>">İçerik Stüdyosu ↗</a>
@@ -86,6 +87,8 @@ function nwcs_render_pool(): void {
 			<span class="nwcs-help__step"><b>2</b> Görseller WordPress medya kitaplığına yüklenir</span>
 			<span class="nwcs-help__step"><b>3</b> Hangi sitede görüneceğini İçerik Stüdyosu'ndan seçin</span>
 		</p>
+
+		<?php nwcs_render_import_undo_bar(); ?>
 
 		<?php nwcs_render_pool_notices(); ?>
 
@@ -117,6 +120,7 @@ function nwcs_render_pool(): void {
 		</div>
 
 		<?php nwcs_render_csv_box(); ?>
+		<?php nwcs_render_import_modal(); ?>
 	</div>
 	<?php
 }

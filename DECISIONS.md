@@ -530,3 +530,55 @@ pay bırakılıyordu, bu da alt sıradaki görselleri aşağı kaydırıyordu.
 **Hakkımızda hero.** Sayfa, ana sayfayla aynı kurguya geçti: fotoğraf + koyu perde + ortalanmış
 başlık. Dağ fotoğrafı zaten açık ve düşük kontrastlı olduğu için perde burada daha hafif
 (`night/66`, ana sayfada `night/78`). Firma metni kısaltıldı; uzun hâli git geçmişinde duruyor.
+
+---
+
+## Excel'den toplu ürün yükleme
+
+### Neden kütüphanesiz
+
+`.xlsx`, içinde XML dosyaları bulunan bir ZIP paketidir. PhpSpreadsheet her Excel özelliğini
+doğru okur ama Composer kurulumu ve depoya ~10 MB'lık bir `vendor` klasörü getirir. Sunucuda
+`ZipArchive`, `XMLReader` ve `SimpleXML` zaten bulunduğu için `includes/xlsx-reader.php` bu
+işi ~200 satırda yapıyor: paketin ilk sayfası ve paylaşılan metin tablosu akışlı okunuyor,
+atlanan hücreler sütun sırası korunarak boşla dolduruluyor.
+
+Kapsam dışı bırakılanlar bilinçli: tarih biçimleri (hücrenin ham Excel seri numarası okunur),
+formüller (Excel'in kaydettiği son değer okunur), birden çok sayfa (yalnızca ilki) ve `.xls`.
+Ürün listesi için bunların hiçbiri gerekmiyor.
+
+**Okuyucuda yakalanan hata:** `XMLReader` ile `readOuterXml()` + `next()` kullanırken dıştaki
+`read()` de ilerlettiği için her ikinci öğe atlanıyordu — paylaşılan metinlerin ve satırların
+yarısı kayboluyordu. Doğru kalıp, ilk öğeye kadar `read()` ile gidip sonrasında yalnızca
+`next( 'row' )` ile yürümek.
+
+### Eşleştirme
+
+Başlıklar Türkçe karakterler sadeleştirilip (ı→i, ş→s…) harf/rakam dışı atılarak eş anlamlı
+listeyle karşılaştırılıyor. Sıra önemli: "açıklama" hem Kısa Açıklama'ya hem Detay Metni'ne
+benziyor, önce Kısa Açıklama deneniyor. Bir alan iki sütuna atanamıyor; kullanıcı ikinciyi
+seçince birincisi serbest bırakılıyor.
+
+### Geri alma
+
+Her yükleme bir "parti" olarak ağ seçeneğinde saklanıyor: oluşturulan ürünlerin kimlikleri ve
+**güncellenen ürünlerin yükleme öncesi tam hâli** (başlık, içerik, kısa ad, fiyat, ölçü,
+kategoriler). Geri alma, eklenenleri siliyor ve güncellenenleri geri yazıyor.
+
+Bir ürünün `post_modified_gmt` değeri parti zamanından sonraysa o ürün elle düzenlenmiş
+demektir; geri alma ona dokunmuyor ve kullanıcıya hangilerini atladığını söylüyor. Sessizce
+üzerine yazmak, kullanıcının yükleme sonrası yaptığı işi yok ederdi.
+
+Yalnızca son yükleme saklanıyor. Birden fazla partiyi tutmak geri alma sırasını ve çakışan
+düzenlemeleri yönetmeyi gerektirirdi; istenen "son yüklemeyi geri al" davranışı için gereksiz.
+
+### Güvenlik ve sınırlar
+
+- İki AJAX ucu da `manage_network_options` yetkisi ve panel nonce'u istiyor.
+- Geçici dosyalar `uploads/nwcs-import/` altında, `.htaccess` ile dışarıya kapalı; iş bitince
+  siliniyor, bir günden eski artıklar her yüklemede süpürülüyor.
+- Oturum belirteci küçük harf onaltılık (`bin2hex`). İlk sürümde `wp_generate_password()`
+  kullanılmıştı ama `sanitize_key()` büyük harfleri düşürdüğü için dosya adı tutmuyordu.
+- Satır sınırı 20.000; üstü okunmuyor ve kullanıcıya bildiriliyor.
+- Yükleme 100'erli parçalar hâlinde işleniyor. Beklenen ölçek birkaç yüz ürün olsa da parçalı
+  yapı hem ilerleme çubuğunu besliyor hem de ölçek büyürse yeniden yazmayı gerektirmiyor.

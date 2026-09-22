@@ -63,6 +63,7 @@ services:
       - ./wp-content/themes/ahsapkasa-theme:/var/www/html/wp-content/themes/ahsapkasa-theme
       - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
       - ./docker/apache-wp.conf:/etc/apache2/conf-enabled/zz-wp.conf:ro
+      - ./docker/php-uploads.ini:/usr/local/etc/php/conf.d/zz-uploads.ini:ro
       - ./scripts:/scripts:ro
       - ./resources:/resources:ro
 

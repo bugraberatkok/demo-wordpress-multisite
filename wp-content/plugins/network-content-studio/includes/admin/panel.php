@@ -40,6 +40,11 @@ function nwcs_admin_assets( string $hook ): void {
 
 	wp_enqueue_style( 'nwcs-admin', NWCS_URL . 'assets/admin.css', array(), NWCS_VERSION );
 	wp_enqueue_script( 'nwcs-admin', NWCS_URL . 'assets/admin.js', array(), NWCS_VERSION, true );
+
+	// Excel sihirbazi yalnizca Urun Havuzu sayfasinda gerekir.
+	if ( str_contains( $hook, NWCS_POOL_SLUG ) ) {
+		wp_enqueue_script( 'nwcs-import', NWCS_URL . 'assets/import.js', array( 'nwcs-admin' ), NWCS_VERSION, true );
+	}
 	wp_localize_script(
 		'nwcs-admin',
 		'nwcsPanel',

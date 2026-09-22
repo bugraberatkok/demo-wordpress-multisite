@@ -207,6 +207,46 @@ Demoda: **Koçist** = Hepsi (8 ürün), **İstanbul Paletçi** = Seçilenler (5 
 iki istisna örneğiyle — Euro Palet bu sitede “Euro Palet (ihracat)” adıyla görünür ve
 İkinci El Palet'in fiyatı bu sitede boş bırakıldığı için “Teklif al” yazar.
 
+## Excel'den toplu ürün yükleme
+
+Ürün Havuzu sayfasındaki **"Excel'den ürün yükle"** düğmesi üç adımlı bir pencere açar:
+
+1. **Dosya Seç** — `.xlsx` dosyası seçilir. İlk sayfası okunur, satırlar geçici bir dosyaya
+   alınır; havuza bu adımda hiçbir şey yazılmaz.
+2. **Eşleştirme** — Başlık satırı sistem alanlarıyla otomatik eşleştirilir ("Stok Kodu" →
+   Ürün Kodu, "Price" → Fiyat gibi), yanında dosyanın ilk satırından örnek değer gösterilir.
+   Yanlışsa açılır listeden düzeltirsiniz. **Ürün Adı** eşleştirilmeden devam edilemez.
+3. **Yükleme** — Satırlar 100'erli parçalar hâlinde işlenir, ilerleme çubuğu ilerler.
+   Sonunda kaç ürün eklendiği, kaç ürünün güncellendiği ve atlanan satırların sebebi yazılır.
+
+Eşleştirilebilen alanlar: Ürün Adı (zorunlu), Ürün Kodu, Fiyat, Kısa Açıklama, Ölçü/Not,
+Kategoriler, Detay Metni. Eşleştirilmeyen sütunlar yoksayılır.
+
+**Aynı ürün ikinci kez gelirse:** ürün kodundan (yoksa addan) türetilen kısa ad havuzdaki bir
+ürünle eşleşirse o ürün güncellenir, yenisi eklenmez. Böylece aynı dosyayı tekrar yüklemek
+ürünleri çiftlemez; fiyat listesi güncellemek için aynı dosyayı yeniden yüklemek yeterlidir.
+
+### Yüklemeyi geri alma
+
+Yükleme bitince havuz sayfasının üstünde bir şerit belirir:
+**"Son Excel yüklemesi · dosya.xlsx · 342 yeni, 14 güncellenen · 22.09.2026 11:40"** ve yanında
+**"Bu yüklemeyi geri al"** düğmesi. Basınca o yüklemede eklenen ürünler silinir, güncellenenler
+yükleme öncesi hâline döner.
+
+Bir ürün yüklemeden sonra elle düzenlendiyse geri alma ona dokunmaz ve hangi ürünlere
+dokunmadığını size söyler. Yeni bir yükleme yapıldığında şerit yerini yeni yüklemeye bırakır,
+yani her an yalnızca son yükleme geri alınabilir.
+
+### Sınırlar
+
+- Dosyanın **ilk sayfası** okunur, ilk satır başlık kabul edilir.
+- En fazla **20.000 satır**; üstü okunmaz ve pencerede uyarı çıkar.
+- Sunucu yükleme sınırı `docker/php-uploads.ini` ile 32 MB'a çıkarılmıştır (WordPress imajının
+  varsayılanı 2 MB'dır ve birkaç bin satırlık dosyaya yetmez).
+- Görsel sütunu bu sürümde aktarılmaz; görseller Medya Havuzu'ndan bağlanır.
+- `.xls` (eski biçim) ve `.csv` bu pencereden yüklenmez. CSV için eski "CSV ile toplu giriş"
+  penceresi yerinde duruyor.
+
 ## Medya Havuzu
 
 **Ağ Yönetimi → Medya Havuzu**
