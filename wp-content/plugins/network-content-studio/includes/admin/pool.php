@@ -255,6 +255,11 @@ function nwcs_product_usage_label( int $product_id ): string {
 	$labels = array();
 
 	foreach ( nwcs_editable_sites() as $blog_id => $site ) {
+		// Temasinda urun alani olmayan site urun gosteremez; sayilmaz.
+		if ( ! nwcs_site_supports_products( (int) $blog_id ) ) {
+			continue;
+		}
+
 		$settings = nwcs_site_product_settings( $blog_id );
 		$override = $settings['overrides'][ $product_id ] ?? array();
 
@@ -428,11 +433,17 @@ function nwcs_render_product_customizations( ?array $product, array $media ): vo
 		return;
 	}
 
-	$id    = (int) $product['id'];
-	$sites = nwcs_editable_sites();
-	$rows  = array();
+	$id          = (int) $product['id'];
+	$sites       = nwcs_editable_sites();
+	$rows        = array();
+	$unsupported = array();
 
 	foreach ( $sites as $blog_id => $site ) {
+		if ( ! nwcs_site_supports_products( (int) $blog_id ) ) {
+			$unsupported[] = $site['label'];
+			continue;
+		}
+
 		$settings = nwcs_site_product_settings( $blog_id );
 		$override = $settings['overrides'][ $id ] ?? array();
 		$visible  = 'all' === $settings['mode'] || in_array( $id, $settings['selected'], true );
@@ -481,7 +492,8 @@ function nwcs_render_product_customizations( ?array $product, array $media ): vo
 
 		<?php if ( ! $rows ) : ?>
 			<p class="nwcs-hint">
-				Bu ürün bütün sitelerde havuzdaki hâliyle görünüyor; siteye özel bir değişiklik yok.
+				Bu ürün, ürün bölümü olan bütün sitelerde havuzdaki hâliyle görünüyor;
+				siteye özel bir değişiklik yok.
 			</p>
 		<?php else : ?>
 			<?php foreach ( $rows as $row ) : ?>
@@ -507,6 +519,13 @@ function nwcs_render_product_customizations( ?array $product, array $media ): vo
 					</table>
 				</div>
 			<?php endforeach; ?>
+		<?php endif; ?>
+
+		<?php if ( $unsupported ) : ?>
+			<p class="nwcs-hint">
+				Şu siteler havuz ürünlerini göstermiyor, çünkü temalarında ürün bölümü tanımlı değil:
+				<strong><?php echo esc_html( implode( ', ', $unsupported ) ); ?></strong>.
+			</p>
 		<?php endif; ?>
 
 		<p class="nwcs-hint">

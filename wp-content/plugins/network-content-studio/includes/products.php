@@ -309,6 +309,38 @@ function nwcs_pool_media(): array {
  *
  * @return array{mode:string, selected:int[], overrides:array<int, array>}
  */
+/**
+ * Sitenin temasi havuz urunlerini basabiliyor mu?
+ *
+ * Manifestte 'products' turunde bir alan yoksa o sitede urunleri gosterecek
+ * hicbir yer yoktur; havuz ozetlerinde "gorunur" saymak yaniltici olur.
+ */
+function nwcs_site_supports_products( int $blog_id ): bool {
+	static $cache = array();
+
+	if ( isset( $cache[ $blog_id ] ) ) {
+		return $cache[ $blog_id ];
+	}
+
+	$supports = false;
+	$manifest = nwcs_manifest_for_blog( $blog_id );
+
+	foreach ( $manifest['pages'] ?? array() as $page ) {
+		foreach ( $page['components'] ?? array() as $component ) {
+			foreach ( $component['fields'] ?? array() as $field ) {
+				if ( 'products' === ( $field['type'] ?? '' ) ) {
+					$supports = true;
+					break 3;
+				}
+			}
+		}
+	}
+
+	$cache[ $blog_id ] = $supports;
+
+	return $supports;
+}
+
 function nwcs_site_product_settings( ?int $blog_id = null ): array {
 	$read = static function ( string $option, $default ) use ( $blog_id ) {
 		return null === $blog_id
@@ -316,7 +348,9 @@ function nwcs_site_product_settings( ?int $blog_id = null ): array {
 			: get_blog_option( $blog_id, $option, $default );
 	};
 
-	$mode = $read( NWCS_OPTION_MODE, 'all' );
+	// Kayit yoksa 'selected' kabul edilir: hic secim yapilmamis bir site,
+	// kimse istemeden havuzdaki her urunu gostermeye baslamasin.
+	$mode = $read( NWCS_OPTION_MODE, 'selected' );
 
 	$selected = $read( NWCS_OPTION_SELECTED, array() );
 	$selected = is_array( $selected ) ? array_values( array_map( 'absint', $selected ) ) : array();
@@ -545,4 +579,21 @@ function nwcs_product_template(): void {
 	// $product sablonda kullanilir.
 	include $template;
 	exit;
+}
+
+/**
+ * Aga yeni bir site eklendiginde urun ayarlarini acikca yazar; boylece
+ * "kayit yok" hali hic olusmaz ve site sahibi ne sectigini bilerek baslar.
+ */
+add_action( 'wp_initialize_site', 'nwcs_seed_new_site_product_settings', 20, 1 );
+function nwcs_seed_new_site_product_settings( $site ): void {
+	$blog_id = (int) ( is_object( $site ) ? $site->blog_id : $site );
+
+	if ( ! $blog_id ) {
+		return;
+	}
+
+	add_blog_option( $blog_id, NWCS_OPTION_MODE, 'selected' );
+	add_blog_option( $blog_id, NWCS_OPTION_SELECTED, array() );
+	add_blog_option( $blog_id, NWCS_OPTION_OVERRIDES, array() );
 }
