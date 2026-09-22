@@ -35,55 +35,17 @@ $details = array(
 ?>
 <article>
 
-	<div class="mx-auto grid max-w-[76rem] items-start gap-12 px-6 pt-14 md:pt-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
-
-		<header>
-			<h1 class="font-display text-[2.5rem] font-semibold leading-[1.06] md:text-5xl" <?php nwcs_edit_attr( 'contact', 'head', 'title' ); ?>>
+	<?php // Baslik ustte ortada; altinda solda form, sagda iletisim bilgileri;
+	      // en altta ortada aciklama cumlesi. ?>
+	<header class="mx-auto max-w-[76rem] px-6 pt-14 text-center md:pt-20">
+		<h1 class="font-display text-[2.5rem] font-semibold leading-[1.06] md:text-5xl" <?php nwcs_edit_attr( 'contact', 'head', 'title' ); ?>>
 				<?php echo esc_html( nwcs_field( 'contact', 'head', 'title' ) ); ?>
 			</h1>
+	</header>
 
-			<p class="reading mt-7 text-xl leading-[1.55] md:text-2xl md:leading-[1.5]" <?php nwcs_edit_attr( 'contact', 'head', 'lead' ); ?>>
-				<?php echo esc_html( nwcs_field( 'contact', 'head', 'lead' ) ); ?>
-			</p>
-		</header>
+	<div class="mx-auto grid max-w-[76rem] items-start gap-10 px-6 pt-12 md:pt-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
 
-		<section aria-labelledby="iletisim-bilgileri">
-			<h2 id="iletisim-bilgileri" class="sr-only">İletişim bilgileri</h2>
-
-			<ul class="card px-6 py-2 md:px-7">
-				<?php foreach ( $details as $row ) : ?>
-					<li class="flex gap-4 border-b border-line py-5 last:border-0">
-						<span class="mt-1 shrink-0 text-timber" aria-hidden="true">
-							<?php nwcs_the_icon( nwcs_field( 'contact', 'details', $row['icon'] ), '', 22 ); ?>
-						</span>
-
-						<div>
-							<h3 class="font-display text-sm font-semibold tracking-[0.04em] text-moss"
-								<?php nwcs_edit_attr( 'contact', 'details', $row['title'] ); ?>>
-								<?php echo esc_html( nwcs_field( 'contact', 'details', $row['title'] ) ); ?>
-							</h3>
-
-							<?php if ( $row['url'] ) : ?>
-								<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'contact', 'details', $row['url'] ) ) ); ?>"
-									class="mt-1 block font-display text-lg font-medium text-ink transition-colors hover:text-forest"
-									<?php nwcs_edit_attr( 'contact', 'details', $row['value'] ); ?>>
-									<?php echo esc_html( nwcs_field( 'contact', 'details', $row['value'] ) ); ?>
-								</a>
-							<?php else : ?>
-								<p class="mt-1 text-[1rem] leading-relaxed text-ink/85" <?php nwcs_edit_attr( 'contact', 'details', $row['value'] ); ?>>
-									<?php echo ahsapkasa_multiline( nwcs_field( 'contact', 'details', $row['value'] ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
-								</p>
-							<?php endif; ?>
-						</div>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-		</section>
-
-	</div>
-
-	<div class="mx-auto max-w-[76rem] px-6 pt-16 md:pt-20">
-		<section id="teklif" class="card mx-auto max-w-[46rem] scroll-mt-28 p-7 md:p-10">
+		<section id="teklif" class="card scroll-mt-28 p-7 md:p-9">
 
 			<?php if ( $success ) : ?>
 
@@ -227,6 +189,46 @@ $details = array(
 
 			<?php endif; ?>
 		</section>
+
+		<section aria-labelledby="iletisim-bilgileri">
+			<h2 id="iletisim-bilgileri" class="sr-only">İletişim bilgileri</h2>
+
+			<ul class="card px-6 py-2 md:px-7">
+				<?php foreach ( $details as $row ) : ?>
+					<li class="flex gap-4 border-b border-line py-5 last:border-0">
+						<span class="mt-1 shrink-0 text-timber" aria-hidden="true">
+							<?php nwcs_the_icon( nwcs_field( 'contact', 'details', $row['icon'] ), '', 22 ); ?>
+						</span>
+
+						<div>
+							<h3 class="font-display text-sm font-semibold tracking-[0.04em] text-moss"
+								<?php nwcs_edit_attr( 'contact', 'details', $row['title'] ); ?>>
+								<?php echo esc_html( nwcs_field( 'contact', 'details', $row['title'] ) ); ?>
+							</h3>
+
+							<?php if ( $row['url'] ) : ?>
+								<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'contact', 'details', $row['url'] ) ) ); ?>"
+									class="mt-1 block font-display text-lg font-medium text-ink transition-colors hover:text-forest"
+									<?php nwcs_edit_attr( 'contact', 'details', $row['value'] ); ?>>
+									<?php echo esc_html( nwcs_field( 'contact', 'details', $row['value'] ) ); ?>
+								</a>
+							<?php else : ?>
+								<p class="mt-1 text-[1rem] leading-relaxed text-ink/85" <?php nwcs_edit_attr( 'contact', 'details', $row['value'] ); ?>>
+									<?php echo ahsapkasa_multiline( nwcs_field( 'contact', 'details', $row['value'] ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+								</p>
+							<?php endif; ?>
+						</div>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+
+	</div>
+
+	<div class="mx-auto max-w-[76rem] px-6 pt-14 md:pt-16">
+		<p class="mx-auto max-w-[44rem] text-center text-xl leading-[1.55] md:text-2xl md:leading-[1.5]" <?php nwcs_edit_attr( 'contact', 'head', 'lead' ); ?>>
+				<?php echo esc_html( nwcs_field( 'contact', 'head', 'lead' ) ); ?>
+			</p>
 	</div>
 </article>
 <?php

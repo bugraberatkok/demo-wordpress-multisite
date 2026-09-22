@@ -27,7 +27,7 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 
 	<section class="mx-auto max-w-[80rem] px-6 pt-12 md:pt-16">
 
-		<div class="mx-auto grid max-w-[72rem] gap-7 sm:grid-cols-2 sm:gap-8" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
+		<div class="mx-auto grid max-w-[78rem] gap-7 sm:grid-cols-2 sm:gap-7" <?php nwcs_edit_attr( 'services', 'grid', 'items' ); ?>>
 			<?php foreach ( $items as $item ) :
 
 				// Kapak + ek gorseller tek galeriye toplanir.
@@ -53,12 +53,12 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 				?>
 				<div class="card flex flex-col-reverse overflow-hidden sm:flex-row" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
 
-					<div class="flex min-w-0 flex-1 flex-col p-6 md:p-8">
+					<div class="flex min-w-0 flex-1 flex-col p-6 md:p-7">
 						<h2 class="font-display text-2xl font-semibold md:text-[1.75rem]">
 							<?php echo esc_html( $item['title'] ?? '' ); ?>
 						</h2>
 
-						<p class="mt-3 text-[1rem] leading-[1.65] text-ink/70">
+						<p class="mt-3 text-[0.9375rem] leading-[1.6] text-ink/70">
 							<?php echo esc_html( $item['text'] ?? '' ); ?>
 						</p>
 
@@ -87,7 +87,7 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 					      // kendi kenari gorur. Kucuk cerceveli onizleme pul gibi duruyordu. ?>
 					<?php if ( $gallery ) : ?>
 						<button type="button" data-lightbox-open="0"
-							class="group relative h-56 w-full shrink-0 overflow-hidden bg-dust sm:h-auto sm:w-[38%]"
+							class="group relative h-56 w-full shrink-0 overflow-hidden bg-dust sm:h-auto sm:w-[50%]"
 							aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $item['title'] ?? '' ) ); ?>">
 
 							<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>"
