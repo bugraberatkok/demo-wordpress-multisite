@@ -458,8 +458,15 @@ ve `logo_sub` alanları görselin alt metnini ve alt bilgiyi besler.
 
 ### Metin
 
-Hakkımızda, Amacımız ve Kalite Politikamız metinleri ahsapkasa.com'daki içeriğin aynısıdır.
-Yalnızca üç açık yazım hatası düzeltildi: "doğrultusun da" → "doğrultusunda",
+Hakkımızda ve Amacımız metinleri ahsapkasa.com'daki içeriğin aynısıdır.
+
+**Kalite Politikamız kısaltıldı** (806 → 242 karakter), müşterinin isteği üzerine: özgün metin
+tek bir uzun devrik cümleydi ve yan yana durduğu Amacımız kutusuyla boy tutmuyordu. Kısaltmada
+maddelerin hepsi korundu (zamanında ve uygun fiyatla teslim, müşteri beklentisi, işi ilk
+seferinde doğru yapmak, çalışan sağlığı ve çevre, tedarikçilerle birlikte gelişme); yalnızca
+tekrarlar atıldı. Özgün metin bu dosyanın git geçmişinde durur.
+
+Ayrıca üç açık yazım hatası düzeltildi: "doğrultusun da" → "doğrultusunda",
 "sepeklerini" → "spesifikasyonlarını", "ahsap" → "ahşap". Sitede karşılığı olmayan
 (dolayısıyla yazılan) metinler: hero başlığı, ana sayfa giriş paragrafı, "Ahşap ambalaj"
 ürün açıklaması, teklif şeridi, iletişim sayfası açıklamaları ve form metinleri.
@@ -478,3 +485,22 @@ girilen değerler korunur.
 üretilmedi. `background01.jpg` (sisli dağ) konuyla ilgisiz olduğu için kullanılmadı;
 `background02.jpg` (çam ormanı) yalnızca Hakkımızda sayfasında, firmanın hammaddesine
 işaret ettiği için kullanıldı.
+
+### Revizyonlar
+
+Müşteri geri bildirimi sonrası yapılan değişiklikler:
+
+1. **Yönetim şeridi çakışması.** Sabit üst menü, WordPress yönetim şeridinin altına giriyordu.
+   Kural katman dışına yazılmak zorunda: Tailwind'in `top-0` yardımcı sınıfı `@layer utilities`
+   içinde durur ve `@layer base`'deki kuralı ezer; katmansız kural ikisini de geçer.
+2. **Hero.** Tipografi bloğu + ayrı fotoğraf şeridi kurgusu bırakıldı. Yerine kenardan kenara
+   fotoğraf, üzerinde nötr koyu perde, ortalanmış başlık ve düğmeler geldi. Hero koyulaştığı
+   için üst menü artık her zaman zeminli.
+3. **Kutulaşma.** Giriş paragrafı, Hakkımızda metinleri ve hizmet kalemleri çerçeveli kutulara
+   alındı (`.card`, `.panel`, `.frame`). Gövde metninin tek blok hâlinde uzaması yoruyordu.
+4. **Hizmetler.** Tek kare / dört bölme fikri bırakıldı. Dört bağımsız kutu, aralarında boşluk,
+   her birinde solda yazı sağda görsel; teklif düğmesi kutuların kesiştiği boşlukta durmaya
+   devam ediyor. Düğmeye pay bırakan iç dolgu `md:` kademesinde ayrıca yazılmalı, yoksa
+   `md:p-8` kısayolu onu eziyor.
+5. **Renk.** Alt bilgi yeşile çalan koyu tondan nötr koyuya (`night`) alındı; kullanılmayan
+   `forest-light` jetonu silindi. Sayfada tek yeşil kaldı ve yalnızca eylem anlamına geliyor.

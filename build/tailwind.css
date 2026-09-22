@@ -235,7 +235,28 @@ body.admin-bar [data-header] {
 		margin-top: 1.4em;
 	}
 
-	/* Icerik kutusu: ahsap tonunda ince sol centik, gri zemin. */
+	/* Sade kutu: gri zemin, ahsap tonunda ince cerceve. */
+	.card {
+		background: var(--color-bone-deep);
+		border: 1px solid color-mix(in srgb, var(--color-timber) 26%, transparent);
+		border-radius: 4px;
+	}
+
+	/* Gorsel cercevesi: kutu ile ayni dil, icerideki gorsel biraz kucuk durur. */
+	.frame {
+		background: var(--color-bone-deep);
+		border: 1px solid color-mix(in srgb, var(--color-timber) 26%, transparent);
+		border-radius: 4px;
+		padding: 0.5rem;
+	}
+
+	.frame > img,
+	.frame > div {
+		border-radius: 2px;
+		display: block;
+	}
+
+	/* Basligi olan icerik kutusu: solda ahsap tonunda centik. */
 	.panel {
 		background: var(--color-bone-deep);
 		border: 1px solid color-mix(in srgb, var(--color-timber) 28%, transparent);

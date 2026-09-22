@@ -171,7 +171,7 @@ return array(
 					'label'  => 'Kalite Politikamız',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Kalite Politikamız' ),
-						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Ürünlerimizi zamanında teslim ederek uygun fiyat avantajı sağlayarak kaliteli ürün ve ekipmanlarını sunarak müşteri ihtiyaç ve beklentilerini karşılamak sürekli gelişmelerini sağlamak, kaliteli bilincini yerleştirerek çalışanlarımızın sağlığı ve çevrenin korunması için maddi ve insan kaynaklarımızı seferber ederek tüm çalışanların gelişmelerini sağlamak, kuruluş olarak her alanda sürekli iyileşme ve gelişme sağlamak. Yaptığımız işi ilk seferinde ve her seferinde doğru yapmak müşteri istek ve görüşlerini esas almak, standartlara ve kalite yönetim sistemimize uygun olarak yapmak. Kaliteli bilincinin artması için tedarikçilerimiz ile birlikte koordineli çalışma içinde bulunmak. Kalite politikamız olarak belirlemiş ve hedeflenmiştir.' ),
+						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Ürünlerimizi zamanında ve uygun fiyatla teslim ederek müşteri ihtiyaç ve beklentilerini karşılamak; işi ilk seferinde ve her seferinde doğru yapmak; çalışanlarımızın sağlığını ve çevreyi gözetmek; tedarikçilerimizle birlikte sürekli gelişmek.' ),
 					),
 				),
 			),
