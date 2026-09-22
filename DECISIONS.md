@@ -663,3 +663,21 @@ kendi içinde tutarlı, ayrı bir muamele.
 Yan yana dizilimde `.btn`'in `white-space: nowrap` özelliği, dar metin kolonunu düğmenin
 genişliğine zorluyor ve sayfayı 2px taşırıyordu. Kart telefonda dikey diziliyor (görsel üstte,
 metin tam genişlikte), 640px üstünde yan yana geçiyor. Oran her iki dizilimde de 3:4.
+
+### İkinci tur düzeltmeler
+
+- **Ana sayfa ürün kartları `.card` sistemine bağlanmamıştı**; doğrudan `bg-bone-deep`
+  yazılmıştı ve o ton bu turda daha da koyulaşınca kartlar iyice koyu kaldı. Sistem sınıfına
+  geçirildi. Ders: yüzey rengi bileşene ait, şablona değil.
+
+- **Küçük çerçeveli önizleme pul gibi duruyordu.** Görsel artık kartın sağ yarısını kenardan
+  kenara dolduruyor; çerçeve işini kartın kendi kenarı görüyor. `.frame` bileşeni yalnızca
+  Hakkımızda'daki büyük görselde kaldı — orada boyut yeterli olduğu için çalışıyor.
+
+- **Başlık ile açıklama arasındaki fark yetersizdi** (24px'e karşı 19px, oran 1,26). Başlık
+  28px'e çıkarıldı, açıklama 16px'e indirildi; oran 1,75. Kart düğmesi de `sm`'den `md`'ye
+  alındı, gövde metniyle aynı puntoda.
+
+- **İletişim düzeni**: başlık solda, iletişim bilgileri sağda bir kutuda, teklif formu ikisinin
+  altında ortada ayrı bir kutuda. Telefon ve e-posta 24px'ten 21px'e indi; adres satır
+  ortasından bölünüyordu.

@@ -24,7 +24,7 @@ $items = nwcs_rows( 'home', 'family', 'items' );
 			?>
 			<li>
 				<a href="<?php echo esc_url( ahsapkasa_link( $item['url'] ?? '' ) ); ?>"
-					class="group block h-full overflow-hidden rounded-sm border border-timber/25 bg-bone-deep transition-colors duration-200 hover:border-timber/70">
+					class="card group block h-full overflow-hidden transition-colors duration-200 hover:border-forest/45">
 
 					<span class="block aspect-[4/3] overflow-hidden bg-dust">
 						<?php if ( ! empty( $thumb['url'] ) ) : ?>

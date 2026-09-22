@@ -51,14 +51,14 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 					ahsapkasa_link( nwcs_field( 'services', 'grid', 'cta_url' ) )
 				) . '#teklif';
 				?>
-				<div class="card flex flex-col-reverse gap-5 p-6 sm:flex-row sm:gap-6 sm:p-7 md:gap-8 md:p-8" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
+				<div class="card flex flex-col-reverse overflow-hidden sm:flex-row" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
 
-					<div class="flex min-w-0 flex-1 flex-col">
-						<h2 class="font-display text-xl font-semibold md:text-2xl">
+					<div class="flex min-w-0 flex-1 flex-col p-6 md:p-8">
+						<h2 class="font-display text-2xl font-semibold md:text-[1.75rem]">
 							<?php echo esc_html( $item['title'] ?? '' ); ?>
 						</h2>
 
-						<p class="mt-3 text-base leading-[1.7] text-ink/75">
+						<p class="mt-3 text-[1rem] leading-[1.65] text-ink/70">
 							<?php echo esc_html( $item['text'] ?? '' ); ?>
 						</p>
 
@@ -77,34 +77,34 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 						<?php endif; ?>
 
 						<a href="<?php echo esc_url( $quote_url ); ?>"
-							class="btn btn--sm btn--solid mt-auto self-start pt-0"
+							class="btn btn--md btn--solid mt-auto self-start"
 							<?php nwcs_edit_attr( 'services', 'grid', 'cta_label' ); ?>>
 							<?php echo esc_html( nwcs_field( 'services', 'grid', 'cta_label' ) ); ?>
 						</a>
 					</div>
 
-					<?php // Butun urun gorselleri ayni olcude: cerceve icinde 3:4 dikey. ?>
+					<?php // Gorsel kartin sag yarisini doldurur; cerceve isini kartin
+					      // kendi kenari gorur. Kucuk cerceveli onizleme pul gibi duruyordu. ?>
 					<?php if ( $gallery ) : ?>
 						<button type="button" data-lightbox-open="0"
-							class="frame group relative w-[8.5rem] shrink-0 self-start sm:w-[7.5rem] md:w-[9rem]"
+							class="group relative h-56 w-full shrink-0 overflow-hidden bg-dust sm:h-auto sm:w-[38%]"
 							aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $item['title'] ?? '' ) ); ?>">
 
-							<span class="relative block aspect-[3/4] overflow-hidden rounded-[2px] bg-dust">
-								<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>"
-									alt="<?php echo esc_attr( $gallery[0]['alt'] ); ?>"
-									class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
-									loading="lazy" decoding="async" />
+							<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>"
+								alt="<?php echo esc_attr( $gallery[0]['alt'] ); ?>"
+								class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+								loading="lazy" decoding="async" />
 
-								<span class="absolute inset-0 flex items-center justify-center bg-night/0 transition-colors duration-200 group-hover:bg-night/30" aria-hidden="true">
-									<span class="flex h-10 w-10 scale-90 items-center justify-center rounded-full bg-surface/95 text-ink opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100">
-										<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-											<circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" />
-										</svg>
-									</span>
+							<span class="absolute inset-0 flex items-center justify-center bg-night/0 transition-colors duration-200 group-hover:bg-night/30" aria-hidden="true">
+								<span class="flex h-11 w-11 scale-90 items-center justify-center rounded-full bg-surface/95 text-ink opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100">
+									<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3M11 8v6M8 11h6" />
+									</svg>
 								</span>
 							</span>
 						</button>
 					<?php endif; ?>
+
 				</div>
 			<?php endforeach; ?>
 		</div>
