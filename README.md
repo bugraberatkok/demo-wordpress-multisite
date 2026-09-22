@@ -326,6 +326,16 @@ npm run watch        # dosyaları izleyerek sürekli derleme
 depoya dahildir; yani siteyi çalıştırmak için Node kurmanız gerekmez, yalnızca
 tasarımı değiştirecekseniz gerekir.
 
+### Üst menüdeki WhatsApp düğmesi
+
+"Teklif alın" düğmesinin yanında bir WhatsApp düğmesi vardır. Bağlantısı İçerik Stüdyosu'ndan
+girilir (Tüm Sayfalar → Üst Menü → **WhatsApp Bağlantısı**), örneğin
+`https://wa.me/905XXXXXXXXX`.
+
+Bağlantı girilmediği sürece düğme görünür ama **tıklanamaz** (`aria-disabled`, klavye
+sırasından çıkarılmış, soluk); kimseyi boş bir adrese götürmez. Bağlantı girilince
+kendiliğinden normal bir bağlantıya döner ve yeni sekmede açılır.
+
 ### Ürün bazlı teklif düğmesi
 
 Hizmetlerimiz sayfasındaki her kutuda kendi **"Bu ürün için teklif al"** düğmesi vardır.
