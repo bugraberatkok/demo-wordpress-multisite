@@ -54,6 +54,10 @@
 				.then( function ( data ) {
 					var message = data.removed + ' ürün silindi, ' + data.restored + ' ürün eski hâline döndü.';
 
+					if ( data.terms ) {
+						message += '\n' + data.terms + ' kategori boş kaldığı için silindi.';
+					}
+
 					if ( data.kept && data.kept.length ) {
 						message += '\n\nYüklemeden sonra elle düzenlendiği için dokunulmayanlar:\n' + data.kept.join( ', ' );
 					}

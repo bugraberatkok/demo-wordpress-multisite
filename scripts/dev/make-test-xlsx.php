@@ -9,7 +9,7 @@
 
 $target = $argv[1] ?? '/tmp/test.xlsx';
 
-$shared = array( 'Ürün Adı', 'Stok Kodu', 'Fiyat', 'Kategori', 'Açıklama', 'Ahşap Palet 120x80', 'PAL-120', 'Palet|İhracat', 'Standart dışı ölçülerde', 'Ahşap Sandık', 'SND-01', 'Sandık' );
+$shared = array( 'Ürün Adı', 'Stok Kodu', 'Fiyat', 'Kategori', 'Açıklama', 'Ahşap Palet 120x80', 'PAL-120', 'DenemeKatA|DenemeKatB', 'Standart dışı ölçülerde', 'Ahşap Sandık', 'SND-01', 'Sandık' );
 
 $si = '';
 foreach ( $shared as $i => $text ) {

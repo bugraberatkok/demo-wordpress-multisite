@@ -251,6 +251,7 @@ function nwcs_pool_product_data( WP_Post $post ): array {
 	return array(
 		'id'          => (int) $post->ID,
 		'slug'        => $post->post_name,
+		'code'        => (string) get_post_meta( $post->ID, '_nwcs_code', true ),
 		'title'       => $post->post_title,
 		'short'       => (string) get_post_meta( $post->ID, '_nwcs_short', true ),
 		'body'        => $post->post_content,
@@ -315,6 +316,60 @@ function nwcs_pool_media(): array {
  * Manifestte 'products' turunde bir alan yoksa o sitede urunleri gosterecek
  * hicbir yer yoktur; havuz ozetlerinde "gorunur" saymak yaniltici olur.
  */
+/**
+ * Urun kodunu bicime sokar: buyuk harf, rakam ve tire.
+ */
+function nwcs_normalize_product_code( string $code ): string {
+	$code = strtoupper( trim( $code ) );
+	$code = preg_replace( '/[^A-Z0-9\-_.]/', '-', $code ) ?? '';
+	$code = preg_replace( '/-+/', '-', $code ) ?? '';
+
+	return trim( $code, '-' );
+}
+
+/**
+ * Bu kod baska bir urunde kullaniliyor mu? Kullaniliyorsa o urunun kimligi.
+ * Havuz sitesi baglaminda cagrilmalidir.
+ */
+function nwcs_product_id_by_code( string $code, int $ignore_id = 0 ): int {
+	$code = nwcs_normalize_product_code( $code );
+
+	if ( '' === $code ) {
+		return 0;
+	}
+
+	$found = get_posts(
+		array(
+			'post_type'      => NWCS_PRODUCT_TYPE,
+			'post_status'    => 'any',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+			'exclude'        => $ignore_id ? array( $ignore_id ) : array(),
+			'meta_key'       => '_nwcs_code', // phpcs:ignore WordPress.DB.SlowDBQuery
+			'meta_value'     => $code, // phpcs:ignore WordPress.DB.SlowDBQuery
+		)
+	);
+
+	return $found ? (int) $found[0] : 0;
+}
+
+/**
+ * Urunun kodunu dondurur; yoksa kimliginden bir tane uretip kaydeder.
+ * Her urunun kendine ait, degismeyen bir kodu olsun diye.
+ */
+function nwcs_ensure_product_code( int $id ): string {
+	$code = nwcs_normalize_product_code( (string) get_post_meta( $id, '_nwcs_code', true ) );
+
+	if ( '' !== $code ) {
+		return $code;
+	}
+
+	$code = 'URN-' . str_pad( (string) $id, 4, '0', STR_PAD_LEFT );
+	update_post_meta( $id, '_nwcs_code', $code );
+
+	return $code;
+}
+
 function nwcs_site_supports_products( int $blog_id ): bool {
 	static $cache = array();
 

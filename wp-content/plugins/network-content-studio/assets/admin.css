@@ -814,11 +814,16 @@ button.nwcs-linkout[data-nwcs-csv-open]:hover { background: #0d9488; }
 }
 
 /* Sihirbaz penceresi */
+/* display:flex, tarayicinin dialog:not([open]){display:none} kuralini ezer;
+   bu yuzden yalnizca acikken uygulanir. */
 .nwcs-wizard {
 	width: min( 92vw, 860px );
 	max-height: 88vh;
 	padding: 0;
 	overflow: hidden;
+}
+
+.nwcs-wizard[open] {
 	display: flex;
 	flex-direction: column;
 }

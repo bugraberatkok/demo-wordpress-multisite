@@ -254,6 +254,7 @@ function nwcs_import_ajax_run(): void {
 		'created' => array(),
 		'updated' => array(),
 		'skipped' => array(),
+		'terms'   => array(),
 	) );
 
 	$slice = array_slice( $rows, $offset, NWCS_IMPORT_CHUNK, true );
@@ -280,15 +281,21 @@ function nwcs_import_ajax_run(): void {
 			$slug = sanitize_title( $title );
 		}
 
-		$existing = get_posts(
-			array(
-				'post_type'      => NWCS_PRODUCT_TYPE,
-				'post_status'    => 'any',
-				'name'           => $slug,
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-			)
-		);
+		// Once urun koduyla, bulunamazsa kisa adla eslestirilir.
+		$code  = nwcs_normalize_product_code( $values['code'] ?? '' );
+		$match = $code ? nwcs_product_id_by_code( $code ) : 0;
+
+		$existing = $match
+			? array( $match )
+			: get_posts(
+				array(
+					'post_type'      => NWCS_PRODUCT_TYPE,
+					'post_status'    => 'any',
+					'name'           => $slug,
+					'posts_per_page' => 1,
+					'fields'         => 'ids',
+				)
+			);
 
 		$postarr = array(
 			'post_type'   => NWCS_PRODUCT_TYPE,
@@ -322,6 +329,12 @@ function nwcs_import_ajax_run(): void {
 			$batch['created'][] = $id;
 		}
 
+		if ( '' !== $code && ! nwcs_product_id_by_code( $code, $id ) ) {
+			update_post_meta( $id, '_nwcs_code', $code );
+		} else {
+			nwcs_ensure_product_code( $id );
+		}
+
 		if ( isset( $values['short'] ) ) {
 			update_post_meta( $id, '_nwcs_short', sanitize_textarea_field( $values['short'] ) );
 		}
@@ -335,7 +348,27 @@ function nwcs_import_ajax_run(): void {
 		}
 
 		if ( isset( $values['categories'] ) ) {
-			$names = array_values( array_filter( array_map( 'trim', preg_split( '/[|,;]/', $values['categories'] ) ?: array() ) ) );
+			$names = array_values(
+				array_filter(
+					array_map(
+						static fn( string $name ): string => trim( html_entity_decode( $name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ),
+						preg_split( '/[|,;]/', $values['categories'] ) ?: array()
+					)
+				)
+			);
+
+			// Bu yukleme sirasinda dogan kategoriler not edilir; geri alinirken
+			// bos kalanlar silinebilsin diye.
+			foreach ( $names as $name ) {
+				if ( ! term_exists( $name, NWCS_PRODUCT_TAX ) ) {
+					$made = wp_insert_term( $name, NWCS_PRODUCT_TAX );
+
+					if ( ! is_wp_error( $made ) ) {
+						$batch['terms'][] = (int) $made['term_id'];
+					}
+				}
+			}
+
 			wp_set_object_terms( $id, $names, NWCS_PRODUCT_TAX, false );
 		}
 	}
@@ -356,6 +389,7 @@ function nwcs_import_ajax_run(): void {
 			'created' => array_values( $batch['created'] ),
 			'updated' => $batch['updated'],
 			'skipped' => array_slice( $batch['skipped'], 0, 50 ),
+			'terms'   => array_values( array_unique( $batch['terms'] ?? array() ) ),
 			'counts'  => array(
 				'created' => count( $batch['created'] ),
 				'updated' => count( $batch['updated'] ),
@@ -484,6 +518,20 @@ function nwcs_import_ajax_undo(): void {
 		++$restored;
 	}
 
+	// Bu yuklemede dogan kategorilerden urunu kalmayanlar silinir.
+	$terms_removed = 0;
+
+	foreach ( $record['terms'] ?? array() as $term_id ) {
+		$term = get_term( (int) $term_id, NWCS_PRODUCT_TAX );
+
+		if ( ! $term || is_wp_error( $term ) || (int) $term->count > 0 ) {
+			continue;
+		}
+
+		wp_delete_term( (int) $term_id, NWCS_PRODUCT_TAX );
+		++$terms_removed;
+	}
+
 	restore_current_blog();
 
 	delete_site_option( NWCS_IMPORT_OPTION );
@@ -493,6 +541,7 @@ function nwcs_import_ajax_undo(): void {
 		array(
 			'removed'  => $removed,
 			'restored' => $restored,
+			'terms'    => $terms_removed,
 			'kept'     => array_slice( $kept, 0, 20 ),
 		)
 	);
