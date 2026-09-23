@@ -1,0 +1,441 @@
+/* Ic sayfalar: sayfa basi, Hakkimizda, Iletisim, Blog listesi, yazi. */
+
+/* Sayfa basi ------------------------------------------------------------------ */
+
+.sp-pagehead {
+	padding-block: clamp(3.5rem, 8vw, 6rem) clamp(2rem, 4vw, 3rem);
+	border-bottom: 1px solid var(--cizgi);
+}
+
+.sp-pagehead__title { font-size: clamp(3.25rem, 8vw, 6rem); line-height: 0.92; }
+
+.sp-pagehead__text {
+	max-width: 36rem;
+	margin-top: 1.25rem;
+	color: var(--toz);
+	font-size: 1.1875rem;
+}
+
+/* Hakkimizda: baslik + fotograf --------------------------------------------- */
+
+.sp-abouthead { padding-block: clamp(3rem, 7vw, 5rem) 0; }
+
+.sp-abouthead__grid {
+	display: grid;
+	gap: 2.5rem;
+	align-items: end;
+}
+
+@media (min-width: 900px) {
+	.sp-abouthead__grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 4rem; }
+}
+
+.sp-abouthead__kicker { color: var(--toz); font-size: 1.0625rem; font-weight: 600; }
+
+.sp-abouthead__title {
+	margin-top: 0.75rem;
+	font-size: clamp(3rem, 6.6vw, 5.5rem);
+	line-height: 0.92;
+}
+
+.sp-abouthead__media { border-radius: var(--kose); overflow: hidden; }
+
+.sp-abouthead__image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+
+/* Firma metni: ilk paragraf buyuk, gerisi okuma sutunu. */
+.sp-story__grid { display: grid; gap: 2rem 4rem; }
+
+@media (min-width: 900px) { .sp-story__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+.sp-story__lead {
+	font-family: var(--font-baslik);
+	font-size: clamp(1.75rem, 3vw, 2.375rem);
+	font-weight: 700;
+	line-height: 1.12;
+}
+
+.sp-story__body { max-width: 38rem; }
+.sp-story__body p + p { margin-top: 1.1rem; }
+
+/* Ilkeler */
+.sp-values { background: var(--beton-acik); }
+
+.sp-values__title { margin-bottom: clamp(2rem, 4vw, 3rem); }
+
+.sp-values__list {
+	display: grid;
+	gap: 2.25rem 2rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 600px) { .sp-values__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .sp-values__list { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+.sp-values__name { margin-top: 1rem; font-size: 1.5rem; }
+
+.sp-values__text { margin-top: 0.4rem; color: var(--toz); }
+
+/* Kocist Grup + belge */
+.sp-aboutgroup__grid { display: grid; gap: 3rem; align-items: start; }
+
+@media (min-width: 900px) {
+	.sp-aboutgroup__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); gap: 5rem; }
+}
+
+.sp-aboutgroup__text { max-width: 36rem; margin: 1.25rem 0 2rem; font-size: 1.125rem; }
+
+.sp-aboutgroup__doc { margin: 0; }
+
+.sp-aboutgroup__caption { margin-top: 0.75rem; color: var(--toz); font-size: 0.9375rem; }
+
+/* Iletisim ------------------------------------------------------------------- */
+
+.sp-contact__grid { display: grid; gap: 3rem; align-items: start; }
+
+@media (min-width: 960px) {
+	.sp-contact__grid { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 5rem; }
+}
+
+.sp-contact__info {
+	display: grid;
+	gap: 1.75rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sp-contact__item {
+	display: grid;
+	grid-template-columns: 3.25rem minmax(0, 1fr);
+	gap: 1rem;
+	align-items: start;
+}
+
+.sp-contact__icon {
+	display: grid;
+	place-items: center;
+	width: 3.25rem;
+	height: 3.25rem;
+	border-radius: 50%;
+	background: var(--yanik);
+	color: var(--cam);
+}
+
+.sp-contact__label { color: var(--toz); font-family: var(--font-govde); font-size: 0.9375rem; font-weight: 600; line-height: 1.4; }
+
+.sp-contact__value {
+	display: inline-block;
+	margin-top: 0.2rem;
+	color: var(--yanik);
+	font-family: var(--font-baslik);
+	font-size: 1.625rem;
+	font-weight: 700;
+	line-height: 1.15;
+}
+
+a.sp-contact__value { color: var(--yesil); text-decoration: none; }
+a.sp-contact__value:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+
+/* Form */
+.sp-form {
+	padding: clamp(1.5rem, 3.5vw, 2.5rem);
+	background: var(--beton-acik);
+	border-radius: var(--kose);
+	border-top: 6px solid var(--cam);
+	scroll-margin-top: 100px;
+}
+
+.sp-form__title { font-size: clamp(2.25rem, 4vw, 3rem); }
+
+.sp-form__text { margin-top: 0.75rem; max-width: 34rem; color: var(--toz); }
+
+.sp-form__grid {
+	display: grid;
+	gap: 1.25rem;
+	margin-top: 1.75rem;
+}
+
+@media (min-width: 640px) { .sp-form__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.sp-field--wide,
+.sp-form__actions { grid-column: 1 / -1; }
+
+.sp-field__label { display: block; margin-bottom: 0.4rem; font-weight: 600; }
+
+.sp-field__optional { color: var(--toz); font-weight: 400; }
+
+.sp-field__input {
+	width: 100%;
+	min-height: 48px;
+	padding: 0.7rem 0.85rem;
+	border: 1px solid color-mix(in srgb, var(--yanik) 35%, transparent);
+	border-radius: var(--kose);
+	background: var(--beton-acik);
+	color: var(--yanik);
+	font: inherit;
+}
+
+textarea.sp-field__input { resize: vertical; }
+
+.sp-field__input:focus-visible { outline: 3px solid var(--odak); outline-offset: 1px; border-color: var(--yesil); }
+
+.sp-field__input[aria-invalid="true"] { border: 2px solid var(--yanik); }
+
+.sp-field__error { margin-top: 0.4rem; font-size: 0.9375rem; font-weight: 600; }
+
+.sp-form__notice {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	margin-top: 1.25rem;
+	padding: 1rem 1.1rem;
+	border-radius: var(--kose);
+	font-weight: 600;
+}
+
+.sp-form__notice--ok { background: color-mix(in srgb, var(--yesil) 14%, var(--beton-acik)); color: var(--yanik); }
+.sp-form__notice--ok .sp-icon { color: var(--yesil); flex: none; }
+
+.sp-form__notice--error { background: color-mix(in srgb, var(--cam) 35%, var(--beton-acik)); }
+
+/* Harita: kenardan kenara, altinda yol tarifi. */
+.sp-map { background: var(--beton-acik); }
+
+.sp-map__frame {
+	display: block;
+	width: 100%;
+	height: clamp(22rem, 50vw, 30rem);
+	border: 0;
+	filter: grayscale(0.35);
+}
+
+.sp-map__bar { padding-block: 1.25rem; }
+
+/* Blog listesi --------------------------------------------------------------- */
+
+.sp-bloglist .sp-pagination { margin-top: 3rem; }
+
+.sp-pagination .nav-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+.sp-pagination .page-numbers {
+	display: inline-grid;
+	place-items: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0 0.75rem;
+	border: 1px solid var(--cizgi);
+	border-radius: var(--kose);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.sp-pagination .current { background: var(--yanik); color: var(--beton-acik); }
+
+/* Yazi ----------------------------------------------------------------------- */
+
+.sp-article__head { padding-block: clamp(3rem, 7vw, 5rem) 2rem; }
+
+.sp-article__back { font-weight: 600; }
+
+.sp-article__title {
+	max-width: 18ch;
+	margin: 1.25rem 0 1rem;
+	font-size: clamp(3rem, 7vw, 5.5rem);
+	line-height: 0.92;
+}
+
+.sp-article__cover {
+	width: 100%;
+	max-height: 34rem;
+	object-fit: cover;
+	border-radius: var(--kose);
+}
+
+.sp-article__grid {
+	display: grid;
+	gap: 3rem;
+	align-items: start;
+	padding-block: clamp(2.5rem, 6vw, 4rem) clamp(3rem, 7vw, 5rem);
+}
+
+@media (min-width: 960px) {
+	.sp-article__grid { grid-template-columns: minmax(0, 42rem) minmax(0, 20rem); justify-content: space-between; }
+	.sp-article__aside { position: sticky; top: 110px; }
+}
+
+.sp-article__content { font-size: 1.1875rem; line-height: 1.7; }
+.sp-article__content > * + * { margin-top: 1.25rem; }
+.sp-article__content h2 { font-size: 2.25rem; margin-top: 2.5rem; }
+
+.sp-article__aside { background: var(--beton-acik); }
+
+.sp-article__aside-text { margin-top: 0.75rem; color: var(--toz); }
+
+.sp-more { background: var(--beton-acik); }
+.sp-more .sp-title { margin-bottom: 2rem; }
+
+
+/* Urunler -------------------------------------------------------------------- */
+
+/* Gruplara atlama: bilgi tasiyan kisa baglanti dizisi. */
+.sp-jump { margin-top: 2rem; }
+
+.sp-jump ul { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0; padding: 0; list-style: none; }
+
+.sp-jump a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 1.1rem;
+	border: 2px solid var(--yanik);
+	border-radius: 999px;
+	color: var(--yanik);
+	font-family: var(--font-baslik);
+	font-size: 1.1875rem;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.sp-jump a:hover { background: var(--yanik); color: var(--beton-acik); }
+
+.sp-pallets__intro { display: grid; gap: 1.25rem 4rem; margin-bottom: clamp(2.5rem, 5vw, 3.5rem); }
+
+@media (min-width: 900px) { .sp-pallets__intro { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); } }
+
+.sp-pallets__lead { font-size: 1.1875rem; font-weight: 600; max-width: 40rem; }
+
+.sp-pallets__text { margin-top: 0.9rem; max-width: 40rem; color: var(--toz); }
+
+.sp-pallets__grid {
+	display: grid;
+	gap: 1.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 680px) { .sp-pallets__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1080px) { .sp-pallets__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.sp-pallet {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 1.25rem 1.25rem 1.5rem;
+	background: var(--beton-acik);
+	border-radius: var(--kose);
+}
+
+/* Cizim alani: teknik foy gibi silik 10 cm'lik kareler. */
+.sp-pallet__drawing {
+	width: 100%;
+	margin-bottom: 1.25rem;
+	padding: 0.5rem;
+	border-radius: var(--kose);
+	background-color: var(--beton);
+	background-image:
+		linear-gradient(var(--cizgi) 1px, transparent 1px),
+		linear-gradient(90deg, var(--cizgi) 1px, transparent 1px);
+	background-size: 20px 20px;
+	background-position: -1px -1px;
+}
+
+.sp-draw { display: block; width: 100%; height: auto; overflow: visible; }
+
+.sp-draw__board { fill: var(--cam); stroke: var(--yanik); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+
+.sp-draw__block { fill: color-mix(in srgb, var(--yanik) 55%, var(--cam)); stroke: var(--yanik); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+
+.sp-draw__dim line { stroke: var(--yanik); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+
+.sp-draw__label { fill: var(--yanik); font-family: var(--font-baslik); font-size: 8px; font-weight: 700; }
+
+/* Olcusu belirtilmemis palet: olcek iddiasi yok, kenarlar kesik cizgi. */
+.sp-draw--generic .sp-draw__board,
+.sp-draw--generic .sp-draw__block { stroke-dasharray: 3 2; }
+
+.sp-pallet__name { font-size: 2rem; }
+
+.sp-pallet__summary { margin-top: 0.4rem; color: var(--toz); }
+
+.sp-pallet__specs { width: 100%; margin: 1rem 0 0; }
+
+.sp-pallet__spec {
+	display: grid;
+	grid-template-columns: 6.5rem minmax(0, 1fr);
+	gap: 1rem;
+	padding-block: 0.5rem;
+	border-top: 1px solid var(--cizgi);
+	font-size: 0.9375rem;
+}
+
+.sp-pallet__spec dt { color: var(--toz); }
+.sp-pallet__spec dd { margin: 0; font-weight: 600; }
+
+/* Ayrintilar: kullanici acinca metin gorunur; isaret donerek acildigini gosterir. */
+.sp-pallet__more { width: 100%; margin-top: 0.75rem; border-top: 1px solid var(--cizgi); }
+
+.sp-pallet__more summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: 44px;
+	color: var(--yesil);
+	font-weight: 600;
+	cursor: pointer;
+	list-style: none;
+}
+
+.sp-pallet__more summary::-webkit-details-marker { display: none; }
+
+.sp-pallet__more summary::after {
+	content: "+";
+	font-family: var(--font-baslik);
+	font-size: 1.5rem;
+	line-height: 1;
+	transition: transform 0.2s ease;
+}
+
+.sp-pallet__more[open] summary::after { transform: rotate(45deg); }
+
+.sp-pallet__more p { padding-bottom: 0.5rem; font-size: 0.9375rem; }
+
+.sp-pallet__quote { margin-top: auto; }
+.sp-pallet__specs + .sp-pallet__quote,
+.sp-pallet__more + .sp-pallet__quote { margin-top: 1.25rem; }
+
+/* Ozel olcu kutusu: olcusu olmayan palet, kesik ahsap cerceve. */
+.sp-pallet--custom {
+	justify-content: center;
+	background: transparent;
+	border: 2px dashed var(--cam);
+}
+
+.sp-pallet--custom .sp-pallet__name { margin-top: 1rem; }
+.sp-pallet--custom .sp-pallet__quote { margin-top: 1.5rem; }
+
+/* Sandik ve kafes */
+.sp-group-product--crates { background: var(--beton-acik); }
+
+.sp-group-product__grid { display: grid; gap: 2.5rem; align-items: center; }
+
+@media (min-width: 900px) {
+	.sp-group-product__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5rem; }
+	.sp-group-product--cages .sp-group-product__media { order: 2; }
+}
+
+.sp-group-product__media { border-radius: var(--kose); overflow: hidden; }
+
+.sp-group-product__image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+
+.sp-group-product__text { max-width: 36rem; margin-top: 1.25rem; font-size: 1.125rem; }
+
+.sp-group-product__list-title { margin: 2rem 0 0; font-size: 1.5rem; }
+
+.sp-group-product__body .sp-checklist__list { margin-top: 1rem; }
+
+.sp-group-product__quote { margin-top: 2rem; }
+
+[id="paletler"], [id="sandiklar"], [id="kafesler"] { scroll-margin-top: 90px; }

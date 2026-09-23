@@ -1,0 +1,41 @@
+/*
+ * Sanayi Palet — tasarim jetonlari.
+ *
+ * Renk degistirmek icin YALNIZCA bu dosyadaki degerleri duzenleyin.
+ * Diger CSS dosyalari ve sablonlar renk kodu tasimaz, hep bu degiskenleri kullanir.
+ *
+ * Renk kurali: yesil = tiklanabilir, cam = ahsap / yapi.
+ */
+
+:root {
+	/* Renkler */
+	--beton: #e3e4e0;        /* sayfa zemini: saha betonu */
+	--beton-acik: #f4f4f1;   /* yukseltilmis yuzey: kart, form, bant */
+	--cam: #d9ae6c;          /* ahsap: damga blogu, yapi cizgileri */
+	--yanik: #2b2019;        /* metin, damga murekkebi, footer zemini */
+	--toz: #6e6660;          /* ikincil metin */
+	--yesil: #3c7f2b;        /* yalnizca eylem: dugme, baglanti, odak */
+
+	/* Turetilmis tonlar: yukaridakilerden hesaplanir, ayrica duzenlemek gerekmez */
+	--yesil-koyu: color-mix(in srgb, var(--yesil) 82%, black);
+	--cizgi: color-mix(in srgb, var(--yanik) 16%, transparent);
+	/* Hero'daki palet duvari kalabalik; baslik net okunsun diye perde koyu. */
+	--perde: color-mix(in srgb, var(--yanik) 58%, transparent);
+	--odak: var(--yesil);
+
+	/* Yazi tipleri */
+	--font-baslik: "Big Shoulders", "Arial Narrow", sans-serif;
+	--font-damga: "Big Shoulders Stencil", "Big Shoulders", "Arial Narrow", sans-serif;
+	--font-govde: "Instrument Sans", system-ui, sans-serif;
+
+	/* Olcu */
+	--sayfa-genislik: 72rem;
+	--kenar: 16px;
+	--kose: 4px;
+}
+
+@media (min-width: 768px) {
+	:root {
+		--kenar: 32px;
+	}
+}

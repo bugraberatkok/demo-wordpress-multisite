@@ -1,0 +1,159 @@
+/* Hero ve yakik damga. */
+
+.sp-hero {
+	position: relative;
+	isolation: isolate;
+	display: flex;
+	align-items: flex-end;
+	min-height: clamp(34rem, 84vh, 52rem);
+	padding-block: clamp(4rem, 10vw, 6.5rem) clamp(3rem, 7vw, 5rem);
+	background: var(--yanik);
+	color: var(--beton-acik);
+	overflow: hidden;
+}
+
+.sp-hero__photo {
+	position: absolute;
+	inset: 0;
+	z-index: -2;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Metnin okundugu alt-sol koseyi koyulastiran notr perde. */
+.sp-hero::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: var(--perde);
+}
+
+.sp-hero__inner {
+	display: grid;
+	gap: 3rem;
+	align-items: end;
+}
+
+@media (min-width: 900px) {
+	.sp-hero__inner { grid-template-columns: minmax(0, 1fr) auto; gap: 4rem; }
+}
+
+.sp-hero__title {
+	max-width: 13ch;
+	font-size: clamp(3.25rem, 8.4vw, 6.75rem);
+	line-height: 0.92;
+}
+
+.sp-hero__text {
+	max-width: 34rem;
+	margin-top: 1.5rem;
+	font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+	color: color-mix(in srgb, var(--beton-acik) 88%, transparent);
+}
+
+.sp-hero__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 2.25rem;
+}
+
+@media (max-width: 479.98px) {
+	.sp-hero__actions .btn { flex: 1 1 100%; }
+}
+
+/*
+ * Mobil: damga basliktan kopuk kalmasin. Metin kutusu cozulur (display: contents),
+ * sira baslik > aciklama > damga > dugmeler olur; damganin aciklamasi yaninda durur.
+ */
+@media (max-width: 899.98px) {
+	.sp-hero__inner { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+	.sp-hero__copy { display: contents; }
+	.sp-hero__title { order: 1; }
+	.sp-hero__text { order: 2; }
+	.sp-hero__stamp { order: 3; display: flex; align-items: center; gap: 1.1rem; margin-top: 2.5rem; }
+	.sp-hero__stamp-caption { margin-top: 0; max-width: 11rem; }
+	.sp-hero__actions { order: 4; }
+}
+
+/* Egik damganin koseleri kenar boslugunu tasmasin diye biraz iceride. */
+.sp-hero__stamp { margin: 0 0 0 6px; justify-self: start; }
+
+@media (min-width: 900px) {
+	.sp-hero__stamp { justify-self: end; }
+}
+
+.sp-hero__stamp-caption {
+	max-width: 15rem;
+	margin-top: 1.1rem;
+	font-size: 0.875rem;
+	color: color-mix(in srgb, var(--beton-acik) 78%, transparent);
+}
+
+/* Damga ------------------------------------------------------------------- *
+ * Palet blogunun kesit yuzu (cam) uzerine yakilarak basilmis isaret.
+ * Cerceve + ayirici cizgi + sablon yazi; IPPC basak logosu cizilmez.
+ */
+
+.sp-stamp {
+	--damga-boy: 1;
+	display: inline-grid;
+	padding: calc(0.9rem * var(--damga-boy));
+	background: var(--cam);
+	border-radius: var(--kose);
+	color: var(--yanik);
+}
+
+.sp-stamp__mark {
+	display: grid;
+	gap: calc(0.35rem * var(--damga-boy));
+	padding: calc(0.7rem * var(--damga-boy)) calc(1rem * var(--damga-boy));
+	border: calc(3px * var(--damga-boy)) solid currentColor;
+	border-radius: calc(10px * var(--damga-boy));
+	font-family: var(--font-damga);
+	font-weight: 800;
+	line-height: 0.95;
+	text-align: center;
+	/* Yakik murekkebin hafif dagilmasi. */
+	text-shadow: 0 0 1px currentColor;
+}
+
+.sp-stamp__code {
+	font-size: calc(2.6rem * var(--damga-boy));
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+}
+
+.sp-stamp__rule {
+	height: calc(3px * var(--damga-boy));
+	background: currentColor;
+}
+
+.sp-stamp__standard {
+	font-size: calc(1.6rem * var(--damga-boy));
+	letter-spacing: 0.08em;
+}
+
+.sp-stamp--hero {
+	--damga-boy: 1.25;
+	transform: rotate(-3deg);
+	animation: sp-damga 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.45s both;
+}
+
+@media (max-width: 479.98px) {
+	/* Telefonda damga yaninda aciklamaya yer kalsin. */
+	.sp-stamp--hero { --damga-boy: 0.72; }
+}
+
+/* Bir kez basilir: yukaridan iner, bastirir, yerine oturur. */
+@keyframes sp-damga {
+	0%   { opacity: 0; transform: rotate(-3deg) scale(1.35); filter: blur(3px); }
+	70%  { opacity: 1; transform: rotate(-3deg) scale(0.97); filter: blur(0); }
+	100% { opacity: 1; transform: rotate(-3deg) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sp-stamp--hero { animation: none; }
+}
