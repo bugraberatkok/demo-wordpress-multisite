@@ -1082,6 +1082,9 @@ git etiketleri `yedek/oncesi-entegrasyon-main` ve `yedek/oncesi-entegrasyon-pr`.
   `admin_init`'te (Koçist'te `init`) herkese açıktı; anonim form gönderimleri
   (`admin-post.php`) de tetikliyordu. Artık yalnızca yönetici ya da WP-CLI; Koçist
   `admin_init`'e alındı, Ahşap Ambalaj'a eşzamanlı çalışma kilidi eklendi.
+  Sonucu: temanın sayfa sürümü ileride artırılırsa (ör. `KOCIST_PAGES_VERSION`),
+  canlıdaki sitede yeni sayfalar ilk ziyaretçiyle değil, bir yönetici wp-admin'i
+  açınca oluşur. İlk kurulum etkilenmez (`after_switch_theme`).
 - **ISPM 15 belgesi**: firmanın kendi açık sitelerinde yayımlı olduğu için kullanıcı
   onayıyla repoda kalıyor.
 - `.gitattributes`: `*.sh` her zaman LF (Windows'ta CRLF'e dönen betik konteynerde
