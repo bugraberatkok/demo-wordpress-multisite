@@ -1,0 +1,2 @@
+# Kabuk betikleri Linux konteynerde calisir; Windows checkout CRLF yapmasin.
+*.sh text eol=lf

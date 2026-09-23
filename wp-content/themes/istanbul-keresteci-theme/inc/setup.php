@@ -23,6 +23,13 @@ add_action( 'after_switch_theme', 'ik_run_setup' );
 add_action( 'admin_init', 'ik_maybe_setup' );
 
 function ik_maybe_setup(): void {
+	// Yedek yol yalnizca yonetici ya da WP-CLI icin: admin_init anonim
+	// admin-post.php (form) isteklerinde de tetiklenir; ziyaretci kurulumu
+	// (sayfa acma, kalici baglanti, rewrite) baslatamasin.
+	if ( ! current_user_can( 'manage_options' ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		return;
+	}
+
 	if ( (int) get_option( 'ik_setup_version' ) < IK_SETUP_VERSION ) {
 		ik_run_setup();
 	}

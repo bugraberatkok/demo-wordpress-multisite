@@ -206,12 +206,30 @@ add_action( 'after_switch_theme', 'ahsapambalaj_setup_site' );
 add_action( 'admin_init', 'ahsapambalaj_maybe_setup_site' );
 
 function ahsapambalaj_maybe_setup_site(): void {
+	// Yedek yol yalnizca yonetici ya da WP-CLI icin: admin_init anonim
+	// admin-post.php (form) isteklerinde de tetiklenir; ziyaretci kurulumu
+	// (sayfa acma, kalici baglanti, rewrite) baslatamasin.
+	if ( ! current_user_can( 'manage_options' ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		return;
+	}
+
 	if ( get_option( 'ahsapambalaj_setup_version' ) !== AHSAPAMBALAJ_SETUP_VERSION ) {
 		ahsapambalaj_setup_site();
 	}
 }
 
 function ahsapambalaj_setup_site(): void {
+	if ( AHSAPAMBALAJ_SETUP_VERSION === get_option( 'ahsapambalaj_setup_version' ) ) {
+		return;
+	}
+
+	// Ayni anda iki istek gelirse sayfalar iki kez acilmasin.
+	if ( get_transient( 'ahsapambalaj_setup_lock' ) ) {
+		return;
+	}
+
+	set_transient( 'ahsapambalaj_setup_lock', 1, MINUTE_IN_SECONDS );
+
 	$pages = array(
 		'hakkimizda'    => 'Hakkımızda',
 		'hizmetlerimiz' => 'Hizmetlerimiz',

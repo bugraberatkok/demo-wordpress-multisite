@@ -50,9 +50,16 @@ function kocist_setup(): void {
 const KOCIST_PAGES_VERSION = '2';
 
 add_action( 'after_switch_theme', 'kocist_ensure_pages' );
-add_action( 'init', 'kocist_maybe_ensure_pages' );
+add_action( 'admin_init', 'kocist_maybe_ensure_pages' );
 
 function kocist_maybe_ensure_pages(): void {
+	// Yedek yol yalnizca yonetici ya da WP-CLI icin: admin_init anonim
+	// admin-post.php (form) isteklerinde de tetiklenir; ziyaretci kurulumu
+	// (sayfa acma, kalici baglanti, rewrite) baslatamasin.
+	if ( ! current_user_can( 'manage_options' ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		return;
+	}
+
 	if ( KOCIST_PAGES_VERSION !== get_option( 'kocist_pages_version' ) ) {
 		kocist_ensure_pages();
 	}

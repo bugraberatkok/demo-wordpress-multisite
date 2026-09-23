@@ -17,6 +17,10 @@ firmaya (Koçist Orman Ürünleri) ait gerçek siteler. Hedef: 10 site, tek pane
 | — Ürünler (+ 4 ürün sayfası) | http://localhost:8080/ithalkeresteci/urunler/ |
 | kavakkeresteci.com yeniden tasarımı (kuzen tema) | http://localhost:8080/kavakkeresteci/ |
 | — Ürünler (+ 4 ürün sayfası) | http://localhost:8080/kavakkeresteci/urunler/ |
+| Koçist (kocist.com.tr; yapım aşamasında, Emirhan) | http://localhost:8080/kocist/ |
+| İstanbul Keresteci (Emirhan) | http://localhost:8080/istanbul-keresteci/ |
+| Sanayi Palet (Emirhan) | http://localhost:8080/sanayi-palet/ |
+| Ahşap Ambalaj Sanayi (Emirhan) | http://localhost:8080/ahsapambalaj/ |
 | Ağ yönetimi (Network Admin) | http://localhost:8080/wp-admin/network/ |
 | — İçerik Stüdyosu | http://localhost:8080/wp-admin/network/admin.php?page=nwcs-studio |
 | — SEO ve GEO | http://localhost:8080/wp-admin/network/admin.php?page=nwcs-seo |

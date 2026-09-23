@@ -31,6 +31,13 @@ add_action( 'admin_init', 'sanayi_palet_maybe_setup_site' );
  * ilk istek yonetimden gelirse.)
  */
 function sanayi_palet_maybe_setup_site(): void {
+	// Yedek yol yalnizca yonetici ya da WP-CLI icin: admin_init anonim
+	// admin-post.php (form) isteklerinde de tetiklenir; ziyaretci kurulumu
+	// (sayfa acma, kalici baglanti, rewrite) baslatamasin.
+	if ( ! current_user_can( 'manage_options' ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		return;
+	}
+
 	if ( SANAYI_PALET_SETUP_VERSION !== get_option( 'sanayi_palet_setup_version' ) ) {
 		sanayi_palet_setup_site();
 	}

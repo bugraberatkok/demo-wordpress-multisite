@@ -98,12 +98,17 @@ else
 fi
 
 # Gercek siteler: <slug>|<tema>|<baslik>|<seed betigi>
-# Yeni bir site eklerken bu listeye bir satir eklemek yeterli.
+# Yeni bir site eklerken bu listeye bir satir eklemek yeterli. Seed yerine "-"
+# yazilirsa tema kendi kurulumunu yapar (sayfalarini after_switch_theme ile acar).
 SITES='
 ahsapkasa|ahsapkasa-theme|Koçist Orman Ürünleri|seed-ahsapkasa.php
 istanbulpaletci|istanbulpaletci-theme|İstanbul Paletçi|seed-istanbulpaletci.php
 ithalkeresteci|ithalkeresteci-theme|İthal Keresteci|seed-ithalkeresteci.php
 kavakkeresteci|kavakkeresteci-theme|Kavak Keresteci|seed-kavakkeresteci.php
+kocist|kocist-theme|Koçist Orman Ürünleri|-
+istanbul-keresteci|istanbul-keresteci-theme|İstanbul Keresteci|-
+sanayi-palet|sanayi-palet-theme|Sanayi Palet|-
+ahsapambalaj|ahsapambalaj-theme|Ahşap Ambalaj|-
 '
 
 echo "==> Turkce dil paketi"
@@ -126,7 +131,15 @@ echo "$SITES" | while IFS='|' read -r slug theme title seed; do
 	wpc site switch-language tr_TR --url="$site_url" >/dev/null 2>&1 || true
 	wpc option update timezone_string Europe/Istanbul --url="$site_url" >/dev/null
 	wpc rewrite structure '/%postname%/' --url="$site_url" >/dev/null
-	wpc eval-file "/scripts/${seed}" --url="$site_url"
+	if [ "$seed" = "-" ]; then
+		# Tema etkinlestikten sonraki ilk yuklemede WordPress after_switch_theme
+		# kancasini calistirir; tema sayfalarini o anda acar.
+		wpc eval 'echo "";' --url="$site_url" >/dev/null
+		# WordPress'in ornek yazisi ve sayfasi (seed'li sitelerde seed siler).
+		wpc eval 'foreach ( array( "post" => "hello-world", "page" => "sample-page" ) as $t => $n ) { $p = get_page_by_path( $n, OBJECT, $t ); if ( $p ) { wp_delete_post( $p->ID, true ); } }' --url="$site_url"
+	else
+		wpc eval-file "/scripts/${seed}" --url="$site_url"
+	fi
 done
 
 echo ""
@@ -135,5 +148,9 @@ echo "  ahsapkasa      : ${BASE_URL}/ahsapkasa/"
 echo "  istanbulpaletci: ${BASE_URL}/istanbulpaletci/"
 echo "  ithalkeresteci : ${BASE_URL}/ithalkeresteci/"
 echo "  kavakkeresteci : ${BASE_URL}/kavakkeresteci/"
+echo "  kocist         : ${BASE_URL}/kocist/"
+echo "  istanbul-keresteci: ${BASE_URL}/istanbul-keresteci/"
+echo "  sanayi-palet   : ${BASE_URL}/sanayi-palet/"
+echo "  ahsapambalaj   : ${BASE_URL}/ahsapambalaj/"
 echo "  Ağ yönetimi    : ${BASE_URL}/wp-admin/network/"
 echo "  Giriş          : ${BASE_URL}/wp-login.php  (kullanıcı: ${ADMIN_USER})"

@@ -1065,3 +1065,28 @@ görünür (`home.hero.image_note`; gerçek fotoğraf yüklenince silinir). Dör
 üretildi; boyası harfe benzeyen (yapay zeka izi belli olan) aday elendi. Ürün
 fotoğrafları firmanın gerçek fotoğrafları olarak kaldı: ürünü doğru gösteren gerçek
 görsel, daha güzel ama uydurma bir görselden iyidir.
+
+## PR #1 entegrasyonu: 8 site tek panelde
+
+Emirhan'ın tema paketi (Koçist + İstanbul Keresteci, Sanayi Palet, Ahşap Ambalaj)
+`feature/entegrasyon` dalında `feature/seo-kereste` üzerine birleştirildi.
+Öncesinde yedek alındı: veritabanı ve yüklemeler `backups/oncesi-entegrasyon-*`,
+git etiketleri `yedek/oncesi-entegrasyon-main` ve `yedek/oncesi-entegrasyon-pr`.
+
+- **Koçist**: yerelde silinen demo tema yerine PR'daki tema bütünüyle alındı. Düz
+  birleştirme PR'ın değiştirmediği 5 dosyayı (index.php dahil) silinmiş bırakıyordu;
+  index.php olmadan WordPress temayı bozuk sayar.
+- **Kurulum**: Emirhan'ın temaları seed betiği kullanmaz, sayfalarını tema etkinleşince
+  kendileri açar (`after_switch_theme`). `install.sh` listesinde seed yerine `-`.
+- **Güvenlik düzeltmesi**: temaların "kurulum çalışmadıysa çalıştır" yedek yolu
+  `admin_init`'te (Koçist'te `init`) herkese açıktı; anonim form gönderimleri
+  (`admin-post.php`) de tetikliyordu. Artık yalnızca yönetici ya da WP-CLI; Koçist
+  `admin_init`'e alındı, Ahşap Ambalaj'a eşzamanlı çalışma kilidi eklendi.
+- **ISPM 15 belgesi**: firmanın kendi açık sitelerinde yayımlı olduğu için kullanıcı
+  onayıyla repoda kalıyor.
+- `.gitattributes`: `*.sh` her zaman LF (Windows'ta CRLF'e dönen betik konteynerde
+  çalışmaz).
+- Duman testi: 8 sitede 92 adres 200, her sayfada tek `<title>`, PHP uyarısı yok.
+  Bilinen SEO eksikleri (6. adım): yeni 4 temada firma bilgisi yok; İstanbul
+  Keresteci'nin 10 ürün sayfası (`/urunlerimiz/<ürün>/`) ve Koçist blog sayfası
+  açıklamasız.
