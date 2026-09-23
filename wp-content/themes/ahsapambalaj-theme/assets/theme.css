@@ -1,0 +1,58 @@
+/*
+ * Elle yazilmis ek kurallar (Tailwind derlemesinin disinda).
+ *
+ * Tailwind kaynagi (build/ahsapambalaj.css) su an yeniden derlenemiyor; derlenmis
+ * CSS'te olmayan sinifa ihtiyac duyan duzeltmeler burada durur. tailwind.css'ten
+ * sonra yuklenir. Derleme yeniden acildiginda bu kurallar kaynaga tasinabilir.
+ */
+
+/* "Iceriğe gec" baglantisi: normalde gizli, klavye odaginda sabit header'in
+   ustunde, dugme boyutunda gorunur. (focus:fixed derlenmemisti; odakta
+   baglanti header'in altinda kaliyordu.) */
+.skip-link:focus {
+	position: fixed;
+	top: 1rem;
+	left: 1rem;
+	z-index: 60;
+	width: auto;
+	height: auto;
+	padding: 0.625rem 1.25rem;
+	clip-path: none;
+	overflow: visible;
+	white-space: nowrap;
+}
+
+/* Hero slayt noktalari: gorunen nokta 10px kalir, basilabilir alan 24px. */
+[data-slideshow-dots] {
+	gap: 14px;
+}
+
+[data-slide-dot] {
+	position: relative;
+}
+
+[data-slide-dot]::before {
+	content: "";
+	position: absolute;
+	inset: -7px;
+}
+
+/* Hero basligi telefonda bir kademe kucuk, ust-alt bosluk daha dar; boylece
+   iki dugme de ilk ekrana sigar. */
+@media (max-width: 767px) {
+	.hero-title {
+		font-size: 2rem;
+		line-height: 1.1;
+	}
+
+	.hero-inner {
+		padding-top: 4rem;
+		padding-bottom: 4.5rem;
+	}
+}
+
+/* Alt bilgideki iletisim baglantilari: parmakla basmak icin daha yuksek alan. */
+.footer-contact a {
+	display: inline-block;
+	padding-block: 0.375rem;
+}
