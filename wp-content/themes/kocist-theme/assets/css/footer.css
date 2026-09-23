@@ -1,0 +1,244 @@
+/*
+ * Footer ve ustundeki hareketli serit.
+ * Duzen referansi qrall.co footer'i, renkler Kocist paleti.
+ */
+
+/* ---------- Hareketli serit ---------- */
+.k-ticker {
+	overflow: hidden;
+	background: var(--forest-3);
+	color: rgba(255, 255, 255, .9);
+	border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.k-ticker__track {
+	display: flex;
+	width: max-content;
+	animation: k-ticker-scroll 42s linear infinite;
+}
+
+/* Fareyle uzerine gelince durur: okumak isteyen okuyabilsin. */
+.k-ticker:hover .k-ticker__track { animation-play-state: paused; }
+
+.k-ticker__list {
+	display: flex;
+	flex: none;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.k-ticker__item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 11px 22px 11px 0;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: .14em;
+}
+
+.k-ticker__mark {
+	color: var(--leaf);
+	font-size: 9px;
+	padding-right: 10px;
+}
+
+/*
+ * Liste iki kez basiliyor; -%50 otelendiginde ikinci kopya birincinin
+ * bittigi yerden devam ettigi icin dongu gorunmuyor.
+ */
+@keyframes k-ticker-scroll {
+	from { transform: translateX(0); }
+	to   { transform: translateX(-50%); }
+}
+
+/* ---------- Footer ---------- */
+.k-footer {
+	position: relative;
+	background: var(--forest-3);
+	color: rgba(255, 255, 255, .78);
+	padding: 52px 0 26px;
+	overflow: hidden;
+}
+
+/*
+ * Sag ustte soluk bir isik lekesi. Referanstaki parlak daire yerine
+ * markaya yakisan, dikkat calmayan bir derinlik katmani.
+ */
+.k-footer::before {
+	content: "";
+	position: absolute;
+	top: -140px;
+	right: -120px;
+	width: 420px;
+	height: 420px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(122, 182, 72, .16) 0%, rgba(122, 182, 72, 0) 68%);
+	pointer-events: none;
+}
+
+.k-footer .k-wrap { position: relative; }
+
+.k-footer__grid {
+	display: grid;
+	grid-template-columns: 1.6fr 1fr 1fr 1.25fr;
+	gap: 38px;
+	padding-bottom: 36px;
+}
+
+/* ---------- Sol sutun ---------- */
+.k-footer__logo {
+	height: 42px;
+	width: auto;
+	margin-bottom: 18px;
+
+	/* Logo koyu zemin icin acilir: ayri bir beyaz dosya tutmaya gerek kalmaz. */
+	filter: brightness(0) invert(1);
+	opacity: .95;
+}
+
+.k-footer__about {
+	margin: 0 0 22px;
+	max-width: 38ch;
+	font-size: 14.5px;
+	line-height: 1.65;
+}
+
+.k-footer__social {
+	display: flex;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.k-footer__social-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border: 1px solid rgba(255, 255, 255, .22);
+	border-radius: 999px;
+	color: rgba(255, 255, 255, .85);
+	text-decoration: none;
+	transition: background .22s ease, border-color .22s ease, color .22s ease, transform .22s ease;
+}
+
+.k-footer__social-link:hover {
+	background: var(--leaf);
+	border-color: var(--leaf);
+	color: var(--forest-3);
+	transform: translateY(-2px);
+}
+
+.k-footer__social-link:focus-visible {
+	outline: 2px solid var(--leaf);
+	outline-offset: 3px;
+}
+
+/* ---------- Baglanti sutunlari ---------- */
+.k-footer__heading {
+	margin: 0 0 16px;
+	font-size: 15px;
+	font-weight: 800;
+	letter-spacing: -.01em;
+	color: #fff;
+}
+
+.k-footer__list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	gap: 11px;
+}
+
+.k-footer__list a {
+	font-size: 14.5px;
+	text-decoration: none;
+	color: rgba(255, 255, 255, .78);
+	transition: color .2s ease, padding-left .2s ease;
+}
+
+.k-footer__list a:hover {
+	color: #fff;
+	padding-left: 4px;
+}
+
+.k-footer__list--contact { gap: 13px; }
+
+.k-footer__address {
+	display: flex;
+	align-items: flex-start;
+	gap: 9px;
+	font-size: 14.5px;
+	line-height: 1.5;
+}
+
+.k-footer__icon { flex: none; margin-top: 2px; color: var(--leaf); }
+
+.k-footer__map {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	color: var(--leaf) !important;
+	font-weight: 700;
+}
+
+.k-footer__map:hover { padding-left: 0 !important; gap: 11px; }
+
+/* ---------- Alt serit ---------- */
+.k-footer__bottom {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 26px;
+	padding-top: 24px;
+	border-top: 1px solid rgba(255, 255, 255, .13);
+	font-size: 13.5px;
+}
+
+.k-footer__legal {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 22px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.k-footer__legal a {
+	text-decoration: none;
+	color: rgba(255, 255, 255, .72);
+	transition: color .2s ease;
+}
+
+.k-footer__legal a:hover { color: #fff; }
+
+@media (max-width: 1023.98px) {
+	.k-footer__grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+	.k-footer__brand { grid-column: 1 / -1; }
+}
+
+@media (max-width: 599.98px) {
+	.k-footer__grid { grid-template-columns: 1fr; }
+	.k-footer__bottom { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	/*
+	 * Serit durur ve basindan gorunur; surekli yatay hareket vestibuler
+	 * rahatsizlik verebiliyor.
+	 */
+	.k-ticker__track { animation: none; }
+
+	.k-footer__social-link,
+	.k-footer__list a,
+	.k-footer__legal a {
+		transition-duration: .01ms !important;
+	}
+}

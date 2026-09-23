@@ -1,0 +1,412 @@
+/*
+ * Header: ust bilgi seridi, logo, ana menu ve morph eden acilir panel.
+ *
+ * Duzen referansi tuin.co.uk, menu hareketi revenuecat.com. Acilir menuler
+ * ayri ayri kutular degil; TEK bir kutu var ve menu ogeleri arasinda
+ * gezerken o kutu yeni icerigin olcusune dogru buyuyup kucultuluyor,
+ * icerik de gidis yonune gore capraz geciyor.
+ *
+ * Renk degiskenleri style.css icindeki :root blogundan gelir.
+ */
+
+/* ---------- Ust bilgi seridi ---------- */
+.k-topbar {
+	background: var(--forest);
+	color: rgba(255, 255, 255, .92);
+	font-size: 13px;
+	border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+
+.k-topbar__inner {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px 24px;
+	padding-top: 9px;
+	padding-bottom: 9px;
+}
+
+.k-topbar__note { font-weight: 600; }
+.k-topbar__dot { margin: 0 5px; opacity: .55; }
+.k-topbar__meta { display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: center; }
+
+.k-topbar__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	text-decoration: none;
+	transition: color .2s ease;
+}
+
+.k-topbar__item:hover { color: var(--leaf); }
+
+/* ---------- Header govdesi ---------- */
+.k-header {
+	position: sticky;
+	top: 0;
+	z-index: 30;
+	background: #fff;
+	color: var(--text);
+	border-bottom: 1px solid var(--line);
+}
+
+/*
+ * Sekiz menu ogesi, logo ve harekete cagri butonu 1180px'lik icerik
+ * genisligine ancak siginca olculer sikilastirildi. Yine de sigmadigi
+ * genisliklerde mobil menuye geciliyor (asagidaki 1179.98px esigi);
+ * onceki 1024px esigi arada bir bant birakiyor ve buton menunun
+ * uzerine biniyordu.
+ */
+.k-header__inner {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding-top: 12px;
+	padding-bottom: 12px;
+}
+
+/* ---------- Logo ---------- */
+.k-logo {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	flex: none;
+	text-decoration: none;
+	color: var(--text);
+}
+
+.k-logo__img { max-height: 52px; width: auto; }
+
+/*
+ * Logo gorseli varsa yazi gizlenir: marka gorseli "KOCIST / ORMAN URUNLERI"
+ * yazisini zaten icinde tasiyor, ikisi yan yana cift gorunurdu.
+ */
+.k-logo__img ~ .k-logo__text-wrap { display: none; }
+
+.k-logo__mark {
+	width: 42px;
+	height: 42px;
+	flex: none;
+	border-radius: 10px;
+	background: linear-gradient(135deg, var(--leaf), var(--forest));
+}
+
+.k-logo__text-wrap { display: flex; flex-direction: column; gap: 2px; }
+.k-logo__text { font-size: 22px; font-weight: 800; letter-spacing: .04em; line-height: 1; color: var(--forest); }
+.k-logo__sub { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- Ana menu ---------- */
+/*
+ * Menu logonun hemen yanindan baslar; kalan bosluk saga birakilir.
+ * Harekete cagri butonu kaldirildiktan sonra menuyu ortalamak solda
+ * genis bir bosluk biraktigi icin ortalamadan vazgecildi.
+ */
+.k-nav {
+	position: relative;
+	margin-right: auto;
+	margin-left: 10px;
+	min-width: 0;
+}
+
+.k-nav__list {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.k-nav__item { position: relative; display: flex; align-items: center; }
+
+/*
+ * Kayan gosterge. Konum ve genislik JS tarafindan yazilir (assets/js/nav.js),
+ * bu yuzden transform yalnizca yatay otelemeye ayrildi; dikey hizalama
+ * top + sabit yukseklik ile yapiliyor.
+ *
+ * Yay egrisi: cubic-bezier son degeri 1 degerini astigi icin gosterge hedefin
+ * bir tik otesine gidip geri oturuyor. Duz bir gecis hissini kiran sey bu.
+ */
+.k-nav__indicator {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 0;
+	height: 38px;
+	margin-top: -19px;
+	border-radius: 999px;
+	background: var(--leaf-soft);
+	box-shadow: inset 0 -2px 0 var(--leaf);
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		transform .46s cubic-bezier(.34, 1.45, .64, 1),
+		width     .46s cubic-bezier(.34, 1.45, .64, 1),
+		opacity   .22s ease;
+}
+
+.k-nav__indicator.is-visible { opacity: 1; }
+
+.k-nav__link {
+	position: relative;
+	z-index: 1;
+	display: inline-block;
+	padding: 9px 9px;
+	font-size: 12.5px;
+	font-weight: 700;
+	letter-spacing: .01em;
+	text-transform: uppercase;
+	text-decoration: none;
+	white-space: nowrap;
+	color: var(--text);
+	border-radius: 999px;
+	transition: color .24s ease;
+}
+
+.k-nav__link:hover,
+.k-nav__link:focus-visible,
+.k-nav__link.is-current { color: var(--forest); }
+
+/* Acilir menu oku */
+.k-nav__caret {
+	position: relative;
+	z-index: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 17px;
+	height: 28px;
+	margin-left: -7px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--muted);
+	cursor: pointer;
+}
+
+.k-nav__chevron { transition: transform .3s cubic-bezier(.22, 1, .36, 1); }
+.k-nav__item.is-open .k-nav__chevron { transform: rotate(180deg); }
+.k-nav__item.is-open .k-nav__caret { color: var(--forest); }
+
+/* ---------- Morph eden acilir panel (masaustu) ---------- */
+.k-dropdown {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 40;
+	padding-top: 10px;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transform: translateX(var(--k-dd-x, 0px)) translateY(-6px);
+	transition:
+		transform  .42s cubic-bezier(.22, 1, .36, 1),
+		opacity    .2s ease,
+		visibility .2s;
+}
+
+.k-nav.is-open .k-dropdown {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+	transform: translateX(var(--k-dd-x, 0px)) translateY(0);
+}
+
+/* Boyutu degisen kutu. Panolarin olculeri JS ile buraya yazilir. */
+.k-dropdown__shell {
+	position: relative;
+	overflow: hidden;
+	width: var(--k-dd-w, 240px);
+	height: var(--k-dd-h, 0px);
+	background: #fff;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	box-shadow: 0 24px 50px rgba(23, 84, 47, .16);
+	transition:
+		width  .42s cubic-bezier(.22, 1, .36, 1),
+		height .42s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Ilk acilista kutu 0 genislikten buyumesin diye gecis tek kare kapatilir. */
+.k-dropdown.is-instant .k-dropdown__shell,
+.k-dropdown.is-instant { transition: none; }
+
+/*
+ * Panolar ust uste durur. Gorunmeyen pano display:none DEGIL visibility:hidden
+ * ile saklanir; boylece olculebilir kalir (offsetWidth/offsetHeight calisir).
+ */
+.k-dropdown__pane {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: max-content;
+	min-width: 220px;
+	padding: 10px;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateX(var(--k-pane-x, 0px));
+	transition:
+		opacity    .24s ease,
+		transform  .34s cubic-bezier(.22, 1, .36, 1),
+		visibility .34s;
+}
+
+.k-dropdown__pane.is-active {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+}
+
+/*
+ * Sutunlar. --cols ve --rows sablonda oge sayisindan hesaplanir
+ * (kocist_menu_columns). grid-auto-flow: column ile okuma sirasi sutun sutun
+ * asagi iner; Hirdavat'in 24 ogesi 3 sutuna 8'er satir olarak dagilir.
+ */
+.k-dropdown__list {
+	display: grid;
+	grid-auto-flow: column;
+	grid-template-rows: repeat(var(--rows, 1), auto);
+	gap: 0 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Alt ogeler sirayla belirir; --i degeri sablonda satir sirasindan gelir. */
+.k-dropdown__item {
+	opacity: 0;
+	transform: translateY(-5px);
+	transition: opacity .22s ease, transform .22s ease;
+}
+
+.k-dropdown__pane.is-active .k-dropdown__item {
+	opacity: 1;
+	transform: none;
+	transition-delay: calc(var(--i, 0) * 32ms);
+}
+
+.k-dropdown__link {
+	display: block;
+	padding: 9px 12px;
+	border-radius: 9px;
+	font-size: 14px;
+	text-decoration: none;
+	white-space: nowrap;
+	color: var(--text);
+	transition: background .18s ease, color .18s ease, padding-left .18s ease;
+}
+
+.k-dropdown__link:hover,
+.k-dropdown__link:focus-visible {
+	background: var(--leaf-soft);
+	color: var(--forest);
+	padding-left: 16px;
+}
+
+/* ---------- Mobil menu dugmesi ---------- */
+.k-burger {
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	gap: 5px;
+	width: 42px;
+	height: 42px;
+	padding: 0 9px;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	background: #fff;
+	cursor: pointer;
+}
+
+.k-burger__bar {
+	display: block;
+	width: 100%;
+	height: 2px;
+	border-radius: 2px;
+	background: var(--forest);
+	transition: transform .28s cubic-bezier(.22, 1, .36, 1), opacity .2s ease;
+}
+
+.k-header.is-nav-open .k-burger__bar:nth-child(2) { transform: translateY(7px) rotate(45deg); }
+.k-header.is-nav-open .k-burger__bar:nth-child(3) { opacity: 0; }
+.k-header.is-nav-open .k-burger__bar:nth-child(4) { transform: translateY(-7px) rotate(-45deg); }
+
+.screen-reader-text {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/*
+ * Dar ekranda akordiyon. Alt menu isaretlemesi iki kez basilir: masaustu icin
+ * ortak panodaki kopya, dar ekran icin ogenin altindaki kopya. Her an yalnizca
+ * biri goruntulenir. Ortak kutuyu mobilde akisin icine sokmaya calismak yerine
+ * secilen bilincli takas: biraz fazladan isaretleme, cok daha basit davranis.
+ */
+.k-nav__accordion { display: none; }
+
+@media (max-width: 1179.98px) {
+	.k-header__inner { flex-wrap: wrap; gap: 12px; }
+	.k-burger { display: flex; margin-left: auto; order: 2; }
+
+	.k-nav {
+		order: 4;
+		width: 100%;
+		margin: 0;
+		padding-bottom: 6px;
+		display: none;
+	}
+
+	.k-header.is-nav-open .k-nav { display: block; }
+
+	.k-nav__indicator,
+	.k-dropdown { display: none; }
+
+	.k-nav__list { flex-direction: column; align-items: stretch; gap: 0; }
+	.k-nav__item { flex-wrap: wrap; border-top: 1px solid var(--line); }
+	.k-nav__link { flex: 1; padding: 13px 2px; }
+	.k-nav__caret { width: 40px; height: 44px; margin-left: 0; }
+
+	/*
+	 * Yukseklik animasyonu icin 0fr -> 1fr grid hilesi: icerigin yuksekligini
+	 * onceden bilmeye gerek birakmaz.
+	 */
+	.k-nav__accordion {
+		display: grid;
+		width: 100%;
+		grid-template-rows: 0fr;
+		transition: grid-template-rows .32s cubic-bezier(.22, 1, .36, 1);
+	}
+
+	.k-nav__item.is-open > .k-nav__accordion { grid-template-rows: 1fr; }
+
+	/* Dar ekranda sutun yok: tek kolon, normal akis. */
+	.k-nav__accordion > .k-dropdown__list {
+		display: block;
+		overflow: hidden;
+		padding-left: 12px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.k-nav__indicator,
+	.k-dropdown,
+	.k-dropdown__shell,
+	.k-dropdown__pane,
+	.k-dropdown__item,
+	.k-dropdown__link,
+	.k-nav__accordion,
+	.k-nav__chevron,
+	.k-burger__bar {
+		transition-duration: .01ms !important;
+		transition-delay: 0s !important;
+	}
+}
