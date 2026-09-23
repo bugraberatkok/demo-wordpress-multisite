@@ -539,6 +539,23 @@ SEO ve GEO sekmesi her site için 0–100 puan gösterir (SEO ve GEO alt puanlar
 Ağ özetinde sütun, site görünümünde kontrol listesi: eksik olan, kaç puan kaybettirdiği
 ve nasıl düzeltileceği. 85 ve üstü "Güçlü", 60–84 "Orta", altı "Zayıf".
 
+## Natro'ya taşıma paketi
+
+```bash
+DOMAIN=panel.kocist.com.tr ADMIN_EMAIL=ad@firma.com sh scripts/export-natro.sh
+```
+
+Yerel veritabanına dokunmaz; geçici bir kopya üzerinde adresleri `https://DOMAIN`'e
+çevirir (serileştirilmiş veri korunur, yazıların `guid` sütunu bilerek değişmez), 8
+sitenin hepsini **arama motorlarına kapatır** (deneme), MCP uygulama parolalarını siler
+ve eklentisini kapatır, yönetici parolasını yeniler (ekrana yazılmaz; paketteki
+`YONETICI-PAROLASI.txt`). Çıktı `dist/natro-<tarih>/` (Git'e girmez): `natro.sql`,
+`wp-content.tar.gz` (temalar ve eklenti Git'teki sürümden), `wp-config-ek.php`,
+`htaccess.txt`, `KURULUM.md` (cPanel adımları) ve dokunulmamış `yerel-yedek.sql`.
+
+Deneme bitince site site: alan adı bağlanır, DNS çevrilir, eski adres yönlendirmeleri
+test edilir, en son o sitenin "arama motorlarına açık" ayarı açılır.
+
 ## Eski adres yönlendirmeleri (301)
 
 **Ağ Yönetimi → SEO ve GEO → Yönlendirmeler.** Her sitenin eski adres listesi: eski

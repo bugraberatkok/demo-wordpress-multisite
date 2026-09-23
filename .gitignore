@@ -9,3 +9,6 @@ backups/
 
 # Tema kaynagi derlenirken olusan gecici dosya (build/theme-src.mjs)
 build/.tmp-*.css
+
+# Natro tasima paketleri (scripts/export-natro.sh); parola dosyasi icerir
+dist/
