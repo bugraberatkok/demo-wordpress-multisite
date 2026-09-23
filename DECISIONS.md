@@ -1236,3 +1236,34 @@ Yerelde posta sunucusu yok, gönderim bilinçli olarak başarısız olur. Canlı
 her alan adı için cPanel posta kutusu, SMTP eklentisi, SPF/DKIM/DMARC (README →
 "Formlar ve e-posta").
 
+## Eski adres yönlendirmeleri (301) — canlıya geçiş öncesi
+
+Firma sahibinin açık isteği: sitelerin eski adresleri kaybolmasın. Risk alan adı
+yeni sunucuya çevrildiği anda başlar; bu yüzden her alan adının listesi DNS
+değişmeden önce hazır olmalı. Koçist yarın ayrıca çıkacak; bugünkü 7 site tarandı
+(site haritaları + sayfa bağlantıları, yalnızca okuma):
+
+| Alan adı | Eski adres | Yeni sitede aynı | 301 | 410 (demo) |
+| --- | --- | --- | --- | --- |
+| istanbulpaletci.com | 31 | 14 | 1 | 16 |
+| sanayipalet.com | 87 | 10 | 27 | 50 |
+| istanbulkeresteci.com | 19 | 16 | 3 | 0 |
+| ahsapkasa.com | 2 | 1 | 1 | 0 |
+| ahsapambalajsanayi.com | 2 | 1 | 1 | 0 |
+| ithalkeresteci.com, kavakkeresteci.com | yalnızca ana sayfa (kocist.com.tr'yi çerçevede gösteriyor) | ✓ | 0 | 0 |
+
+Kararlar:
+- **Mekanizma eklentide** (`includes/redirects.php`, panel: SEO ve GEO →
+  Yönlendirmeler), `.htaccess` değil: çok siteli ağda tek `.htaccess` 8 alan adını
+  birden yönetir ve alan adı değişince kurallar bozulurdu. Kural yalnızca 404'te (ya da
+  yalnızca bir görselin ek sayfasına denk gelen adreste) çalışır; var olan sayfayı ezemez.
+- **Eski temanın demo içeriği 410**: Sanayi Palet'te vize/koçluk/ülke/ekip (51 sayfa),
+  İstanbul Paletçi'de portfolyo (16 sayfa), lorem ipsum. Ana sayfaya yönlendirmek
+  Google'da "yumuşak 404" sayılır; 410 dizinden hızlı çıkarır.
+- **Sanayi Palet'in 4 blog yazısı yeni sitede yok**; en yakın konuya yönlendirildi.
+  Öneri: firmanın kendi yazıları olduğu için yeni sitede aynı adresle yeniden
+  yayımlanmaları (kural o zaman kendiliğinden devre dışı kalır).
+- İstanbul Keresteci'de 2 yazının adresi kısaltılmış; eski adresler yeni adrese 301.
+- Test: 141 eski adresin tamamı yerel kopyada denendi; aynı adresler 200, taşınanlar
+  301 ve hedefleri 200, demo sayfalar 410, gerçek sayfalar etkilenmedi.
+

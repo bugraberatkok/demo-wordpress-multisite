@@ -539,6 +539,24 @@ SEO ve GEO sekmesi her site için 0–100 puan gösterir (SEO ve GEO alt puanlar
 Ağ özetinde sütun, site görünümünde kontrol listesi: eksik olan, kaç puan kaybettirdiği
 ve nasıl düzeltileceği. 85 ve üstü "Güçlü", 60–84 "Orta", altı "Zayıf".
 
+## Eski adres yönlendirmeleri (301)
+
+**Ağ Yönetimi → SEO ve GEO → Yönlendirmeler.** Her sitenin eski adres listesi: eski
+sitenin Google'daki ve başka sitelerdeki adresleri yeni sayfalara taşınır (301) ya da
+kaldırıldığı bildirilir (410). Kural yalnızca adres sitede bulunamadığında çalışır;
+var olan sayfayı etkilemez. Yollar sitenin köküne göredir, alan adı değişince de geçerli.
+
+```
+/urunler/ahsap-palet/    /urunler/#paletler     301
+/tag/*                   /blog/                 önekle eşleşen bütün adresler
+/portfolio-item/*        410                    eski temanın demo sayfaları
+```
+
+İlk listeler canlı alan adları taranarak çıkarıldı (`scripts/data/redirects.php`) ve
+`wp eval-file /scripts/load-redirects.php` ile yüklenir (`--dry-run` önce gösterir).
+**Bir alan adının DNS'i yeni sunucuya çevrilmeden önce o sitenin listesi hazır
+olmalı.** Koçist (kocist.com.tr, ~600 eski adres) listesi kendi geçişinden önce eklenecek.
+
 ## Formlar ve e-posta
 
 Bütün sitelerin teklif/iletişim formları gönderimi WordPress'e kaydeder (site
