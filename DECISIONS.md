@@ -681,3 +681,387 @@ metin tam genişlikte), 640px üstünde yan yana geçiyor. Oran her iki dizilimd
 - **İletişim düzeni**: başlık solda, iletişim bilgileri sağda bir kutuda, teklif formu ikisinin
   altında ortada ayrı bir kutuda. Telefon ve e-posta 24px'ten 21px'e indi; adres satır
   ortasından bölünüyordu.
+
+## istanbulpaletci yeniden tasarımı
+
+İkinci gerçek site. ahsapkasa ile aynı şirket (Koçist Orman Ürünleri), bu yüzden
+asıl soru "iki kardeş site nasıl birbirine benzemeden aynı sistemde durur" oldu.
+
+### Renk: logodan ölçüldü, görevleri ayrıldı
+
+- **İndigo `#3D34ED`** logodaki "İSTANBUL" yazısından piksel piksel ölçüldü; canlı
+  sitede hiç kullanılmıyordu (tema demosunun donuk laciverti vardı). Tek görevi
+  eylem: düğme, bağlantı, etkin menü, odak halkası.
+- **İndigo açık `#A09BFF`** logonun koyu zemin sürümünden alındı; koyu yüzeyde
+  indigo'nun yerine geçer.
+- **Sinyal sarısı `#F2B705`** yalnızca ölçü ve teknik veri: hero'daki ölçü
+  çizgileri, kartlardaki ölçü satırı, şartname föyünün üst çizgisi. Başka yerde yok.
+- **Arayüzde ahşap tonu yok.** ahsapkasa'da ahşap ve yeşil arayüzün kendisiydi;
+  burada sıcaklığı yalnızca fotoğraflar taşır. İki site böylece aynı şirketin iki
+  ayrı yüzü olur.
+
+### Tipografi
+
+Barlow Condensed (yalnızca 32 px üstü başlıklar) + Barlow (metin). Tek süper aile,
+iki belirgin genişlik; kamu altyapı tabelaları için çizilmiş, endüstriyel. Dar kesim
+küçük boyda "spor kulübü" gibi okunduğu için kart başlıkları normal genişliktedir.
+Ölçüler `tabular-nums` ile hizalanır; monospace kullanılmadı.
+
+### Yüzeyler ve gölge
+
+Bant (kenardan kenara dolu renk), föy (`.sheet`, keskin köşe) ve kart (`.card`,
+4 px). Yüzeylerde gölge yok; ayrım renk ve çizgiyle. **Tek istisna** üst menünün
+açılır ürün paneli: sayfanın üstünde süzülen bir katman olduğu ancak gölgeyle
+anlaşılıyor (beyaz ürün görselinin üstüne binince kenarı kayboluyordu).
+
+Düğmeler 3 px köşeli, sert; ahsapkasa'nın hap düğmelerinden bilinçli olarak farklı.
+Boy ve çeşit sistemi aynı mantıkta (`.btn--sm/md/lg`, `--solid/outline/light/light-outline`).
+
+### Tek gösterişli an
+
+Hero'da indigo alan üzerinde beyaz bir şartname föyü; çevresindeki sarı ölçü
+çizgileri sayfa açılışında bir kez çizilir. Bölüm bölüm kayarak gelen animasyonlar
+yok. Ölçü çizgisinin uç çentikleri önce 1 px idi ve görünmüyordu; 2 px'e çıkarıldı,
+çizim animasyonunun kırpma alanı da çentikleri kesmesin diye 20 px dışa taşırıldı.
+
+### Ürün sayfaları tek şablon
+
+Beş ürün sayfası manifestte `'template' => 'product'` ile işaretli ayrı sayfalardır
+(panelde her biri ayrı düzenlenir) ama tek şablonla basılır (`page.php` →
+`template-parts/product-page.php`). Ürün listesinin tek kaynağı manifesttir:
+menü, ızgara, liste, alt bilgi, form seçenekleri ve "diğer ürünler" oradan beslenir.
+Manifestteki beş sayfa aynı alan yapısını bir kurucu fonksiyonla paylaşır; dosya hâlâ
+WordPress'e bağımlı olmayan saf bir dizi döndürür.
+
+Ürün havuzu kullanılmadı: ürün sayfaları şartname, galeri ve uzun açıklama taşıyor,
+havuz ise kart düzeyinde ürünler için tasarlandı. ahsapkasa'da da ürünler manifestte.
+
+### Şartname tablosu ve içerik dürüstlüğü
+
+Canlı sitenin ürün sayfalarında hiçbir teknik veri yoktu; B2B alıcı için en büyük
+eksik buydu. Şartname tablosu eklendi ama **firmaya özel değer uydurulmadı**: Euro
+palet verileri (ölçüler, 35 kg, 1500 kg, 45,234 dm³) firmanın kendi sayfasından,
+diğer satırlar kendi ürün metinlerinden türetildi. Euro palet metnindeki "80 adet
+tahtadan imal edilir" cümlesi kaldırıldı; standart bir Euro palet ~20 parçadan
+oluşur, cümle büyük olasılıkla çivi sayısıyla karışmış.
+
+### Görseller
+
+- Ana sayfa slaytlarının üçü kolajdı; beyaz ayırıcı çizgiler ölçülerek içlerinden
+  tek fotoğraf kırpıldı (kurulum betiğinde, koordinatlarıyla).
+- `home1-welcome` ve `home1-contact-pic` tema demosundan kalma stok görseller
+  ("DIGITAL MARKETING" panolu adam, işaret eden kadın); kullanılmadı.
+- `background01` (sisli dağ) ahsapkasa'da kullanıldığı için, `background02` (tren
+  yolu) marka dışı olduğu için kullanılmadı.
+- Planda Ahşap Sandık ve İkinci El Palet için "ÖRNEK GÖRSEL" öngörülmüştü; gerek
+  kalmadı: `featured02` gerçek bir OSB sandık, `palet_2` yıpranmış bir palet.
+- Logo yalnızca 160×51 px; retina ekranda yumuşak görünür. SVG ya da yüksek
+  çözünürlüklü sürümü gelince değiştirilmeli.
+
+### Canlı sitede bulunan hata
+
+WhatsApp bağlantısında numara boşluklu yazılmış (`phone=+9053237498%2032`), bu
+yüzden çalışmıyor. Yeni sitede `https://wa.me/905323749832` kullanıldı.
+
+### Teklif formunda durum anahtarı (ahsapkasa'da da düzeltildi)
+
+Form, yönlendirmeden sonra hata/başarı durumunu geçici kayıtta tutar ve anahtarı
+adresle taşır. ahsapkasa bu anahtarı büyük-küçük harf karışık üretiyor, okurken
+`sanitize_key()` küçültüyordu. Yerelde MySQL harf duyarsız olduğu için çalışıyordu;
+harf duyarlı nesne önbelleğinde (LiteSpeed, Redis) mesajlar kaybolurdu. İki temada
+da anahtar artık küçük harfli onaltılık ve okurken biçimi doğrulanıyor. Excel içe
+aktarmadaki hatanın aynısı.
+
+### Dil
+
+Blog yazıları firma tarafından WordPress yönetiminden düzenleneceği için bu siteye
+Türkçe dil paketi kuruldu (tarihler "11 Mayıs 2022", `lang="tr-TR"`). Diğer siteler
+hâlâ İngilizce; ahsapkasa canlıya alınmadan önce aynı işlem yapılmalı.
+
+### Revizyon: hero zemini
+
+Düz indigo hero alanı göz alıyordu. İlk denenen koyu lacivert + ışık + ızgara
+beğenilmedi. Son hâl: logodaki indigo korunup üstüne %60 siyah perde çekildi
+(`--hero-veil` değişkeni, tek yerden ayarlanır). Föy hafif iki katmanlı gölgeyle
+zeminden kalkar (`.sheet--raised`); bu, gölge kuralının ikinci istisnası.
+
+### WhatsApp düğmesi marka yeşilinde
+
+WhatsApp düğmeleri (üst menü, mobil menü, ürün sayfası) yeşil zemin, beyaz ikon ve
+yazı: `.btn--whatsapp`. Parlak marka yeşili `#25D366` üzerinde beyaz yazının
+kontrastı 2:1, okunabilirlik sınırı 4.5:1; bu yüzden düğme zemini aynı yeşilin koyu
+tonu `#157F48` (5:1). Parlak yeşil beyaz zemindeki ikonlarda kalır (iletişim
+listeleri). Tek istisna renk: WhatsApp anında tanınsın diye.
+
+## SEO ve GEO — kalıcı ilke
+
+Kullanıcı kararı: ağdaki bütün siteler (hedef 10) **SEO ve GEO destekli** olacak.
+GEO (Generative Engine Optimization), ChatGPT, Perplexity ve Google'ın yapay zekâ
+özetleri gibi motorlarda kaynak olarak gösterilmek demek. Bu bölüm bundan sonraki her
+tema ve eklenti değişikliği için kontrol listesidir; yeni bir site bu listeyi
+karşılamadan "tamam" sayılmaz.
+
+### Nerede yaşar
+
+Temada değil, **eklentide**. On site için tek kod; panelde her sayfanın kendi SEO
+bölümü, site düzeyinde varsayılanlar. Temanın görevi yalnızca anlamlı HTML üretmek.
+Uygulama: ağ yönetiminde "SEO ve GEO" sekmesi (ayrıntı: "SEO ve GEO — uygulama").
+
+### Her sayfada
+
+- Tek H1, atlamayan başlık hiyerarşisi, `lang="tr"`, `header/nav/main/footer`.
+- Arama başlığı ve meta açıklama. Boşsa sayfa başlığı ve öne çıkan cümleden üretilir.
+- Kanonik adres; alan adı eşlemesinden sonra her site kendi alan adını kanonik gösterir.
+- Paylaşım önizlemesi (Open Graph + Twitter): başlık, açıklama, görsel.
+- Görsellerde anlamlı alternatif metin; boyutu belli, tembel yüklenen görseller.
+
+### Yapılandırılmış veri (JSON-LD)
+
+- Site geneli: `Organization` / `LocalBusiness` (ad, adres, telefon, e-posta,
+  koordinat, `sameAs` ile kardeş siteler), `WebSite`.
+- Ürün sayfaları: `Product` (ad, açıklama, görsel, şartname satırları
+  `additionalProperty` olarak). **Uydurma fiyat, puan, yorum yok.** Fiyat yoksa
+  `offers` hiç yazılmaz.
+- Blog: `BlogPosting` (tarih, yazar olarak firma). Tüm iç sayfalar: `BreadcrumbList`.
+- `FAQPage` yalnızca sayfada gerçekten soru-cevap varsa.
+
+### GEO'ya özel
+
+- Her sitede `/llms.txt`: sitenin ne olduğu, sayfalar ve kısa açıklamaları.
+- Önemli bilgiler **metin olarak** durur: ölçüler, kapasiteler, adres. Görselin
+  içine gömülü bilgi yapay zekâ tarafından okunmaz. Şartname tabloları bu yüzden
+  gerçek `<dl>`.
+- Firma adı, adres ve telefon (NAP) 10 sitede birebir aynı yazılır. Tutarsızlık hem
+  yerel SEO'yu hem yapay zekânın firmayı tek varlık olarak tanımasını bozar.
+- İçerik dürüstlüğü burada SEO konusu da: yapay zekâ motorları metni alıntılar.
+  Uydurma bir rakam on sitede çoğalır ve firma adına tekrarlanır.
+
+### Ağ düzeyinde
+
+- Site başına site haritası (WordPress çekirdeği: `/wp-sitemap.xml`).
+- `robots.txt` alt dizin multisite'ta yalnızca kök alan adında çalışır; her site
+  kendi alan adına eşlendiğinde site başına üretilmeli.
+- Kardeş siteler birbirine bağlantı verirken aynı içeriği kopyalamaz (yinelenen
+  içerik). ahsapkasa ve istanbulpaletci aynı firmanın farklı metinleriyle durur.
+- Hız (Core Web Vitals) sıralama sinyalidir: sayfa oluşturucu kullanılmaz, CSS
+  derlenmiş tek dosya, yazı tipleri önceden bağlanır.
+
+## SEO ve GEO — uygulama
+
+### Alanlar manifeste eklentiden eklenir
+
+Temalar SEO alanı tanımlamaz. `nwcs_manifest_for_theme()` manifesti okurken her
+sayfaya (ortak `global` hariç) bir `seo` bileşeni ("Arama ve Paylaşım") ve gizli bir
+`site_seo` sayfası (firma bilgisi, varsayılanlar) ekler. Sonuç: kaydetme, temizleme,
+alan çizimi, canlı önizleme ve MCP yetenekleri SEO alanlarında **ek kod olmadan**
+çalışır. Yeni SEO sekmesi de ayrı bir kaydetme yolu açmaz; İçerik Stüdyosu'nun AJAX
+kaydetmesini ve aynı güvenlik zincirini kullanır. `seo` ve `site_seo` adları ayrılmıştır.
+
+Gizli sayfa (`'hidden' => true`) Stüdyo'nun sekmelerinde görünmez; firma bilgisi yalnızca
+SEO sekmesinden düzenlenir.
+
+### Boş alan = otomatik
+
+Site sahibi hiçbir şey girmese de her sayfa başlık, açıklama ve görselle çıkar: başlık
+sayfanın kendi başlığından (`title`/`name` alanları), açıklama öne çıkan cümleden
+(`lead`/`short`/`intro`/`text`…), görsel ilk dolu görsel alanından. Tema isterse
+`seo_source` ile hangi alanın kullanılacağını açıkça söyler. Otomatik değer panelde gri
+yer tutucu olarak görünür; içerik değişince kendiliğinden güncellenir. Ana sayfada marka
+önce gelir ("İstanbul Paletçi – İsteğe özel…"), iç sayfalarda sayfa adı.
+
+### Ürün verisi şartnameden
+
+`seo_source.type = Product` olan sayfalarda şartname satırları `additionalProperty`
+olarak ürün verisine ve `llms.txt`'ye düz metin olarak geçer; aynı veri iki kez
+girilmez. **Fiyat, puan, yorum üretilmez**: Google yanlış ürün verisini cezalandırır,
+yapay zekâ motorları da alıntılar.
+
+### Arayüz: önce önizleme, gerekirse düzenleme
+
+Sitenin sayfaları Google sonucu önizlemesi olarak listelenir; düzenleyici her kartın
+altında kapalı durur. İlk sürümde bütün formlar açıktı ve sekme ~9000 piksel tutuyordu;
+kapalı hâliyle ~3400. Başlıkta 60, açıklamada 160 karakter sayacı var; alan boşken
+sayaç otomatik değerin uzunluğunu gösterir. Stüdyo'nun kaydet çubuğu tek form için
+yapışıktır; bu sekmede çok form olduğu için yerinde durur. "Kaydedilmedi" göstergesi
+de artık olayın geldiği forma bağlı (önceden sayfadaki ilk formu varsayıyordu).
+
+### Siteler arası tutarlılık
+
+Ağ özeti, sitelerin firma bilgisinde unvan, telefon ve adresi karşılaştırır (boşluk ve
+büyük-küçük harf farkı sayılmaz). İlk çalıştırmada gerçek bir tutarsızlık buldu: iki
+site aynı adresi farklı yazıyor ("Şahintepe Mh. … No. 176/A-B-C-D" / "Şahintepe, …
+No: 176"). Varsayılanlar her sitenin **kendi yayındaki** bilgisinden alındı; hangisinin
+doğru olduğuna firma karar verir.
+
+### Güvenlik ve temizlik
+
+Site haritasından kullanıcı listesi çıkarıldı: WordPress varsayılanı yönetici kullanıcı
+adını herkese açık bir dosyada listeliyordu. Yazar, tarih, arama ve ek sayfası
+arşivleri `noindex`. `llms.txt` arama motorlarına kapalı sitede verilmez.
+
+### Kapsam dışı
+
+`robots.txt` alt dizin multisite'ta yalnızca kök alan adında çalışır; site başına dosya
+alan adı eşlemesinden sonra. Google Search Console kaydı canlıya geçişte. Blog
+yazılarının açıklaması yazının WordPress "Özet" alanından gelir; SEO sekmesi yazıları
+listeler ama düzenlemeyi WordPress'in yazı düzenleyicisine bırakır.
+
+## Demo sitelerin kaldırılması
+
+İlk aşamanın iki demo sitesi (`/kocist/`, `/paletci/`), temaları, `seed.php`,
+`seed-only.sh` ve Docker bağlantıları kaldırıldı; artık yalnızca gerçek siteler var.
+Silmeden önce veritabanının tamamı `backups/` altına alındı (Git dışı, web kökü dışı).
+Ürün havuzu özelliği ve içindeki ürünler (kullanıcının denemeleri dahil) duruyor; şu an
+havuzu kullanan bir site yok.
+
+`install.sh` artık betiğin başındaki `SITES` listesinden gerçek siteleri kurar ve var
+olan bir sitenin içeriğine dokunmaz (seed alanları varsayılana geri yazdığı için
+yalnızca site ilk kez oluşurken çalışır).
+
+### Tema klasörü tek başına site değildir
+
+Tema = tasarım + düzenlenebilir alan listesi. Site ayrıca açılır (Ağ Yönetimi → Siteler),
+tema ona atanır, manifestteki adresler için sayfalar oluşturulur. Silerken önce site,
+sonra tema: tersi sırada site temasız kalır. Bu dört adımı tek ekrana indiren bir "Yeni
+site" sihirbazı sıradaki adım olarak önerildi.
+
+## ithalkeresteci — kuzen kereste sitelerinin ilki
+
+### Bulgu: alan adlarının kendi içeriği yok
+
+ithalkeresteci.com ve kavakkeresteci.com aynı sunucuya bakıyor ve yalnızca
+kocist.com.tr'yi tam ekran bir çerçeve (iframe) içinde gösteriyor; HTTPS çalışmıyor.
+Çerçeve içeriği Google'da kocist.com.tr'ye sayılır, alan adlarının kendi değeri sıfır.
+kocist.com.tr'nin kendisi 604 adresli (vida, tabanca, kompresör, kulübe modelleri) bir
+katalog. Yeniden tasarımda her alan adı **kendi adının karşılığı olan odaklı bir kereste
+sitesi** oldu; 604 adres yerine 10 sayfa.
+
+### Tek ana tema, iki çocuk tema
+
+WordPress'in standart ana/çocuk tema yapısı: `kereste-base` bütün şablonları,
+hesaplayıcıyı, formu ve stili taşır; çocuk tema yalnızca üç renk değişkeni ve içerik
+manifestidir. Manifest, ana temadaki kurucuya (`manifest.php`, bir closure döndürür)
+site ayarlarını verir; dosya panel tarafından birden çok kez okunabildiği için fonksiyon
+tanımlamaz. Eklenti değişmedi: çocuk temanın manifestini, SEO alanlarıyla birlikte,
+kendiliğinden tanıdı (12 sayfa, 153 alan). İki kuzeni ayıran modüller manifestteki
+`sortable_sections` listesinden seçilir.
+
+### Tasarım: "parti boyası"
+
+Kereste depolarında paket ve tomruk uçları partiyi belli etmek için boyanır; iki site
+aynı depodan iki parti gibi, farklı işaret rengiyle. Diğer iki siteden ayrışma:
+
+- beyaz zemin, **Zilla Slab** başlıklar (ahşap matbaa harfi karakteri), Source Sans 3 metin;
+- **Saira Stencil One** yalnızca kesit ölçüsü ve tür etiketlerinde (paketlere böyle püskürtülür);
+- köşesiz düğmeler (ahsapkasa hap, istanbulpaletci 3 px köşeli);
+- ürün kartları **paket etiketi**: delik, ip, şablon harfli ölçü;
+- vurgu ithalde petrol `#0B5C6B` (beyazda 7.6:1); kavak için ilk plan pastı, kullanıcı
+  isteğiyle yeşil-kahveye döndü (aşağıda, kavakkeresteci).
+
+İmza öğe **hero'daki m³ hesaplayıcısı**: kereste metreküple satılır; hesaplanan ölçü
+"teklif al" ile teklif penceresine yazılır. Sayfa açılışında animasyon yok.
+
+Hero'da fotoğraf ızgara hücresini hem en-boy oranı hem tam yükseklikle alınca sütunu
+itiyordu (hesaplayıcı 263 piksele sıkıştı, ölçülerek bulundu); masaüstünde fotoğraf
+hücreyi mutlak konumla dolduruyor.
+
+### İçerik kaynakları ve bilinçli boşluklar
+
+Metinler kocist.com.tr'deki ürün sayfalarından kısaltıldı; teknik satırlar oradaki
+verilerle sınırlı (inşaatlık kereste: sarıçam/karaçam/ladin, 5×10 ve 10×10, 1./2.
+sınıf; plywood: aspen/huş, filmli/filmsiz; kalas: çam/gürgen, fırınlanmış). Ürün
+listesi ve ölçüler firmadan teyit bekliyor. Fotoğraflar firmanın kendi fotoğrafları
+(822 px, ortada filigran); örnek görsel üretmek gerekmedi.
+
+Adres ve telefon, kullanıcı kararıyla kaynak sitedeki gibi (Çatalca, 0549 648 19 19)
+bırakıldı; firma sahibi SEO ve GEO sekmesinden düzeltecek. Sekme şu an iki telefon ve
+üç adres yazımını tutarsızlık olarak gösteriyor. Kaynakta WhatsApp numarası boş
+(`wa.me/`); düğme sonradan kullanıcı isteğiyle telefon hattıyla dolduruldu (aşağıda). Kaynak Hakkımızda "37 yıl" diyor, diğer siteler
+"40 yıl"; burada kaynak korundu. kocist.com.tr'deki kontrplak sayfasının metni
+"ASDASDASD…" test yazısı.
+
+## kavakkeresteci — kuzen sitenin ikincisi
+
+### m³ hesaplayıcısı kaynakta yoktu
+
+Kullanıcı sordu: kocist.com.tr'de hesaplayıcı yok; onaylanan tasarım planında imza öğe
+olarak önerilen bir ekleme. Satıcı istemezse ana sayfadan tek bölüm olarak kaldırılır
+(hero'daki hesaplayıcı ve Hacim hesaplama sayfası); başka hiçbir şey ona bağlı değil.
+
+### Renk: yeşil ve kahve
+
+Kullanıcı kavak için pas yerine yeşil-kahve istedi: "tahtayla çok haşır neşiriz ve logosu
+da yeşil". İşaret rengi doğrudan Koçist logosunun yeşili `#508038`; beyaz zeminde ve
+beyaz yazıyla 4,7:1, koyulaştırmak gerekmedi. Şablon harfler kahve `#7A4A26` (7,4:1),
+metin ve alt bilgi koyu ahşap kahvesi `#2A221C`, bölüm zemini açık adaçayı `#EEF0E9`.
+Bunun için ana temaya üç yeni isteğe bağlı değişken eklendi (`--site-stamp`,
+`--site-ink`, `--site-stone`); tanımlamayan ithal eski haliyle kalır.
+
+### Modül farkı: tedarik yerine kullanım alanları
+
+ithal ana sayfasında "toptan tedarik, hızlı sevkiyat" bandı var (tır ve forklift
+fotoğrafları). Kavakta sevkiyat fotoğrafı yok, alıcının sorusu da farklı: "bu işime uyar
+mı?". Yeni `uses` modülü kaynaktaki kullanım alanlarını (ambalaj/sandık/palet, mobilya,
+inşaat, iç dekorasyon) sıralar; fotoğraf alanı isteğe bağlı, eşleşen fotoğraf olmadığı
+için boş. Manifest kurucusu artık ana sayfada yalnızca `home_sections` listesindeki
+modüllerin alanlarını açar; panelde kullanılmayan alan görünmez.
+
+### Ürünler
+
+Kavak kereste, çıta, ahşap takoz, OSB levha. kocist.com.tr'de kavak ailesinden içeriği
+ve fotoğrafı olan dört ürün bunlar; "paletlik kereste"nin metni olmadığı için OSB seçildi.
+Teknik satırlar kaynaktaki bilgiyle sınırlı; ölçü yazılmadı ve hesaplayıcının hazır
+kesitleri boş bırakıldı (ölçü listesi satıcıdan gelecek).
+
+### Koçist logosu ve WhatsApp (iki sitede)
+
+- Grup logosu (`global.header.parent_logo`): üst menüde site adının yanında (xl ve
+  üstü; lg'de menü satırı dolu), mobil menünün altında ve alt bilgide beyaz plaka üzerinde
+  (logo açık zemine göre çizilmiş). Bağlantısı kocist.com.tr.
+- WhatsApp: kaynak sitedeki bağlantıda numara yok. Kullanıcı "butonu görelim" dedi;
+  **telefonla aynı hat (0549 648 19 19) varsayıldı**, `wa.me/905496481919`. Firma başka
+  bir hat verirse panelden değişir. Düğme istanbulpaletci'deki gibi yeşil zemin
+  `#157F48`, beyaz simge. Üst menüde md'de yazılı, lg'de gizli (yer yok), xl'de yalnız
+  simge, 2xl'de yazılı; telefon yazısı 2xl'e alındı. Ürün sayfasında üç büyük düğme
+  satırı taşırdığı için "Hacim hesapla" düğmesi metin bağlantısına indi.
+
+### Yerel bağlantılar
+
+Kuzen köprüsü ve alt bilgideki kardeş siteler canlı alan adlarını gösterir. Yerel ağda
+seed betikleri bunları buradaki kopyalara çevirir (`kr_localize_links`); sonradan
+kurulan kuzen, öncekinin bağlantısını da çevirir. Canlıda kod değişmeden alan adları
+geçerli.
+
+## Kereste siteleri: hesaplayıcı kaldırıldı, hero yeniden tasarlandı
+
+Kullanıcı kararıyla m³ hesaplayıcısı iki siteden de kaldırıldı: hero'daki kutu, Hacim
+hesaplama sayfası (WordPress sayfası da silindi, adres 404), menü öğesi, ürün
+sayfasındaki bağlantı, manifestteki `calc_*` alanları, `calc` sayfası ve hazır kesitler,
+site.js'deki hesaplama kodu. SSS'deki "metreküp nasıl hesaplanır" sorusu kaynaktan
+geldiği için kaldı; yalnızca hesaplama sayfasına yönlendiren cümle çıktı.
+
+### Yeni hero: ipe asılı paket etiketi
+
+Değerlendirmede eski hero'nun zayıf yanı: sayfanın ilk ekranı bir forma benziyordu,
+fotoğraf küçük ve filigranlıydı (kavakta beyaz fonlu ürün kesimi). Yeni hero:
+
+- **Tam genişlik fotoğraf**: kereste paketlerinin boyayla işaretlenmiş uçları. Tasarımın
+  "parti boyası" fikri artık fotoğrafın içinde: ithalde petrol, kavakta yeşil çizgiler.
+- **Perde**: metin tarafı koyu (masaüstünde soldan, mobilde alttan), `--color-ink`
+  üzerinden; kavakta koyu kahve, ithalde kurşuni.
+- **İmza öğe**: sağda, hero'nun üst kenarından inen ipe asılı büyük **paket etiketi**.
+  Üstte sitenin rozeti ve adı (parti etiketi), altında şablon harfli dört ürün; her satır
+  ürün sayfasına gider. Ürün kartlarındaki etiketin hero boyu. Mobilde gizli (kartlar
+  hemen altta).
+- **Tek hareket**: etiket açılışta bir kez ipinde yerine oturur (-9° → -2°);
+  `prefers-reduced-motion` açıkken hareket yok.
+- İkincil düğme koyu zemin için yeni `btn--ghost`.
+
+### Yapay zekayla üretilen örnek görseller
+
+Hero fotoğrafları Flux 2 Max ile üretildi (`resources/kereste/ornek-hero-ithal.jpg`,
+`ornek-hero-kavak.jpg`, 2400 px). Proje kuralı gereği sitede **"Örnek görsel"** notuyla
+görünür (`home.hero.image_note`; gerçek fotoğraf yüklenince silinir). Dört aday
+üretildi; boyası harfe benzeyen (yapay zeka izi belli olan) aday elendi. Ürün
+fotoğrafları firmanın gerçek fotoğrafları olarak kaldı: ürünü doğru gösteren gerçek
+görsel, daha güzel ama uydurma bir görselden iyidir.

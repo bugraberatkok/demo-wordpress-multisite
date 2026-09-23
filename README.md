@@ -1,27 +1,34 @@
-# WordPress siteleri, tek içerik paneli — yerel demo
+# WordPress siteleri, tek içerik paneli — yerel geliştirme ortamı
 
-Tek bir WordPress **Multisite** ağı altında, tasarımları birbirinden bağımsız üç demo sitesi:
+Tek bir WordPress **Multisite** ağı altında, tasarımları birbirinden bağımsız, aynı
+firmaya (Koçist Orman Ürünleri) ait gerçek siteler. Hedef: 10 site, tek panel.
 
 | Ne | Yerel adres |
 | --- | --- |
-| Koçist (kurumsal / endüstriyel tema) | http://localhost:8080/kocist/ |
-| — örnek alt sayfa | http://localhost:8080/kocist/kurumsal/ |
-| İstanbul Paletçi (ürün / teklif odaklı tema) | http://localhost:8080/paletci/ |
-| — örnek alt sayfa | http://localhost:8080/paletci/urunlerimiz/ |
 | Koçist / ahsapkasa.com yeniden tasarımı (Tailwind) | http://localhost:8080/ahsapkasa/ |
 | — Hakkımızda | http://localhost:8080/ahsapkasa/hakkimizda/ |
 | — Hizmetlerimiz | http://localhost:8080/ahsapkasa/hizmetlerimiz/ |
 | — İletişim (çalışan teklif formu) | http://localhost:8080/ahsapkasa/iletisim/ |
+| Koçist / istanbulpaletci.com yeniden tasarımı (Tailwind) | http://localhost:8080/istanbulpaletci/ |
+| — Ürünlerimiz (+ 5 ürün sayfası) | http://localhost:8080/istanbulpaletci/urunlerimiz/ |
+| — Blog (WordPress yazıları) | http://localhost:8080/istanbulpaletci/blog/ |
+| — İletişim (çalışan teklif formu) | http://localhost:8080/istanbulpaletci/iletisim/ |
+| ithalkeresteci.com yeniden tasarımı (kuzen tema) | http://localhost:8080/ithalkeresteci/ |
+| — Ürünler (+ 4 ürün sayfası) | http://localhost:8080/ithalkeresteci/urunler/ |
+| kavakkeresteci.com yeniden tasarımı (kuzen tema) | http://localhost:8080/kavakkeresteci/ |
+| — Ürünler (+ 4 ürün sayfası) | http://localhost:8080/kavakkeresteci/urunler/ |
 | Ağ yönetimi (Network Admin) | http://localhost:8080/wp-admin/network/ |
+| — İçerik Stüdyosu | http://localhost:8080/wp-admin/network/admin.php?page=nwcs-studio |
+| — SEO ve GEO | http://localhost:8080/wp-admin/network/admin.php?page=nwcs-seo |
 | Giriş | http://localhost:8080/wp-login.php |
 
-> Bu tamamen yerel bir demodur. Gerçek `kocist.com.tr` / `istanbulpaletci.com` /
+> Bu yerel bir geliştirme ortamıdır. Gerçek `kocist.com.tr` / `istanbulpaletci.com` /
 > `ahsapkasa.com` alan adlarına, DNS'e veya canlı sitelere dokunulmaz.
 >
-> Koçist ve Paletçi sitelerindeki görseller "ÖRNEK GÖRSEL" yazılı yer tutuculardır.
-> `ahsapkasa` sitesi bir yeniden tasarım çalışması olduğu için oradaki fotoğraflar
-> firmanın kendi sitesinden alınan gerçek üretim fotoğraflarıdır (`resources/`);
-> metinler de ahsapkasa.com'daki içeriğin kendisidir.
+> Sitelerdeki fotoğraflar firmanın kendi sitelerinden alınan gerçek fotoğraflardır
+> (`resources/`); metinler de o sitelerdeki içeriğin kendisidir. İlk aşamadaki iki
+> demo site (`/kocist/`, `/paletci/`) kaldırıldı; kaldırılmadan önceki veritabanının
+> yedeği `backups/` klasöründedir (Git'e girmez).
 
 ## Gereksinimler
 
@@ -45,10 +52,12 @@ docker compose --profile cli run --rm --entrypoint sh wpcli /scripts/install.sh
 `install.sh` tekrar çalıştırılabilir; var olanı bozmaz. Yaptıkları:
 
 1. WordPress'i kurar, ardından **alt dizin tabanlı** Multisite ağına çevirir
-2. `/kocist/` ve `/paletci/` alt sitelerini oluşturur
-3. İki temayı ağ genelinde etkinleştirip her siteye doğru temayı atar
-4. `network-content-studio` eklentisini ağ genelinde etkinleştirir
-5. Her iki site için demo içeriğini ve örnek görselleri üretir
+2. `network-content-studio` eklentisini ağ genelinde etkinleştirir
+3. Türkçe dil paketini kurar
+4. Betiğin başındaki `SITES` listesindeki her site için (şu an `ahsapkasa`, `istanbulpaletci`,
+   `ithalkeresteci`, `kavakkeresteci`): alt siteyi açar, temasını atar, dilini Türkçe yapar ve kendi
+   seed betiğiyle içeriğini kurar. **Var olan bir siteye dokunmaz**: seed alanları
+   varsayılana geri yazdığı için yalnızca site ilk kez oluşurken çalışır.
 
 Yönetici kullanıcı adı ve şifresi `.env` dosyasındadır (`WP_ADMIN_USER`,
 `WP_ADMIN_PASSWORD`). `.env` sürüm kontrolüne girmez.
@@ -60,9 +69,6 @@ Yönetici kullanıcı adı ve şifresi `.env` dosyasındadır (`WP_ADMIN_USER`,
 docker compose up -d
 docker compose stop
 
-# Demo içeriğini yeniden üret (kurulumu bozmadan)
-docker compose --profile cli run --rm --entrypoint sh wpcli /scripts/seed-only.sh
-
 # Claude Code'u MCP ile bağla
 bash scripts/mcp-setup.sh
 
@@ -72,7 +78,7 @@ docker compose --profile cli run --rm wpcli --path=/var/www/html core update-db 
 
 # İçerik envanterini manifestten yeniden üret
 docker compose --profile cli run --rm --entrypoint sh wpcli -c \
-  "wp --path=/var/www/html eval-file /scripts/inventory.php --url=http://localhost:8080/kocist/ --quiet"
+  "wp --path=/var/www/html eval-file /scripts/inventory.php --url=http://localhost:8080/istanbulpaletci/ --quiet"
 
 # Herhangi bir WP-CLI komutu (örn. site listesi)
 docker compose --profile cli run --rm wpcli --path=/var/www/html site list
@@ -100,8 +106,10 @@ Panelin düzeni:
   Footer…). Bölümün yanındaki **↑ ↓** okları ana sayfa sırasını değiştirir; üst menü ve
   footer "sabit" olarak işaretlidir. Bir bölüme tıklandığında aynı sütun düzenleyiciye
   döner, **← Bölümler** ile geri dönülür.
-- **Üst şeritte site seçici** — Koçist / İstanbul Paletçi. Seçim değiştiğinde panel o
-  sitenin manifestine göre yeniden kurulur.
+- **Üst şeritte site seçici** — ağdaki manifestli her site (şu an ahsapkasa, istanbulpaletci,
+  ithalkeresteci ve kavakkeresteci). Seçim değiştiğinde panel o sitenin manifestine göre yeniden kurulur.
+- **Her sayfanın son bölümü "Arama ve Paylaşım"**: o sayfanın Google başlığı, açıklaması
+  ve paylaşım görseli (bkz. [SEO ve GEO](#seo-ve-geo)).
 
 Teknik bilgi gerekmez: manifest, alan anahtarı gibi kavramlar panelde görünmez;
 her alan kendi Türkçe adıyla listelenir.
@@ -203,9 +211,10 @@ girme ihtiyacı yoktur.
 | **Seçilenler** | Yalnızca işaretledikleriniz; sırayı ↑↓ ile siz verirsiniz |
 | **İstisnalar** | Bu siteye özel ad, açıklama, görsel, fiyat; ya da ürünü bu sitede gizleme |
 
-Demoda: **Koçist** = Hepsi (8 ürün), **İstanbul Paletçi** = Seçilenler (5 palet ürünü),
-iki istisna örneğiyle — Euro Palet bu sitede “Euro Palet (ihracat)” adıyla görünür ve
-İkinci El Palet'in fiyatı bu sitede boş bırakıldığı için “Teklif al” yazar.
+Şu an ağdaki iki gerçek site ürünlerini kendi manifestlerinde tutuyor; havuzu kullanan
+bir site yok. Havuzu kullanacak bir tema, manifestine `products` türünde bir alan
+ekler; ancak o zaman site havuzdan ürün gösterebilir. Havuzu örnek ürünlerle doldurmak
+için (yalnızca geliştirmede): `wp eval-file /scripts/seed-products.php --url=http://localhost:8080/`.
 
 ## Ürün kodu
 
@@ -281,7 +290,7 @@ Her görselin hangi üründe kullanıldığı kartında yazar; kullanımdaki gö
 ### Ürün detay sayfası
 
 Bir ürünün **detay sayfası metni** doldurulursa o ürün kendi sayfasını kazanır:
-http://localhost:8080/paletci/urun/euro-palet/ — kart da oraya bağlanır. Metin boşsa
+`/<site>/urun/<ürün-adresi>/` — kart da oraya bağlanır. Metin boşsa
 ürünün sayfası yoktur (adres 404 verir) ve kart doğrudan teklif bölümüne gider.
 Detay sayfası da site istisnalarını uygular.
 
@@ -290,12 +299,19 @@ Detay sayfası da site istisnalarını uygular.
 ```
 docker-compose.yml          WordPress + MariaDB + WP-CLI
 docker/apache-wp.conf       .htaccess (mod_rewrite) izni
-scripts/install.sh          Tekrarlanabilir kurulum
-scripts/seed.php            Demo içerik + örnek görsel üretimi
+scripts/install.sh          Tekrarlanabilir kurulum (site listesi betiğin başında)
+scripts/seed-<site>.php     Sitenin ilk içeriği (sayfalar, görseller, alan değerleri)
+scripts/data/               Seed betiklerinin metin verisi (ör. blog yazıları)
+scripts/seed-products.php   Ürün havuzuna örnek ürün (yalnızca geliştirme)
 scripts/inventory.php       CONTENT-INVENTORY.md üreteci
-wp-content/themes/kocist-theme/
-wp-content/themes/paletci-theme/
+build/                      Tailwind kaynakları (tema başına bir dosya)
+wp-content/themes/ahsapkasa-theme/
+wp-content/themes/istanbulpaletci-theme/
+wp-content/themes/kereste-base/           kuzen kereste sitelerinin ana teması
+wp-content/themes/ithalkeresteci-theme/   çocuk tema (renk + içerik)
+wp-content/themes/kavakkeresteci-theme/   çocuk tema (renk + içerik)
 wp-content/plugins/network-content-studio/
+backups/                    Veritabanı yedekleri (Git'e girmez)
 ```
 
 WordPress core Git'e **kopyalanmaz**; `wp_core` adlı Docker volume'unda durur.
@@ -318,11 +334,14 @@ Tasarım kararları ve gerekçeleri: [DECISIONS.md](DECISIONS.md)
 ```bash
 cd build
 npm install          # yalnızca ilk seferde
-npm run build        # tek seferlik derleme
-npm run watch        # dosyaları izleyerek sürekli derleme
+npm run build        # iki temayı da derler
+npm run build:ahsapkasa          # yalnızca bir tema
+npm run build:istanbulpaletci
+npm run watch:istanbulpaletci    # izleyerek sürekli derleme (tema başına)
 ```
 
-Çıktı `wp-content/themes/ahsapkasa-theme/assets/tailwind.css` dosyasına yazılır ve
+Her temanın kendi kaynağı vardır (`build/ahsapkasa.css`, `build/istanbulpaletci.css`).
+Çıktı ilgili temanın `assets/tailwind.css` dosyasına yazılır ve
 depoya dahildir; yani siteyi çalıştırmak için Node kurmanız gerekmez, yalnızca
 tasarımı değiştirecekseniz gerekir.
 
@@ -364,6 +383,151 @@ gezilir. Görsel değiştirildiğinde veya pencere kapandığında yakınlaştı
 `http://localhost:8080/ahsapkasa/wp-admin/edit.php?post_type=ak_quote`
 adresinden görebilirsiniz. Demoda e-posta gönderimi yoktur; kayıt WordPress
 içinde tutulur.
+
+## istanbulpaletci yeniden tasarımı (Tailwind)
+
+`istanbulpaletci-theme`, istanbulpaletci.com'un (yine Koçist Orman Ürünleri) yeniden
+tasarımıdır. Canlı sitedeki 10 sayfa korunmuştur: Anasayfa, Hakkımızda, Ürünlerimiz,
+beş ürün sayfası (`/urunlerimiz/ahsap-palet/` …), Blog ve İletişim. Eklentide hiçbir
+değişiklik gerekmedi; İçerik Stüdyosu siteyi "Koçist · istanbulpaletci.com" adıyla,
+11 düzenlenebilir sayfa ve 157 alanla kendiliğinden tanır.
+
+Sıfırdan kurulum (ağ kuruluyken):
+
+```bash
+docker compose run --rm wpcli site create --slug=istanbulpaletci --title="İstanbul Paletçi"
+docker compose run --rm wpcli theme enable istanbulpaletci-theme --network
+docker compose run --rm wpcli theme activate istanbulpaletci-theme --url=http://localhost:8080/istanbulpaletci/
+docker compose run --rm wpcli language core install tr_TR
+docker compose run --rm wpcli site switch-language tr_TR --url=http://localhost:8080/istanbulpaletci/
+docker compose run --rm wpcli eval-file /scripts/seed-istanbulpaletci.php --url=http://localhost:8080/istanbulpaletci/
+```
+
+Kurulum betiği tekrar çalıştırılabilir; sayfa, görsel ve yazıları ikinci kez
+oluşturmaz, ama alan değerlerini manifest varsayılanlarına **geri yazar**. Site sahibi
+panelden içerik girdikten sonra çalıştırmayın.
+
+- **Ürün sayfaları tek şablondur.** Manifestte `'template' => 'product'` işaretli
+  sayfalar ürün sayılır; üst menünün açılır paneli, ana sayfa ızgarası, Ürünlerimiz
+  listesi, alt bilgi ve form seçenekleri bu listeden beslenir.
+- **Blog yazıları** WordPress'in kendi yazılarıdır (site yönetiminde Yazılar). Panel
+  yalnızca blog sayfasının başlığını ve düğme metinlerini yönetir.
+- **Teklif formu** ana sayfada ve İletişim'de aynıdır; gönderimler
+  `http://localhost:8080/istanbulpaletci/wp-admin/edit.php?post_type=ip_quote`
+  altında görülür. Ad, ölçü ve e-posta **ya da** telefon zorunludur.
+- **Görseller:** ana sayfa slaytları kolaj olduğu için (tek görselde 3–8 fotoğraf)
+  kurulum betiği içlerinden tek fotoğraf kırpar. Tema demosundan kalan stok görseller
+  ve ahsapkasa ile aynı manzara fotoğrafları kullanılmaz.
+
+## Kuzen kereste siteleri (ithalkeresteci, kavakkeresteci)
+
+İki alan adı bugün yalnızca kocist.com.tr'yi çerçeve içinde gösteriyor. Yeniden
+tasarımda her biri **kendi adının karşılığı olan odaklı bir kereste sitesi** oluyor;
+ikisi aynı tasarımı paylaşan kuzenler:
+
+```
+wp-content/themes/kereste-base/          ana tema: şablonlar, form, stil
+wp-content/themes/ithalkeresteci-theme/  çocuk tema: renk (style.css) + içerik (manifest)
+wp-content/themes/kavakkeresteci-theme/  çocuk tema: renk (style.css) + içerik (manifest)
+```
+
+- Çocuk temanın `style.css` dosyası yalnızca renk değişkenleri tanımlar ("parti
+  boyası"): ithal petrol; kavak Koçist logosunun yeşili, kahve şablon
+  harfler, koyu ahşap kahvesi alt bilgi. Tanımlanabilen değişkenler: `--site-mark`,
+  `--site-mark-deep`, `--site-mark-wash`, `--site-stamp`, `--site-ink`, `--site-stone`.
+- Çocuk temanın `content-manifest.php` dosyası ana temanın kurucusunu çağırır ve
+  siteye özgü metinleri, dört ürünü ve ana sayfada hangi modüllerin görüneceğini verir.
+  Ana sayfa modülleri: ithal → toptan tedarik bandı; kavak → kullanım alanları.
+  Yalnızca listedeki modüllerin alanları panelde görünür.
+- Üst menüde ve alt bilgide **Koçist logosu** (grup logosu alanı) ve yeşil
+  **WhatsApp** düğmesi (üst menü, mobil menü, ürün sayfası, iletişim).
+- Seed betikleri kardeş site bağlantılarını (kuzen köprüsü, alt bilgi) yerel ağda
+  buradaki kopyalara çevirir; canlıda alan adları manifestteki haliyle kalır.
+- Ana sayfanın hero'su tam genişlik paket ucu fotoğrafı ve ipe asılı **paket etiketi**
+  (sitenin rozeti ve dört ürünü, her satır ürün sayfasına gider). Hero fotoğrafı yapay
+  zekayla üretilmiş örnek görsel; köşesinde "Örnek görsel" notu var, gerçek fotoğraf
+  yüklenince not panelden silinir. "Teklif al" her sayfadaki teklif penceresini açar. Teklif istekleri site
+  yönetiminde **Teklif İstekleri** altında (`kr_quote`).
+- Sayfalar: Anasayfa, Ürünler, 4 ürün, Sık sorulan sorular, Hakkımızda, İletişim.
+  Kaynak sitenin 604 adresi yerine 9.
+- Fotoğraflar firmanın kendi sitesinden (`resources/kereste/`); ortalarında firmanın
+  filigranı var, filigransız asılları gelince panelden değiştirilir.
+
+Kurulum: `install.sh` içindeki `SITES` listesinde; tek başına
+`wp eval-file /scripts/seed-ithalkeresteci.php --url=http://localhost:8080/ithalkeresteci/`
+(kavak için `seed-kavakkeresteci.php` ve `/kavakkeresteci/`).
+Ana tema ayrıca `build/kereste.css` kaynağından derlenir (`npm run build:kereste`).
+
+## SEO ve GEO
+
+**Ağ Yönetimi → SEO ve GEO**
+http://localhost:8080/wp-admin/network/admin.php?page=nwcs-seo
+
+Ağdaki bütün sitelerin arama motoru (SEO) ve yapay zekâ araması (GEO) ayarları tek
+sekmede. Temalar bu konuda hiçbir şey yapmaz; eklenti manifesti olan her siteye
+kendiliğinden uygular.
+
+**Ağ özeti** her sitenin durumunu (elle iyileştirilen sayfa sayısı, firma bilgisi
+eksikleri, arama motorlarına açık/kapalı) ve **siteler arası tutarlılığı** gösterir:
+aynı firmanın sitelerinde resmî unvan, telefon ve adres birebir aynı yazılmalı.
+
+**Site görünümü**: her sayfanın Google sonucundaki hâli (önizleme), altında açılan
+düzenleyici (arama başlığı, açıklama, paylaşım görseli; karakter sayacıyla) ve sağda
+sitenin firma bilgisi. Aynı "Arama ve Paylaşım" alanları İçerik Stüdyosu'nda her
+sayfanın son bölümü olarak da durur.
+
+**Boş bırakılan her şey otomatik dolar**: başlık sayfanın kendi başlığından, açıklama
+öne çıkan cümlesinden, görsel sayfanın ana görselinden gelir. Hiçbir şey girilmese de
+her sayfa başlık, açıklama ve paylaşım görseliyle yayına çıkar.
+
+Kendiliğinden üretilenler:
+
+| Ne | Nerede |
+| --- | --- |
+| Belge başlığı, meta açıklama | her sayfa |
+| Paylaşım önizlemesi (Open Graph, X) | her sayfa |
+| Yapılandırılmış veri (JSON-LD): firma, web sitesi, sayfa, konum yolu | her sayfa |
+| Ürün verisi, şartname satırları dahil (fiyat/puan uydurulmaz) | `seo_source.type = Product` sayfalar |
+| Blog yazısı verisi | yazılar |
+| `/llms.txt`: yapay zekâ için sitenin özeti, ürün ölçüleri dahil | her site |
+| Arşivlerde (yazar, tarih, arama) `noindex` | her site |
+| Site haritasından kullanıcı listesinin çıkarılması | her site |
+
+Tema tarafında isteğe bağlı iki ipucu (`content-manifest.php`):
+
+```php
+'seo_site_defaults' => array( 'name' => '…', 'phone' => '…', … ), // firma bilgisinin ilk değerleri
+// sayfa başına:
+'seo_source' => array(
+	'title'       => 'card.name',     // otomatik başlık hangi alandan
+	'description' => 'detail.lead',
+	'image'       => 'card.image',
+	'type'        => 'Product',       // ürün verisi üret
+	'properties'  => 'specs.rows',    // şartname satırları (label/value)
+),
+```
+
+`seo` bileşen adı ve `site_seo` sayfa adı eklentiye ayrılmıştır; temalar kullanmaz.
+Kararlar ve kontrol listesi: [DECISIONS.md](DECISIONS.md) → "SEO ve GEO — kalıcı ilke".
+
+## Yeni site ekleme
+
+Tema klasörünü yüklemek **tek başına yetmez**: tema, sitenin tasarımı ve düzenlenebilir
+alanlarının listesidir (`content-manifest.php`); sitenin kendisi ayrıca açılır.
+
+1. Tema klasörünü `wp-content/themes/` altına koyun (hostingde FTP/cPanel ile;
+   yerelde ayrıca `docker-compose.yml`'e bir bağlama satırı).
+2. Ağ Yönetimi → Siteler → **Yeni site**: adres ve başlık.
+3. Ağ Yönetimi → Temalar → temayı **Ağda etkinleştir**; sitenin Görünüm menüsünden
+   temayı etkinleştirin.
+4. Manifestteki sayfa adresleri için WordPress sayfalarını açın (ör. `/hakkimizda/`).
+5. İçerik Stüdyosu ve SEO ve GEO sekmesi siteyi kendiliğinden tanır; içerik oradan girilir.
+
+Yerelde bu adımların hepsini `scripts/install.sh` içindeki `SITES` listesine bir satır
+ve bir `seed-<site>.php` ekleyerek yaparsınız.
+
+**Silme**: önce Ağ Yönetimi → Siteler'den siteyi silin, sonra tema klasörünü kaldırın.
+Tersi sırada yapılırsa site temasız kalır ve boş sayfa gösterir.
 
 ## Mimari özet
 
@@ -409,3 +573,20 @@ gerçek e-posta teslimi ve spam koruması, alan adı eşlemesi, e-ticaret.
   tasarımı (ana sayfa, hakkımızda, hizmetlerimiz, iletişim), Tailwind ile derlenen
   stil, animasyonlu üst menü, dörtlü ürün karesi ve ortasındaki tek teklif düğmesi,
   çalışan teklif formu. Ağdaki üçüncü site olarak İçerik Stüdyosu'ndan yönetilir.
+- **istanbulpaletci yeniden tasarımı — tamamlandı**: istanbulpaletci.com'un 10 sayfası
+  (ana sayfa, hakkımızda, ürünlerimiz, beş ürün sayfası, blog, iletişim), şartname
+  tabloları, görselli açılır ürün menüsü, çalışan teklif formu, Türkçe dil paketi.
+- **Demo sitelerin kaldırılması**: `/kocist/` ve `/paletci/` siteleri, temaları ve demo
+  seed betikleri kaldırıldı; kurulum betiği gerçek siteleri kurar. Öncesinin yedeği
+  `backups/` altında.
+- **SEO ve GEO — tamamlandı**: ağ yönetiminde yeni sekme; bütün sitelere otomatik meta,
+  paylaşım önizlemesi, yapılandırılmış veri, `llms.txt`; siteler arası firma bilgisi
+  tutarlılığı denetimi.
+- **ithalkeresteci yeniden tasarımı — tamamlandı**: iframe'le kocist.com.tr'yi gösteren alan
+  adı için odaklı kereste sitesi; ortak ana tema (`kereste-base`) + çocuk tema, paket
+  etiketi ürün kartları, teklif penceresi. m³ hesaplayıcısı sonradan kaldırıldı; hero
+  yeniden tasarlandı (DECISIONS.md).
+- **kavakkeresteci yeniden tasarımı — tamamlandı**: aynı ana tema, yeşil-kahve parti
+  boyası; kavak kereste, çıta, ahşap takoz, OSB levha; ana sayfada "kullanım alanları".
+  İki siteye Koçist logosu ve WhatsApp düğmesi eklendi. Ürün listesi, ölçüler, adres ve
+  fotoğraflar satıcının geri bildirimini bekliyor.
