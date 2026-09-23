@@ -1,0 +1,376 @@
+/*
+ * kereste-base (ana tema) icin Tailwind kaynak dosyasi.
+ * Derleme:  cd build && npm run build:kereste
+ * Cikti:    wp-content/themes/kereste-base/assets/tailwind.css
+ *
+ * Iki kuzen site (ithalkeresteci, kavakkeresteci) ayni CSS'i kullanir.
+ * Aralarindaki gorsel fark "parti boyasi": cocuk temanin style.css
+ * dosyasi --site-mark* degiskenlerini tanimlar. Istege bagli olarak
+ * --site-ink (metin ve koyu yuzey), --site-stone (bolum zemini) ve
+ * --site-stamp (sablon harf boyasi) da degistirilebilir; tanimlanmazsa
+ * asagidaki varsayilanlar (ithalkeresteci) gecerlidir.
+ */
+
+@import "tailwindcss";
+
+@source "../wp-content/themes/kereste-base/**/*.php";
+
+/* ------------------------------------------------------------------ *
+ * Tasarim jetonlari
+ *
+ * Renklerin gorevi:
+ *   mark  = eylem ve isaret boyasi (dugme, baglanti, etiket numarasi)
+ *   ink   = metin ve koyu yuzey
+ *   stone = bolum zemini
+ *   stamp = sablon harfli olcu ve etiket boyasi (varsayilan: mark)
+ * Kereste depolarinda tomruk ve paket uclari partiyi belli etmek icin
+ * boyayla isaretlenir; iki site ayni depodan iki parti gibi, farkli boya.
+ * ------------------------------------------------------------------ */
+@theme {
+	--color-mark:      var(--site-mark, #0b5c6b);
+	--color-mark-deep: var(--site-mark-deep, #07424d);
+	--color-mark-wash: var(--site-mark-wash, #e3f0f2);
+
+	--color-stamp:     var(--site-stamp, var(--site-mark, #0b5c6b));
+
+	--color-ink:    var(--site-ink, #1e2226);
+	--color-muted:  #5e656b;
+	--color-paper:  #ffffff;
+	--color-stone:  var(--site-stone, #f2f3f0);
+
+	/* WhatsApp yesili, beyaz yaziyla okunacak koyulukta (#25d366 yetmez). */
+	--color-whatsapp:      #157f48;
+	--color-whatsapp-deep: #10683a;
+	--color-line:   #d9dcd6;
+	--color-alert:  #b42318;
+	--color-alert-soft: #fdecea;
+
+	--font-slab:    "Zilla Slab", "Rockwell", Georgia, serif;
+	--font-sans:    "Source Sans 3", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+	--font-stencil: "Saira Stencil One", "Arial Black", sans-serif;
+
+	--text-base: 1.0625rem;
+	--text-base--line-height: 1.65;
+}
+
+@layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		background: var(--color-paper);
+		color: var(--color-ink);
+		font-family: var(--font-sans);
+		font-size: var(--text-base);
+		line-height: 1.65;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	/* Slab basliklar: eski ahsap matbaa harflerinin (wood type) karakteri. */
+	h1, h2, h3, .u-slab {
+		font-family: var(--font-slab);
+		font-weight: 700;
+		line-height: 1.05;
+		letter-spacing: -0.01em;
+		text-wrap: balance;
+	}
+
+	h4 {
+		font-family: var(--font-sans);
+		font-weight: 600;
+		line-height: 1.3;
+	}
+
+	p {
+		text-wrap: pretty;
+	}
+
+	a {
+		color: var(--color-mark);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-mark);
+		outline-offset: 3px;
+	}
+
+	::selection {
+		background: var(--color-mark-wash);
+		color: var(--color-ink);
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+	}
+
+	.tabular {
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+/* Yonetim seridi acikken sabit ust menu onun altinda kalsin. Katman disinda:
+   Tailwind'in top-0 sinifi katmanli kurallari ezer (DECISIONS.md). */
+body.admin-bar [data-header] {
+	top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+	body.admin-bar [data-header] {
+		top: 46px;
+	}
+}
+
+@layer components {
+
+	/* ---------------------------------------------------------------- *
+	 * Sablon harf: yalnizca kesit olculeri ve paket numaralari. Kereste
+	 * paketlerine olcu tam boyle puskurtulur.
+	 * ---------------------------------------------------------------- */
+	.stencil {
+		font-family: var(--font-stencil);
+		font-weight: 400;
+		letter-spacing: 0.02em;
+		line-height: 1;
+		color: var(--color-stamp);
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Paket etiketi: urun karti. Kereste paketine asilan etiket gibi:
+	 * ustte delik, ipten asili, sablon harfle olcu.
+	 * ---------------------------------------------------------------- */
+	.tag {
+		position: relative;
+		background: var(--color-paper);
+		border: 1.5px solid color-mix(in srgb, var(--color-ink) 16%, transparent);
+		border-radius: 10px 10px 4px 4px;
+		transition: border-color 160ms ease, transform 200ms ease;
+	}
+
+	/* Delik: kartin ustunde, zemini gosteren halka. */
+	.tag::before {
+		content: "";
+		position: absolute;
+		top: 14px;
+		left: 50%;
+		width: 14px;
+		height: 14px;
+		margin-left: -7px;
+		border-radius: 999px;
+		background: var(--tag-hole, var(--color-stone));
+		box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-ink) 22%, transparent);
+	}
+
+	/* Ip: delikten yukari. */
+	.tag::after {
+		content: "";
+		position: absolute;
+		top: -18px;
+		left: 50%;
+		width: 1.5px;
+		height: 38px;
+		background: color-mix(in srgb, var(--color-ink) 35%, transparent);
+		transform: rotate(-8deg);
+		transform-origin: bottom center;
+	}
+
+	.tag--link:hover,
+	.tag--link:focus-within {
+		border-color: var(--color-mark);
+	}
+
+	.tag--link:hover::after,
+	.tag--link:focus-within::after {
+		transform: rotate(8deg);
+		transition: transform 240ms ease;
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Hero etiketi: ayni paket etiketi, hero'nun ust kenarindan inen ipe
+	 * asili. Ip hero'nun tepesine kadar uzanir (--string); etiket ipin
+	 * ucunda hafif yatik durur ve sayfa acilisinda bir kez yerine oturur.
+	 * Sayfadaki tek kendiliginden hareket bu.
+	 * ---------------------------------------------------------------- */
+	.tag--hero {
+		--string: 4.5rem;
+		--tag-hole: var(--color-ink);
+		margin-top: var(--string);
+		border-color: transparent;
+		box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.55);
+		transform: rotate(-2deg);
+		transform-origin: 50% calc(-1 * var(--string));
+		animation: tag-settle 1100ms cubic-bezier(0.3, 1.6, 0.5, 1) 250ms both;
+	}
+
+	.tag--hero::after {
+		top: calc(-1 * var(--string));
+		height: calc(var(--string) + 20px);
+		background: color-mix(in srgb, var(--color-paper) 70%, transparent);
+		transform: none;
+	}
+
+	/* Hero fotografinin perdesi: metnin durdugu taraf koyu, fotograf
+	   obur tarafta acik kalir. Mobilde metin altta, perde asagidan. */
+	.hero__veil {
+		background: linear-gradient(to top,
+			color-mix(in srgb, var(--color-ink) 92%, transparent) 0%,
+			color-mix(in srgb, var(--color-ink) 70%, transparent) 45%,
+			color-mix(in srgb, var(--color-ink) 15%, transparent) 100%);
+	}
+
+	@media (min-width: 64rem) {
+		.hero__veil {
+			background: linear-gradient(to right,
+				color-mix(in srgb, var(--color-ink) 90%, transparent) 0%,
+				color-mix(in srgb, var(--color-ink) 70%, transparent) 40%,
+				color-mix(in srgb, var(--color-ink) 10%, transparent) 78%);
+		}
+	}
+
+	/* Gorsel standardi: sabit oran, kirpilarak doldurur. */
+	.shot {
+		position: relative;
+		overflow: hidden;
+		background: var(--color-stone);
+	}
+
+	.shot > img,
+	.shot > [role="img"] {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.reading {
+		max-width: 38rem;
+	}
+
+	.reading p + p {
+		margin-top: 1em;
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Dugmeler: koseli, matbaa harfi gibi sert. Uc boy, dort cesit.
+	 * ---------------------------------------------------------------- */
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.55rem;
+		border: 1.5px solid transparent;
+		border-radius: 0;
+		font-family: var(--font-sans);
+		font-weight: 700;
+		line-height: 1.1;
+		white-space: nowrap;
+		text-decoration: none;
+		cursor: pointer;
+		transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+	}
+
+	.btn--sm { min-height: 2.5rem; padding: 0 1rem; font-size: 0.9375rem; }
+	.btn--md { min-height: 3rem; padding: 0 1.4rem; font-size: 1rem; }
+	.btn--lg { min-height: 3.5rem; padding: 0 1.9rem; font-size: 1.0625rem; }
+
+	.btn--mark { background: var(--color-mark); color: var(--color-paper); }
+	.btn--mark:hover, .btn--mark:focus-visible { background: var(--color-mark-deep); color: var(--color-paper); }
+
+	.btn--ink { background: var(--color-ink); color: var(--color-paper); }
+	.btn--ink:hover, .btn--ink:focus-visible { background: #000; color: var(--color-paper); }
+
+	.btn--outline { border-color: var(--color-ink); color: var(--color-ink); }
+	.btn--outline:hover, .btn--outline:focus-visible { background: var(--color-ink); color: var(--color-paper); }
+
+	.btn--light { background: var(--color-paper); color: var(--color-ink); }
+	.btn--light:hover, .btn--light:focus-visible { background: var(--color-mark-wash); color: var(--color-ink); }
+
+	/* Koyu zemin (hero) uzerinde ikincil dugme. */
+	.btn--ghost { border-color: color-mix(in srgb, var(--color-paper) 70%, transparent); color: var(--color-paper); }
+	.btn--ghost:hover, .btn--ghost:focus-visible { background: var(--color-paper); border-color: var(--color-paper); color: var(--color-ink); }
+
+	.btn--whatsapp { background: var(--color-whatsapp); color: var(--color-paper); }
+	.btn--whatsapp:hover, .btn--whatsapp:focus-visible { background: var(--color-whatsapp-deep); color: var(--color-paper); }
+
+	/* ---------------------------------------------------------------- *
+	 * Sartname satirlari
+	 * ---------------------------------------------------------------- */
+	.spec__row {
+		display: grid;
+		grid-template-columns: minmax(8rem, 0.8fr) 1.2fr;
+		gap: 1rem;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid var(--color-line);
+	}
+
+	.spec__row:last-child {
+		border-bottom: 0;
+	}
+
+	.spec__key { color: var(--color-muted); font-size: 0.9375rem; }
+	.spec__value { font-weight: 600; text-wrap: balance; }
+
+	/* Ust menude etkin sayfa: kalin alt cizgi, isaret boyasi renginde. */
+	.navline {
+		position: relative;
+	}
+
+	.navline::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -8px;
+		height: 3px;
+		background: var(--color-mark);
+		transform: scaleX(0);
+		transform-origin: left center;
+		transition: transform 200ms ease;
+	}
+
+	.navline:hover::after,
+	.navline[aria-current="page"]::after,
+	.navline[data-section-current]::after {
+		transform: scaleX(1);
+	}
+
+	/* Pencereler (teklif, gorsel): arka plan karartmasi. */
+	.kr-dialog::backdrop {
+		background: color-mix(in srgb, var(--color-ink) 70%, transparent);
+	}
+
+	/* Sik sorulan sorular: acilir kapanir. */
+	.faq summary {
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.faq summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.faq summary .faq__sign {
+		transition: transform 200ms ease;
+	}
+
+	.faq[open] summary .faq__sign {
+		transform: rotate(45deg);
+	}
+}
+
+@keyframes tag-settle {
+	from { transform: rotate(-9deg); }
+	to   { transform: rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html { scroll-behavior: auto; }
+
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}

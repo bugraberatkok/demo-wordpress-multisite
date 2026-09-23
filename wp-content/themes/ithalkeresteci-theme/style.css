@@ -1,0 +1,18 @@
+/*
+Theme Name: Ithal Keresteci
+Theme URI: http://localhost:8080/ithalkeresteci/
+Author: Demo
+Description: ithalkeresteci.com. kereste-base ana temasinin cocugu; kavakkeresteci ile ayni tasarimi paylasir, parti boyasi (vurgu rengi) ve icerigi farklidir.
+Template: kereste-base
+Version: 0.1.0
+Requires at least: 6.5
+Requires PHP: 8.1
+Text Domain: ithalkeresteci
+*/
+
+/* Parti boyasi: petrol. Ithalat ve deniz yoluyla gelen kereste. */
+:root {
+	--site-mark: #0b5c6b;
+	--site-mark-deep: #07424d;
+	--site-mark-wash: #e3f0f2;
+}

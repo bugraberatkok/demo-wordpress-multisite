@@ -1,0 +1,623 @@
+/*
+ * istanbulpaletci-theme icin Tailwind kaynak dosyasi.
+ * Derleme:  cd build && npm run build:istanbulpaletci
+ * Cikti:    wp-content/themes/istanbulpaletci-theme/assets/tailwind.css
+ */
+
+@import "tailwindcss";
+
+@source "../wp-content/themes/istanbulpaletci-theme/**/*.php";
+
+/* ------------------------------------------------------------------ *
+ * Tasarim jetonlari
+ *
+ * Her rengin tek bir gorevi var; susleme icin renk kullanilmaz:
+ *   indigo = eylem   (dugme, baglanti, aktif menu, odak halkasi)
+ *   signal = olcu    (olcu cizgisi, sartname isareti) - baska hicbir yerde
+ *
+ * Arayuzde ahsap tonu yoktur. Ahsabin sicakligini fotograflar tasir; arayuz
+ * soguk ve teknik kalir. Kardes site ahsapkasa'dan ayrildigi yer burasi.
+ * ------------------------------------------------------------------ */
+@theme {
+	/* Logodaki "ISTANBUL" yazisindan olculdu. */
+	--color-indigo:       #3d34ed;
+	--color-indigo-deep:  #241cb0;
+	/* Logonun koyu zemin surumundeki ton: koyu yuzeyde indigo'nun karsiligi. */
+	--color-indigo-tint:  #a09bff;
+	--color-indigo-wash:  #ecebfe;
+
+	/* Depo zeminindeki sari serit. Yalnizca olcu ve teknik veri. */
+	--color-signal:       #f2b705;
+
+	/* WhatsApp marka yesili. Parlak ton beyaz zeminde ikon icin; dugme zemini
+	   icin koyu ton: parlak yesil uzerinde beyaz yazi 2:1, koyu tonda 5:1. */
+	--color-whatsapp:      #25d366;
+	--color-whatsapp-deep: #157f48;
+	--color-whatsapp-dark: #10683a;
+
+	--color-night:        #10112e;
+	--color-ink:          #14161f;
+	--color-steel:        #5a6076;
+	--color-paper:        #f2f3f8;
+	--color-sheet:        #ffffff;
+	--color-mist:         #e6e8f0;
+	--color-line:         #d4d8e4;
+	--color-alert:        #b42318;
+	--color-alert-soft:   #fdecea;
+
+	--font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+	--font-body:    "Barlow", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+
+	--text-2xs:  0.75rem;
+	--text-xs:   0.8125rem;
+	--text-sm:   0.9375rem;
+	--text-base: 1.0625rem;
+	--text-base--line-height: 1.65;
+	--text-lg:   1.25rem;
+	--text-xl:   1.5rem;
+	--text-2xl:  2rem;
+	--text-3xl:  2.5rem;
+	--text-4xl:  3.25rem;
+	--text-5xl:  4.25rem;
+	--text-6xl:  5.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * Taban
+ * ------------------------------------------------------------------ */
+@layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		background-color: var(--color-paper);
+		color: var(--color-ink);
+		font-family: var(--font-body);
+		font-size: var(--text-base);
+		line-height: 1.65;
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	/* Dar kesim yalnizca buyuk basliklarda. Kucuk boyda tabela degil,
+	   spor kulubu gibi okunuyor; kart basliklari normal genislikte kalir. */
+	h1, h2, .u-display {
+		font-family: var(--font-display);
+		letter-spacing: -0.005em;
+		line-height: 1.02;
+		text-wrap: balance;
+	}
+
+	h3, h4 {
+		font-family: var(--font-body);
+		line-height: 1.25;
+		text-wrap: balance;
+	}
+
+	p {
+		text-wrap: pretty;
+	}
+
+	a {
+		color: var(--color-indigo);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-indigo);
+		outline-offset: 3px;
+		border-radius: 2px;
+	}
+
+	::selection {
+		background: var(--color-indigo-wash);
+		color: var(--color-ink);
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+	}
+
+	/* Olculer alt alta geldiginde hizali dursun. */
+	.tabular {
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+/* ------------------------------------------------------------------ *
+ * WordPress yonetim seridi acikken sabit ust menu onun altinda kalsin.
+ * Katman DISINDA: Tailwind'in 'top-0' sinifi @layer utilities icindedir ve
+ * katmanli kurallari ezer (ahsapkasa'da yasandi, DECISIONS.md).
+ * ------------------------------------------------------------------ */
+body.admin-bar [data-header] {
+	top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+	body.admin-bar [data-header] {
+		top: 46px;
+	}
+}
+
+@layer components {
+
+	/* ---------------------------------------------------------------- *
+	 * Yuzeyler
+	 *
+	 * Uc yuzey, uc gorev. Ayrim renk ve cizgiyle; golge yalnizca iki yerde:
+	 * ustte suzulen acilir menu ve hero foyu (.sheet--raised).
+	 *   bant (sablonda dolu renk)  kenardan kenara, kosesiz
+	 *   .sheet  foy: keskin kose, teknik belge
+	 *   .card   liste ogesi: 4px kose
+	 * ---------------------------------------------------------------- */
+	.sheet {
+		background: var(--color-sheet);
+		border: 1px solid var(--color-line);
+	}
+
+	.card {
+		background: var(--color-sheet);
+		border: 1px solid var(--color-line);
+		border-radius: 4px;
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Hero zemini
+	 *
+	 * Logodaki indigo, uzerinde yari saydam siyah bir perdeyle. Duz indigo
+	 * goz aliyordu; perde rengi koruyup parlakligini dusurur.
+	 * Perdenin koyulugu tek degiskende: --hero-veil.
+	 * ---------------------------------------------------------------- */
+	.hero-field {
+		--hero-veil: 0.6;
+		background:
+			linear-gradient(rgb(0 0 0 / var(--hero-veil)), rgb(0 0 0 / var(--hero-veil))),
+			var(--color-indigo);
+	}
+
+	/* Hero foyu: yuzeylerde golge kullanmama kuralinin ikinci istisnasi.
+	   Iki katman: yakindaki keskin, uzaktaki genis ve yumusak golge. */
+	.sheet--raised {
+		border-color: transparent;
+		box-shadow:
+			0 2px 6px rgb(5 6 20 / 0.35),
+			0 40px 80px -28px rgb(3 4 16 / 0.85),
+			0 0 0 1px rgb(255 255 255 / 0.08);
+	}
+
+	/* Tiklanabilir kart: tek geri bildirim kenar rengi. Kalkma, golge,
+	   buyume yok. */
+	.card--link {
+		transition: border-color 160ms ease;
+	}
+
+	.card--link:hover,
+	.card--link:focus-within {
+		border-color: var(--color-indigo);
+	}
+
+	/* Gorsel standardi: beyaz zeminde, sabit oranda, kirpilarak doldurulur.
+	   Firmanin beyaz fonlu urun cekimleri ve saha fotograflari ayni kutuda
+	   ayni boyda durur. */
+	.shot {
+		position: relative;
+		overflow: hidden;
+		background: var(--color-sheet);
+	}
+
+	.shot > img,
+	.shot > [role="img"] {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	/* Okuma kolonu: Barlow icin ~68 karakter. */
+	.reading {
+		max-width: 36rem;
+	}
+
+	.reading p + p {
+		margin-top: 1.1em;
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Olcu cizgisi - sitenin tek gosterisli ogesi.
+	 *
+	 * Mimari cizimdeki kot cizgisi: uclarda 45 derece centik, ortada deger.
+	 * Yalnizca sinyal sarisiyla cizilir; sari baska hicbir yerde gorunmez.
+	 * ---------------------------------------------------------------- */
+	.dim {
+		--dim-color: var(--color-signal);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--dim-color);
+	}
+
+	.dim__line {
+		position: relative;
+		align-self: stretch;
+		height: 1px;
+		background: var(--dim-color);
+	}
+
+	/* Uc centikleri: cizgiden kalin olmali, yoksa 1 pikselde kayboluyor. */
+	.dim__line::before,
+	.dim__line::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		width: 2px;
+		height: 16px;
+		background: var(--dim-color);
+		transform: translate(-50%, -50%) rotate(45deg);
+	}
+
+	.dim__line::before {
+		left: 0;
+	}
+
+	.dim__line::after {
+		left: 100%;
+	}
+
+	.dim__label {
+		flex: none;
+		font-family: var(--font-body);
+		font-size: var(--text-sm);
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+	}
+
+	/* Dikey olcu: ayni cizgi, yazi 90 derece donuk ve cizginin saginda. */
+	.dim--v {
+		flex-direction: row;
+		height: 100%;
+	}
+
+	.dim--v .dim__line {
+		width: 1px;
+		height: auto;
+	}
+
+	.dim--v .dim__line::before,
+	.dim--v .dim__line::after {
+		left: 50%;
+		width: 16px;
+		height: 2px;
+	}
+
+	.dim--v .dim__line::before {
+		top: 0;
+	}
+
+	.dim--v .dim__line::after {
+		top: 100%;
+	}
+
+	.dim--v .dim__label {
+		writing-mode: vertical-rl;
+		transform: rotate(180deg);
+	}
+
+	/* Sayfa acilisindaki tek hareket: olcu cizgileri bir kez cizilir.
+	   Kirpma alani 20px disari tasar; uc centikleri cizginin disina tasiyor. */
+	.dim--draw {
+		clip-path: inset(-20px 100% -20px -20px);
+		animation: dim-draw-x 900ms cubic-bezier(0.22, 1, 0.36, 1) 300ms forwards;
+	}
+
+	.dim--v.dim--draw {
+		clip-path: inset(-20px -20px 100% -20px);
+		animation-name: dim-draw-y;
+		animation-delay: 650ms;
+	}
+
+	@keyframes dim-draw-x {
+		to { clip-path: inset(-20px -20px -20px -20px); }
+	}
+
+	@keyframes dim-draw-y {
+		to { clip-path: inset(-20px -20px -20px -20px); }
+	}
+
+	/* Kucuk olcu satiri (kartlarda): kisa sari centik + deger. */
+	.dimtag {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: var(--text-sm);
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		color: var(--color-ink);
+	}
+
+	.dimtag::before {
+		content: "";
+		width: 18px;
+		height: 2px;
+		background: var(--color-signal);
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Sartname tablosu: foyun ustunde sari cizgi, satirlar sac cizgiyle.
+	 * ---------------------------------------------------------------- */
+	.spec {
+		border-top: 3px solid var(--color-signal);
+	}
+
+	.spec__row {
+		display: grid;
+		grid-template-columns: minmax(8rem, 0.9fr) 1.1fr;
+		gap: 1rem;
+		padding: 0.8rem 0;
+		border-bottom: 1px solid var(--color-line);
+	}
+
+	.spec__row:last-child {
+		border-bottom: 0;
+	}
+
+	.spec__key {
+		color: var(--color-steel);
+		font-size: var(--text-sm);
+	}
+
+	.spec__value {
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		text-wrap: balance;
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Ust menu: aktif sayfa altinda tam genislikte indigo cizgi.
+	 * ---------------------------------------------------------------- */
+	.navline {
+		position: relative;
+	}
+
+	.navline::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: -7px;
+		height: 2px;
+		background: var(--color-indigo);
+		transform: scaleX(0);
+		transform-origin: left center;
+		transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.navline:hover::after,
+	.navline:focus-visible::after,
+	.navline[aria-current="page"]::after,
+	.navline[aria-expanded="true"]::after,
+	.navline[data-section-current]::after {
+		transform: scaleX(1);
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Dugme sistemi
+	 *
+	 * Uc boy, dort cesit. Sablonlarda elle dolgu/punto yazilmaz.
+	 * Keskin sayilacak kadar az kose (3px): endustriyel, sert; ahsapkasa'nin
+	 * hap dugmelerinden bilincli olarak farkli.
+	 * ---------------------------------------------------------------- */
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.55rem;
+		border-radius: 3px;
+		border: 1px solid transparent;
+		font-family: var(--font-body);
+		font-weight: 600;
+		line-height: 1.1;
+		white-space: nowrap;
+		text-decoration: none;
+		cursor: pointer;
+		transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+	}
+
+	.btn--sm {
+		min-height: 2.5rem;
+		padding: 0 1rem;
+		font-size: var(--text-sm);
+	}
+
+	.btn--md {
+		min-height: 3rem;
+		padding: 0 1.5rem;
+		font-size: 1rem;
+	}
+
+	.btn--lg {
+		min-height: 3.5rem;
+		padding: 0 2rem;
+		font-size: 1.125rem;
+	}
+
+	/* Acik zeminde birincil eylem. */
+	.btn--solid {
+		background: var(--color-indigo);
+		color: var(--color-sheet);
+	}
+
+	.btn--solid:hover,
+	.btn--solid:focus-visible {
+		background: var(--color-indigo-deep);
+		color: var(--color-sheet);
+	}
+
+	/* WhatsApp: yesil zemin, beyaz ikon ve yazi. Tanindigi icin kendi rengi. */
+	.btn--whatsapp {
+		background: var(--color-whatsapp-deep);
+		color: var(--color-sheet);
+	}
+
+	.btn--whatsapp:hover,
+	.btn--whatsapp:focus-visible {
+		background: var(--color-whatsapp-dark);
+		color: var(--color-sheet);
+	}
+
+	/* Acik zeminde ikincil eylem. */
+	.btn--outline {
+		border-color: color-mix(in srgb, var(--color-ink) 24%, transparent);
+		color: var(--color-ink);
+	}
+
+	.btn--outline:hover,
+	.btn--outline:focus-visible {
+		border-color: var(--color-indigo);
+		color: var(--color-indigo);
+	}
+
+	/* Indigo ya da gece zemininde birincil eylem. */
+	.btn--light {
+		background: var(--color-sheet);
+		color: var(--color-indigo);
+	}
+
+	.btn--light:hover,
+	.btn--light:focus-visible {
+		background: var(--color-indigo-wash);
+		color: var(--color-indigo-deep);
+	}
+
+	/* Indigo ya da gece zemininde ikincil eylem. */
+	.btn--light-outline {
+		border-color: color-mix(in srgb, var(--color-sheet) 45%, transparent);
+		color: var(--color-sheet);
+	}
+
+	.btn--light-outline:hover,
+	.btn--light-outline:focus-visible {
+		border-color: var(--color-sheet);
+		background: color-mix(in srgb, var(--color-sheet) 10%, transparent);
+		color: var(--color-sheet);
+	}
+
+	/* Koyu zeminde odak halkasi indigo'nun acik tonuyla gorunur kalsin. */
+	.on-dark :focus-visible {
+		outline-color: var(--color-indigo-tint);
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Blog sayfalamasi (the_posts_pagination ciktisi)
+	 * ---------------------------------------------------------------- */
+	.ip-pagination .nav-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.ip-pagination .page-numbers {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2.75rem;
+		min-height: 2.75rem;
+		padding: 0 0.875rem;
+		border: 1px solid var(--color-line);
+		border-radius: 3px;
+		background: var(--color-sheet);
+		color: var(--color-ink);
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		text-decoration: none;
+	}
+
+	.ip-pagination a.page-numbers:hover {
+		border-color: var(--color-indigo);
+		color: var(--color-indigo);
+	}
+
+	.ip-pagination .page-numbers.current {
+		border-color: var(--color-indigo);
+		background: var(--color-indigo);
+		color: var(--color-sheet);
+	}
+
+	/* ---------------------------------------------------------------- *
+	 * Blog yazisi govdesi (WordPress editorunden gelen HTML)
+	 * ---------------------------------------------------------------- */
+	.prose-ip {
+		max-width: 38rem;
+		font-size: 1.125rem;
+		line-height: 1.7;
+	}
+
+	.prose-ip > * + * {
+		margin-top: 1.1em;
+	}
+
+	.prose-ip h2 {
+		margin-top: 2em;
+		font-size: var(--text-2xl);
+		font-weight: 600;
+	}
+
+	.prose-ip h3 {
+		margin-top: 1.6em;
+		font-size: var(--text-lg);
+		font-weight: 600;
+	}
+
+	.prose-ip ul,
+	.prose-ip ol {
+		padding-left: 1.25rem;
+	}
+
+	.prose-ip ul {
+		list-style: square;
+	}
+
+	.prose-ip ol {
+		list-style: decimal;
+	}
+
+	.prose-ip li + li {
+		margin-top: 0.35em;
+	}
+
+	.prose-ip li::marker {
+		color: var(--color-steel);
+	}
+
+	.prose-ip a {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+}
+
+/* ------------------------------------------------------------------ *
+ * Hareket tercihi
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	.dim--draw,
+	.dim--v.dim--draw {
+		animation: none;
+		clip-path: none;
+	}
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}

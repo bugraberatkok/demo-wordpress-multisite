@@ -9,9 +9,28 @@
  */
 
 return array(
-	'site_key'   => 'ahsapkasa',
-	'site_label' => 'Koçist · ahsapkasa.com',
-	'pages'      => array(
+	'site_key'          => 'ahsapkasa',
+	'site_label'        => 'Koçist · ahsapkasa.com',
+
+	// SEO ve GEO sekmesindeki firma bilgisinin ilk degerleri: sitenin kendi
+	// iletisim ve alt bilgi alanlarindaki bilgiler. Konum bilinmedigi icin bos.
+	'seo_site_defaults' => array(
+		'name'        => 'Koçist Orman Ürünleri',
+		'legal_name'  => 'Koçist Orman Ürünleri İnş. ve İnş. Yap. Malz. San. Tic. Ltd. Şti.',
+		'description' => 'Koçist Orman Ürünleri, İstanbul İkitelli’de 40 yıllık tecrübeyle istenen ölçü ve ebatlarda ahşap sandık, ahşap kafes, ahşap palet ve ahşap ambalaj üretir; demonte paketler hâlinde sevk eder.',
+		'phone'       => '+90 212 648 10 90',
+		'email'       => 'info@kocist.com.tr',
+		'street'      => 'Şahintepe Mh. Eski İstanbul Cd. No. 176/A-B-C-D',
+		'district'    => 'Başakşehir',
+		'city'        => 'İstanbul',
+		'country'     => 'TR',
+		'same_as'     => array(
+			array( 'url' => 'https://istanbulpaletci.com' ),
+			array( 'url' => 'https://www.kocist.com.tr' ),
+		),
+	),
+
+	'pages'             => array(
 
 		/* ---------------------------------------------------------- *
 		 * Tum sayfalarda ortak: ust menu ve alt bilgi

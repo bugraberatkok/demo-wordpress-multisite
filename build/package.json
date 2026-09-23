@@ -1,11 +1,16 @@
 {
-  "name": "ahsapkasa-build",
+  "name": "theme-build",
   "private": true,
-  "version": "1.0.0",
-  "description": "Tailwind derleyicisi: ahsapkasa-theme icin CSS uretir.",
+  "version": "1.1.0",
+  "description": "Tailwind derleyicisi: her tema kendi kaynak dosyasindan kendi CSS'ini uretir.",
   "scripts": {
-    "build": "tailwindcss -i ./tailwind.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --minify",
-    "watch": "tailwindcss -i ./tailwind.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --watch"
+    "build": "npm run build:ahsapkasa && npm run build:istanbulpaletci && npm run build:kereste",
+    "build:ahsapkasa": "tailwindcss -i ./ahsapkasa.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --minify",
+    "build:istanbulpaletci": "tailwindcss -i ./istanbulpaletci.css -o ../wp-content/themes/istanbulpaletci-theme/assets/tailwind.css --minify",
+    "watch:ahsapkasa": "tailwindcss -i ./ahsapkasa.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --watch",
+    "watch:istanbulpaletci": "tailwindcss -i ./istanbulpaletci.css -o ../wp-content/themes/istanbulpaletci-theme/assets/tailwind.css --watch",
+    "build:kereste": "tailwindcss -i ./kereste.css -o ../wp-content/themes/kereste-base/assets/tailwind.css --minify",
+    "watch:kereste": "tailwindcss -i ./kereste.css -o ../wp-content/themes/kereste-base/assets/tailwind.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",

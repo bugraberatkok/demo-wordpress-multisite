@@ -1,0 +1,25 @@
+/*
+Theme Name: Kavak Keresteci
+Theme URI: http://localhost:8080/kavakkeresteci/
+Author: Demo
+Description: kavakkeresteci.com. kereste-base ana temasinin cocugu; ithalkeresteci ile ayni tasarimi paylasir, parti boyasi (renkler), ana sayfa modulleri ve icerigi farklidir.
+Template: kereste-base
+Version: 0.1.0
+Requires at least: 6.5
+Requires PHP: 8.1
+Text Domain: kavakkeresteci
+*/
+
+/*
+ * Parti boyasi: yesil ve kahve. Isaret rengi Koçist logosunun yesili
+ * (#508038; beyaz zeminde ve beyaz yaziyla 4,7:1). Sablon harfler kahve,
+ * koyu yuzeyler ve metin koyu ahsap kahvesi, bolum zemini acik adacayi.
+ */
+:root {
+	--site-mark: #508038;
+	--site-mark-deep: #3b5e29;
+	--site-mark-wash: #e9f0e1;
+	--site-stamp: #7a4a26;
+	--site-ink: #2a221c;
+	--site-stone: #eef0e9;
+}

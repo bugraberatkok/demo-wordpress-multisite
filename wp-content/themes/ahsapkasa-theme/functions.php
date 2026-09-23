@@ -214,7 +214,10 @@ function ahsapkasa_handle_quote(): void {
 		$errors['size'] = 'En, boy ve yükseklik bilgisini yazın.';
 	}
 
-	$token = wp_generate_password( 16, false, false );
+	// Kucuk harfli onaltilik: okurken sanitize_key() buyuk harfi kucultur.
+	// Karisik harfli anahtar yerelde (harf duyarsiz MySQL) calisir ama harf
+	// duyarli nesne onbelleginde (LiteSpeed, Redis) bulunamaz.
+	$token = bin2hex( random_bytes( 10 ) );
 
 	if ( $errors ) {
 		set_transient( 'ahsapkasa_quote_' . $token, array( 'errors' => $errors, 'values' => $values ), 10 * MINUTE_IN_SECONDS );
@@ -284,7 +287,7 @@ function ahsapkasa_handle_quote(): void {
 function ahsapkasa_quote_state(): array {
 	$token = isset( $_GET['ak'] ) ? sanitize_key( wp_unslash( $_GET['ak'] ) ) : '';
 
-	if ( ! $token ) {
+	if ( ! preg_match( '/^[a-f0-9]{20}$/', $token ) ) {
 		return array( 'errors' => array(), 'values' => array(), 'success' => false );
 	}
 

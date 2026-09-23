@@ -1,5 +1,6 @@
 #!/bin/sh
-# Multisite agini ve iki demo siteyi kurar. Tekrar calistirilabilir.
+# Multisite agini ve gercek siteleri kurar. Tekrar calistirilabilir: var olan
+# bir sitenin icerigine dokunmaz (seed yalnizca site ilk kez olusurken calisir).
 # Calistirma (proje kokunden):
 #   docker compose --profile cli run --rm --entrypoint sh wpcli /scripts/install.sh
 
@@ -80,10 +81,6 @@ RewriteRule . index.php [L]
 HTACCESS
 fi
 
-echo "==> temalar ag genelinde etkinlestiriliyor"
-wpc theme enable kocist-theme --network >/dev/null
-wpc theme enable paletci-theme --network >/dev/null
-
 echo "==> eklenti ag genelinde etkinlestiriliyor"
 wpc plugin activate network-content-studio --network >/dev/null
 
@@ -100,41 +97,43 @@ else
 	fi
 fi
 
-create_site() {
-	slug="$1"
-	title="$2"
+# Gercek siteler: <slug>|<tema>|<baslik>|<seed betigi>
+# Yeni bir site eklerken bu listeye bir satir eklemek yeterli.
+SITES='
+ahsapkasa|ahsapkasa-theme|Koçist Orman Ürünleri|seed-ahsapkasa.php
+istanbulpaletci|istanbulpaletci-theme|İstanbul Paletçi|seed-istanbulpaletci.php
+ithalkeresteci|ithalkeresteci-theme|İthal Keresteci|seed-ithalkeresteci.php
+kavakkeresteci|kavakkeresteci-theme|Kavak Keresteci|seed-kavakkeresteci.php
+'
 
-	if wpc site list --field=url | grep -q "${BASE_URL}/${slug}/"; then
-		echo "==> /${slug}/ sitesi zaten var"
-	else
-		echo "==> /${slug}/ sitesi olusturuluyor"
-		wpc site create --slug="$slug" --title="$title" --email="$ADMIN_EMAIL" >/dev/null
-	fi
-}
+echo "==> Turkce dil paketi"
+wpc language core install tr_TR >/dev/null 2>&1 || echo "    atlandi: indirilemedi"
 
-create_site kocist "Koçist"
-create_site paletci "İstanbul Paletçi"
-
-echo "==> merkezi urun havuzu dolduruluyor"
-wpc eval-file /scripts/seed-products.php --url="${BASE_URL}/"
-
-setup_site() {
-	slug="$1"
-	theme="$2"
+echo "$SITES" | while IFS='|' read -r slug theme title seed; do
+	[ -n "$slug" ] || continue
 	site_url="${BASE_URL}/${slug}/"
 
-	echo "==> ${slug}: tema atanyor ve icerik seed ediliyor"
-	wpc theme activate "$theme" --url="$site_url" >/dev/null
-	wpc rewrite structure '/%postname%/' --url="$site_url" >/dev/null
-	wpc eval-file /scripts/seed.php --url="$site_url"
-}
+	# Var olan sitenin icerigine dokunulmaz: seed alanlari varsayilana geri yazar.
+	if wpc site list --field=url | grep -q "$site_url"; then
+		echo "==> /${slug}/ zaten var; icerige dokunulmuyor"
+		continue
+	fi
 
-setup_site kocist kocist-theme
-setup_site paletci paletci-theme
+	echo "==> /${slug}/ kuruluyor"
+	wpc site create --slug="$slug" --title="$title" --email="$ADMIN_EMAIL" >/dev/null
+	wpc theme enable "$theme" --network >/dev/null
+	wpc theme activate "$theme" --url="$site_url" >/dev/null
+	wpc site switch-language tr_TR --url="$site_url" >/dev/null 2>&1 || true
+	wpc option update timezone_string Europe/Istanbul --url="$site_url" >/dev/null
+	wpc rewrite structure '/%postname%/' --url="$site_url" >/dev/null
+	wpc eval-file "/scripts/${seed}" --url="$site_url"
+done
 
 echo ""
 echo "Kurulum tamam."
-echo "  Koçist        : ${BASE_URL}/kocist/"
-echo "  İstanbul Paletçi: ${BASE_URL}/paletci/"
-echo "  Ağ yönetimi   : ${BASE_URL}/wp-admin/network/"
-echo "  Giriş         : ${BASE_URL}/wp-login.php  (kullanıcı: ${ADMIN_USER})"
+echo "  ahsapkasa      : ${BASE_URL}/ahsapkasa/"
+echo "  istanbulpaletci: ${BASE_URL}/istanbulpaletci/"
+echo "  ithalkeresteci : ${BASE_URL}/ithalkeresteci/"
+echo "  kavakkeresteci : ${BASE_URL}/kavakkeresteci/"
+echo "  Ağ yönetimi    : ${BASE_URL}/wp-admin/network/"
+echo "  Giriş          : ${BASE_URL}/wp-login.php  (kullanıcı: ${ADMIN_USER})"
