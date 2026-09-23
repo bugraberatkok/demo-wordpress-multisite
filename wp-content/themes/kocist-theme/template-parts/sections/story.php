@@ -5,7 +5,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$image  = nwcs_image( 'inner', 'story', 'image' );
+$image  = kocist_image_or_default( nwcs_image( 'inner', 'story', 'image' ), 's2-kereste.jpg', 'Koçist kereste stok sahası' );
 $points = nwcs_rows( 'inner', 'story', 'points' );
 ?>
 <section class="k-section" data-nwcs-section="story">

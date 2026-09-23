@@ -1,0 +1,345 @@
+/*
+ * Iletisim sayfasi.
+ *
+ * Koyu bir baslik bandi, bandin altina binen beyaz iletisim seridi, ardindan
+ * solda form sagda harita. Agirlik banda ve haritaya verildi; form kutusuz,
+ * sade alanlarla duruyor.
+ */
+
+.k-contact { padding-bottom: 56px; }
+
+/* ---------- Baslik bandi ---------- */
+.k-contact__band {
+	position: relative;
+	overflow: hidden;
+	padding: 56px 0 92px;
+	background: var(--forest);
+	color: #fff;
+}
+
+/* Sag ustte soluk isik lekesi: footer'daki ile ayni dil. */
+.k-contact__band::before {
+	content: "";
+	position: absolute;
+	top: -180px;
+	right: -140px;
+	width: 480px;
+	height: 480px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(122, 182, 72, .22) 0%, rgba(122, 182, 72, 0) 68%);
+	pointer-events: none;
+}
+
+.k-contact__band .k-wrap { position: relative; }
+
+.k-contact__eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 13px;
+	margin: 0 0 16px;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: .24em;
+	text-transform: uppercase;
+	color: var(--leaf);
+}
+
+/* Etiketin onundeki kisa cizgi: bolum etiketleriyle ayni isaret. */
+.k-contact__eyebrow::before {
+	content: "";
+	width: 34px;
+	height: 2px;
+	border-radius: 999px;
+	background: var(--leaf);
+}
+
+.k-contact__title {
+	margin: 0 0 14px;
+	max-width: 16ch;
+	font-size: clamp(34px, 4.4vw, 56px);
+	line-height: 1.02;
+	letter-spacing: -.03em;
+	color: #fff;
+}
+
+.k-contact__subtitle {
+	margin: 0;
+	max-width: 52ch;
+	font-size: 16.5px;
+	line-height: 1.65;
+	color: rgba(255, 255, 255, .78);
+}
+
+/* ---------- Iletisim seridi ---------- */
+/*
+ * Serit bandin altina biniyor (negatif ust bosluk). Kart listesi yerine tek
+ * parca bir cubuk: ogeler ince cizgilerle ayriliyor, kutu yigini olusmuyor.
+ */
+.k-strip {
+	/*
+	 * z-index sart: band 'position: relative' oldugu icin konumlandirilmis
+	 * bir oge, serit ise statik. Konumlandirilmis ogeler statiklerin uzerine
+	 * boyandigindan, serit bandin altinda kalip etiketleri gorunmez oluyordu.
+	 */
+	position: relative;
+	z-index: 1;
+
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	margin-top: -52px;
+	margin-bottom: 52px;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	background: #fff;
+	box-shadow: 0 20px 44px rgba(15, 61, 33, .1);
+	overflow: hidden;
+}
+
+.k-strip__item {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	padding: 22px 24px;
+	text-decoration: none;
+	color: inherit;
+	border-left: 1px solid var(--line);
+	transition: background .22s ease;
+}
+
+.k-strip__item:first-child { border-left: 0; }
+
+a.k-strip__item:hover { background: var(--leaf-soft); }
+
+a.k-strip__item:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: -3px;
+}
+
+.k-strip__label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: .14em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.k-strip__icon { flex: none; color: var(--leaf-dark); }
+
+.k-strip__value {
+	font-size: 15.5px;
+	font-weight: 700;
+	line-height: 1.4;
+	color: var(--forest);
+}
+
+/* ---------- Form ve harita ---------- */
+.k-contact__grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 46px;
+	align-items: start;
+}
+
+.k-contact__h2 {
+	margin: 0 0 10px;
+	font-size: clamp(22px, 2.2vw, 28px);
+	color: var(--forest);
+}
+
+.k-contact__lead {
+	margin: 0 0 26px;
+	max-width: 44ch;
+	font-size: 15.5px;
+	line-height: 1.65;
+	color: var(--muted);
+}
+
+/* Form kutusuz: cerceve yerine alanlarin kendisi tasiyor. */
+.k-contact__form {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px 16px;
+}
+
+.k-field { display: flex; flex-direction: column; gap: 7px; }
+.k-field--wide { grid-column: 1 / -1; }
+
+.k-field label {
+	font-size: 13.5px;
+	font-weight: 700;
+	color: var(--text);
+}
+
+/*
+ * Alt cizgili alanlar yeterince belirgin degildi; nereye yazilacagi
+ * anlasilmiyordu. Kutulu alanlar: net sinir, rahat dokunma alani ve
+ * odaklanmada belirgin bir halka.
+ */
+.k-field input,
+.k-field textarea {
+	width: 100%;
+	padding: 13px 15px;
+	border: 1.5px solid var(--line);
+	border-radius: 12px;
+	background: #fff;
+	font-family: inherit;
+	font-size: 15.5px;
+	line-height: 1.5;
+	color: var(--text);
+	transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.k-field input::placeholder,
+.k-field textarea::placeholder {
+	color: #9aa79f;
+}
+
+.k-field input:hover,
+.k-field textarea:hover { border-color: #c2d1c7; }
+
+.k-field input:focus,
+.k-field textarea:focus {
+	outline: none;
+	border-color: var(--leaf);
+	box-shadow: 0 0 0 4px rgba(122, 182, 72, .16);
+}
+
+.k-field textarea { resize: vertical; min-height: 132px; }
+
+.k-contact__submit-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 14px 18px;
+	margin-top: 8px;
+}
+
+/*
+ * Buton devre disi: form demo oldugu icin tiklanabilir gorunmemeli.
+ * Imlec de bunu soyluyor.
+ */
+.k-contact__submit {
+	padding: 14px 32px;
+	border: 0;
+	border-radius: 999px;
+	background: var(--forest);
+	color: #fff;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 800;
+	letter-spacing: .04em;
+	opacity: .4;
+	cursor: not-allowed;
+}
+
+/* Uyari kutu degil, butonun yanindaki ince bir satir. */
+.k-contact__demo {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1 1 220px;
+	font-size: 12.5px;
+	line-height: 1.45;
+	color: var(--muted);
+}
+
+/* ---------- Harita ---------- */
+.k-map {
+	position: relative;
+	overflow: hidden;
+	border-radius: 18px;
+	border: 1px solid var(--line);
+	line-height: 0;
+}
+
+.k-map__frame {
+	display: block;
+	width: 100%;
+	height: 520px;
+	border: 0;
+
+	/*
+	 * Google'in mavi-gri haritasi sayfanin yesil paletinden kopuyordu;
+	 * hafif bir doygunluk ve ton kaydirmasi onu markaya yaklastiriyor.
+	 */
+	filter: saturate(.72) hue-rotate(-12deg) contrast(1.04);
+}
+
+/* Adres karti haritanin uzerine biniyor. */
+.k-map__card {
+	position: absolute;
+	left: 18px;
+	right: 18px;
+	bottom: 18px;
+	padding: 18px 20px 20px;
+	border-radius: 14px;
+	background: rgba(255, 255, 255, .96);
+	backdrop-filter: blur(6px);
+	box-shadow: 0 16px 34px rgba(15, 61, 33, .18);
+	line-height: normal;
+}
+
+.k-map__title {
+	margin: 0 0 6px;
+	font-size: 11px;
+	font-weight: 800;
+	letter-spacing: .16em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.k-map__address {
+	margin: 0 0 14px;
+	font-size: 15px;
+	line-height: 1.5;
+	color: var(--forest);
+	font-weight: 600;
+}
+
+.k-map__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 11px 20px;
+	border-radius: 999px;
+	background: var(--forest);
+	color: #fff;
+	font-size: 13px;
+	font-weight: 800;
+	letter-spacing: .04em;
+	text-decoration: none;
+	transition: background .22s ease, gap .22s ease;
+}
+
+.k-map__link:hover {
+	background: var(--leaf-dark);
+	gap: 14px;
+}
+
+@media (max-width: 899.98px) {
+	.k-contact__band { padding: 40px 0 80px; }
+	.k-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.k-strip__item:nth-child(odd) { border-left: 0; }
+	.k-strip__item:nth-child(n + 3) { border-top: 1px solid var(--line); }
+	.k-contact__grid { grid-template-columns: 1fr; gap: 36px; }
+	.k-map__frame { height: 380px; }
+}
+
+@media (max-width: 599.98px) {
+	.k-strip { grid-template-columns: 1fr; }
+	.k-strip__item { border-left: 0; border-top: 1px solid var(--line); }
+	.k-strip__item:first-child { border-top: 0; }
+	.k-contact__form { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.k-strip__item,
+	.k-map__link,
+	.k-field input,
+	.k-field textarea {
+		transition-duration: .01ms !important;
+	}
+}

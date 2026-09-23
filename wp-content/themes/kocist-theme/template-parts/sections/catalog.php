@@ -1,49 +1,55 @@
 <?php
 /**
- * Urun gruplari bolumu (gorselli kartlar).
+ * Ana urun gamlari: dort kart yan yana, gorselin uzerinde ortalanmis baslik.
  *
- * Kartlar merkezi urun havuzundan gelir; bu sitenin secimi ve istisnalari
- * panelden yonetilir. Fiyat bos ise "Teklif al" gorunur.
+ * Durur haldeyken yalnizca baslik ve alt baslik gorunur; imlec gelince
+ * altlarindaki cizgi acilir ve Kesfet butonu asagidan yukselir. Kartlar
+ * ekrana girdikce sirayla belirir (assets/js/catalog.js).
+ *
+ * Kartin tamami tiklanabilir; buton gorsel bir isarettir, bu yuzden ayri
+ * bir baglanti degil <span> olarak basiliyor (ic ice baglanti gecersiz
+ * isaretleme olurdu).
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$items     = function_exists( 'nwcs_site_products' ) ? nwcs_site_products() : array();
-$cta_label = nwcs_field( 'home', 'catalog', 'cta_label' );
+$items = nwcs_rows( 'home', 'catalog', 'items' );
+
+// Kart gorseli panelde secilmemisse temadaki kategori fotograflari.
+$item_defaults = array( 's2-kereste.jpg', 's2-ambalaj.jpg', 's2-dekorasyon.jpg', 's2-hirdavat.jpg' );
 ?>
-<section class="k-section k-section--alt" id="katalog" data-nwcs-section="catalog">
+<section class="k-section" id="katalog" data-nwcs-section="catalog">
 	<div class="k-wrap">
-		<div class="k-section-head">
-			<h2 class="k-section-title" <?php nwcs_edit_attr( 'home', 'catalog', 'title' ); ?>><?php echo esc_html( nwcs_field( 'home', 'catalog', 'title' ) ); ?></h2>
-			<p class="k-section-sub" <?php nwcs_edit_attr( 'home', 'catalog', 'subtitle' ); ?>><?php echo esc_html( nwcs_field( 'home', 'catalog', 'subtitle' ) ); ?></p>
-		</div>
+		<?php /* Buyuk baslik yerine ince bir etiket; kartlarin onune gecmiyor. */ ?>
+		<h2 class="k-groups__label" data-k-reveal>
+			<span class="k-groups__dash" aria-hidden="true"></span>
+			<span <?php nwcs_edit_attr( 'home', 'catalog', 'title' ); ?>><?php echo esc_html( nwcs_field( 'home', 'catalog', 'title' ) ); ?></span>
+		</h2>
 
-		<div class="k-catalog" <?php nwcs_edit_attr( 'home', 'catalog', 'pool' ); ?>>
-			<?php foreach ( $items as $item ) : ?>
-				<article class="k-cat">
-					<div class="k-cat__media">
-						<?php echo kocist_image_tag( $item['image'], '', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
-					</div>
-					<div class="k-cat__body">
-						<h3 class="k-cat__title"><?php echo esc_html( $item['title'] ); ?></h3>
+		<div class="k-groups" data-k-groups>
+			<?php
+			foreach ( $items as $index => $item ) :
+				$image = kocist_image_or_default( nwcs_image_by_id( (int) ( $item['image'] ?? 0 ), 'large' ), $item_defaults[ $index ] ?? '', (string) ( $item['title'] ?? '' ) );
+				?>
+				<a
+					class="k-group"
+					href="<?php echo esc_url( kocist_link( $item['link_url'] ?? '' ) ); ?>"
+					data-k-group
+					style="--i: <?php echo (int) $index; ?>"
+					<?php nwcs_edit_attr( 'home', 'catalog', 'items', $index, 'title' ); ?>
+				>
+					<?php echo kocist_image_tag( $image, 'k-group__img', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 
-						<span class="k-cat__price<?php echo $item['has_price'] ? '' : ' is-quote'; ?>">
-							<?php echo esc_html( $item['price_label'] ); ?>
-						</span>
+					<span class="k-group__body">
+						<span class="k-group__title"><?php echo esc_html( $item['title'] ?? '' ); ?></span>
+						<span class="k-group__rule" aria-hidden="true"></span>
 
-						<p class="k-cat__text"><?php echo esc_html( $item['short'] ); ?></p>
-
-						<a class="k-cat__link" href="<?php echo esc_url( $item['body'] ? $item['url'] : '#teklif' ); ?>">
-							<?php echo esc_html( $item['body'] ? 'Ürün detayı' : $cta_label ); ?>
-							<?php nwcs_the_icon( 'arrow', 'k-icon', 16 ); ?>
-						</a>
-					</div>
-				</article>
+						<?php if ( ! empty( $item['link_label'] ) ) : ?>
+							<span class="k-group__btn"><?php echo esc_html( $item['link_label'] ); ?></span>
+						<?php endif; ?>
+					</span>
+				</a>
 			<?php endforeach; ?>
-
-			<?php if ( ! $items ) : ?>
-				<p class="k-section-sub">Bu site için henüz ürün seçilmedi.</p>
-			<?php endif; ?>
 		</div>
 	</div>
 </section>

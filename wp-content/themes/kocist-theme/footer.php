@@ -1,22 +1,67 @@
 <?php
 /**
- * Footer. Degerler 'global' sayfasindan okunur.
+ * Footer ve ustundeki hareketli serit. Degerler 'global' sayfasindan okunur.
+ *
+ * Serit ogeleri kesintisiz akar. Teknigi: ayni liste iki kez basilir ve
+ * seridin tamami -%50 otelenir; ikinci kopya birincinin bittigi yerden
+ * devam ettigi icin dongu gorunmez. Kopya yalnizca gorsel oldugundan
+ * ekran okuyuculardan gizleniyor.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$links = nwcs_rows( 'global', 'footer', 'links' );
+$ticker    = nwcs_rows( 'global', 'footer', 'ticker' );
+$social    = nwcs_rows( 'global', 'footer', 'social' );
+$links     = nwcs_rows( 'global', 'footer', 'links' );
+$corporate = nwcs_rows( 'global', 'footer', 'corporate' );
+$legal     = nwcs_rows( 'global', 'footer', 'legal' );
+$logo      = kocist_image_or_default( nwcs_image( 'global', 'header', 'logo_image', 'medium' ), 'logo.png', 'Koçist Orman Ürünleri logosu' );
 ?>
+<?php if ( $ticker ) : ?>
+	<div class="k-ticker" data-k-ticker>
+		<div class="k-ticker__track">
+			<?php for ( $copy = 0; $copy < 2; $copy++ ) : ?>
+				<ul class="k-ticker__list" <?php echo 0 === $copy ? '' : 'aria-hidden="true"'; ?>>
+					<?php foreach ( $ticker as $ticker_index => $entry ) : ?>
+						<?php // Duzenleme isareti yalnizca ilk kopyada; ikincisi gorsel tekrar. ?>
+						<li class="k-ticker__item" <?php if ( 0 === $copy ) { nwcs_edit_attr( 'global', 'footer', 'ticker', $ticker_index, 'text' ); } ?>>
+							<span class="k-ticker__mark" aria-hidden="true">◆</span>
+							<?php echo esc_html( $entry['text'] ?? '' ); ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endfor; ?>
+		</div>
+	</div>
+<?php endif; ?>
+
 <footer class="k-footer" data-nwcs-section="footer">
 	<div class="k-wrap">
 		<div class="k-footer__grid">
-			<div>
-				<h3 <?php nwcs_edit_attr( 'global', 'footer', 'about_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'about_title' ) ); ?></h3>
+
+			<div class="k-footer__brand">
+				<?php if ( ! empty( $logo['url'] ) ) : ?>
+					<img class="k-footer__logo" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( $logo['alt'] ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?> />
+				<?php endif; ?>
+
 				<p class="k-footer__about" <?php nwcs_edit_attr( 'global', 'footer', 'about_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'about_text' ) ); ?></p>
+
+				<?php if ( $social ) : ?>
+					<ul class="k-footer__social">
+						<?php foreach ( $social as $social_index => $item ) : ?>
+							<li>
+								<a class="k-footer__social-link" href="<?php echo esc_url( kocist_link( $item['url'] ?? '' ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'social', $social_index, 'url' ); ?>>
+									<span class="screen-reader-text"><?php echo esc_html( $item['label'] ?? '' ); ?></span>
+									<?php kocist_social_icon( (string) ( $item['icon'] ?? '' ), (string) ( $item['label'] ?? '' ) ); ?>
+								</a>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
 			</div>
 
-			<div>
-				<h3 <?php nwcs_edit_attr( 'global', 'footer', 'links_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'links_title' ) ); ?></h3>
+			<div class="k-footer__col">
+				<h3 class="k-footer__heading" <?php nwcs_edit_attr( 'global', 'footer', 'links_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'links_title' ) ); ?></h3>
 				<ul class="k-footer__list">
 					<?php foreach ( $links as $index => $link ) : ?>
 						<li><a href="<?php echo esc_url( kocist_link( $link['url'] ?? '' ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'links', $index, 'label' ); ?>><?php echo esc_html( $link['label'] ?? '' ); ?></a></li>
@@ -24,28 +69,44 @@ $links = nwcs_rows( 'global', 'footer', 'links' );
 				</ul>
 			</div>
 
-			<div>
-				<h3 <?php nwcs_edit_attr( 'global', 'footer', 'contact_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'contact_title' ) ); ?></h3>
-				<div class="k-footer__contact">
-					<div <?php nwcs_edit_attr( 'global', 'footer', 'address' ); ?>>
-						<?php nwcs_the_icon( nwcs_field( 'global', 'footer', 'address_icon' ), 'k-icon', 18 ); ?>
+			<div class="k-footer__col">
+				<h3 class="k-footer__heading" <?php nwcs_edit_attr( 'global', 'footer', 'corporate_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'corporate_title' ) ); ?></h3>
+				<ul class="k-footer__list">
+					<?php foreach ( $corporate as $index => $link ) : ?>
+						<li><a href="<?php echo esc_url( kocist_link( $link['url'] ?? '' ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'corporate', $index, 'label' ); ?>><?php echo esc_html( $link['label'] ?? '' ); ?></a></li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+
+			<div class="k-footer__col">
+				<h3 class="k-footer__heading" <?php nwcs_edit_attr( 'global', 'footer', 'contact_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'contact_title' ) ); ?></h3>
+				<ul class="k-footer__list k-footer__list--contact">
+					<li class="k-footer__address" <?php nwcs_edit_attr( 'global', 'footer', 'address' ); ?>>
+						<?php nwcs_the_icon( nwcs_field( 'global', 'footer', 'address_icon' ), 'k-footer__icon', 17 ); ?>
 						<span><?php echo esc_html( nwcs_field( 'global', 'footer', 'address' ) ); ?></span>
-					</div>
-					<a href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'phone_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'phone_label' ); ?>>
-						<?php nwcs_the_icon( 'phone', 'k-icon', 18 ); ?>
-						<span><?php echo esc_html( nwcs_field( 'global', 'footer', 'phone_label' ) ); ?></span>
-					</a>
-					<a href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'email_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'email_label' ); ?>>
-						<?php nwcs_the_icon( 'mail', 'k-icon', 18 ); ?>
-						<span><?php echo esc_html( nwcs_field( 'global', 'footer', 'email_label' ) ); ?></span>
-					</a>
-				</div>
+					</li>
+					<li>
+						<a class="k-footer__map" href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'map_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'map_label' ); ?>>
+							<?php echo esc_html( nwcs_field( 'global', 'footer', 'map_label' ) ); ?>
+							<span aria-hidden="true">→</span>
+						</a>
+					</li>
+					<li><a href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'phone_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'phone_label' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'phone_label' ) ); ?></a></li>
+					<li><a href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'email_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'email_label' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'email_label' ) ); ?></a></li>
+				</ul>
 			</div>
 		</div>
 
 		<div class="k-footer__bottom">
-			<span <?php nwcs_edit_attr( 'global', 'footer', 'copyright' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'copyright' ) ); ?></span>
-			<span <?php nwcs_edit_attr( 'global', 'footer', 'demo_note' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'demo_note' ) ); ?></span>
+			<span class="k-footer__copy" <?php nwcs_edit_attr( 'global', 'footer', 'copyright' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'copyright' ) ); ?></span>
+
+			<?php if ( $legal ) : ?>
+				<ul class="k-footer__legal">
+					<?php foreach ( $legal as $index => $link ) : ?>
+						<li><a href="<?php echo esc_url( kocist_link( $link['url'] ?? '' ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'legal', $index, 'label' ); ?>><?php echo esc_html( $link['label'] ?? '' ); ?></a></li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
 		</div>
 	</div>
 </footer>

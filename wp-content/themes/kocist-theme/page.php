@@ -12,7 +12,15 @@ get_header();
 
 $is_demo_inner = is_page( 'kurumsal' );
 
-if ( $is_demo_inner ) {
+if ( is_page( 'iletisim' ) ) {
+	// Iletisim sayfasi: manifestteki 'contact' bilesenlerinden cizilir.
+	kocist_section( 'contact-main' );
+} elseif ( is_page( 'urun' ) ) {
+	// Ornek urun sayfasi: manifestteki 'product' bilesenlerinden cizilir.
+	kocist_section( 'product-main' );
+	kocist_section( 'product-specs' );
+	kocist_section( 'product-faq' );
+} elseif ( $is_demo_inner ) {
 	kocist_section( 'page-head' );
 	kocist_section( 'story' );
 	kocist_section( 'values' );

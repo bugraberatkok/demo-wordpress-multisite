@@ -12,7 +12,7 @@ get_header();
 ?>
 <div class="k-pagehead">
 	<div class="k-wrap">
-		<p class="k-pagehead__crumb">Ana Sayfa / <?php echo esc_html( nwcs_field( 'home', 'catalog', 'title' ) ); ?></p>
+		<p class="k-pagehead__crumb">Ana Sayfa / <?php echo esc_html( nwcs_field( 'home', 'products', 'title' ) ); ?></p>
 		<h1 class="k-pagehead__title"><?php echo esc_html( $product['title'] ); ?></h1>
 		<?php if ( $product['short'] ) : ?>
 			<p class="k-pagehead__sub"><?php echo esc_html( $product['short'] ); ?></p>
