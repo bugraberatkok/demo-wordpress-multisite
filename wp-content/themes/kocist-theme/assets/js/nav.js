@@ -331,7 +331,22 @@
 	} );
 
 	document.addEventListener( 'keydown', function ( event ) {
-		if ( 'Escape' !== event.key || ! openedItem ) {
+		if ( 'Escape' !== event.key ) {
+			return;
+		}
+
+		// Dar ekranda Esc tum menuyu kapatir, odak hamburgere doner.
+		if ( header && header.classList.contains( 'is-nav-open' ) ) {
+			setMobileMenu( false );
+
+			if ( burger ) {
+				burger.focus();
+			}
+
+			return;
+		}
+
+		if ( ! openedItem ) {
 			return;
 		}
 
@@ -353,14 +368,41 @@
 
 	/* ---------- mobil menu ---------- */
 
+	/*
+	 * Menu acikken arkadaki sayfa kaymasin. Header yapiskan; uzun menu kendi
+	 * icinde kayar, yuksekligi icin ust kenarin o anki konumu CSS'e verilir.
+	 */
+	function setMobileMenu( open ) {
+		if ( ! header ) {
+			return;
+		}
+
+		header.classList.toggle( 'is-nav-open', open );
+		document.documentElement.classList.toggle( 'k-nav-locked', open );
+
+		if ( open ) {
+			header.style.setProperty( '--k-nav-top', Math.max( 0, nav.getBoundingClientRect().top ) + 'px' );
+		}
+
+		if ( burger ) {
+			burger.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+		}
+
+		if ( ! open ) {
+			closeAll();
+		}
+	}
+
 	if ( burger && header ) {
 		burger.addEventListener( 'click', function () {
-			var isOpen = header.classList.toggle( 'is-nav-open' );
+			setMobileMenu( ! header.classList.contains( 'is-nav-open' ) );
+		} );
 
-			burger.setAttribute( 'aria-expanded', isOpen ? 'true' : 'false' );
-
-			if ( ! isOpen ) {
-				closeAll();
+		// Ayni sayfadaki capaya (/#katalog) gidilince menu acik ve sayfa
+		// kilitli kalmasin.
+		nav.addEventListener( 'click', function ( event ) {
+			if ( event.target.closest( 'a' ) && header.classList.contains( 'is-nav-open' ) ) {
+				setMobileMenu( false );
 			}
 		} );
 	}
@@ -390,16 +432,7 @@
 
 	if ( desktop.addEventListener ) {
 		desktop.addEventListener( 'change', function () {
-			closeAll();
-
-			if ( header ) {
-				header.classList.remove( 'is-nav-open' );
-			}
-
-			if ( burger ) {
-				burger.setAttribute( 'aria-expanded', 'false' );
-			}
-
+			setMobileMenu( false );
 			settle();
 		} );
 	}

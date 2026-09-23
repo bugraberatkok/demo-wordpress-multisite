@@ -272,6 +272,33 @@ function kocist_menu_columns( int $count ): int {
 }
 
 /**
+ * Havuz urunu detay sayfasinda (/urun/<slug>/) sekme basligi urunun adi olsun.
+ *
+ * Detay sayfasi eklentinin sorgu degiskeniyle aciliyor; WordPress'in kendi
+ * sorgusunda bir yazi olmadigindan baslik yalnizca site adina dusuyordu.
+ */
+add_filter( 'document_title_parts', 'kocist_product_title_parts' );
+function kocist_product_title_parts( array $parts ): array {
+	$slug = get_query_var( 'nwcs_product' );
+
+	if ( ! $slug || ! function_exists( 'nwcs_site_product_by_slug' ) ) {
+		return $parts;
+	}
+
+	$product = nwcs_site_product_by_slug( sanitize_title( (string) $slug ) );
+
+	if ( ! $product || '' === trim( (string) ( $product['title'] ?? '' ) ) ) {
+		return $parts;
+	}
+
+	$parts['title'] = $product['title'];
+	$parts['site']  = get_bloginfo( 'name', 'display' );
+	unset( $parts['tagline'] );
+
+	return $parts;
+}
+
+/**
  * Ana sayfa bolumunu kayitli siraya gore basar.
  */
 function kocist_section( string $key ): void {
@@ -285,16 +312,19 @@ function kocist_section( string $key ): void {
 /**
  * Menu ogesi su an goruntulenen sayfayi mi isaret ediyor?
  *
- * Yalnizca sayfa yolu karsilastirilir. Capa baglantilari (#kereste) ve dis
- * adresler hicbir zaman aktif sayilmaz; kayan gosterge bunlara demirlenmez.
+ * Yalnizca sayfa yolu karsilastirilir. Capali baglantilar (/#katalog, #kereste)
+ * ve dis adresler hicbir zaman aktif sayilmaz; kayan gosterge bunlara
+ * demirlenmez. Yol, kocist_link() ile cozulmus tam adresten alinir; alt dizin
+ * kurulumunda (/kocist/kurumsal/) istek yoluyla bire bir karsilastirilabilsin.
  */
 function kocist_is_current_menu_item( string $url ): bool {
 	$url = trim( $url );
 
-	if ( '' === $url || str_starts_with( $url, '#' ) ) {
+	if ( '' === $url || str_contains( $url, '#' ) ) {
 		return false;
 	}
 
+	$url  = kocist_link( $url );
 	$host = wp_parse_url( $url, PHP_URL_HOST );
 
 	// Baska bir alan adina gidiyorsa aktif olamaz.
@@ -302,25 +332,75 @@ function kocist_is_current_menu_item( string $url ): bool {
 		return false;
 	}
 
-	$path = (string) wp_parse_url( $url, PHP_URL_PATH );
-	$path = trim( $path, '/' );
-
-	if ( '' === $path ) {
-		return is_front_page();
-	}
-
+	$path    = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
 	$current = trim( (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ), '/' );
 
 	return $path === $current;
 }
 
 /**
- * Bos baglantilari '#' yapar; cikti her zaman esc_url ile basilir.
+ * Sayfalarda gercekten var olan capalar ve bulunduklari yol.
+ *
+ * Panelde '#katalog' gibi yalin capa yazilabiliyor; bu capa yalnizca ana
+ * sayfada karsiligi olan bir bolumu isaret eder. Baska sayfadan tiklandiginda
+ * da dogru yere gitsin diye yalin capa buradaki yola baglanir.
  */
-function kocist_link( $url ): string {
+function kocist_anchor_targets(): array {
+	return array(
+		'katalog' => '/#katalog',
+		'urunler' => '/#urunler',
+		'teklif'  => '/#teklif',
+		'harita'  => '/iletisim/#harita',
+	);
+}
+
+/**
+ * Hedefi olmayan yalin capa mi (#instagram, #kereste)?
+ */
+function kocist_is_dead_anchor( $url ): bool {
 	$url = trim( (string) $url );
 
-	return '' === $url ? '#' : $url;
+	if ( ! str_starts_with( $url, '#' ) ) {
+		return false;
+	}
+
+	return ! isset( kocist_anchor_targets()[ substr( $url, 1 ) ] );
+}
+
+/**
+ * Panelden gelen baglantiyi siteye gore cozer; cikti her zaman esc_url ile basilir.
+ *
+ * - Bos deger '#' olur.
+ * - '/' ile baslayan yol alt sitenin adresine baglanir: ag alt dizinle
+ *   kuruldugunda '/kurumsal/' ana siteye degil '/kocist/kurumsal/'a gider.
+ * - Bilinen yalin capa (#katalog) bulundugu sayfanin tam adresine baglanir.
+ * - Hedefi olmayan yalin capa $fallback verilmisse ona duser (menude ust
+ *   ogenin adresi, slaytta katalog); verilmemisse oldugu gibi kalir.
+ * - Tam adres, tel:, mailto: dokunulmadan doner.
+ */
+function kocist_link( $url, string $fallback = '' ): string {
+	$url = trim( (string) $url );
+
+	if ( '' === $url ) {
+		return '#';
+	}
+
+	if ( str_starts_with( $url, '#' ) && '#' !== $url ) {
+		$targets = kocist_anchor_targets();
+		$anchor  = substr( $url, 1 );
+
+		if ( isset( $targets[ $anchor ] ) ) {
+			return home_url( $targets[ $anchor ] );
+		}
+
+		return '' !== trim( $fallback ) ? kocist_link( $fallback ) : $url;
+	}
+
+	if ( str_starts_with( $url, '/' ) && ! str_starts_with( $url, '//' ) ) {
+		return home_url( $url );
+	}
+
+	return $url;
 }
 
 /**
@@ -380,9 +460,7 @@ function kocist_social_icon( string $key, string $label = '', string $class = 'k
  * gorseller koyuyor; bunlar da bos sayilir ki gercek fotograf gorunsun.
  */
 function kocist_image_or_default( array $image, string $file, string $alt = '' ): array {
-	$is_placeholder = false !== mb_stripos( (string) ( $image['alt'] ?? '' ), 'yer tutucu' );
-
-	if ( $is_placeholder ) {
+	if ( kocist_is_placeholder_image( $image ) ) {
 		$image = array( 'id' => 0, 'url' => '', 'alt' => '' );
 	}
 
@@ -395,6 +473,43 @@ function kocist_image_or_default( array $image, string $file, string $alt = '' )
 		'url' => get_theme_file_uri( 'assets/img/' . $file ),
 		'alt' => '' !== ( $image['alt'] ?? '' ) ? $image['alt'] : $alt,
 	);
+}
+
+/**
+ * Seed betiginin urettigi yer tutucu gorsel mi? Alt metninden anlasilir.
+ */
+function kocist_is_placeholder_image( array $image ): bool {
+	$alt = (string) ( $image['alt'] ?? '' );
+
+	return false !== mb_stripos( $alt, 'yer tutucu' ) || false !== mb_stripos( $alt, 'örnek' );
+}
+
+/**
+ * Havuz urunu icin gosterilecek gorsel.
+ *
+ * Havuzdaki gorsel gercekse o kullanilir. Bos ya da yer tutucuysa urunun
+ * adina bakilip temadaki en yakin grup fotografina dusulur.
+ */
+function kocist_product_image( array $product ): array {
+	$key = sanitize_title( ( $product['slug'] ?? '' ) . ' ' . ( $product['title'] ?? '' ) );
+	$map = array(
+		'kereste'    => 's2-kereste.jpg',
+		'dekorasyon' => 's2-dekorasyon.jpg',
+		'hirdavat'   => 's2-hirdavat.jpg',
+		'palet'      => 's2-ambalaj.jpg',
+		'kafes'      => 's2-ambalaj.jpg',
+		'sandik'     => 's2-ambalaj.jpg',
+	);
+	$file = 'atolye.jpg';
+
+	foreach ( $map as $needle => $candidate ) {
+		if ( str_contains( $key, $needle ) ) {
+			$file = $candidate;
+			break;
+		}
+	}
+
+	return kocist_image_or_default( (array) ( $product['image'] ?? array() ), $file, (string) ( $product['title'] ?? '' ) );
 }
 
 /**

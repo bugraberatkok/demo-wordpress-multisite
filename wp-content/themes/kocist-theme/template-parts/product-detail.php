@@ -44,7 +44,7 @@ get_header();
 		</div>
 
 		<div class="k-story__media">
-			<?php echo kocist_image_tag( $product['image'], '', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+			<?php echo kocist_image_tag( kocist_product_image( $product ), '', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</div>
 	</div>
 </section>

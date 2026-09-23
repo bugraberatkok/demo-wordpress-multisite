@@ -42,6 +42,10 @@
 .k-topbar__item:hover { color: var(--leaf); }
 
 /* ---------- Header govdesi ---------- */
+
+/* Yapiskan header capa hedeflerinin (#katalog, #harita) ustunu ortmesin. */
+html { scroll-padding-top: 88px; }
+
 .k-header {
 	position: sticky;
 	top: 0;
@@ -394,6 +398,31 @@
 		overflow: hidden;
 		padding-left: 12px;
 	}
+
+	/*
+	 * Masaustu panosundaki sirali belirme (.k-dropdown__item opacity 0 ->
+	 * .is-active panoda 1) akordiyonda yok; orada gizleme/acma yukseklik
+	 * animasyonuyla yapiliyor. Ogeler her zaman gorunur.
+	 */
+	.k-nav__accordion .k-dropdown__item {
+		opacity: 1;
+		transform: none;
+	}
+
+	/*
+	 * Menu acikken sayfa kilitli (html.k-nav-locked, nav.js). Header yapiskan
+	 * oldugu icin uzun menu ekrandan tasarsa kendi icinde kayar; ust kenar
+	 * --k-nav-top ile acilis anindaki konumdan olculur.
+	 */
+	.k-header.is-nav-open .k-nav {
+		max-height: calc(100vh - var(--k-nav-top, 120px));
+		max-height: calc(100dvh - var(--k-nav-top, 120px));
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	html.k-nav-locked,
+	html.k-nav-locked body { overflow: hidden; }
 }
 
 /* Telefonda ust serit tek satir: yalnizca telefon ve e-posta kalir. */

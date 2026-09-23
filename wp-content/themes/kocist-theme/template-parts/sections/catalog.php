@@ -33,7 +33,7 @@ $item_defaults = array( 's2-kereste.jpg', 's2-ambalaj.jpg', 's2-dekorasyon.jpg',
 				?>
 				<a
 					class="k-group"
-					href="<?php echo esc_url( kocist_link( $item['link_url'] ?? '' ) ); ?>"
+					href="<?php echo esc_url( kocist_link( $item['link_url'] ?? '', '/#katalog' ) ); ?>"
 					data-k-group
 					style="--i: <?php echo (int) $index; ?>"
 					<?php nwcs_edit_attr( 'home', 'catalog', 'items', $index, 'title' ); ?>

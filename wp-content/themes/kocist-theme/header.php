@@ -145,7 +145,7 @@ foreach ( $menu as $menu_index => $menu_item ) {
 								<ul class="k-dropdown__list">
 									<?php foreach ( $children as $child ) : ?>
 										<li class="k-dropdown__item">
-											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'] ) ); ?>">
+											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $item['url'] ) ); ?>">
 												<?php echo esc_html( $child['label'] ); ?>
 											</a>
 										</li>
@@ -173,7 +173,7 @@ foreach ( $menu as $menu_index => $menu_item ) {
 								>
 									<?php foreach ( $pane_children as $child_index => $child ) : ?>
 										<li class="k-dropdown__item" style="--i: <?php echo (int) $child_index; ?>">
-											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'] ) ); ?>">
+											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $menu[ $pane_index ]['url'] ) ); ?>">
 												<?php echo esc_html( $child['label'] ); ?>
 											</a>
 										</li>

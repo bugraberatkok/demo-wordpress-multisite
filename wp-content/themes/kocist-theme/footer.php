@@ -16,6 +16,20 @@ $links     = nwcs_rows( 'global', 'footer', 'links' );
 $corporate = nwcs_rows( 'global', 'footer', 'corporate' );
 $legal     = nwcs_rows( 'global', 'footer', 'legal' );
 $logo      = kocist_image_or_default( nwcs_image( 'global', 'header', 'logo_image', 'medium' ), 'logo.png', 'Koçist Orman Ürünleri logosu' );
+
+// Adresi girilmemis (bos ya da #instagram gibi hedefsiz capa) sosyal hesap
+// ziyaretciye gosterilmez. Panel onizlemesinde kalir ki duzenlenebilsin.
+// Anahtarlar korunuyor: nwcs_edit_attr satir sirasini bunlardan okuyor.
+if ( ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
+	$social = array_filter(
+		$social,
+		static function ( $item ): bool {
+			$url = trim( (string) ( $item['url'] ?? '' ) );
+
+			return '' !== $url && '#' !== $url && ! kocist_is_dead_anchor( $url );
+		}
+	);
+}
 ?>
 <?php if ( $ticker ) : ?>
 	<div class="k-ticker" data-k-ticker>

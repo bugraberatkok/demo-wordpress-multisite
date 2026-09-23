@@ -30,7 +30,7 @@ if ( ! $items && ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() )
 			<?php foreach ( $items as $item ) : ?>
 				<article class="k-cat">
 					<div class="k-cat__media">
-						<?php echo kocist_image_tag( $item['image'], '', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+						<?php echo kocist_image_tag( kocist_product_image( $item ), '', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					</div>
 					<div class="k-cat__body">
 						<h3 class="k-cat__title"><?php echo esc_html( $item['title'] ); ?></h3>
@@ -41,7 +41,7 @@ if ( ! $items && ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() )
 
 						<p class="k-cat__text"><?php echo esc_html( $item['short'] ); ?></p>
 
-						<a class="k-cat__link" href="<?php echo esc_url( $item['body'] ? $item['url'] : '#teklif' ); ?>">
+						<a class="k-cat__link" href="<?php echo esc_url( $item['body'] ? $item['url'] : kocist_link( '#teklif' ) ); ?>">
 							<?php echo esc_html( $item['body'] ? 'Ürün detayı' : $cta_label ); ?>
 							<?php nwcs_the_icon( 'arrow', 'k-icon', 16 ); ?>
 						</a>

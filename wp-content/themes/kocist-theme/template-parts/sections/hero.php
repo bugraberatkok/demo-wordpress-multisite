@@ -84,7 +84,7 @@ $trust  = nwcs_rows( 'home', 'hero', 'trust' );
 									<p class="k-hero__slide-text" <?php nwcs_edit_attr( 'home', 'hero', 'slides', $slide_index, 'text' ); ?>><?php echo esc_html( $slide['text'] ?? '' ); ?></p>
 
 									<?php if ( ! empty( $slide['cta_label'] ) ) : ?>
-										<a class="k-hero__btn" href="<?php echo esc_url( kocist_link( $slide['cta_url'] ?? '' ) ); ?>">
+										<a class="k-hero__btn" href="<?php echo esc_url( kocist_link( $slide['cta_url'] ?? '', '/#katalog' ) ); ?>">
 											<?php echo esc_html( $slide['cta_label'] ); ?>
 										</a>
 									<?php endif; ?>

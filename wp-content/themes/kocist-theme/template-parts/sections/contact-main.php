@@ -144,7 +144,7 @@ $place      = $has_coords ? preg_replace( '/\s+/', '', $coords ) : $query;
 			</div>
 
 			<?php if ( '' !== $place ) : ?>
-				<div class="k-contact__map-col" data-nwcs-section="map">
+				<div class="k-contact__map-col" id="harita" data-nwcs-section="map">
 					<div class="k-map">
 						<iframe
 							class="k-map__frame"
