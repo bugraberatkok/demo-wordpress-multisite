@@ -40,7 +40,11 @@ function kr_setup(): void {
 
 add_action( 'wp_enqueue_scripts', 'kr_assets' );
 function kr_assets(): void {
-	$version = wp_get_theme( get_template() )->get( 'Version' );
+	// Surum = tema surumu + dosya degisim zamani: dosya her derlendiginde adres
+	// degisir, tarayici ve onbellek eski CSS/JS'i gostermez.
+	$base  = wp_get_theme( get_template() )->get( 'Version' );
+	$ver   = static fn( string $file ): string => $base . '.' . (int) @filemtime( get_template_directory() . '/' . $file );
+	$child = wp_get_theme()->get( 'Version' ) . '.' . (int) @filemtime( get_stylesheet_directory() . '/style.css' );
 
 	wp_enqueue_style(
 		'kr-fonts',
@@ -51,10 +55,10 @@ function kr_assets(): void {
 
 	// Ortak stil ana temadan; cocuk temanin style.css'i sonra gelir ve yalnizca
 	// parti boyasini (vurgu rengi) tanimlar.
-	wp_enqueue_style( 'kr-tailwind', get_template_directory_uri() . '/assets/tailwind.css', array( 'kr-fonts' ), $version );
-	wp_enqueue_style( 'kr-site', get_stylesheet_uri(), array( 'kr-tailwind' ), wp_get_theme()->get( 'Version' ) );
+	wp_enqueue_style( 'kr-tailwind', get_template_directory_uri() . '/assets/tailwind.css', array( 'kr-fonts' ), $ver( 'assets/tailwind.css' ) );
+	wp_enqueue_style( 'kr-site', get_stylesheet_uri(), array( 'kr-tailwind' ), $child );
 
-	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', array(), $version, true );
+	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', array(), $ver( 'assets/site.js' ), true );
 }
 
 add_action( 'wp_head', 'kr_preconnect', 1 );

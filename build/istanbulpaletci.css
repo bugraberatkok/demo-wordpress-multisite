@@ -176,6 +176,33 @@ body.admin-bar [data-header] {
 			var(--color-indigo);
 	}
 
+	/* Fotografli hero: duz renk yerine fotograf, ustunde indigo perde.
+	   Metin tarafi (sol) koyu indigo, foyun arkasi daha acik; mobilde metin
+	   ustte oldugu icin perde yukaridan asagi acilir. Bilgi seridi perdenin
+	   en koyu yerinde kalsin diye alt kenar da koyulasir. */
+	.hero-field--photo {
+		background: var(--color-indigo);
+	}
+
+	.hero-field__veil {
+		background:
+			linear-gradient(to top, rgb(8 9 38 / 0.85) 0%, rgb(8 9 38 / 0) 30%),
+			linear-gradient(to bottom,
+				color-mix(in srgb, var(--color-indigo) 55%, rgb(0 0 0) 45%) 0%,
+				color-mix(in srgb, var(--color-indigo) 55%, rgb(0 0 0 / 0.55) 45%) 100%);
+	}
+
+	@media (min-width: 64rem) {
+		.hero-field__veil {
+			background:
+				linear-gradient(to top, rgb(8 9 38 / 0.85) 0%, rgb(8 9 38 / 0) 30%),
+				linear-gradient(to right,
+					color-mix(in srgb, var(--color-indigo) 50%, rgb(0 0 0) 50%) 0%,
+					color-mix(in srgb, var(--color-indigo) 55%, rgb(0 0 0 / 0.6) 45%) 45%,
+					color-mix(in srgb, var(--color-indigo) 30%, transparent) 100%);
+		}
+	}
+
 	/* Hero foyu: yuzeylerde golge kullanmama kuralinin ikinci istisnasi.
 	   Iki katman: yakindaki keskin, uzaktaki genis ve yumusak golge. */
 	.sheet--raised {

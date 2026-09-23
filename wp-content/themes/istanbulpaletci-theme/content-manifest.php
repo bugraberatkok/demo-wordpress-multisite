@@ -189,6 +189,8 @@ return array(
 						'primary_url'     => array( 'label' => 'Birinci Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/#teklif' ),
 						'secondary_label' => array( 'label' => 'İkinci Düğme Metni', 'type' => 'text', 'default' => 'Ürünleri inceleyin' ),
 						'secondary_url'   => array( 'label' => 'İkinci Düğme Adresi', 'type' => 'url', 'default' => '/urunlerimiz/' ),
+						'bg_image'        => array( 'label' => 'Arka Plan Fotoğrafı (boşsa düz indigo)', 'type' => 'image', 'default' => 0 ),
+						'bg_note'         => array( 'label' => 'Arka Plan Fotoğrafı Notu (örnek görselse "Örnek görsel" yazın)', 'type' => 'text', 'default' => '' ),
 						'sheet_image'     => array( 'label' => 'Föy Görseli', 'type' => 'image', 'default' => 0 ),
 						'dim_x'           => array( 'label' => 'Yatay Ölçü Yazısı', 'type' => 'text', 'default' => '120 cm' ),
 						'dim_y'           => array( 'label' => 'Dikey Ölçü Yazısı', 'type' => 'text', 'default' => '80 cm' ),

@@ -307,6 +307,8 @@ Sıralanabilir bölümler: `products`, `process`, `export`, `blog`, `quote` (hea
 | `primary_url` | Birinci Düğme Adresi | bağlantı |
 | `secondary_label` | İkinci Düğme Metni | tek satır metin |
 | `secondary_url` | İkinci Düğme Adresi | bağlantı |
+| `bg_image` | Arka Plan Fotoğrafı (boşsa düz indigo) | görsel (medya kaydı + alt metin) |
+| `bg_note` | Arka Plan Fotoğrafı Notu (örnek görselse "Örnek görsel" yazın) | tek satır metin |
 | `sheet_image` | Föy Görseli | görsel (medya kaydı + alt metin) |
 | `dim_x` | Yatay Ölçü Yazısı | tek satır metin |
 | `dim_y` | Dikey Ölçü Yazısı | tek satır metin |
@@ -726,8 +728,7 @@ Sıralanabilir bölümler: `products`, `process`, `export`, `blog`, `quote` (hea
 | --- | --- | --- |
 | `share_image` | Varsayılan paylaşım görseli | görsel (medya kaydı + alt metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 228._
-
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 230._
 
 
 ## Koçist · ithalkeresteci.com (`ithalkeresteci`)

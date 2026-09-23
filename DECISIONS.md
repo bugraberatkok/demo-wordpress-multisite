@@ -1093,3 +1093,24 @@ git etiketleri `yedek/oncesi-entegrasyon-main` ve `yedek/oncesi-entegrasyon-pr`.
   Bilinen SEO eksikleri (6. adım): yeni 4 temada firma bilgisi yok; İstanbul
   Keresteci'nin 10 ürün sayfası (`/urunlerimiz/<ürün>/`) ve Koçist blog sayfası
   açıklamasız.
+
+## istanbulpaletci hero: düz renk yerine fotoğraf
+
+Kullanıcı hero'yu beğendi ama diğer sitelerin fotoğraflı hero'larına uymasını istedi.
+Föy, ölçü çizgileri ve bilgi şeridi aynı kaldı; düz indigo zeminin yerine palet sahası
+fotoğrafı (forklift ve palet istifleri) geldi. Üstünde **indigo tonlu perde**: metin
+tarafı koyu, föyün arkası açık; marka rengi korunuyor. Fotoğraf yoksa eski perdeli
+indigo zemine döner (`home.hero.bg_image`, not alanı `bg_note`).
+
+Görsel, Emirhan'ın Sanayi Palet temasındaki müşteri onaylı fotoğraf
+(`resources/palet-sahasi-forklift.jpg`); Sanayi Palet onu yalnızca Hakkımızda
+başlığında kullanıyor. Yapay zekayla yeni görsel üretilemedi (Pixa kredisi bitti).
+
+## Tarayıcı önbelleği: dosya sürümü
+
+Tema varlıkları (Tailwind CSS, JS) tema sürümüyle (`?ver=0.1.0`) yükleniyordu; dosya
+değişse de adres aynı kalıyor, tarayıcı eski CSS'i gösteriyordu (yerelde yeni hero'yu
+bozuk gösterdi; canlıda güncelleme sonrası geri dönen ziyaretçide aynısı olurdu).
+ahsapkasa, istanbulpaletci ve kereste-base artık `tema sürümü + dosya değişim zamanı`
+kullanıyor. Emirhan'ın dört teması da aynı sorunu taşıyor; kendi dalında düzeltecek.
+

@@ -197,6 +197,8 @@ $media = array(
 	'palet1'      => ip_seed_media( 'palet_1.jpg', 'ip-palet-1', 'Ahşap palet', 'Beyaz zeminde ahşap palet' ),
 	'palet2'      => ip_seed_media( 'palet_2.jpg', 'ip-palet-2', 'İkinci el ahşap palet', 'Kullanılmış, yıpranmış ahşap palet' ),
 	'palet3'      => ip_seed_media( 'palet_3.jpg', 'ip-palet-3', 'Damgalı ahşap palet', 'Ayağında damga bulunan ahşap palet' ),
+	// Hero arka plani; Sanayi Palet temasindaki (Emirhan) musteri onayli fotograf.
+	'saha'        => ip_seed_media( 'palet-sahasi-forklift.jpg', 'ip-palet-sahasi', 'Palet sahası', 'İstiflenmiş ahşap paletlerin arasında forklift' ),
 	'ahsap_palet' => ip_seed_media( 'ahsap_palet.jpg', 'ip-ahsap-palet', 'Ahşap palet', 'Ahşap palet, üstten görünüm' ),
 	'euro_palet'  => ip_seed_media( 'euro_palet.jpg', 'ip-euro-palet', 'Euro palet', 'EPAL damgalı Euro palet' ),
 	'kafes'       => ip_seed_media( 'ahsap_kafes.jpg', 'ip-ahsap-kafes', 'Ahşap kafes', 'Çapraz destekli ahşap kafes' ),
@@ -255,6 +257,7 @@ foreach ( $manifest['pages'] as $page_key => $page ) {
 $content['global']['header']['logo_image'] = $media['logo'];
 $content['global']['footer']['logo_image'] = $media['logo_white'];
 $content['home']['hero']['sheet_image']    = $media['palet3'];
+$content['home']['hero']['bg_image']       = $media['saha'];
 $content['home']['export']['image']        = $media['yard'];
 $content['about']['head']['image']         = $media['shop'];
 $content['about']['values']['image']       = $media['workshop'];

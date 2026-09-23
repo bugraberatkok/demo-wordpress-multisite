@@ -38,7 +38,9 @@ function ahsapkasa_setup(): void {
 
 add_action( 'wp_enqueue_scripts', 'ahsapkasa_assets' );
 function ahsapkasa_assets(): void {
-	$version = wp_get_theme()->get( 'Version' );
+	// Surum = tema surumu + dosya degisim zamani: dosya her derlendiginde adres
+	// degisir, tarayici ve onbellek eski CSS/JS'i gostermez.
+	$ver = static fn( string $file ): string => wp_get_theme()->get( 'Version' ) . '.' . (int) @filemtime( get_theme_file_path( $file ) );
 
 	wp_enqueue_style(
 		'ahsapkasa-fonts',
@@ -51,14 +53,14 @@ function ahsapkasa_assets(): void {
 		'ahsapkasa-tailwind',
 		get_theme_file_uri( 'assets/tailwind.css' ),
 		array( 'ahsapkasa-fonts' ),
-		$version
+		$ver( 'assets/tailwind.css' )
 	);
 
 	// style.css yalnizca tema basligini tasir; kuyruga alinmasi WordPress adeti.
-	wp_enqueue_style( 'ahsapkasa-style', get_stylesheet_uri(), array( 'ahsapkasa-tailwind' ), $version );
+	wp_enqueue_style( 'ahsapkasa-style', get_stylesheet_uri(), array( 'ahsapkasa-tailwind' ), $ver( 'style.css' ) );
 
-	wp_enqueue_script( 'ahsapkasa-nav', get_theme_file_uri( 'assets/nav.js' ), array(), $version, true );
-	wp_enqueue_script( 'ahsapkasa-media', get_theme_file_uri( 'assets/media.js' ), array(), $version, true );
+	wp_enqueue_script( 'ahsapkasa-nav', get_theme_file_uri( 'assets/nav.js' ), array(), $ver( 'assets/nav.js' ), true );
+	wp_enqueue_script( 'ahsapkasa-media', get_theme_file_uri( 'assets/media.js' ), array(), $ver( 'assets/media.js' ), true );
 }
 
 add_action( 'wp_head', 'ahsapkasa_preconnect', 1 );

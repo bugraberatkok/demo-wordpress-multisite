@@ -1,7 +1,8 @@
 <?php
 /**
- * Hero: perdeli indigo zemin uzerinde beyaz bir sartname foyu.
- * Foy hafif bir golgeyle zeminden kalkar.
+ * Hero: palet sahasi fotografi, ustunde indigo perde ve beyaz bir sartname
+ * foyu. Perde metin tarafinda koyu, foyun arkasinda acik; foy hafif bir
+ * golgeyle zeminden kalkar. Fotograf yuklenmemisse perdeli duz indigo.
  *
  * Foyun cevresindeki sari olcu cizgileri sayfa acilisinda bir kez cizilir;
  * sitenin tek gosterisli ani budur. Altta bilgi seridi (40 yil, 5 urun...).
@@ -12,8 +13,16 @@ defined( 'ABSPATH' ) || exit;
 $sheet = nwcs_image( 'home', 'hero', 'sheet_image', 'large' );
 $rows  = nwcs_rows( 'home', 'hero', 'sheet_rows' );
 $facts = nwcs_rows( 'home', 'facts', 'items' );
+$bg    = nwcs_image( 'home', 'hero', 'bg_image', 'full' );
+$note  = trim( (string) nwcs_field( 'home', 'hero', 'bg_note' ) );
 ?>
-<section class="on-dark hero-field overflow-hidden text-sheet">
+<section class="on-dark hero-field <?php echo $bg['url'] ? 'hero-field--photo' : ''; ?> relative isolate overflow-hidden text-sheet">
+	<?php if ( $bg['url'] ) : ?>
+		<div class="absolute inset-0 -z-10" <?php nwcs_edit_attr( 'home', 'hero', 'bg_image' ); ?>>
+			<img src="<?php echo esc_url( $bg['url'] ); ?>" alt="<?php echo esc_attr( $bg['alt'] ); ?>" class="h-full w-full object-cover" fetchpriority="high" decoding="async" />
+			<div class="hero-field__veil absolute inset-0" aria-hidden="true"></div>
+		</div>
+	<?php endif; ?>
 	<div class="mx-auto grid max-w-[80rem] items-center gap-14 px-5 pb-16 pt-14 md:px-8 md:pb-20 md:pt-20 lg:grid-cols-[1fr_1.05fr] lg:gap-16 lg:pb-24">
 
 		<div>
@@ -99,5 +108,9 @@ $facts = nwcs_rows( 'home', 'facts', 'items' );
 				<?php endforeach; ?>
 			</dl>
 		</div>
+	<?php endif; ?>
+
+	<?php if ( $bg['url'] && $note ) : ?>
+		<p class="absolute right-0 top-0 bg-ink/70 px-3 py-1.5 text-[0.8125rem] font-semibold text-sheet/90" <?php nwcs_edit_attr( 'home', 'hero', 'bg_note' ); ?>><?php echo esc_html( $note ); ?></p>
 	<?php endif; ?>
 </section>
