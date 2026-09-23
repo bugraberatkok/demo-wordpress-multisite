@@ -1274,3 +1274,98 @@ button.nwcs-linkout[data-nwcs-csv-open]:hover { background: #0d9488; }
 	color: #6b716b;
 	max-width: 200px;
 }
+
+/* ---------- SEO ve GEO sekmesi ---------- */
+.nwcs-seo__grid,
+.nwcs-seo__layout {
+	display: grid;
+	gap: 16px;
+	align-items: start;
+	padding-top: 16px;
+}
+.nwcs-seo__grid { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+.nwcs-seo__layout { grid-template-columns: minmax(0, 1fr) 400px; }
+.nwcs-seo__main, .nwcs-seo__side { display: grid; gap: 16px; }
+.nwcs-seo__side { align-content: start; }
+.nwcs-seo__lead { margin: -4px 0 14px; font-size: 12.5px; }
+
+.nwcs-seo__site { font-weight: 600; text-decoration: none; }
+.nwcs-seo__files { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; }
+.nwcs-seo__warn { color: var(--nwcs-amber); }
+.nwcs-seo__warn-pill { color: var(--nwcs-amber) !important; background: #fdf3e7 !important; }
+
+/* Durum rozetleri */
+.nwcs-badge {
+	display: inline-block;
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: var(--nwcs-soft);
+	color: var(--nwcs-muted);
+	font-size: 11.5px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.nwcs-badge--ok { background: #e6f6f4; color: var(--nwcs-teal); }
+.nwcs-badge--warn { background: #fdf3e7; color: var(--nwcs-amber); }
+
+/* Tutarlilik listesi */
+.nwcs-seo__checks { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.nwcs-seo__check { padding: 10px 12px; border: 1px solid var(--nwcs-line); border-radius: 10px; }
+.nwcs-seo__check-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.nwcs-seo__variants { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.nwcs-seo__variants li { padding: 6px 8px; background: var(--nwcs-soft); border-radius: 7px; }
+.nwcs-seo__variant { display: block; font-weight: 600; }
+
+/* Sayfa karti */
+.nwcs-seo__page { padding: 16px 0; border-top: 1px solid var(--nwcs-line); }
+.nwcs-seo__page:first-of-type { border-top: 0; padding-top: 4px; }
+.nwcs-seo__page-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.nwcs-seo__page-head h3 { margin: 0; font-size: 14px; }
+.nwcs-seo__form .nwcs-fields { display: grid; gap: 10px; }
+/* Studyo'da kaydet cubugu yapisiktir; burada cok form var, yerinde durur. */
+.nwcs-seo__form .nwcs-actions { position: static; margin-top: 10px; padding: 0; background: none; border: 0; box-shadow: none; }
+
+.nwcs-seo__page-head h3 { display: flex; align-items: center; gap: 8px; }
+.nwcs-seo__edit > summary {
+	cursor: pointer; width: fit-content;
+	padding: 6px 12px; border-radius: 8px;
+	background: var(--nwcs-brand-soft); color: var(--nwcs-brand-dark);
+	font-weight: 600; font-size: 12.5px;
+}
+.nwcs-seo__edit[open] > summary { margin-bottom: 12px; }
+
+/* Google sonuc onizlemesi: Google'in kendi olculerine yakin */
+.nwcs-serp {
+	display: grid;
+	gap: 3px;
+	max-width: 600px;
+	margin-bottom: 12px;
+	padding: 12px 14px;
+	background: #fff;
+	border: 1px solid var(--nwcs-line);
+	border-radius: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+.nwcs-serp__url { color: #202124; font-size: 12.5px; }
+.nwcs-serp__title {
+	color: #1a0dab; font-size: 19px; line-height: 1.3;
+	overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.nwcs-serp__desc {
+	color: #4d5156; font-size: 13.5px; line-height: 1.55;
+	display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Otomatik uretilenler listesi */
+.nwcs-seo__auto { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 12.5px; color: var(--nwcs-muted); }
+.nwcs-seo__auto strong { display: block; color: var(--nwcs-ink); font-size: 13px; }
+
+/* Karakter sayaci (SEO alanlari; Studyo'da da) */
+.nwcs-counter { display: block; margin-top: 4px; font-size: 11.5px; color: var(--nwcs-muted); text-align: right; font-variant-numeric: tabular-nums; }
+.nwcs-counter.is-over { color: #b32d2e; font-weight: 600; }
+.nwcs-input::placeholder { color: #9ca3af; }
+
+@media (max-width: 1100px) {
+	.nwcs-seo__grid, .nwcs-seo__layout { grid-template-columns: 1fr; }
+	.nwcs-seo__side { position: static; }
+}

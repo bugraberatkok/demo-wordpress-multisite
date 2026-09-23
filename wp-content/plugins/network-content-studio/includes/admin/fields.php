@@ -58,12 +58,22 @@ function nwcs_render_field( string $field_key, array $definition, $value, array 
 	);
 	printf( '<label class="nwcs-field__label" for="%s">%s</label>', esc_attr( $id ), esc_html( $label ) );
 
+	// Istege bagli: gri yer tutucu (orn. otomatik SEO degeri) ve karakter sayaci.
+	$extra = '';
+	if ( ! empty( $definition['placeholder'] ) ) {
+		$extra .= ' placeholder="' . esc_attr( (string) $definition['placeholder'] ) . '"';
+	}
+	if ( ! empty( $definition['count'] ) ) {
+		$extra .= ' data-nwcs-count="' . esc_attr( (string) (int) $definition['count'] ) . '"';
+	}
+
 	switch ( $type ) {
 		case 'textarea':
 			printf(
-				'<textarea class="nwcs-input" id="%s" name="%s" rows="4">%s</textarea>',
+				'<textarea class="nwcs-input" id="%s" name="%s" rows="4"%s>%s</textarea>',
 				esc_attr( $id ),
 				esc_attr( $name ),
+				$extra, // phpcs:ignore WordPress.Security.EscapingOutput -- yukarida kacirildi.
 				esc_textarea( (string) $value )
 			);
 			break;
@@ -89,12 +99,17 @@ function nwcs_render_field( string $field_key, array $definition, $value, array 
 		case 'text':
 		default:
 			printf(
-				'<input class="nwcs-input" type="text" id="%s" name="%s" value="%s" />',
+				'<input class="nwcs-input" type="text" id="%s" name="%s" value="%s"%s />',
 				esc_attr( $id ),
 				esc_attr( $name ),
-				esc_attr( (string) $value )
+				esc_attr( (string) $value ),
+				$extra // phpcs:ignore WordPress.Security.EscapingOutput -- yukarida kacirildi.
 			);
 			break;
+	}
+
+	if ( ! empty( $definition['hint'] ) ) {
+		printf( '<p class="nwcs-hint">%s</p>', esc_html( (string) $definition['hint'] ) );
 	}
 
 	echo '</div>';
@@ -202,6 +217,10 @@ function nwcs_render_repeater( string $field_key, array $definition, $value, arr
 			<span class="nwcs-field__label"><?php echo esc_html( $definition['label'] ?? $field_key ); ?></span>
 			<span class="nwcs-repeater__meta">en fazla <?php echo (int) $max; ?> satır<?php echo $sortable ? ' · sırayı yukarı/aşağı taşıyabilirsiniz' : ''; ?></span>
 		</div>
+
+		<?php if ( ! empty( $definition['hint'] ) ) : ?>
+			<p class="nwcs-hint"><?php echo esc_html( (string) $definition['hint'] ); ?></p>
+		<?php endif; ?>
 
 		<div class="nwcs-repeater__rows" data-nwcs-rows>
 			<?php

@@ -32,7 +32,8 @@ function nwcs_admin_assets( string $hook ): void {
 	// Icerik Studyosu, Urun Havuzu ve Medya Havuzu ayni varliklari kullanir.
 	$ours = str_contains( $hook, NWCS_MENU_SLUG )
 		|| str_contains( $hook, NWCS_POOL_SLUG )
-		|| str_contains( $hook, NWCS_MEDIA_SLUG );
+		|| str_contains( $hook, NWCS_MEDIA_SLUG )
+		|| str_contains( $hook, NWCS_SEO_SLUG );
 
 	if ( ! $ours ) {
 		return;
@@ -78,7 +79,7 @@ function nwcs_fold_admin_menu( string $classes ): string {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca gorunum.
 	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
-	$ours = in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG ), true );
+	$ours = in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG, NWCS_SEO_SLUG ), true );
 
 	if ( $ours && 'o' !== get_user_setting( 'mfold' ) ) {
 		$classes .= ' folded';
@@ -121,14 +122,18 @@ function nwcs_ordered_components( array $manifest, string $page_key, int $blog_i
 	$components = array_keys( $manifest['pages'][ $page_key ]['components'] ?? array() );
 	$sortable   = nwcs_sortable_sections( $manifest, $page_key );
 
+	// Arama ve Paylasim her sayfada en sonda durur; sayfa iceriginin parcasi degil.
+	$seo        = in_array( NWCS_SEO_COMPONENT, $components, true ) ? array( NWCS_SEO_COMPONENT ) : array();
+	$components = array_values( array_diff( $components, $seo ) );
+
 	if ( ! $sortable ) {
-		return $components;
+		return array_merge( $components, $seo );
 	}
 
 	$fixed  = array_values( array_diff( $components, $sortable ) );
 	$sorted = nwcs_section_order( $page_key, $blog_id, $manifest );
 
-	return array_merge( $fixed, $sorted );
+	return array_merge( $fixed, $sorted, $seo );
 }
 
 /**
@@ -159,7 +164,8 @@ function nwcs_render_panel(): void {
 
 	$site     = $sites[ $blog_id ];
 	$manifest = $site['manifest'];
-	$pages    = $manifest['pages'];
+	// Gizli sayfalar (orn. site geneli SEO) kendi sekmelerinden duzenlenir.
+	$pages    = nwcs_visible_pages( $manifest );
 
 	$page_key = isset( $_GET['content_page'] ) ? sanitize_key( wp_unslash( $_GET['content_page'] ) ) : '';
 	if ( ! isset( $pages[ $page_key ] ) ) {
@@ -361,6 +367,9 @@ function nwcs_render_editor_form( int $blog_id, array $manifest, string $page_ke
 
 	$values = nwcs_get_all( $blog_id );
 	$media  = nwcs_site_media( $blog_id );
+
+	// Arama ve Paylasim: bos alanda gri olarak otomatik deger gorunsun.
+	$placeholders = NWCS_SEO_COMPONENT === $component_key ? nwcs_seo_placeholders( $blog_id, $page_key ) : array();
 	?>
 	<?php // admin-post.php yalnizca wp-admin kokunde bulunur; ag dizininde yoktur. ?>
 	<form class="nwcs-form" method="post" enctype="multipart/form-data"
@@ -381,6 +390,10 @@ function nwcs_render_editor_form( int $blog_id, array $manifest, string $page_ke
 		<div class="nwcs-fields">
 			<?php
 			foreach ( $component['fields'] as $field_key => $definition ) {
+				if ( ! empty( $placeholders[ $field_key ] ) ) {
+					$definition['placeholder'] = $placeholders[ $field_key ];
+				}
+
 				$value = $values[ $page_key ][ $component_key ][ $field_key ] ?? ( $definition['default'] ?? '' );
 				nwcs_render_field( $field_key, $definition, $value, $media, $blog_id );
 			}

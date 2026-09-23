@@ -55,9 +55,11 @@
 		}
 	}
 
-	function setDirty( value ) {
+	// Sayfada birden cok form olabilir (SEO sekmesi); gosterge ilgili formunki.
+	function setDirty( value, form ) {
 		dirty = value;
-		var badge = wrap.querySelector( '[data-nwcs-dirty]' );
+		var scope = form || currentForm() || wrap;
+		var badge = scope.querySelector( '[data-nwcs-dirty]' );
 		if ( badge ) {
 			badge.hidden = ! value;
 		}
@@ -575,15 +577,17 @@
 
 	// Degisiklik takibi
 	wrap.addEventListener( 'input', function ( event ) {
-		if ( currentForm() && currentForm().contains( event.target ) ) {
-			setDirty( true );
+		var form = event.target.closest( '[data-nwcs-form]' );
+		if ( form ) {
+			setDirty( true, form );
 		}
 	} );
 	// Havuz/medya sayfalarindaki kontroller (duzenleyici formuna bagli degil)
 	wrap.addEventListener( 'change', function ( event ) {
-		// Duzenleyici formundaki her degisiklik kaydedilmemis sayilir.
-		if ( currentForm() && currentForm().contains( event.target ) ) {
-			setDirty( true );
+		// Formdaki her degisiklik kaydedilmemis sayilir.
+		var changedForm = event.target.closest( '[data-nwcs-form]' );
+		if ( changedForm ) {
+			setDirty( true, changedForm );
 		}
 
 		// Galeriye kitapliktan gorsel ekle
@@ -701,7 +705,7 @@
 					return;
 				}
 
-				setDirty( false );
+				setDirty( false, form );
 				showToast( result.data.message, result.data.hasError ? 'error' : null );
 				reloadPreview();
 

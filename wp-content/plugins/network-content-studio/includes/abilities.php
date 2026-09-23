@@ -54,7 +54,7 @@ function nwcs_is_local_site( int $blog_id ): bool {
 }
 
 /**
- * Site kimligini cozer: blog_id veya yol adi ("kocist", "/paletci/").
+ * Site kimligini cozer: blog_id veya yol adi ("ahsapkasa", "/istanbulpaletci/").
  */
 function nwcs_resolve_site( $site ) {
 	$sites = nwcs_editable_sites();
@@ -143,7 +143,7 @@ function nwcs_register_abilities(): void {
 				'properties' => array(
 					'site' => array(
 						'type'        => 'string',
-						'description' => 'Site anahtarı ("kocist", "paletci") veya sayısal kimlik.',
+						'description' => 'Site anahtarı ("ahsapkasa", "istanbulpaletci") veya sayısal kimlik.',
 					),
 				),
 				'required'   => array( 'site' ),
