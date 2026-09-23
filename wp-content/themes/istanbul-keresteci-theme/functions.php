@@ -721,3 +721,21 @@ add_filter(
 	'nwcs_seo_default_image',
 	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/hero-orman.jpg', 'Orman yolunun kenarında istiflenmiş tomruklar' ) : 0
 );
+
+/**
+ * Urun gorseli buyutme ve pencere ici yakinlastirma: yalnizca urun
+ * sayfalarinda yuklenir. Surum dosya degisim zamanindan; guncellemede
+ * tarayici eski dosyayi gostermez.
+ */
+add_action( 'wp_enqueue_scripts', 'ik_zoom_assets', 20 );
+function ik_zoom_assets(): void {
+	if ( ! ik_current_product() ) {
+		return;
+	}
+
+	$ver = static fn( string $file ): string => (string) @filemtime( get_theme_file_path( $file ) );
+
+	wp_enqueue_style( 'ik-zoom', get_theme_file_uri( 'assets/css/zoom.css' ), array( 'ik-base' ), $ver( 'assets/css/zoom.css' ) );
+	wp_enqueue_script( 'ik-zoom-engine', get_theme_file_uri( 'assets/js/zoom.js' ), array(), $ver( 'assets/js/zoom.js' ), true );
+	wp_enqueue_script( 'ik-product-zoom', get_theme_file_uri( 'assets/js/product-zoom.js' ), array( 'ik-zoom-engine' ), $ver( 'assets/js/product-zoom.js' ), true );
+}

@@ -116,9 +116,22 @@
 		var nav = lightbox.querySelector( '[data-kr-lightbox-nav]' );
 		var at = 0;
 
+		// Pencere icinde ikinci kademe yakinlastirma (assets/zoom.js).
+		var zoom = 'function' === typeof window.woodZoom
+			? window.woodZoom( lightbox.querySelector( '[data-kr-zoom-stage]' ), image, {
+				in: lightbox.querySelector( '[data-kr-zoom-in]' ),
+				out: lightbox.querySelector( '[data-kr-zoom-out]' ),
+				reset: lightbox.querySelector( '[data-kr-zoom-reset]' ),
+				level: lightbox.querySelector( '[data-kr-zoom-level]' ),
+			} )
+			: null;
+
 		var show = function ( index ) {
 			at = ( index + gallery.length ) % gallery.length;
-			image.src = gallery[ at ].url;
+			if ( zoom ) {
+				zoom.reset();
+			}
+			image.src = gallery[ at ].full || gallery[ at ].url;
 			image.alt = gallery[ at ].alt || '';
 			caption.textContent = gallery[ at ].alt || '';
 			nav.hidden = gallery.length < 2;
@@ -133,6 +146,10 @@
 		lightbox.querySelector( '[data-kr-lightbox-next]' ).addEventListener( 'click', function () { show( at + 1 ); } );
 
 		lightbox.addEventListener( 'keydown', function ( event ) {
+			if ( zoom && zoom.key( event ) ) {
+				return;
+			}
+
 			if ( 'ArrowRight' === event.key ) {
 				show( at + 1 );
 			} else if ( 'ArrowLeft' === event.key ) {

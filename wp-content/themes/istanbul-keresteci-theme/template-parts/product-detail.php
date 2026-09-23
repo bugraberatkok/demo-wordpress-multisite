@@ -33,8 +33,40 @@ get_template_part(
 	<div class="ik-wrap ik-product__grid">
 		<article class="ik-product__main">
 			<figure class="ik-product__media">
-				<?php echo ik_image_tag( $image, 'ik-product__image', null, 'eager' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+				<?php if ( ! empty( $image['url'] ) ) : ?>
+					<?php // Buyutme: tam boy gorsel pencerede, icinde ikinci kademe yakinlastirma (assets/js/product-zoom.js). ?>
+					<button type="button" class="ik-zoom-open" data-ik-zoom-open
+						data-full="<?php echo esc_url( ik_product_image( $product, 'full' )['url'] ?? $image['url'] ); ?>"
+						aria-label="<?php echo esc_attr( $product['title'] . ' görselini büyüt' ); ?>">
+						<?php echo ik_image_tag( $image, 'ik-product__image', null, 'eager' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+						<span class="ik-zoom-open__badge" aria-hidden="true">Büyüt</span>
+					</button>
+				<?php else : ?>
+					<?php echo ik_image_tag( $image, 'ik-product__image', null, 'eager' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+				<?php endif; ?>
 			</figure>
+
+			<?php if ( ! empty( $image['url'] ) ) : ?>
+				<dialog class="ik-zoom" data-ik-zoom aria-label="<?php echo esc_attr( $product['title'] ); ?>">
+					<div class="ik-zoom__frame">
+						<div class="ik-zoom__stage" data-ik-zoom-stage>
+							<img class="ik-zoom__image" data-ik-zoom-image src="" alt="<?php echo esc_attr( $image['alt'] ?: $product['title'] ); ?>" />
+						</div>
+
+						<form method="dialog" class="ik-zoom__close">
+							<button type="submit" class="ik-zoom__btn" aria-label="Kapat">&times;</button>
+						</form>
+
+						<div class="ik-zoom__bar" role="group" aria-label="Yakınlaştırma">
+							<button type="button" class="ik-zoom__btn" data-ik-zoom-out aria-label="Uzaklaştır">&minus;</button>
+							<span class="ik-zoom__level" data-ik-zoom-level aria-live="polite">%100</span>
+							<button type="button" class="ik-zoom__btn" data-ik-zoom-in aria-label="Yakınlaştır">+</button>
+							<button type="button" class="ik-zoom__btn ik-zoom__btn--text" data-ik-zoom-reset>Sığdır</button>
+						</div>
+					</div>
+					<p class="ik-zoom__hint">Yakınlaştırmak için görsele tıklayın ya da tekerleği kullanın; yakınken sürükleyerek gezinin.</p>
+				</dialog>
+			<?php endif; ?>
 
 			<div class="ik-prose ik-product__body" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'body' ); ?>>
 				<?php ik_paragraphs( $product['body'] ); ?>

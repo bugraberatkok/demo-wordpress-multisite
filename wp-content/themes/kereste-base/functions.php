@@ -58,7 +58,8 @@ function kr_assets(): void {
 	wp_enqueue_style( 'kr-tailwind', get_template_directory_uri() . '/assets/tailwind.css', array( 'kr-fonts' ), $ver( 'assets/tailwind.css' ) );
 	wp_enqueue_style( 'kr-site', get_stylesheet_uri(), array( 'kr-tailwind' ), $child );
 
-	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', array(), $ver( 'assets/site.js' ), true );
+	wp_enqueue_script( 'kr-zoom', get_template_directory_uri() . '/assets/zoom.js', array(), $ver( 'assets/zoom.js' ), true );
+	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', array( 'kr-zoom' ), $ver( 'assets/site.js' ), true );
 }
 
 add_action( 'wp_head', 'kr_preconnect', 1 );
@@ -279,6 +280,8 @@ function kr_product_gallery( string $key ): array {
 		if ( '' !== $large['url'] ) {
 			$gallery[] = array(
 				'url'   => $large['url'],
+				// Buyutmede yakinlastirma netligi icin tam boy.
+				'full'  => nwcs_image_by_id( $id, 'full' )['url'] ?: $large['url'],
 				'alt'   => $large['alt'] ?: $name,
 				'thumb' => nwcs_image_by_id( $id, 'medium' )['url'] ?: $large['url'],
 			);
