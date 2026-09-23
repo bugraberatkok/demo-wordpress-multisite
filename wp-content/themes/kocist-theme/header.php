@@ -110,7 +110,8 @@ foreach ( $menu as $menu_index => $menu_item ) {
 					<?php
 					$children     = $item['children'];
 					$has_children = ! empty( $children );
-					$is_current   = kocist_is_current_menu_item( $item['url'] );
+					$is_exact     = kocist_is_current_menu_item( $item['url'] );
+					$is_current   = $is_exact || kocist_is_current_menu_branch( $item );
 
 					if ( $has_children ) {
 						$columns   = kocist_menu_columns( count( $children ) );
@@ -125,7 +126,7 @@ foreach ( $menu as $menu_index => $menu_item ) {
 						<a
 							class="k-nav__link<?php echo $is_current ? ' is-current' : ''; ?>"
 							href="<?php echo esc_url( kocist_link( $item['url'] ) ); ?>"
-							<?php echo $is_current ? 'aria-current="page"' : ''; ?>
+							<?php echo $is_exact ? 'aria-current="page"' : ( $is_current ? 'aria-current="true"' : '' ); ?>
 							data-k-nav-link
 							<?php nwcs_edit_attr( 'global', 'header', 'menu', $index, 'label' ); ?>
 						><?php echo esc_html( $item['label'] ); ?></a>

@@ -25,9 +25,11 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 	function nwcs_the_icon( $key, $class = '', $size = 24 ) {}
 	function nwcs_edit_attr( $page, $component, $field = '', $row = null, $sub = '' ) {}
 	function nwcs_section_order( $page = 'home' ) {
-		return array( 'catalog', 'products', 'capabilities', 'references', 'ctaband' );
+		return array( 'catalog', 'products', 'capabilities', 'references', 'blog', 'ctaband' );
 	}
 }
+
+require_once __DIR__ . '/inc/blog.php';
 
 add_action( 'after_setup_theme', 'kocist_setup' );
 function kocist_setup(): void {
@@ -41,8 +43,11 @@ function kocist_setup(): void {
  * betigi bunlari olusturmasa da site eksiksiz acilsin diye tema kendisi
  * acar. Surum secenegi sayesinde her istekte sorgu yapilmaz; var olan bir
  * sayfaya dokunulmaz, kullanici silerse ayni surumde geri getirilmez.
+ *
+ * Surum 2: Insan Kaynaklari ve Blog sayfalari, yazilar sayfasi ayari ve
+ * ilk kurulum blog yazilari (inc/blog.php).
  */
-const KOCIST_PAGES_VERSION = '1';
+const KOCIST_PAGES_VERSION = '2';
 
 add_action( 'after_switch_theme', 'kocist_ensure_pages' );
 add_action( 'init', 'kocist_maybe_ensure_pages' );
@@ -54,28 +59,76 @@ function kocist_maybe_ensure_pages(): void {
 }
 
 function kocist_ensure_pages(): void {
-	$pages = array(
-		'kurumsal' => 'Kurumsal',
-		'urun'     => 'Ahşap Tavuk Kümesi',
-		'iletisim' => 'İletişim',
-	);
+	// Ayni istekte iki kanca birden tetiklenirse ikinci kez calisma.
+	static $done = false;
 
-	foreach ( $pages as $slug => $title ) {
-		if ( get_page_by_path( $slug, OBJECT, 'page' ) ) {
-			continue;
-		}
-
-		wp_insert_post(
-			array(
-				'post_type'   => 'page',
-				'post_status' => 'publish',
-				'post_name'   => $slug,
-				'post_title'  => $title,
-			)
-		);
+	if ( $done ) {
+		return;
 	}
 
+	$done = true;
+
+	$pages = array(
+		'kurumsal'         => 'Kurumsal',
+		'urun'             => 'Ahşap Tavuk Kümesi',
+		'iletisim'         => 'İletişim',
+		'insan-kaynaklari' => 'İnsan Kaynakları',
+		'blog'             => 'Blog – Haberler',
+	);
+
+	$ids = array();
+
+	foreach ( $pages as $slug => $title ) {
+		$ids[ $slug ] = kocist_ensure_page( $slug, $title );
+	}
+
+	/*
+	 * Yazilar sayfasi yalnizca statik on sayfa secildiginde calisir. On sayfa
+	 * hic secilmemisse (yeni site) bos bir "Ana Sayfa" acilip secilir;
+	 * front-page.php her iki durumda da ayni ana sayfayi cizer. Kullanicinin
+	 * yaptigi secim ezilmez.
+	 */
+	if ( 'page' !== get_option( 'show_on_front' ) || ! get_option( 'page_on_front' ) ) {
+		$front = kocist_ensure_page( 'ana-sayfa', 'Ana Sayfa' );
+
+		if ( $front && ! get_option( 'page_on_front' ) ) {
+			update_option( 'page_on_front', $front );
+		}
+
+		if ( get_option( 'page_on_front' ) ) {
+			update_option( 'show_on_front', 'page' );
+		}
+	}
+
+	if ( ! get_option( 'page_for_posts' ) && $ids['blog'] ) {
+		update_option( 'page_for_posts', $ids['blog'] );
+	}
+
+	kocist_seed_blog_posts();
+
 	update_option( 'kocist_pages_version', KOCIST_PAGES_VERSION );
+}
+
+/**
+ * Sayfayi acar; ayni adres adinda sayfa varsa ona dokunmadan kimligini dondurur.
+ */
+function kocist_ensure_page( string $slug, string $title ): int {
+	$page = get_page_by_path( $slug, OBJECT, 'page' );
+
+	if ( $page ) {
+		return 'trash' === $page->post_status ? 0 : (int) $page->ID;
+	}
+
+	$id = wp_insert_post(
+		array(
+			'post_type'   => 'page',
+			'post_status' => 'publish',
+			'post_name'   => $slug,
+			'post_title'  => $title,
+		)
+	);
+
+	return is_wp_error( $id ) ? 0 : (int) $id;
 }
 
 add_action( 'wp_enqueue_scripts', 'kocist_assets' );
@@ -173,6 +226,26 @@ function kocist_assets(): void {
 		wp_enqueue_style(
 			'kocist-contact',
 			get_theme_file_uri( 'assets/css/contact.css' ),
+			array( 'kocist-style' ),
+			wp_get_theme()->get( 'Version' )
+		);
+	}
+
+	// Kurumsal ve Insan Kaynaklari sayfalari.
+	if ( is_page( array( 'kurumsal', 'insan-kaynaklari' ) ) ) {
+		wp_enqueue_style(
+			'kocist-pages',
+			get_theme_file_uri( 'assets/css/pages.css' ),
+			array( 'kocist-style' ),
+			wp_get_theme()->get( 'Version' )
+		);
+	}
+
+	// Blog listesi, arsivler, tekil yazi ve ana sayfadaki son yazilar.
+	if ( is_home() || is_archive() || is_singular( 'post' ) || is_front_page() ) {
+		wp_enqueue_style(
+			'kocist-blog',
+			get_theme_file_uri( 'assets/css/blog.css' ),
 			array( 'kocist-style' ),
 			wp_get_theme()->get( 'Version' )
 		);
@@ -299,9 +372,44 @@ function kocist_product_title_parts( array $parts ): array {
 }
 
 /**
- * Ana sayfa bolumunu kayitli siraya gore basar.
+ * Ana sayfa bolum sirasi.
+ *
+ * Panel, kayitli siraya sonradan eklenen bolumu (blog) en sona koyuyor; bu
+ * da blogu kapanis seridinin (ctaband) altina dusuruyordu. Kayitli sirada
+ * blog hic yoksa (kullanici henuz yerini secmemis) teklif seridinin hemen
+ * onune alinir; kullanici paneldeki siralamayi kaydettiyse o gecerlidir.
  */
-function kocist_section( string $key ): void {
+function kocist_home_sections(): array {
+	$order  = nwcs_section_order( 'home' );
+	$stored = get_option( 'nwcs_section_order', array() );
+	$saved  = is_array( $stored ) && isset( $stored['home'] ) && is_array( $stored['home'] ) ? $stored['home'] : array();
+
+	if ( in_array( 'blog', $saved, true ) || ! in_array( 'blog', $order, true ) || ! in_array( 'ctaband', $order, true ) ) {
+		return $order;
+	}
+
+	$order = array_values( array_diff( $order, array( 'blog' ) ) );
+	array_splice( $order, (int) array_search( 'ctaband', $order, true ), 0, array( 'blog' ) );
+
+	return $order;
+}
+
+/**
+ * Blog listesi ve arsivlerde sayfa basina 12 yazi: uc sutunlu izgarayi
+ * tam satirlarla doldurur.
+ */
+add_action( 'pre_get_posts', 'kocist_blog_per_page' );
+function kocist_blog_per_page( WP_Query $query ): void {
+	if ( ! is_admin() && $query->is_main_query() && ( $query->is_home() || $query->is_archive() ) ) {
+		$query->set( 'posts_per_page', 12 );
+	}
+}
+
+/**
+ * Bolum sablonunu basar. $args sablonun icinde ayni adla okunur
+ * (ornegin page-head.php hangi sayfanin basligini cizecegini buradan alir).
+ */
+function kocist_section( string $key, array $args = array() ): void {
 	$file = get_theme_file_path( "template-parts/sections/{$key}.php" );
 
 	if ( file_exists( $file ) ) {
@@ -332,10 +440,45 @@ function kocist_is_current_menu_item( string $url ): bool {
 		return false;
 	}
 
-	$path    = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
-	$current = trim( (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ), '/' );
+	$path = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
 
-	return $path === $current;
+	return $path === kocist_current_path();
+}
+
+/**
+ * Menu karsilastirmasi icin su anki yol.
+ *
+ * Blog listesi, arsivler ve tekil yazilar menude "Blog" ogesine baglidir;
+ * bu sayfalarda yol, yazilar sayfasinin yolu sayilir.
+ */
+function kocist_current_path(): string {
+	// Havuz urunu detayi (/urun/<slug>/) WordPress sorgusunda yazi listesi
+	// gibi gorunur; blog sayilmasin.
+	$is_blog = ( is_home() && ! is_front_page() ) || is_archive() || is_singular( 'post' );
+
+	if ( $is_blog && ! get_query_var( 'nwcs_product' ) ) {
+		return trim( (string) wp_parse_url( kocist_blog_url(), PHP_URL_PATH ), '/' );
+	}
+
+	return trim( (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ), '/' );
+}
+
+/**
+ * Ust menu ogesi aktif mi: kendi adresi ya da alt ogelerinden biri su anki
+ * sayfa ise (Insan Kaynaklari acikken "Kurumsal" isaretli kalir).
+ */
+function kocist_is_current_menu_branch( array $item ): bool {
+	if ( kocist_is_current_menu_item( (string) $item['url'] ) ) {
+		return true;
+	}
+
+	foreach ( $item['children'] ?? array() as $child ) {
+		if ( kocist_is_current_menu_item( kocist_link( $child['url'], (string) $item['url'] ) ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -347,10 +490,16 @@ function kocist_is_current_menu_item( string $url ): bool {
  */
 function kocist_anchor_targets(): array {
 	return array(
-		'katalog' => '/#katalog',
-		'urunler' => '/#urunler',
-		'teklif'  => '/#teklif',
-		'harita'  => '/iletisim/#harita',
+		'katalog'          => '/#katalog',
+		'urunler'          => '/#urunler',
+		'teklif'           => '/#teklif',
+		'harita'           => '/iletisim/#harita',
+
+		// Panelde eski demo menusunden kalan capalar; artik gercek sayfalari var.
+		'insan-kaynaklari' => '/insan-kaynaklari/',
+		'blog'             => '/blog/',
+		'referanslar'      => '/kurumsal/',
+		'belgeler'         => '/kurumsal/',
 	);
 }
 
@@ -510,6 +659,24 @@ function kocist_product_image( array $product ): array {
 	}
 
 	return kocist_image_or_default( (array) ( $product['image'] ?? array() ), $file, (string) ( $product['title'] ?? '' ) );
+}
+
+/**
+ * Panelden gelen cok paragrafli metni basar: bos satirlar paragraf ayirir.
+ */
+function kocist_paragraphs( $text, string $class = '' ): string {
+	$parts = preg_split( '/\R\s*\R/u', trim( (string) $text ) );
+	$out   = '';
+
+	foreach ( $parts as $part ) {
+		$part = trim( $part );
+
+		if ( '' !== $part ) {
+			$out .= sprintf( '<p%s>%s</p>', $class ? ' class="' . esc_attr( $class ) . '"' : '', nl2br( esc_html( $part ) ) );
+		}
+	}
+
+	return $out;
 }
 
 /**

@@ -9,7 +9,7 @@ get_header();
 
 kocist_section( 'hero' );
 
-foreach ( nwcs_section_order( 'home' ) as $section ) {
+foreach ( kocist_home_sections() as $section ) {
 	kocist_section( $section );
 }
 

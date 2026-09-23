@@ -221,9 +221,9 @@ return array(
 							),
 							'default' => array(
 								array( 'label' => 'Hakkımızda', 'url' => '/kurumsal/' ),
-								array( 'label' => 'İnsan Kaynakları', 'url' => '#insan-kaynaklari' ),
-								array( 'label' => 'Referanslar', 'url' => '#referanslar' ),
-								array( 'label' => 'Blog – Haberler', 'url' => '#blog' ),
+								array( 'label' => 'İnsan Kaynakları', 'url' => '/insan-kaynaklari/' ),
+								array( 'label' => 'Referanslar', 'url' => '/kurumsal/' ),
+								array( 'label' => 'Blog – Haberler', 'url' => '/blog/' ),
 							),
 						),
 					),
@@ -311,9 +311,10 @@ return array(
 							),
 							'default' => array(
 								array( 'label' => 'Hakkımızda', 'url' => '/kurumsal/' ),
-								array( 'label' => 'Belgelerimiz', 'url' => '/kurumsal/#belgeler' ),
-								array( 'label' => 'Referanslar', 'url' => '#referanslar' ),
-								array( 'label' => 'Katalog', 'url' => '/#katalog' ),
+								array( 'label' => 'İnsan Kaynakları', 'url' => '/insan-kaynaklari/' ),
+								array( 'label' => 'Blog – Haberler', 'url' => '/blog/' ),
+								array( 'label' => 'Belgelerimiz', 'url' => '/kurumsal/' ),
+								array( 'label' => 'Referanslar', 'url' => '/kurumsal/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -354,7 +355,7 @@ return array(
 		'home' => array(
 			'label'             => 'Ana Sayfa',
 			'path'              => '/',
-			'sortable_sections' => array( 'catalog', 'products', 'capabilities', 'references', 'ctaband' ),
+			'sortable_sections' => array( 'catalog', 'products', 'capabilities', 'references', 'blog', 'ctaband' ),
 			'components'        => array(
 
 				/*
@@ -543,6 +544,18 @@ return array(
 					),
 				),
 
+				/*
+				 * Son uc blog yazisi. Yazi yoksa bolum hic basilmaz.
+				 */
+				'blog' => array(
+					'label'  => 'Blog – Son Yazılar',
+					'fields' => array(
+						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Blog – Haberler' ),
+						'subtitle'   => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Koçist’ten haberler; orman ürünlerinde güncel trendler ve bilgilendirmeler.' ),
+						'link_label' => array( 'label' => 'Tüm Yazılar Bağlantı Metni', 'type' => 'text', 'default' => 'Tüm yazılar' ),
+					),
+				),
+
 				'ctaband' => array(
 					'label'  => 'Teklif Şeridi',
 					'fields' => array(
@@ -556,8 +569,16 @@ return array(
 			),
 		),
 
+		/*
+		 * Kurumsal sayfasi (/kurumsal/). Metinler firmanin kendi kurumsal
+		 * metnidir; yazim hatalari duzeltildi, anlam korundu.
+		 *
+		 * Eski 'story' ve 'values' bilesenleri yerine yeni anahtarlar
+		 * kullaniliyor: panel deposunda eski demo metinleri kayitli olan
+		 * sitelerde de yeni icerik varsayilandan gorunsun diye.
+		 */
 		'inner' => array(
-			'label'      => 'Kurumsal (Örnek Alt Sayfa)',
+			'label'      => 'Kurumsal',
 			'path'       => '/kurumsal/',
 			'components' => array(
 
@@ -566,52 +587,212 @@ return array(
 					'fields' => array(
 						'breadcrumb' => array( 'label' => 'Yol Göstergesi', 'type' => 'text', 'default' => 'Ana Sayfa / Kurumsal' ),
 						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Kurumsal' ),
-						'subtitle'   => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Üretim kapasitemiz, çalışma biçimimiz ve tedarik yaklaşımımız.' ),
+						'subtitle'   => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Özel ölçüde kereste, palet, sandık ve kafes üretiminde kalite, dürüstlük ve hız.' ),
 					),
 				),
 
-				'story' => array(
-					'label'  => 'Kurumsal Metin',
+				'profile' => array(
+					'label'  => 'Profilimiz',
 					'fields' => array(
-						'title'  => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Tedarikten sevkiyata tek muhatap' ),
-						'body'   => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Koçist; kereste, ahşap ambalaj, dekorasyon ve hırdavat gruplarında kurumsal müşterilere tedarik yapar. Bu demo kurulumda metinler örnek amaçlıdır ve panelden düzenlenebilir.' ),
-						'image'  => array( 'label' => 'Görsel', 'type' => 'image', 'default' => 0 ),
-						'points' => array(
-							'label'   => 'Maddeler',
-							'type'    => 'repeater',
-							'max'     => 6,
-							'fields'  => array(
-								'icon' => array( 'label' => 'İkon', 'type' => 'icon' ),
-								'text' => array( 'label' => 'Metin', 'type' => 'text' ),
-							),
-							'default' => array(
-								array( 'icon' => 'check', 'text' => 'Stoklu çalışma ve hızlı teyit' ),
-								array( 'icon' => 'check', 'text' => 'Proje bazlı özel ölçü üretimi' ),
-								array( 'icon' => 'check', 'text' => 'Kurumsal fatura ve sevk irsaliyesi' ),
-							),
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Profilimiz' ),
+						'body'  => array(
+							'label'   => 'Metin (paragraflar arasında boş satır bırakın)',
+							'type'    => 'textarea',
+							'default' => "Firmamız, yeni bir ürün için yaptıracağınız veya mevcut kullanımınızın yerini alacak her ölçüde kereste, palet, sandık ve kafesi sizin çıkarlarınız doğrultusunda en uygun şekilde dizayn eder ve size sunar; ya da mevcut kullandığınız palet, sandık ve kafes ölçülerini, şartnamelerini veya proje çizimlerini alarak istekleriniz doğrultusunda en hızlı şekilde üretime geçer. Tüm palet, sandık ve kafes elemanlarını içeren demonte paketleri hazırlayarak size sevk eder.\n\nKaliteli, dürüst ve hızlı bir pazarlama ilkesi benimsemiş olan firmamız, müşterilerini memnun etmek amacıyla özel boy ve ebatta kereste, palet, sandık, kafes vb. ahşap ambalaj malzemeleri üretmektedir. Bu amaçla yola çıkan firmamız, kalitesinden ve dürüstlüğünden taviz vermeden hizmetlerine devam etmektedir.",
 						),
+						'image' => array( 'label' => 'Görsel', 'type' => 'image', 'default' => 0 ),
 					),
 				),
 
-				'values' => array(
-					'label'  => 'Çalışma İlkeleri',
+				'aim' => array(
+					'label'  => 'Amacımız',
 					'fields' => array(
-						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Çalışma İlkeleri' ),
+						'title'     => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Amacımız' ),
+						'statement' => array( 'label' => 'Ana Cümle', 'type' => 'textarea', 'default' => 'En kaliteli malzemeyi en kısa zamanda müşterimizin hizmetine sunmak.' ),
+						'body'      => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Bu bağlamda firmamızın çalışmaları, daha kaliteli ve daha hesaplı malzemeyi tüketicinin hizmetine sunma ilkesiyle devam etmektedir.' ),
+					),
+				),
+
+				'quality' => array(
+					'label'  => 'Kalite Politikamız',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Kalite Politikamız' ),
+						'intro' => array( 'label' => 'Giriş', 'type' => 'textarea', 'default' => 'Aşağıdaki ilkeleri kalite politikamız olarak belirledik ve hedefledik.' ),
 						'items' => array(
-							'label'   => 'Kartlar',
+							'label'   => 'İlkeler',
 							'type'    => 'repeater',
-							'max'     => 6,
+							'max'     => 10,
 							'fields'  => array(
-								'icon'  => array( 'label' => 'İkon', 'type' => 'icon' ),
-								'title' => array( 'label' => 'Başlık', 'type' => 'text' ),
-								'text'  => array( 'label' => 'Metin', 'type' => 'textarea' ),
+								'text' => array( 'label' => 'İlke', 'type' => 'textarea' ),
 							),
 							'default' => array(
-								array( 'icon' => 'clock', 'title' => 'Zamanında teslim', 'text' => 'Teyit edilen sevk tarihine bağlı kalırız.' ),
-								array( 'icon' => 'recycle', 'title' => 'Malzemenin izi', 'text' => 'Kullanılan ahşabın kaynağı ve işlemi kayıt altındadır.' ),
-								array( 'icon' => 'shield', 'title' => 'Şartname uyumu', 'text' => 'İhracat ambalajında istenen belgelere uygun üretim.' ),
+								array( 'text' => 'Ürünlerimizi zamanında teslim ederek, uygun fiyat avantajı sağlayarak ve kaliteli ürün ve ekipmanlarımızı sunarak müşteri ihtiyaç ve beklentilerini karşılamak, sürekli gelişmelerini sağlamak.' ),
+								array( 'text' => 'Kalite bilincini yerleştirerek, çalışanlarımızın sağlığı ve çevrenin korunması için maddi ve insan kaynaklarımızı seferber etmek ve tüm çalışanların gelişmelerini sağlamak.' ),
+								array( 'text' => 'Kuruluş olarak her alanda sürekli iyileşme ve gelişme sağlamak.' ),
+								array( 'text' => 'Yaptığımız işi ilk seferinde ve her seferinde doğru yapmak.' ),
+								array( 'text' => 'Müşteri istek ve görüşlerini esas almak; işimizi standartlara ve kalite yönetim sistemimize uygun olarak yapmak.' ),
+								array( 'text' => 'Kalite bilincinin artması için tedarikçilerimiz ile birlikte koordineli çalışma içinde bulunmak.' ),
 							),
 						),
+					),
+				),
+
+				'group' => array(
+					'label'  => 'Koçist Grup',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Koçist Grup' ),
+						'body'  => array(
+							'label'   => 'Metin (paragraflar arasında boş satır bırakın)',
+							'type'    => 'textarea',
+							'default' => "Koçist Grup, orman ürünleri alanındaki yatırımı ile 37 yıldır; yapı ve inşaat sektörünün malzeme tedarikçisi olarak 2 yıldır hizmet vermektedir. 37 yıllık tecrübe ile Koçist Grup; doğal ortamları daha güzel ve yaşanabilir ortamlara dönüştürme becerisine sahip olan, insan eliyle oluşan yapılar inşa etmeye karar vermiştir.\n\nYapı ve inşaat sektörü; zaman içinde gelişim göstererek, ilkel yaşam alanlarından akıllı binalara, tozlu patikalardan peyzaj ve çevre düzenlemesi yapılmış huzurlu yaşam alanlarına dönüşerek çeşitli teknik ve estetik evrimlere uğramıştır. Dolayısıyla sektör temsilcileri, insanlık gelişim tarihini ve kültür evrimini günümüze taşıyan ve geleceği inşa eden yatırımcılardır.\n\nKoçist Yapı İnşaat, sizleri mutlu edecek yaşam ve çalışma alanları inşa etmekte ve sizler için geleceği inşa eden bir yatırımcı olmayı hedeflemektedir. Koçist Grup, 2016 yılından itibaren Koçist Teknoloji markası ile bilişim alanında da yatırım yapmıştır.",
+						),
+						'facts' => array(
+							'label'   => 'Öne Çıkan Bilgiler',
+							'type'    => 'repeater',
+							'max'     => 4,
+							'fields'  => array(
+								'value' => array( 'label' => 'Değer', 'type' => 'text' ),
+								'label' => array( 'label' => 'Açıklama', 'type' => 'text' ),
+							),
+							'default' => array(
+								array( 'value' => '37 yıl', 'label' => 'orman ürünleri alanında' ),
+								array( 'value' => '2 yıl', 'label' => 'yapı ve inşaat malzemesi tedarikinde' ),
+								array( 'value' => '2016', 'label' => 'Koçist Teknoloji ile bilişim yatırımı' ),
+							),
+						),
+						'image' => array( 'label' => 'Görsel', 'type' => 'image', 'default' => 0 ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Insan Kaynaklari (/insan-kaynaklari/). Ise alim gercek bir sirali
+		 * surec oldugu icin adimlar numarali basilir; politika ilkeleri sira
+		 * bildirmedigi icin numarasiz liste.
+		 */
+		'hr' => array(
+			'label'      => 'İnsan Kaynakları',
+			'path'       => '/insan-kaynaklari/',
+			'components' => array(
+
+				'page_head' => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'breadcrumb' => array( 'label' => 'Yol Göstergesi', 'type' => 'text', 'default' => 'Ana Sayfa / Kurumsal / İnsan Kaynakları' ),
+						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'İnsan Kaynakları' ),
+						'subtitle'   => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Başarımıza çalışanlarımızın gücü ve desteğiyle ulaştık; en önemli değerimiz insan kaynağımız.' ),
+					),
+				),
+
+				'policy' => array(
+					'label'  => 'İnsan Kaynakları Politikamız',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'İnsan Kaynakları Politikamız' ),
+						'intro' => array( 'label' => 'Giriş', 'type' => 'textarea', 'default' => 'Sahip olduğu başarıya çalışanlarının gücü ve desteği ile ulaşan ve en önemli değerinin insan kaynağı olduğuna inanan Koçist Grup, aşağıdaki ilkeleri insan kaynakları politikası olarak benimsemiştir.' ),
+						'items' => array(
+							'label'   => 'İlkeler',
+							'type'    => 'repeater',
+							'max'     => 10,
+							'fields'  => array(
+								'text' => array( 'label' => 'İlke', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'text' => 'Görevin gerektirdiği bilgi ve beceriye sahip kaliteli insan gücünü bünyesine kazandırmak.' ),
+								array( 'text' => 'Çalışanlarının yaratıcılıklarını kullanabilecekleri ve fikirlerini dile getirebilecekleri etkin bir iletişim ve motivasyon ortamı sağlamak.' ),
+								array( 'text' => 'Farklı bakış açıları ve bilgi birikimlerini bir arada barındıran katılımcı yönetim politikası izlemek.' ),
+								array( 'text' => 'Çalışanlarının kişisel ve mesleki gelişimlerini ön planda tutarak sürekli öğrenme ve gelişimi desteklemek.' ),
+								array( 'text' => 'Çalışan performanslarını objektif kriterlerle değerlendirerek yüksek performansı ödüllendirmek ve teşvik etmek.' ),
+								array( 'text' => 'Yenilikçi insan kaynakları uygulamalarını hayata geçirerek çalışanlarına daima en iyiyi sunmak.' ),
+							),
+						),
+					),
+				),
+
+				'hiring' => array(
+					'label'  => 'İşe Alım Süreci',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'İşe Alım Süreci' ),
+						'intro' => array( 'label' => 'Giriş', 'type' => 'textarea', 'default' => 'İşe alım sürecimizin amacı, doğru adayı uygun pozisyonla eşleştirmektir.' ),
+						'steps' => array(
+							'label'   => 'Adımlar (sırayla)',
+							'type'    => 'repeater',
+							'max'     => 10,
+							'fields'  => array(
+								'title' => array( 'label' => 'Adım', 'type' => 'text' ),
+								'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'title' => 'Başvuru', 'text' => 'Açık pozisyonlar için Koçist Grup’un ihtiyaç ve istihdam çalışmaları ile bireysel başvurular değerlendirilir.' ),
+								array( 'title' => 'Ön görüşme', 'text' => 'Uygun adaylar İnsan Kaynakları Departmanı ile ön görüşmeye davet edilir.' ),
+								array( 'title' => 'Testler', 'text' => 'Ön görüşmede uygun görülen adaylara, pozisyonun gerekliliğine göre dikkat testi, genel yetenek testi, yabancı dil testi, kişilik envanteri ve vaka çalışmaları uygulanır.' ),
+								array( 'title' => 'Yönetici görüşmesi', 'text' => 'Kısa listeye kalan adaylar ilgili bölüm yöneticileri ile görüşür.' ),
+								array( 'title' => 'Referans ve teklif', 'text' => 'Bölüm yöneticisi tarafından onaylanan adaylara, referans ve ücret çalışmaları sonrasında teklif sunulur.' ),
+								array( 'title' => 'İşe başlama ve oryantasyon', 'text' => 'Teklifi kabul eden aday işe başlar; oryantasyon ve İSG eğitimleri ile göreve adaptasyonu sağlanır.' ),
+							),
+						),
+					),
+				),
+
+				'performance' => array(
+					'label'  => 'Performans Değerlendirme',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Performans Değerlendirme' ),
+						'body'  => array(
+							'label'   => 'Metin (paragraflar arasında boş satır bırakın)',
+							'type'    => 'textarea',
+							'default' => "Koçist Grup, hedeflerle yönetim prensipleri doğrultusunda çalışanlarının performanslarını ölçer. Çalışanların performansı, hedeflerin yanı sıra yetkinliklerin de kullanıldığı bir sistem ile ölçülür.\n\nKoçist Grup yetkinlikleri, tüm grup şirketlerinin yöneticileri ile düzenlenen çalıştaylarda belirlenmiş olup, yetkinlikler Koçist Grup’un işlerinde başarıyı getiren davranış örnekleri üzerine belirlenmiştir. Genel esasları Koçist Grup tarafından belirlenmiş olan Performans Yönetim Sistemi, şirket bazında uygulamada farklı ihtiyaçlara cevap verecek esnekliğe sahiptir.\n\nPerformans Değerlendirme Sistemi, ara dönem ve yıl sonu olmak üzere 2 dönemde değerlendirilir. Performans Yönetim Sistemi; Eğitim ve Gelişim, Kariyer Yönetimi, Ödül Yönetimi ve Potansiyel Değerlendirme süreçlerine girdi sağlar.",
+						),
+					),
+				),
+
+				'apply' => array(
+					'label'  => 'Başvuru Çağrısı',
+					'fields' => array(
+						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ekibimize katılmak ister misiniz?' ),
+						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Özgeçmişinizi ve ilgilendiğiniz pozisyonu e-posta ile gönderin; İnsan Kaynakları Departmanımız başvurunuzu değerlendirip size dönüş yapar.' ),
+						'button_label' => array( 'label' => 'Buton Metni', 'type' => 'text', 'default' => 'Özgeçmiş gönderin' ),
+						'button_url'   => array( 'label' => 'Buton Bağlantısı', 'type' => 'url', 'default' => 'mailto:info@kocist.com.tr?subject=%C4%B0%C5%9F%20ba%C5%9Fvurusu' ),
+						'email'        => array( 'label' => 'Görünen E-posta', 'type' => 'text', 'default' => 'info@kocist.com.tr' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Blog (/blog/, kategori arsivleri ve tekil yazi). Yazilarin kendisi
+		 * WordPress yazisidir (tema ilk kurulumda bir kez olusturur); burada
+		 * yalnizca sayfa metinleri duruyor.
+		 */
+		'blog' => array(
+			'label'      => 'Blog',
+			'path'       => '/blog/',
+			'components' => array(
+
+				'page_head' => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'breadcrumb' => array( 'label' => 'Yol Göstergesi', 'type' => 'text', 'default' => 'Ana Sayfa / Blog' ),
+						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Blog – Haberler' ),
+						'subtitle'   => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Koçist’ten haberler; orman ürünlerinde güncel trendler ve bilgilendirmeler.' ),
+					),
+				),
+
+				'listing' => array(
+					'label'  => 'Yazı Listesi',
+					'fields' => array(
+						'all_label'  => array( 'label' => 'Filtre: Tümü Metni', 'type' => 'text', 'default' => 'Tüm yazılar' ),
+						'filter_label' => array( 'label' => 'Filtre Başlığı (ekran okuyucu için)', 'type' => 'text', 'default' => 'Kategoriye göre süz' ),
+						'read_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Yazıyı okuyun' ),
+						'empty_text' => array( 'label' => 'Yazı Yoksa Gösterilecek Metin', 'type' => 'text', 'default' => 'Bu kategoride henüz yazı yok.' ),
+					),
+				),
+
+				'single' => array(
+					'label'  => 'Yazı Sayfası',
+					'fields' => array(
+						'back_label'    => array( 'label' => 'Geri Bağlantı Metni', 'type' => 'text', 'default' => 'Tüm yazılar' ),
+						'related_title' => array( 'label' => 'İlgili Yazılar Başlığı', 'type' => 'text', 'default' => 'İlgili yazılar' ),
 					),
 				),
 			),

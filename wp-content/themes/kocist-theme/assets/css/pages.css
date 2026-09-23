@@ -1,0 +1,245 @@
+/*
+ * Kurumsal ve Insan Kaynaklari sayfalari.
+ *
+ * Ana sayfanin diliyle ayni: Archivo, 16px kose, yesil palet, buyuk harf
+ * etiket yok. Sayfanin tek vurgulu ani Kurumsal'daki "Amacimiz" karti;
+ * diger bolumler sakin, metin agirlikli.
+ */
+
+/* ---------- Kurumsal: Profilimiz ---------- */
+.k-about {
+	display: grid;
+	grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+	gap: 56px;
+	align-items: center;
+}
+
+.k-about__text .k-prose p:first-child { color: var(--text); font-size: 19px; line-height: 1.65; }
+
+.k-about__media img {
+	width: 100%;
+	aspect-ratio: 4 / 5;
+	max-height: 560px;
+	object-fit: cover;
+	border-radius: 16px;
+}
+
+/* ---------- Kurumsal: Amacimiz ---------- */
+.k-aim {
+	position: relative;
+	overflow: hidden;
+	padding: 56px 64px;
+	border-radius: 16px;
+	background: var(--leaf-soft);
+	color: var(--forest-3);
+}
+
+/* Sol kenarda yaprak yesili kalin serit: cumlenin bir alinti gibi okunmasi icin. */
+.k-aim::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 8px;
+	background: var(--leaf);
+}
+
+.k-aim__label {
+	margin: 0 0 16px;
+	font-size: 17px;
+	font-weight: 800;
+	letter-spacing: 0;
+	color: var(--leaf-dark);
+}
+
+.k-aim__statement {
+	margin: 0 0 20px;
+	max-width: 24ch;
+	font-size: clamp(28px, 3.8vw, 46px);
+	line-height: 1.1;
+	font-weight: 800;
+	letter-spacing: -.03em;
+	color: var(--forest);
+}
+
+.k-aim__text { margin: 0; max-width: 62ch; font-size: 17px; color: var(--muted); }
+
+/* ---------- Kurumsal: Kalite Politikamiz ---------- */
+.k-principles {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.k-principles__item {
+	display: flex;
+	gap: 14px;
+	align-items: flex-start;
+	padding: 22px 24px;
+	background: #fff;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+.k-principles__icon { flex: none; margin-top: 1px; color: var(--leaf-dark); }
+
+/* ---------- Kurumsal: Koçist Grup ---------- */
+.k-group-info {
+	display: grid;
+	grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+	gap: 56px;
+	align-items: start;
+}
+
+.k-group-info__media img {
+	width: 100%;
+	aspect-ratio: 16 / 11;
+	object-fit: cover;
+	border-radius: 16px;
+}
+
+.k-facts { margin: 8px 0 0; }
+
+.k-facts__row {
+	display: grid;
+	grid-template-columns: 7.5ch 1fr;
+	gap: 18px;
+	align-items: baseline;
+	padding: 18px 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.k-facts__value {
+	font-size: 30px;
+	font-weight: 800;
+	letter-spacing: -.03em;
+	line-height: 1;
+	color: var(--forest);
+	white-space: nowrap;
+}
+
+.k-facts__label { margin: 0; color: var(--muted); font-size: 15px; }
+
+/* ---------- Iki sutunlu bolum: solda baslik, sagda icerik ---------- */
+.k-split {
+	display: grid;
+	grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+	gap: 56px;
+	align-items: start;
+}
+
+.k-split__head { position: sticky; top: 104px; }
+.k-split__intro { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.7; max-width: 44ch; }
+
+/* ---------- Insan Kaynaklari: ilkeler ---------- */
+.k-rules { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+
+.k-rules__item {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+	padding: 20px 0;
+	border-bottom: 1px solid var(--line);
+	font-size: 17px;
+	line-height: 1.6;
+}
+
+.k-rules__icon { flex: none; margin-top: 2px; color: var(--leaf-dark); }
+
+/* ---------- Insan Kaynaklari: ise alim adimlari ---------- */
+.k-steps {
+	counter-reset: k-step;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 18px;
+}
+
+.k-steps__item {
+	counter-increment: k-step;
+	position: relative;
+	padding: 26px 24px 24px;
+	background: #fff;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+}
+
+.k-steps__item::before {
+	content: counter(k-step);
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	margin-bottom: 16px;
+	border-radius: 50%;
+	background: var(--forest);
+	color: #fff;
+	font-weight: 800;
+	font-size: 17px;
+}
+
+.k-steps__title { margin: 0 0 8px; font-size: 19px; font-weight: 800; letter-spacing: -.015em; color: var(--forest); }
+.k-steps__text { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.65; }
+
+/* ---------- Insan Kaynaklari: basvuru cagrisi ---------- */
+.k-apply {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 28px 40px;
+	align-items: center;
+	justify-content: space-between;
+	padding: 44px 56px;
+	border-radius: 16px;
+	background:
+		radial-gradient(circle at 100% 0%, rgba(122, 182, 72, .24) 0%, rgba(122, 182, 72, 0) 45%),
+		var(--forest);
+	color: #fff;
+}
+
+.k-apply__text { flex: 1 1 420px; }
+.k-apply__title { margin: 0 0 10px; font-size: clamp(24px, 2.8vw, 34px); line-height: 1.15; }
+.k-apply__body { margin: 0; color: rgba(255, 255, 255, .8); max-width: 56ch; }
+
+.k-apply__actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.k-apply__email { color: rgba(255, 255, 255, .85); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.k-apply__email:hover { color: var(--leaf); }
+
+.k-apply .k-btn:focus-visible,
+.k-apply__email:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- Duyarli ---------- */
+@media (max-width: 1000px) {
+	.k-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+	.k-about,
+	.k-group-info,
+	.k-split { grid-template-columns: 1fr; gap: 32px; }
+
+	.k-split__head { position: static; }
+	.k-about__media img { aspect-ratio: 16 / 11; }
+	.k-principles { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+	.k-aim { padding: 34px 26px 34px 32px; }
+	.k-aim::before { width: 6px; }
+	.k-about__text .k-prose p:first-child { font-size: 17px; }
+	.k-prose { font-size: 16px; }
+
+	.k-steps { grid-template-columns: 1fr; gap: 12px; }
+	.k-steps__item { display: grid; grid-template-columns: 42px 1fr; column-gap: 16px; padding: 20px; }
+	.k-steps__item::before { grid-row: span 2; margin: 0; }
+
+	.k-apply { padding: 30px 24px; }
+	.k-facts__value { font-size: 26px; }
+}

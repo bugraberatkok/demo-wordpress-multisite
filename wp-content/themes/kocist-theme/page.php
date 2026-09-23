@@ -2,17 +2,42 @@
 /**
  * Sayfa sablonu.
  *
- * Demo kapsamindaki ornek alt sayfa ('kurumsal') manifestteki 'inner'
- * bilesenlerinden cizilir; diger sayfalar normal icerikle gosterilir.
+ * Temanin actigi sayfalar (kurumsal, insan-kaynaklari, iletisim, urun)
+ * manifestteki bilesenlerden cizilir; diger sayfalar normal icerikle.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-$is_demo_inner = is_page( 'kurumsal' );
-
-if ( is_page( 'iletisim' ) ) {
+if ( is_page( 'kurumsal' ) ) {
+	kocist_section( 'page-head', array( 'page' => 'inner' ) );
+	kocist_section( 'about-profile' );
+	kocist_section( 'about-aim' );
+	kocist_section( 'about-quality' );
+	kocist_section( 'about-group' );
+} elseif ( is_page( 'insan-kaynaklari' ) ) {
+	kocist_section( 'page-head', array( 'page' => 'hr' ) );
+	kocist_section( 'hr-policy' );
+	kocist_section( 'hr-hiring' );
+	kocist_section( 'hr-performance' );
+	kocist_section( 'hr-apply' );
+} elseif ( is_page( 'blog' ) ) {
+	// Okuma ayarinda yazilar sayfasi baska secilmisse /blog/ yine liste gostersin.
+	get_template_part(
+		'template-parts/blog-list',
+		null,
+		array(
+			'query' => new WP_Query(
+				array(
+					'post_type'           => 'post',
+					'posts_per_page'      => -1,
+					'ignore_sticky_posts' => true,
+				)
+			),
+		)
+	);
+} elseif ( is_page( 'iletisim' ) ) {
 	// Iletisim sayfasi: manifestteki 'contact' bilesenlerinden cizilir.
 	kocist_section( 'contact-main' );
 } elseif ( is_page( 'urun' ) ) {
@@ -20,10 +45,6 @@ if ( is_page( 'iletisim' ) ) {
 	kocist_section( 'product-main' );
 	kocist_section( 'product-specs' );
 	kocist_section( 'product-faq' );
-} elseif ( $is_demo_inner ) {
-	kocist_section( 'page-head' );
-	kocist_section( 'story' );
-	kocist_section( 'values' );
 } else {
 	?>
 	<div class="k-pagehead">

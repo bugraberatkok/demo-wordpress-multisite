@@ -3,7 +3,7 @@ Theme Name: Kocist Theme
 Theme URI: http://localhost:8081/
 Author: Demo
 Description: Kocist demo sitesi icin kurumsal/endustriyel tema. Icerik degerleri Network Content Studio veri katmanindan okunur.
-Version: 0.3.3
+Version: 0.4.0
 Requires at least: 6.5
 Requires PHP: 8.1
 Text Domain: kocist
@@ -166,10 +166,71 @@ a { color: inherit; }
 .k-cta__note { color: rgba(255,255,255,.55); font-size: 13px; margin: 14px 0 0; width: 100%; }
 
 /* ---------- Ic sayfa ---------- */
-.k-pagehead { background: var(--steel-2); color: #fff; padding: 46px 0; }
-.k-pagehead__crumb { font-size: 14px; color: var(--leaf); margin: 0 0 10px; }
-.k-pagehead__title { font-size: clamp(28px, 3.6vw, 42px); font-weight: 800; margin: 0 0 10px; }
-.k-pagehead__sub { color: rgba(255,255,255,.78); margin: 0; max-width: 62ch; }
+
+/*
+ * Ic sayfa basligi: ana sayfadaki hero kartlariyla ayni dil. Tam genislik
+ * bant yerine icerik genisligine oturan, 16px koseli koyu yesil kart; sag
+ * ustte footer ve iletisim bandindaki soluk yaprak isigi. Isaretleme
+ * degismedi: kart .k-wrap'in arkasina ::before ile ciziliyor, boylece urun
+ * detayi ve 404 gibi ayni sinifi kullanan sablonlar da kendiliginden uyuyor.
+ */
+.k-pagehead { padding: 26px 0 0; color: #fff; }
+
+.k-pagehead > .k-wrap {
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+	padding: 52px 64px 56px;
+}
+
+.k-pagehead > .k-wrap::before {
+	content: "";
+	position: absolute;
+	inset: 0 20px;
+	z-index: -1;
+	border-radius: 16px;
+	background:
+		radial-gradient(circle at 92% 0%, rgba(122, 182, 72, .26) 0%, rgba(122, 182, 72, 0) 42%),
+		linear-gradient(135deg, var(--forest) 0%, var(--forest-3) 100%);
+}
+
+.k-pagehead__crumb {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	font-size: 14px;
+	color: rgba(255, 255, 255, .7);
+	margin: 0 0 14px;
+}
+
+.k-pagehead__crumb a { color: var(--leaf); text-decoration: none; }
+.k-pagehead__crumb a:hover { color: #fff; text-decoration: underline; }
+.k-pagehead__crumb a:focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px; border-radius: 4px; }
+
+.k-pagehead__title {
+	font-size: clamp(32px, 4.4vw, 54px);
+	line-height: 1.04;
+	letter-spacing: -.03em;
+	font-weight: 800;
+	margin: 0 0 14px;
+	max-width: 20ch;
+}
+
+.k-pagehead__sub { color: rgba(255, 255, 255, .8); font-size: 17px; margin: 0; max-width: 58ch; }
+
+@media (max-width: 640px) {
+	.k-pagehead { padding-top: 16px; }
+	.k-pagehead > .k-wrap { padding: 34px 40px 38px; }
+	.k-pagehead > .k-wrap::before { inset: 0 16px; }
+	.k-pagehead__sub { font-size: 16px; }
+}
+
+/* Ic sayfalarda uzun metin: okunur satir boyu, paragraflar arasi nefes. */
+.k-prose { color: var(--muted); font-size: 17px; line-height: 1.75; max-width: 68ch; }
+.k-prose p { margin: 0 0 1.1em; }
+.k-prose p:last-child { margin-bottom: 0; }
+
+.k-section--tight { padding: 28px 0; }
 
 .k-story { display: grid; grid-template-columns: 1.1fr .9fr; gap: 42px; align-items: start; }
 .k-story__body { color: var(--muted); font-size: 16px; white-space: pre-line; }
