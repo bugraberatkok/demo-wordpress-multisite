@@ -98,10 +98,10 @@ return $build(
 			'city'        => 'İstanbul',
 			'postal_code' => '34494',
 			'country'     => 'TR',
-			'same_as'     => array(
-				array( 'url' => 'https://www.kocist.com.tr' ),
-				array( 'url' => 'https://kavakkeresteci.com' ),
-			),
+			// Kardes siteler sameAs degil; grup iliskisi parentOrganization ile.
+			'same_as'     => array(),
+			'parent_name' => 'Koçist Orman Ürünleri',
+			'parent_url'  => 'https://www.kocist.com.tr',
 		),
 
 		'products'       => array(

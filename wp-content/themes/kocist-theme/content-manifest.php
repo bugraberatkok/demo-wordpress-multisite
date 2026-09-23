@@ -11,6 +11,20 @@
 return array(
 	'site_key'   => 'kocist',
 	'site_label' => 'Koçist',
+	// SEO ve GEO firma bilgisi (Network Content Studio). Degerler bu sitenin
+	// kendi sayfalarinda yazanlardir; panelin SEO ve GEO sekmesinden duzeltilir.
+	'seo_site_defaults' => array(
+		'name'        => 'Koçist Orman Ürünleri',
+		'legal_name'  => 'Koçist Orman Ürünleri İnş. ve İnş. Yap. Malz. San. Tic. Ltd. Şti.',
+		'description' => 'Koçist Orman Ürünleri: özel ölçüde kereste, palet, sandık ve kafes üretimi. Tedarik, üretim ve sevkiyat aynı çatı altında; İstanbul teslim.',
+		'phone'       => '+90 549 648 19 19',
+		'email'       => 'info@kocist.com.tr',
+		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
+		'district'    => 'Çatalca',
+		'city'        => 'İstanbul',
+		'postal_code' => '34494',
+		'country'     => 'TR',
+	),
 	'pages'      => array(
 
 		'global' => array(

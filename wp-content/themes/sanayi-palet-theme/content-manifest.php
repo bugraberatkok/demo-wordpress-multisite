@@ -14,6 +14,22 @@
 return array(
 	'site_key'   => 'sanayi-palet',
 	'site_label' => 'Sanayi Palet',
+	// SEO ve GEO firma bilgisi (Network Content Studio). Degerler bu sitenin
+	// kendi sayfalarinda yazanlardir; panelin SEO ve GEO sekmesinden duzeltilir.
+	'seo_site_defaults' => array(
+		'name'        => 'Sanayi Palet',
+		'legal_name'  => 'Koçist Grup Dış Ticaret Sanayi Ltd. Şti.',
+		'description' => 'Sanayi Palet, Koçist Grup’un ahşap palet ve sandık markası. Başakşehir’deki tesiste palet, sandık ve kafes istenen ölçüde üretilir; ihracat için ISPM 15 ısıl işlem ve damga.',
+		'phone'       => '+90 212 648 10 90',
+		'email'       => 'info@sanayipalet.com',
+		'street'      => 'Şahintepe, Eski İstanbul Cd. No:176',
+		'district'    => 'Başakşehir',
+		'city'        => 'İstanbul',
+		'postal_code' => '34494',
+		'country'     => 'TR',
+		'parent_name' => 'Koçist Orman Ürünleri',
+		'parent_url'  => 'https://www.kocist.com.tr',
+	),
 	'pages'      => array(
 
 		'global' => array(

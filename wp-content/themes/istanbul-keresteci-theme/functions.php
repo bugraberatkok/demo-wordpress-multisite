@@ -192,6 +192,43 @@ function ik_current_product(): array {
 }
 
 /**
+ * Urun alt sayfalarini SEO ve GEO eklentisine bildirir: bu sayfalar manifestte
+ * degil, product-detail sablonuyla ciziliyor. Her biri baslik, aciklama,
+ * Product yapilandirilmis verisi ve llms.txt satiri alir.
+ */
+add_filter( 'nwcs_seo_extra_pages', 'ik_seo_product_pages' );
+function ik_seo_product_pages( array $pages ): array {
+	foreach ( ik_products() as $product ) {
+		$image = (int) $product['image'];
+
+		if ( ! $image ) {
+			$file  = get_theme_file_path( 'assets/img/' . $product['file'] );
+			$size  = is_readable( $file ) ? getimagesize( $file ) : false;
+			$image = $size ? array(
+				'url'    => get_theme_file_uri( 'assets/img/' . $product['file'] ),
+				'width'  => (int) $size[0],
+				'height' => (int) $size[1],
+				'alt'    => $product['title'],
+			) : 0;
+		}
+
+		$pages[] = array(
+			'url'         => $product['url'],
+			'name'        => $product['title'],
+			'description' => '' !== trim( $product['short'] ) ? $product['short'] : $product['body'],
+			'image'       => $image,
+			'type'        => 'Product',
+			'properties'  => array_map(
+				static fn( array $pair ): array => array( 'name' => $pair[0], 'value' => $pair[1] ),
+				ik_specs( $product['specs'] )
+			),
+		);
+	}
+
+	return $pages;
+}
+
+/**
  * "Ad: deger" satirlarini ciftlere boler.
  */
 function ik_specs( string $text ): array {
@@ -675,3 +712,12 @@ function ik_message_state(): array {
 		'success' => ! empty( $state['success'] ),
 	);
 }
+
+/**
+ * SEO ve GEO: gorseller tema icinde oldugundan, gorseli olmayan sayfalar
+ * paylasilinca ve arama sonucunda hero fotografi gorunur.
+ */
+add_filter(
+	'nwcs_seo_default_image',
+	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/hero-orman.jpg', 'Orman yolunun kenarında istiflenmiş tomruklar' ) : 0
+);

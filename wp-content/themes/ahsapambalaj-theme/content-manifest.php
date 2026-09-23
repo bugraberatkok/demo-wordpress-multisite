@@ -11,6 +11,20 @@
 return array(
 	'site_key'   => 'ahsapambalaj',
 	'site_label' => 'Ahşap Ambalaj Sanayi · ahsapambalajsanayi.com',
+	// SEO ve GEO firma bilgisi (Network Content Studio). Degerler bu sitenin
+	// kendi sayfalarinda yazanlardir; panelin SEO ve GEO sekmesinden duzeltilir.
+	'seo_site_defaults' => array(
+		'name'        => 'Ahşap Ambalaj Sanayi',
+		'description' => 'İstanbul Başakşehir’de sanayi ve ihracat yükleri için ölçüye göre ahşap sandık, kafes ve palet üretimi. Makine, kalıp ve proje sevkiyatına uygun ahşap ambalaj.',
+		'phone'       => '+90 212 648 10 90',
+		'email'       => 'info@kocist.com.tr',
+		'street'      => 'Şahintepe Mh. Eski İstanbul Cd. No. 176/A-B-C-D',
+		'district'    => 'Başakşehir',
+		'city'        => 'İstanbul',
+		'country'     => 'TR',
+		'parent_name' => 'Koçist Orman Ürünleri',
+		'parent_url'  => 'https://www.kocist.com.tr',
+	),
 	'pages'      => array(
 
 		/* ---------------------------------------------------------- *

@@ -9,7 +9,13 @@
  *   - yapilandirilmis veri (JSON-LD): firma, web sitesi, sayfa, konum yolu,
  *     urun ve blog yazisi
  *   - /llms.txt: yapay zeka motorlari icin sitenin duz metin ozeti
- *   - arsiv sayfalarinda noindex, site haritasindan kullanici listesi cikarilir
+ *   - her sayfada tek canonical adres
+ *   - arsiv sayfalarinda noindex; site haritasindan kullanici listesi ve
+ *     kategori/etiket arsivleri cikarilir
+ *
+ * Manifestte olmayan sayfalar (ornegin temanin tek sablonla cizdigi urun alt
+ * sayfalari) icin tema 'nwcs_seo_extra_pages' suzgeciyle bilgi verir; bkz.
+ * nwcs_seo_extra_pages().
  *
  * Her deger once panelde girilen ozel degerden, yoksa sayfanin kendi
  * iceriginden gelir. Site sahibi hicbir sey girmese de her sayfa baslik,
@@ -135,8 +141,10 @@ function nwcs_seo_page_auto( string $page_key, ?array $manifest = null ): array 
 	$source     = (array) ( $page['seo_source'] ?? array() );
 	$components = array_diff_key( (array) ( $page['components'] ?? array() ), array( NWCS_SEO_COMPONENT => true ) );
 
-	// Belirtilen alan adlarindan, bilesen sirasiyla ilk dolu metin.
-	$find_text = static function ( array $names ) use ( $components, $page_key ): string {
+	// Belirtilen alan adlarindan, bilesen sirasiyla dolu metinler.
+	$texts = static function ( array $names ) use ( $components, $page_key ): array {
+		$found = array();
+
 		foreach ( $names as $name ) {
 			foreach ( $components as $component_key => $component ) {
 				$type = $component['fields'][ $name ]['type'] ?? '';
@@ -144,15 +152,17 @@ function nwcs_seo_page_auto( string $page_key, ?array $manifest = null ): array 
 				if ( 'text' === $type || 'textarea' === $type ) {
 					$value = nwcs_seo_clean( nwcs_field( $page_key, $component_key, $name ) );
 
-					if ( '' !== $value ) {
-						return $value;
+					if ( '' !== $value && ! in_array( $value, $found, true ) ) {
+						$found[] = $value;
 					}
 				}
 			}
 		}
 
-		return '';
+		return $found;
 	};
+
+	$find_text = static fn( array $names ): string => $texts( $names )[0] ?? '';
 
 	$find_image = static function () use ( $components, $page_key ): int {
 		foreach ( $components as $component_key => $component ) {
@@ -178,9 +188,13 @@ function nwcs_seo_page_auto( string $page_key, ?array $manifest = null ): array 
 		? nwcs_seo_clean( nwcs_seo_path_value( $page_key, $source['title'] ) )
 		: $find_text( array( 'title', 'name' ) );
 
-	$description = isset( $source['description'] )
-		? nwcs_seo_clean( nwcs_seo_path_value( $page_key, $source['description'] ) )
-		: $find_text( array( 'lead', 'short', 'intro', 'text', 'tagline', 'note' ) );
+	$candidates = $texts( array( 'lead', 'short', 'intro', 'text', 'tagline', 'note', 'body', 'p1' ) );
+
+	if ( isset( $source['description'] ) ) {
+		array_unshift( $candidates, nwcs_seo_clean( nwcs_seo_path_value( $page_key, $source['description'] ) ) );
+	}
+
+	$description = nwcs_seo_join_description( $candidates );
 
 	$image = isset( $source['image'] )
 		? nwcs_seo_first_image( nwcs_seo_path_value( $page_key, $source['image'] ) )
@@ -195,6 +209,43 @@ function nwcs_seo_page_auto( string $page_key, ?array $manifest = null ): array 
 		'description' => nwcs_seo_clean( $description, 160 ),
 		'image'       => $image,
 	);
+}
+
+/**
+ * Aciklama: ilk metin; arama sonucunu doldurmayacak kadar kisaysa (100
+ * karakterden az) sayfanin sonraki metinleri eklenir. Sonuc 160 karakterde
+ * kelime sinirindan kesilir.
+ */
+function nwcs_seo_join_description( array $candidates ): string {
+	$description = '';
+
+	foreach ( array_values( array_filter( array_map( 'nwcs_seo_clean', $candidates ) ) ) as $text ) {
+		if ( '' === $description ) {
+			$description = $text;
+		} elseif ( mb_strlen( $description ) < 100 && false === mb_strpos( $description, $text ) ) {
+			$description = rtrim( $description, ' .' ) . '. ' . $text;
+		}
+
+		if ( mb_strlen( $description ) >= 100 ) {
+			break;
+		}
+	}
+
+	return nwcs_seo_clean( $description, 160 );
+}
+
+/**
+ * Baslik: "sayfa – site"; 60 karakteri asarsa site adi eklenmez (arama
+ * sonucunda zaten kesilir, sayfa adi one ciksin).
+ */
+function nwcs_seo_title_with_site( string $name, string $site, bool $site_first = false ): string {
+	if ( '' === $name || $name === $site ) {
+		return $site;
+	}
+
+	$title = $site_first ? $site . ' – ' . $name : $name . ' – ' . $site;
+
+	return mb_strlen( $title ) <= 60 ? $title : $name;
 }
 
 /**
@@ -213,12 +264,16 @@ function nwcs_seo_page_resolved( string $page_key, ?array $manifest = null ): ar
 	);
 
 	// Ana sayfada marka once gelir; ic sayfalarda sayfa adi.
-	$auto_title = 'home' === $page_key
-		? $site . ' – ' . $auto['name']
-		: $auto['name'] . ' – ' . $site;
+	$auto_title = nwcs_seo_title_with_site( $auto['name'], $site, 'home' === $page_key );
 
-	if ( $auto['name'] === $site ) {
-		$auto_title = $site;
+	// Ana sayfanin aciklamasi firmayi anlatmali: sayfadan cikan metin kisaysa
+	// firma tanimi kullanilir.
+	if ( 'home' === $page_key && mb_strlen( $auto['description'] ) < 100 ) {
+		$org_description = nwcs_seo_clean( nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'description' ), 160 );
+
+		if ( mb_strlen( $org_description ) > mb_strlen( $auto['description'] ) ) {
+			$auto['description'] = $org_description;
+		}
 	}
 
 	return array(
@@ -258,8 +313,78 @@ function nwcs_seo_page_for_path( string $path ): string {
 }
 
 /**
- * Bu istek icin SEO bilgisi. Manifest sayfasi ya da blog yazisi degilse bos;
- * o zaman WordPress'in varsayilanlari gecerli kalir.
+ * Manifestte olmayan ama temanin cizdigi sayfalar. Tema suzgecle liste verir:
+ *
+ *   add_filter( 'nwcs_seo_extra_pages', function ( array $pages ): array {
+ *       $pages[] = array(
+ *           'url'         => 'https://…/urunlerimiz/kalas/',
+ *           'name'        => 'Kalas',
+ *           'description' => '…',
+ *           'image'       => 12,            // ek kimligi ya da array( url, width, height, alt )
+ *           'type'        => 'Product',     // istege bagli
+ *           'properties'  => array( array( 'name' => 'Ağaç', 'value' => 'Çam' ) ),
+ *       );
+ *       return $pages;
+ *   } );
+ *
+ * Bu sayfalar da baslik, aciklama, JSON-LD (urunse Product) ve llms.txt alir.
+ */
+function nwcs_seo_extra_pages(): array {
+	static $pages = null;
+
+	if ( null === $pages ) {
+		$pages = array_values(
+			array_filter(
+				(array) apply_filters( 'nwcs_seo_extra_pages', array() ),
+				static fn( $page ): bool => is_array( $page ) && ! empty( $page['url'] ) && ! empty( $page['name'] )
+			)
+		);
+	}
+
+	return $pages;
+}
+
+/**
+ * Gorsel: ek kimligi ya da temanin verdigi hazir bilgi (url, width, height, alt).
+ */
+function nwcs_seo_image_any( $image ): array {
+	if ( is_array( $image ) ) {
+		return empty( $image['url'] ) ? array() : $image + array( 'id' => 0, 'width' => 0, 'height' => 0, 'alt' => '' );
+	}
+
+	return nwcs_seo_image( (int) $image );
+}
+
+/**
+ * Tema klasorundeki bir gorsel dosyasindan paylasim bilgisi. Gorselleri medya
+ * kitapliginda degil tema icinde tutan temalar, varsayilan gorsel ve logo
+ * suzgeclerinde kullanir:
+ *
+ *   add_filter( 'nwcs_seo_default_image', fn() => nwcs_seo_theme_file_image( 'assets/img/hero.jpg', 'Aciklama' ) );
+ *   add_filter( 'nwcs_seo_default_logo', fn() => nwcs_seo_theme_file_image( 'assets/img/logo.png', 'Firma' ) );
+ */
+function nwcs_seo_theme_file_image( string $relative, string $alt = '' ): array {
+	$file = get_theme_file_path( $relative );
+	$size = is_readable( $file ) ? getimagesize( $file ) : false;
+
+	if ( ! $size ) {
+		return array();
+	}
+
+	return array(
+		'id'     => 0,
+		'url'    => get_theme_file_uri( $relative ),
+		'width'  => (int) $size[0],
+		'height' => (int) $size[1],
+		'alt'    => $alt,
+	);
+}
+
+/**
+ * Bu istek icin SEO bilgisi: manifest sayfasi, temanin bildirdigi ek sayfa,
+ * blog yazisi ya da WordPress'in kendi sayfalari (blog listesi, arsiv, diger
+ * sayfalar). Manifestsiz sitede ya da 404'te bos; o zaman WordPress'in
+ * varsayilanlari gecerli kalir.
  */
 function nwcs_seo_context(): array {
 	static $context = null;
@@ -275,6 +400,13 @@ function nwcs_seo_context(): array {
 	}
 
 	$site = nwcs_seo_site_name();
+	$base = array(
+		'kind'       => 'page',
+		'page_key'   => '',
+		'post'       => null,
+		'schema'     => '',
+		'properties' => array(),
+	);
 
 	if ( is_singular( 'post' ) ) {
 		$post    = get_queried_object();
@@ -283,45 +415,124 @@ function nwcs_seo_context(): array {
 
 		$context = array(
 			'kind'        => 'post',
-			'page_key'    => '',
 			'post'        => $post,
 			'name'        => $name,
-			'title'       => $name . ' – ' . $site,
+			'title'       => nwcs_seo_title_with_site( $name, $site ),
 			'description' => nwcs_seo_clean( $excerpt, 160 ),
 			'image'       => (int) get_post_thumbnail_id( $post ),
 			'url'         => (string) get_permalink( $post ),
-		);
+		) + $base;
 	} else {
-		$page_key = nwcs_seo_page_for_path( nwcs_seo_request_path() );
+		$path     = nwcs_seo_request_path();
+		$page_key = nwcs_seo_page_for_path( $path );
 
-		if ( '' === $page_key ) {
-			return $context;
+		if ( '' !== $page_key ) {
+			$resolved = nwcs_seo_page_resolved( $page_key );
+			$page     = nwcs_manifest()['pages'][ $page_key ];
+
+			$context = array(
+				'page_key'    => $page_key,
+				'schema'      => (string) ( $page['seo_source']['type'] ?? '' ),
+				'name'        => $resolved['name'],
+				'title'       => $resolved['title'],
+				'description' => $resolved['description'],
+				'image'       => $resolved['image'],
+				'url'         => home_url( $page['path'] ),
+			) + $base;
+		} else {
+			$context = nwcs_seo_context_extra( $path, $site, $base ) ?: nwcs_seo_context_wordpress( $site, $base );
 		}
-
-		$resolved = nwcs_seo_page_resolved( $page_key );
-		$page     = nwcs_manifest()['pages'][ $page_key ];
-
-		$context = array(
-			'kind'        => 'page',
-			'page_key'    => $page_key,
-			'post'        => null,
-			'name'        => $resolved['name'],
-			'title'       => $resolved['title'],
-			'description' => $resolved['description'],
-			'image'       => $resolved['image'],
-			'url'         => home_url( $page['path'] ),
-		);
 	}
 
-	// Gorsel yoksa: site geneli paylasim gorseli, o da yoksa logo.
+	if ( ! $context ) {
+		return $context;
+	}
+
+	// Aciklama yoksa firma tanimi; sayfa bos gorunmesin.
+	if ( '' === $context['description'] ) {
+		$context['description'] = nwcs_seo_clean( nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'description' ), 160 );
+	}
+
+	// Gorsel yoksa: site geneli paylasim gorseli, logo, ana sayfanin ilk
+	// gorseli, en son temanin bildirdigi gorsel (nwcs_seo_default_image).
+	// Paylasilan her sayfa bir gorselle gorunsun.
 	if ( ! $context['image'] ) {
 		$context['image'] = (int) nwcs_field( NWCS_SEO_SITE_PAGE, 'defaults', 'share_image', 0 )
-			?: nwcs_seo_logo_id();
+			?: nwcs_seo_logo_id()
+			?: ( isset( nwcs_manifest()['pages']['home'] ) ? nwcs_seo_page_auto( 'home' )['image'] : 0 )
+			?: apply_filters( 'nwcs_seo_default_image', 0 );
 	}
 
-	$context['image'] = nwcs_seo_image( (int) $context['image'] );
+	$context['image'] = nwcs_seo_image_any( $context['image'] );
 
 	return $context;
+}
+
+/**
+ * Temanin bildirdigi ek sayfa (bkz. nwcs_seo_extra_pages).
+ */
+function nwcs_seo_context_extra( string $path, string $site, array $base ): array {
+	foreach ( nwcs_seo_extra_pages() as $page ) {
+		if ( untrailingslashit( (string) wp_parse_url( $page['url'], PHP_URL_PATH ) ) !== $path ) {
+			continue;
+		}
+
+		$name = nwcs_seo_clean( $page['name'] );
+
+		return array(
+			'schema'      => (string) ( $page['type'] ?? '' ),
+			'properties'  => (array) ( $page['properties'] ?? array() ),
+			'name'        => $name,
+			'title'       => nwcs_seo_title_with_site( $name, $site ),
+			'description' => nwcs_seo_clean( (string) ( $page['description'] ?? '' ), 160 ),
+			'image'       => $page['image'] ?? 0,
+			'url'         => (string) $page['url'],
+		) + $base;
+	}
+
+	return array();
+}
+
+/**
+ * WordPress'in kendi sayfalari: blog listesi, kategori/etiket arsivi ve
+ * manifestte olmayan duz sayfalar.
+ */
+function nwcs_seo_context_wordpress( string $site, array $base ): array {
+	$name        = '';
+	$description = '';
+	$url         = '';
+	$image       = 0;
+
+	if ( is_home() && ! is_front_page() && get_option( 'page_for_posts' ) ) {
+		$page        = get_post( (int) get_option( 'page_for_posts' ) );
+		$name        = nwcs_seo_clean( get_the_title( $page ) );
+		$description = $page->post_excerpt ?: $page->post_content;
+		$url         = (string) get_permalink( $page );
+		$image       = (int) get_post_thumbnail_id( $page );
+	} elseif ( is_category() || is_tag() || is_tax() ) {
+		$term        = get_queried_object();
+		$name        = nwcs_seo_clean( single_term_title( '', false ) );
+		$description = term_description( $term );
+		$url         = (string) get_term_link( $term );
+	} elseif ( is_singular() ) {
+		$post        = get_queried_object();
+		$name        = nwcs_seo_clean( get_the_title( $post ) );
+		$description = $post->post_excerpt ?: $post->post_content;
+		$url         = (string) get_permalink( $post );
+		$image       = (int) get_post_thumbnail_id( $post );
+	}
+
+	if ( '' === $name || '' === $url ) {
+		return array();
+	}
+
+	return array(
+		'name'        => $name,
+		'title'       => nwcs_seo_title_with_site( $name, $site ),
+		'description' => nwcs_seo_clean( $description, 160 ),
+		'image'       => $image,
+		'url'         => $url,
+	) + $base;
 }
 
 /**
@@ -346,6 +557,18 @@ function nwcs_seo_document_title( $title ) {
 	$context = nwcs_seo_context();
 
 	return $context['title'] ?? $title;
+}
+
+/**
+ * WordPress canonical'i yalnizca tekil sayfalarda yazar; ana sayfa (yazi
+ * listesi), blog listesi ve arsivler canonical'siz kalir. Baglam varsa
+ * eklenti her sayfada kendisi yazar; ikisi birden cikmasin.
+ */
+add_action( 'wp', 'nwcs_seo_take_canonical' );
+function nwcs_seo_take_canonical(): void {
+	if ( nwcs_seo_context() ) {
+		remove_action( 'wp_head', 'rel_canonical' );
+	}
 }
 
 add_action( 'wp_head', 'nwcs_seo_head', 1 );
@@ -394,6 +617,10 @@ function nwcs_seo_head(): void {
 
 	echo "\n<!-- Network Content Studio: SEO ve GEO -->\n";
 
+	// Tek canonical adres (WordPress'inki kaldirildi, bkz. nwcs_seo_take_canonical).
+	$canonical = is_paged() ? get_pagenum_link( max( 1, (int) get_query_var( 'paged' ) ) ) : $context['url'];
+	printf( '<link rel="canonical" href="%s" />' . "\n", esc_url( $canonical ) );
+
 	foreach ( $meta as $tag ) {
 		printf( '<meta %s="%s" content="%s" />' . "\n", esc_attr( $tag[0] ), esc_attr( $tag[1] ), esc_attr( $tag[2] ) );
 	}
@@ -412,14 +639,15 @@ function nwcs_seo_head(): void {
  * Firma bilgisi: panelde girilen degerler; bos olanlar yazilmaz.
  */
 function nwcs_seo_org_data(): array {
-	$keys = array( 'name', 'legal_name', 'description', 'phone', 'email', 'street', 'district', 'city', 'postal_code', 'country', 'latitude', 'longitude' );
+	$keys = array( 'name', 'legal_name', 'description', 'phone', 'email', 'street', 'district', 'city', 'postal_code', 'country', 'latitude', 'longitude', 'parent_name', 'parent_url' );
 	$org  = array();
 
 	foreach ( $keys as $key ) {
 		$org[ $key ] = nwcs_seo_clean( nwcs_field( NWCS_SEO_SITE_PAGE, 'org', $key ) );
 	}
 
-	$org['name'] = nwcs_seo_site_name();
+	$org['name']       = nwcs_seo_site_name();
+	$org['parent_url'] = esc_url_raw( $org['parent_url'] );
 
 	$org['same_as'] = array_values(
 		array_filter(
@@ -460,7 +688,7 @@ function nwcs_seo_graph( array $context ): array {
 		)
 	);
 
-	$logo = nwcs_seo_image( nwcs_seo_logo_id() );
+	$logo = nwcs_seo_image( nwcs_seo_logo_id() ) ?: nwcs_seo_image_any( apply_filters( 'nwcs_seo_default_logo', 0 ) );
 
 	if ( $logo ) {
 		$business['logo'] = array(
@@ -480,6 +708,18 @@ function nwcs_seo_graph( array $context ): array {
 				'addressRegion'   => $org['city'],
 				'postalCode'      => $org['postal_code'],
 				'addressCountry'  => $org['country'],
+			)
+		);
+	}
+
+	// Grup iliskisi: kardes siteler sameAs degil (ayni kurum degiller), ortak
+	// ust kurumla baglanir. Yapay zeka motorlari siteleri tek grup olarak tanir.
+	if ( '' !== $org['parent_name'] ) {
+		$business['parentOrganization'] = array_filter(
+			array(
+				'@type' => 'Organization',
+				'name'  => $org['parent_name'],
+				'url'   => $org['parent_url'],
 			)
 		);
 	}
@@ -546,8 +786,26 @@ function nwcs_seo_graph( array $context ): array {
 
 	if ( 'post' === $context['kind'] ) {
 		$graph[] = nwcs_seo_article( $context, $org_id, $page_id, $language );
-	} elseif ( 'Product' === ( nwcs_manifest()['pages'][ $context['page_key'] ]['seo_source']['type'] ?? '' ) ) {
+	} elseif ( 'Product' === $context['schema'] ) {
 		$graph[] = nwcs_seo_product( $context, $org_id, $page_id );
+	} elseif ( 'FAQPage' === $context['schema'] ) {
+		$faq = nwcs_seo_faq( $context['page_key'] );
+
+		if ( $faq ) {
+			// Sayfanin kendisi soru-cevap sayfasi: WebPage yerine FAQPage.
+			$graph[ array_key_last( $graph ) ]['@type'] = array( 'WebPage', 'FAQPage' );
+			$graph[ array_key_last( $graph ) ]['mainEntity'] = array_map(
+				static fn( array $item ): array => array(
+					'@type'          => 'Question',
+					'name'           => $item['question'],
+					'acceptedAnswer' => array(
+						'@type' => 'Answer',
+						'text'  => $item['answer'],
+					),
+				),
+				$faq
+			);
+		}
 	}
 
 	return array(
@@ -620,23 +878,14 @@ function nwcs_seo_breadcrumbs( array $context ): array {
  * Fiyat, puan ve yorum uydurulmaz; fiyat yoksa 'offers' hic yazilmaz.
  */
 function nwcs_seo_product( array $context, string $org_id, string $page_id ): array {
-	$source     = nwcs_manifest()['pages'][ $context['page_key'] ]['seo_source'] ?? array();
-	$properties = array();
-
-	if ( ! empty( $source['properties'] ) ) {
-		foreach ( (array) nwcs_seo_path_value( $context['page_key'], $source['properties'] ) as $row ) {
-			$name  = nwcs_seo_clean( $row['label'] ?? '' );
-			$value = nwcs_seo_clean( $row['value'] ?? '' );
-
-			if ( '' !== $name && '' !== $value ) {
-				$properties[] = array(
-					'@type' => 'PropertyValue',
-					'name'  => $name,
-					'value' => $value,
-				);
-			}
-		}
-	}
+	$properties = array_map(
+		static fn( array $pair ): array => array(
+			'@type' => 'PropertyValue',
+			'name'  => $pair['name'],
+			'value' => $pair['value'],
+		),
+		nwcs_seo_product_specs( $context['page_key'], $context['properties'] )
+	);
 
 	return array_filter(
 		array(
@@ -652,6 +901,66 @@ function nwcs_seo_product( array $context, string $org_id, string $page_id ): ar
 			'additionalProperty' => $properties,
 		)
 	);
+}
+
+/**
+ * Urunun sartname satirlari: manifest sayfasinda seo_source.properties
+ * (label/value satirlari), temanin ek sayfasinda dogrudan verilen ciftler.
+ *
+ * @return array<int, array{name:string, value:string}>
+ */
+function nwcs_seo_product_specs( string $page_key, array $given = array() ): array {
+	$rows = $given;
+
+	if ( '' !== $page_key ) {
+		$source = nwcs_manifest()['pages'][ $page_key ]['seo_source'] ?? array();
+		$rows   = empty( $source['properties'] ) ? array() : (array) nwcs_seo_path_value( $page_key, $source['properties'] );
+	}
+
+	$specs = array();
+
+	foreach ( $rows as $row ) {
+		$name  = nwcs_seo_clean( $row['name'] ?? $row['label'] ?? '' );
+		$value = nwcs_seo_clean( $row['value'] ?? '' );
+
+		if ( '' !== $name && '' !== $value ) {
+			$specs[] = array(
+				'name'  => $name,
+				'value' => $value,
+			);
+		}
+	}
+
+	return $specs;
+}
+
+/**
+ * Soru-cevap sayfasinin satirlari: seo_source.questions (question/answer
+ * alanli tekrarli satirlar).
+ *
+ * @return array<int, array{question:string, answer:string}>
+ */
+function nwcs_seo_faq( string $page_key ): array {
+	$source = nwcs_manifest()['pages'][ $page_key ]['seo_source'] ?? array();
+	$items  = array();
+
+	if ( '' === $page_key || empty( $source['questions'] ) ) {
+		return $items;
+	}
+
+	foreach ( (array) nwcs_seo_path_value( $page_key, $source['questions'] ) as $row ) {
+		$question = nwcs_seo_clean( $row['question'] ?? '' );
+		$answer   = nwcs_seo_clean( $row['answer'] ?? '' );
+
+		if ( '' !== $question && '' !== $answer ) {
+			$items[] = array(
+				'question' => $question,
+				'answer'   => $answer,
+			);
+		}
+	}
+
+	return $items;
 }
 
 /**
@@ -682,7 +991,9 @@ function nwcs_seo_article( array $context, string $org_id, string $page_id, stri
  * ====================================================================== */
 
 /**
- * Icerigi olmayan arsivler dizine girmesin: yazar, tarih, arama, ek sayfasi.
+ * Icerigi olmayan arsivler dizine girmesin: yazar, tarih, arama, ek sayfasi,
+ * kategori ve etiket (bu sitelerde birkac yazilik ince listeler; yazilarin
+ * kendisi ve blog sayfasi dizinde).
  */
 add_filter( 'wp_robots', 'nwcs_seo_robots' );
 function nwcs_seo_robots( array $robots ): array {
@@ -690,7 +1001,7 @@ function nwcs_seo_robots( array $robots ): array {
 		return $robots;
 	}
 
-	if ( is_author() || is_date() || is_search() || is_attachment() ) {
+	if ( is_author() || is_date() || is_search() || is_attachment() || is_category() || is_tag() || is_tax() ) {
 		$robots['noindex'] = true;
 		$robots['follow']  = true;
 	}
@@ -700,11 +1011,12 @@ function nwcs_seo_robots( array $robots ): array {
 
 /**
  * Site haritasindan kullanici listesi cikarilir: yonetici kullanici adini
- * herkese acik bir dosyada listelemek gereksiz bir guvenlik acigi.
+ * herkese acik bir dosyada listelemek gereksiz bir guvenlik acigi. Kategori
+ * ve etiket arsivleri de cikar: noindex olan adres site haritasinda olmaz.
  */
 add_filter( 'wp_sitemaps_add_provider', 'nwcs_seo_sitemap_providers', 10, 2 );
 function nwcs_seo_sitemap_providers( $provider, string $name ) {
-	return 'users' === $name ? false : $provider;
+	return in_array( $name, array( 'users', 'taxonomies' ), true ) ? false : $provider;
 }
 
 /* ====================================================================== *
@@ -757,6 +1069,7 @@ function nwcs_seo_llms_text(): string {
 			'' !== $org['street'] ? 'Adres: ' . implode( ', ', array_filter( array( $org['street'], $org['district'], $org['city'], $org['postal_code'] ) ) ) : '',
 			'' !== $org['phone'] ? 'Telefon: ' . $org['phone'] : '',
 			'' !== $org['email'] ? 'E-posta: ' . $org['email'] : '',
+			'' !== $org['parent_name'] ? 'Bağlı olduğu grup: ' . $org['parent_name'] . ( '' !== $org['parent_url'] ? ' (' . $org['parent_url'] . ')' : '' ) : '',
 		)
 	);
 
@@ -780,26 +1093,41 @@ function nwcs_seo_llms_text(): string {
 		}
 
 		// Urunlerde sartname duz metin olarak: olculer gorselde degil yazida.
-		$source = (array) ( $page['seo_source'] ?? array() );
-
-		if ( 'Product' === ( $source['type'] ?? '' ) && ! empty( $source['properties'] ) ) {
-			$specs = array();
-
-			foreach ( (array) nwcs_seo_path_value( $key, $source['properties'] ) as $row ) {
-				$name  = nwcs_seo_clean( $row['label'] ?? '' );
-				$value = nwcs_seo_clean( $row['value'] ?? '' );
-
-				if ( '' !== $name && '' !== $value ) {
-					$specs[] = $name . ': ' . $value;
-				}
-			}
-
-			if ( $specs ) {
-				$line .= ' (' . implode( '; ', $specs ) . ')';
-			}
+		if ( 'Product' === ( $page['seo_source']['type'] ?? '' ) ) {
+			$line .= nwcs_seo_llms_specs( nwcs_seo_product_specs( $key ) );
 		}
 
 		$lines[] = $line;
+	}
+
+	// Temanin bildirdigi ek sayfalar (tek sablonla cizilen urun sayfalari gibi).
+	foreach ( nwcs_seo_extra_pages() as $page ) {
+		$line = sprintf( '- [%s](%s)', nwcs_seo_clean( $page['name'] ), $page['url'] );
+
+		if ( '' !== nwcs_seo_clean( $page['description'] ?? '' ) ) {
+			$line .= ': ' . nwcs_seo_clean( $page['description'], 160 );
+		}
+
+		$lines[] = $line . nwcs_seo_llms_specs( nwcs_seo_product_specs( '', (array) ( $page['properties'] ?? array() ) ) );
+	}
+
+	// Sik sorulan sorular: yapay zeka yanitlarinin en dogrudan kaynagi.
+	foreach ( nwcs_seo_pages() as $key => $page ) {
+		if ( 'FAQPage' !== ( $page['seo_source']['type'] ?? '' ) ) {
+			continue;
+		}
+
+		$faq = nwcs_seo_faq( $key );
+
+		if ( $faq ) {
+			$lines[] = '';
+			$lines[] = '## Sık sorulan sorular';
+			$lines[] = '';
+
+			foreach ( $faq as $item ) {
+				$lines[] = '- ' . $item['question'] . ' ' . $item['answer'];
+			}
+		}
 	}
 
 	$posts = get_posts(
@@ -831,4 +1159,15 @@ function nwcs_seo_llms_text(): string {
 	}
 
 	return implode( "\n", $lines ) . "\n";
+}
+
+/**
+ * llms.txt satirina eklenen sartname: " (Ad: deger; Ad: deger)".
+ */
+function nwcs_seo_llms_specs( array $specs ): string {
+	if ( ! $specs ) {
+		return '';
+	}
+
+	return ' (' . implode( '; ', array_map( static fn( array $pair ): string => $pair['name'] . ': ' . $pair['value'], $specs ) ) . ')';
 }

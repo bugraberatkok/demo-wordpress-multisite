@@ -22,6 +22,22 @@ $address        = "Şahintepe, Eski İstanbul Cd. No:176\n34494 Başakşehir / �
 return array(
 	'site_key'   => 'istanbul-keresteci',
 	'site_label' => 'İstanbul Keresteci',
+	// SEO ve GEO firma bilgisi (Network Content Studio). Degerler bu sitenin
+	// kendi sayfalarinda yazanlardir; panelin SEO ve GEO sekmesinden duzeltilir.
+	'seo_site_defaults' => array(
+		'name'        => 'İstanbul Keresteci',
+		'legal_name'  => 'Koçist Grup Dış Ticaret ve Sanayi Ltd. Şti.',
+		'description' => 'İstanbul Başakşehir’de çam, köknar, kayın ve meşe kereste; tomruk, OSB, kontrplak ve plywood plaka. İstenen ölçüde kesip adrese teslim.',
+		'phone'       => '+90 212 648 10 90',
+		'email'       => 'info@istanbulkeresteci.com',
+		'street'      => 'Şahintepe, Eski İstanbul Cd. No:176',
+		'district'    => 'Başakşehir',
+		'city'        => 'İstanbul',
+		'postal_code' => '34494',
+		'country'     => 'TR',
+		'parent_name' => 'Koçist Orman Ürünleri',
+		'parent_url'  => 'https://www.kocist.com.tr',
+	),
 	'pages'      => array(
 
 		'global' => array(

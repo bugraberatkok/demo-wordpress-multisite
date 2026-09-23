@@ -50,7 +50,7 @@ return $build(
 		),
 
 		'products_text'  => 'Üretim ve ambalaj işleri için kavak kereste, çıta, takoz ve OSB levha.',
-		'products_lead'  => 'Kavak kereste ve onu tamamlayan çıta, ahşap takoz ve OSB levha.',
+		'products_lead'  => 'Kavak kereste ve onu tamamlayan çıta, ahşap takoz ve OSB levha. Ambalaj, sandık, palet ve mobilya üretimine uygun; toptan alım.',
 
 		'uses'           => array(
 			'title' => 'Kavak nerede kullanılır?',
@@ -100,10 +100,10 @@ return $build(
 			'city'        => 'İstanbul',
 			'postal_code' => '34494',
 			'country'     => 'TR',
-			'same_as'     => array(
-				array( 'url' => 'https://www.kocist.com.tr' ),
-				array( 'url' => 'https://ithalkeresteci.com' ),
-			),
+			// Kardes siteler sameAs degil; grup iliskisi parentOrganization ile.
+			'same_as'     => array(),
+			'parent_name' => 'Koçist Orman Ürünleri',
+			'parent_url'  => 'https://www.kocist.com.tr',
 		),
 
 		'products'       => array(

@@ -1114,3 +1114,39 @@ bozuk gösterdi; canlıda güncelleme sonrası geri dönen ziyaretçide aynısı
 ahsapkasa, istanbulpaletci ve kereste-base artık `tema sürümü + dosya değişim zamanı`
 kullanıyor. Emirhan'ın dört teması da aynı sorunu taşıyor; kendi dalında düzeltecek.
 
+## SEO ve GEO — tamamlama (8 site)
+
+Canlıya çıkmadan önce 8 sitenin site haritasındaki her adres ölçülerek denetlendi
+(başlık, açıklama, canonical, paylaşım görseli, JSON-LD, h1, alt metin, dil, llms.txt).
+İlk denetimde bulunanlar ve çözümleri:
+
+- **Emirhan'ın 4 sitesinde firma bilgisi yoktu** (JSON-LD'de yalnızca ad). Temalara
+  `seo_site_defaults` eklendi; değerler her sitenin kendi sayfalarında yazanlar
+  (telefon aynı hattın uluslararası yazımı). Ahşap Ambalaj'da görünür bir resmî unvan
+  olmadığı için unvan boş.
+- **`sameAs` yanlış kullanılıyordu**: kardeş siteler "aynı kurum" olarak işaretliydi.
+  Kaldırıldı; yerine yeni "Bağlı olduğu grup" alanı → `parentOrganization` (Koçist Orman
+  Ürünleri). ahsapkasa Koçist'in kendisi olduğu için onda `sameAs: kocist.com.tr` kaldı.
+- **İstanbul Keresteci'nin 10 ürün sayfası** (`/urunlerimiz/<ürün>/`) manifestte değil,
+  tek şablonla çiziliyor; açıklamasız ve yapılandırılmış verisizdi. Eklentiye
+  `nwcs_seo_extra_pages` süzgeci eklendi; tema ürünlerini bildiriyor → başlık, açıklama,
+  Product verisi ve llms.txt satırı.
+- **Canonical eksikti**: WordPress yalnızca tekil sayfalarda yazıyor. Eklenti artık her
+  sayfada tek canonical yazıyor (WordPress'inki kaldırılıyor).
+- **Kategori arşivleri** (Koçist'te 9 tane, birkaç yazılık ince listeler) açıklamasız
+  ve dizindeydi: `noindex` + site haritasından çıkarıldı.
+- **Paylaşım görseli eksikti** (Emirhan'ın temaları görselleri tema klasöründe tutuyor):
+  `nwcs_seo_default_image` / `nwcs_seo_default_logo` süzgeçleri; her tema kendi hero
+  fotoğrafını bildiriyor, Koçist ayrıca logosunu.
+- **Kısa açıklamalar**: sayfanın ilk metni 100 karakterden kısaysa sonraki metinleri
+  eklenir; ana sayfada kısa kalırsa firma tanımı kullanılır. Başlık 60 karakteri aşarsa
+  site adı eklenmez.
+- **GEO**: kereste sitelerinin SSS sayfası `FAQPage` olarak işaretli; sık sorulanlar
+  llms.txt'de de var (yapay zekâ yanıtlarının en doğrudan kaynağı).
+- ahsapkasa'nın sayfa dili `en-US` idi → `tr`.
+
+Kalan, içerik düzeyinde küçük noktalar (Emirhan'ın metinleri; SEO sekmesinden
+iyileştirilebilir): Koçist'te 4 blog yazısının kendi başlığı 60 karakterden uzun,
+6 sayfanın açıklaması 55–69 karakter. İçerik tutarsızlıkları (tecrübe yılı, ünvan,
+adres, çalışma saati, Euro palet değerleri) firma sahibinin kararını bekliyor.
+

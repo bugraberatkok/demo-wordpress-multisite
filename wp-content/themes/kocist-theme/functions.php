@@ -705,3 +705,16 @@ function kocist_image_tag( array $image, string $class = '', string $placeholder
 		esc_html( $placeholder )
 	);
 }
+
+/**
+ * SEO ve GEO: gorseller tema icinde oldugundan, gorseli olmayan sayfalar
+ * paylasilinca ve arama sonucunda hero fotografi gorunur.
+ */
+add_filter(
+	'nwcs_seo_default_image',
+	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/atolye.jpg', 'Ahşap atölyesinde el aletleri ve talaş' ) : 0
+);
+add_filter(
+	'nwcs_seo_default_logo',
+	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/logo.png', 'Koçist Orman Ürünleri' ) : 0
+);

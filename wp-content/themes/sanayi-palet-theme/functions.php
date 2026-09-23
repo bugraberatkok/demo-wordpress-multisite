@@ -590,3 +590,12 @@ function sanayi_palet_image_tag( array $image, string $class = '', string $place
 		esc_html( $placeholder )
 	);
 }
+
+/**
+ * SEO ve GEO: gorseller tema icinde oldugundan, gorseli olmayan sayfalar
+ * paylasilinca ve arama sonucunda hero fotografi gorunur.
+ */
+add_filter(
+	'nwcs_seo_default_image',
+	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/palet-duvari.jpg', 'Üst üste istiflenmiş, farklı renklerde yüzlerce ahşap palet' ) : 0
+);

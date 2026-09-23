@@ -488,14 +488,17 @@ Kendiliğinden üretilenler:
 
 | Ne | Nerede |
 | --- | --- |
-| Belge başlığı, meta açıklama | her sayfa |
-| Paylaşım önizlemesi (Open Graph, X) | her sayfa |
+| Belge başlığı (60 karakteri aşarsa site adı eklenmez), meta açıklama | her sayfa |
+| Tek `canonical` adres (WordPress'in yazmadığı ana sayfa, blog listesi, arşivler dahil) | her sayfa |
+| Paylaşım önizlemesi (Open Graph, X); görseli olmayan sayfada site görseli | her sayfa |
 | Yapılandırılmış veri (JSON-LD): firma, web sitesi, sayfa, konum yolu | her sayfa |
+| Grup ilişkisi (`parentOrganization`): kardeş siteler aynı grubun parçası | firma bilgisinde grup girilmişse |
 | Ürün verisi, şartname satırları dahil (fiyat/puan uydurulmaz) | `seo_source.type = Product` sayfalar |
+| Soru-cevap verisi (`FAQPage`) | `seo_source.type = FAQPage` sayfalar |
 | Blog yazısı verisi | yazılar |
-| `/llms.txt`: yapay zekâ için sitenin özeti, ürün ölçüleri dahil | her site |
-| Arşivlerde (yazar, tarih, arama) `noindex` | her site |
-| Site haritasından kullanıcı listesinin çıkarılması | her site |
+| `/llms.txt`: yapay zekâ için sitenin özeti, ürün ölçüleri ve sık sorulanlar dahil | her site |
+| Arşivlerde (yazar, tarih, arama, kategori, etiket) `noindex` | her site |
+| Site haritasından kullanıcı listesi ve kategori/etiket arşivlerinin çıkarılması | her site |
 
 Tema tarafında isteğe bağlı iki ipucu (`content-manifest.php`):
 
@@ -509,7 +512,22 @@ Tema tarafında isteğe bağlı iki ipucu (`content-manifest.php`):
 	'type'        => 'Product',       // ürün verisi üret
 	'properties'  => 'specs.rows',    // şartname satırları (label/value)
 ),
+// soru-cevap sayfası:
+'seo_source' => array( 'type' => 'FAQPage', 'questions' => 'items.rows' ), // question/answer satırları
 ```
+
+Manifestte olmayan ama temanın çizdiği sayfalar (tek şablonla çizilen ürün alt
+sayfaları gibi) ve görselleri tema klasöründe tutan temalar için süzgeçler:
+
+```php
+add_filter( 'nwcs_seo_extra_pages', fn( $pages ) => … );   // url, name, description, image, type, properties
+add_filter( 'nwcs_seo_default_image', fn() => nwcs_seo_theme_file_image( 'assets/img/hero.jpg', 'Açıklama' ) );
+add_filter( 'nwcs_seo_default_logo', fn() => nwcs_seo_theme_file_image( 'assets/img/logo.png', 'Firma' ) );
+```
+
+**Kardeş siteler `sameAs` değildir.** `sameAs` "aynı kurum" demektir; firma bilgisindeki
+"Firmanın diğer adresleri" yalnızca o firmanın kendi hesapları (sosyal medya, Google
+İşletme) içindir. Siteler arasındaki bağ "Bağlı olduğu grup" alanıyla kurulur.
 
 `seo` bileşen adı ve `site_seo` sayfa adı eklentiye ayrılmıştır; temalar kullanmaz.
 Kararlar ve kontrol listesi: [DECISIONS.md](DECISIONS.md) → "SEO ve GEO — kalıcı ilke".

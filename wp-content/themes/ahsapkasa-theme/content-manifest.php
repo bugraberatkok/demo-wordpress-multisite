@@ -24,8 +24,9 @@ return array(
 		'district'    => 'Başakşehir',
 		'city'        => 'İstanbul',
 		'country'     => 'TR',
+		// Bu site Koçist'in kendisi: kocist.com.tr ayni kurumun adresi. Kardes
+		// siteler (istanbulpaletci vb.) ayni kurum degil; sameAs'e yazilmaz.
 		'same_as'     => array(
-			array( 'url' => 'https://istanbulpaletci.com' ),
 			array( 'url' => 'https://www.kocist.com.tr' ),
 		),
 	),

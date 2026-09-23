@@ -195,12 +195,14 @@ function nwcs_seo_site_page( array $defaults ): array {
 						'label'   => 'Firmanın diğer adresleri',
 						'type'    => 'repeater',
 						'max'     => 12,
-						'hint'    => 'Kardeş siteler, sosyal medya ve harita kayıtları. Arama motorları bunlardan aynı firma olduğunu anlar.',
+						'hint'    => 'Yalnızca bu firmanın kendi hesapları: sosyal medya, Google İşletme, harita kaydı. Kardeş siteler buraya değil, "Bağlı olduğu grup" alanına.',
 						'fields'  => array(
 							'url' => array( 'label' => 'Adres', 'type' => 'url' ),
 						),
 						'default' => $defaults['same_as'] ?? array(),
 					),
+					'parent_name' => $field( 'parent_name', 'Bağlı olduğu grup', 'text', 'Siteler aynı grubun parçasıysa grubun adı. Örn. Koçist Orman Ürünleri' ),
+					'parent_url'  => $field( 'parent_url', 'Grubun web adresi', 'url', 'Örn. https://www.kocist.com.tr' ),
 				),
 			),
 			'defaults' => array(

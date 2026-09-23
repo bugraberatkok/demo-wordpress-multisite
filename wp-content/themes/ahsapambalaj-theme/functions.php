@@ -451,3 +451,12 @@ function ahsapambalaj_quote_state(): array {
 		'success' => ! empty( $state['success'] ),
 	);
 }
+
+/**
+ * SEO ve GEO: gorseller tema icinde oldugundan, gorseli olmayan sayfalar
+ * paylasilinca ve arama sonucunda hero fotografi gorunur.
+ */
+add_filter(
+	'nwcs_seo_default_image',
+	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/hero-1.jpg', 'Ahşap sandık ve kafes üretimi' ) : 0
+);

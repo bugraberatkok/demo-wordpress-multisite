@@ -283,8 +283,12 @@ return static function ( array $s ): array {
 		'faq' => array(
 			'label'      => 'Sık Sorulan Sorular',
 			'path'       => '/sik-sorulan-sorular/',
+			'seo_source' => array(
+				'type'      => 'FAQPage',
+				'questions' => 'items.rows',
+			),
 			'components' => array(
-				'head'  => $head( 'Sık sorulan sorular', 'Sipariş, sevkiyat, ödeme ve ölçüyle ilgili en çok sorulanlar.' ),
+				'head'  => $head( 'Sık sorulan sorular', 'Sipariş, sevkiyat süresi, ödeme seçenekleri, ölçüye göre kesim ve kereste metreküp hesabıyla ilgili en çok sorulanlar.' ),
 				'items' => array(
 					'label'  => 'Sorular',
 					'fields' => array(

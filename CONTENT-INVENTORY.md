@@ -246,6 +246,8 @@ Sıralanabilir bölümler: `intro`, `family`, `ctaband` (header ve footer sabitt
 | `latitude` | Enlem | tek satır metin |
 | `longitude` | Boylam | tek satır metin |
 | `same_as` | Firmanın diğer adresleri | tekrarlı satırlar → `url` (bağlantı) |
+| `parent_name` | Bağlı olduğu grup | tek satır metin |
+| `parent_url` | Grubun web adresi | bağlantı |
 
 **Varsayılanlar** — `site_seo / defaults`
 
@@ -253,7 +255,7 @@ Sıralanabilir bölümler: `intro`, `family`, `ctaband` (header ve footer sabitt
 | --- | --- | --- |
 | `share_image` | Varsayılan paylaşım görseli | görsel (medya kaydı + alt metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 125._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 127._
 
 
 ## Koçist · istanbulpaletci.com (`istanbulpaletci`)
@@ -721,6 +723,8 @@ Sıralanabilir bölümler: `products`, `process`, `export`, `blog`, `quote` (hea
 | `latitude` | Enlem | tek satır metin |
 | `longitude` | Boylam | tek satır metin |
 | `same_as` | Firmanın diğer adresleri | tekrarlı satırlar → `url` (bağlantı) |
+| `parent_name` | Bağlı olduğu grup | tek satır metin |
+| `parent_url` | Grubun web adresi | bağlantı |
 
 **Varsayılanlar** — `site_seo / defaults`
 
@@ -728,7 +732,7 @@ Sıralanabilir bölümler: `products`, `process`, `export`, `blog`, `quote` (hea
 | --- | --- | --- |
 | `share_image` | Varsayılan paylaşım görseli | görsel (medya kaydı + alt metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 230._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 232._
 
 
 ## Koçist · ithalkeresteci.com (`ithalkeresteci`)
@@ -1101,6 +1105,8 @@ Sıralanabilir bölümler: `products`, `supply`, `cousin`, `faq`, `quote` (heade
 | `latitude` | Enlem | tek satır metin |
 | `longitude` | Boylam | tek satır metin |
 | `same_as` | Firmanın diğer adresleri | tekrarlı satırlar → `url` (bağlantı) |
+| `parent_name` | Bağlı olduğu grup | tek satır metin |
+| `parent_url` | Grubun web adresi | bağlantı |
 
 **Varsayılanlar** — `site_seo / defaults`
 
@@ -1108,7 +1114,7 @@ Sıralanabilir bölümler: `products`, `supply`, `cousin`, `faq`, `quote` (heade
 | --- | --- | --- |
 | `share_image` | Varsayılan paylaşım görseli | görsel (medya kaydı + alt metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 171._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 173._
 
 
 ## Koçist · kavakkeresteci.com (`kavakkeresteci`)
@@ -1480,6 +1486,8 @@ Sıralanabilir bölümler: `products`, `uses`, `cousin`, `faq`, `quote` (header 
 | `latitude` | Enlem | tek satır metin |
 | `longitude` | Boylam | tek satır metin |
 | `same_as` | Firmanın diğer adresleri | tekrarlı satırlar → `url` (bağlantı) |
+| `parent_name` | Bağlı olduğu grup | tek satır metin |
+| `parent_url` | Grubun web adresi | bağlantı |
 
 **Varsayılanlar** — `site_seo / defaults`
 
@@ -1487,5 +1495,6 @@ Sıralanabilir bölümler: `products`, `uses`, `cousin`, `faq`, `quote` (header 
 | --- | --- | --- |
 | `share_image` | Varsayılan paylaşım görseli | görsel (medya kaydı + alt metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 170._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 172._
+
 
