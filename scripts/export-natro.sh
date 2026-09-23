@@ -4,6 +4,10 @@
 #
 #   DOMAIN=panel.kocist.com.tr ADMIN_EMAIL=ad@firma.com sh scripts/export-natro.sh
 #
+# SSL henuz yoksa (yalnizca deneme): SCHEME=http ekleyin. Adresler http://
+# yazilir ve yonetimde HTTPS zorunlulugu konmaz. Sertifika gelince paket
+# SCHEME=https (varsayilan) ile yeniden uretilip kurulur.
+#
 # Proje kokunden, Docker calisirken. Git Bash'te MSYS_NO_PATHCONV=1 betik icinde
 # ayarlanir. Cikti: dist/natro-<tarih>/ (Git'e girmez)
 #
@@ -23,10 +27,16 @@ export MSYS_NO_PATHCONV=1
 
 DOMAIN="${DOMAIN:?DOMAIN gerekli, ornek: DOMAIN=panel.kocist.com.tr}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-}"
+SCHEME="${SCHEME:-https}"
 LOCAL_HOST="${LOCAL_HOST:-localhost:8080}"
 STAMP="$(date +%Y%m%d-%H%M)"
 OUT="dist/natro-$STAMP"
 TMPDB="wp_export"
+
+case "$SCHEME" in
+	http|https) ;;
+	*) echo "HATA: SCHEME http ya da https olmali." >&2; exit 1 ;;
+esac
 
 case "$DOMAIN" in
 	*/*|*:*|"") echo "HATA: DOMAIN yalnizca alan adi olmali (https:// ve / olmadan)." >&2; exit 1 ;;
@@ -62,9 +72,11 @@ dbroot "$TMPDB" < "$OUT/yerel-yedek.sql"
 old() { wpc -e WORDPRESS_DB_NAME="$TMPDB" -e WP_HOST="$LOCAL_HOST" wpcli "$@"; }
 new() { wpc -e WORDPRESS_DB_NAME="$TMPDB" -e WP_HOST="$DOMAIN" wpcli "$@"; }
 
-echo "==> Adresler: $LOCAL_HOST -> $DOMAIN (serilestirilmis veri korunur)"
+echo "==> Adresler: $LOCAL_HOST -> $SCHEME://$DOMAIN (serilestirilmis veri korunur)"
 old search-replace "$LOCAL_HOST" "$DOMAIN" --network --all-tables-with-prefix --skip-columns=guid --report-changed-only | tail -1
-new search-replace "http://$DOMAIN" "https://$DOMAIN" --network --all-tables-with-prefix --skip-columns=guid --report-changed-only | tail -1
+if [ "$SCHEME" = "https" ]; then
+	new search-replace "http://$DOMAIN" "https://$DOMAIN" --network --all-tables-with-prefix --skip-columns=guid --report-changed-only | tail -1
+fi
 
 echo "==> Deneme: butun siteler arama motorlarina kapali"
 for url in $(new site list --field=url | tr -d '\r'); do
@@ -131,16 +143,23 @@ define( 'WP_ENVIRONMENT_TYPE', 'production' );
 define( 'DISALLOW_FILE_EDIT', true );
 define( 'WP_DEBUG', false );
 define( 'WP_DEBUG_DISPLAY', false );
-define( 'FORCE_SSL_ADMIN', true );
 PHP
+if [ "$SCHEME" = "https" ]; then
+	echo "define( 'FORCE_SSL_ADMIN', true );" >> "$OUT/wp-config-ek.php"
+else
+	echo "/* SSL yok (deneme): FORCE_SSL_ADMIN bilerek eklenmedi. Sertifika gelince https paketi kurulur. */" >> "$OUT/wp-config-ek.php"
+fi
 
 sed -n "/^# WordPress Multisite/,/^RewriteRule \. index.php \[L\]/p" scripts/install.sh > "$OUT/htaccess.txt"
 [ -s "$OUT/htaccess.txt" ] || { echo "HATA: .htaccess kurallari install.sh'ten okunamadi." >&2; exit 1; }
 
 cat > "$OUT/KURULUM.md" <<MD
-# Natro deneme kurulumu ($DOMAIN)
+# Natro deneme kurulumu ($SCHEME://$DOMAIN)
 
 Paket: $STAMP. Butun siteler arama motorlarina KAPALI kurulur (deneme).
+$( [ "$SCHEME" = "http" ] && printf '%s' '**SSL yok (http paketi):** giris parolasi sifresiz gider; sertifika gelince https paketini kurun ve parolayi degistirin. 8. adimi (SSL) atlayin.' )
+
+0. cPanel -> PHP Surumu Sec / MultiPHP Yoneticisi: \`$DOMAIN\` icin PHP 8.1 ya da uzeri (8.2/8.3 onerilir).
 
 1. cPanel -> Alan adlari: \`$DOMAIN\` kok klasoru bos bir klasor olsun (ornek \`public_html/panel\`).
 2. cPanel -> MySQL veritabanlari: veritabani + kullanici olusturun, kullaniciya TUM yetkileri verin.
@@ -153,9 +172,9 @@ Paket: $STAMP. Butun siteler arama motorlarina KAPALI kurulur (deneme).
 6. wp-config.php: \`wp-config-ek.php\` icerigini "That's all, stop editing!" satirindan once ekleyin.
 7. .htaccess: \`htaccess.txt\` icerigini klasordeki .htaccess'e yazin (eskisini degistirin).
 8. SSL: cPanel -> SSL/TLS Status -> \`$DOMAIN\` icin AutoSSL calistirin.
-9. Giris: https://$DOMAIN/wp-login.php (kullanici ve parola: YONETICI-PAROLASI.txt).
+9. Giris: $SCHEME://$DOMAIN/wp-login.php (kullanici ve parola: YONETICI-PAROLASI.txt).
    Ilk giriste parolayi degistirin, sonra o dosyayi silin.
-10. Kontrol: https://$DOMAIN/wp-admin/network/ -> Siteler (8 site), her sitenin ana sayfasi,
+10. Kontrol: $SCHEME://$DOMAIN/wp-admin/network/ -> Siteler (8 site), her sitenin ana sayfasi,
     SEO ve GEO sekmesi (puanlar), Yonlendirmeler sayfasi.
 
 Sonra (site site, deneme bitince): alan adini siteye bagla (Ag Yonetimi -> Siteler -> Duzenle ->
