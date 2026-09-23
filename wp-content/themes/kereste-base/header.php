@@ -1,27 +1,29 @@
 <?php
 /**
- * Ust menu. Logo yazisi ve rozet alanlardan gelir; logo gorseli yuklenirse
- * yazi logosunun yerini alir. Genis ekranda yanina grup (Koçist) logosu gelir.
+ * Ust kisim: ince bilgi seridi (adres, e-posta, calisma saati) ve koyu menu
+ * bandi. Istanbul Keresteci ile ayni duzen: cam agacli iki satir logo, beyaz
+ * menu, sagda "arayin" telefon kutusu. Uc keresteci sitesi ust kisimda
+ * akraba gorunur; renkler her sitenin kendi parti boyasi.
  *
- * Genislik butcesi: lg'de menu satiri doldugu icin WhatsApp dugmesi lg'de
- * gizlenir, xl'de yalniz simge olarak doner; telefon yazisi 2xl'de gorunur.
+ * Genislik butcesi: telefon kutusu xl'de, WhatsApp simgesi md'de, teklif
+ * dugmesi sm'de gorunur; dar ekranda hepsi mobil menude.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$logo  = nwcs_image( 'global', 'header', 'logo_image', 'medium' );
-$word  = (string) nwcs_field( 'global', 'header', 'logo_word' );
-$rest  = (string) nwcs_field( 'global', 'header', 'logo_rest' );
-$badge = (string) nwcs_field( 'global', 'header', 'logo_mark' );
-$menu  = nwcs_rows( 'global', 'header', 'menu' );
-$phone = array(
+$menu     = nwcs_rows( 'global', 'header', 'menu' );
+$phone    = array(
 	'label' => (string) nwcs_field( 'global', 'header', 'phone_label' ),
+	'note'  => (string) nwcs_field( 'global', 'header', 'phone_note' ),
 	'url'   => kr_link( nwcs_field( 'global', 'header', 'phone_url' ) ),
 );
 $cta      = (string) nwcs_field( 'global', 'header', 'cta_label' );
 $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 $wa_label = (string) nwcs_field( 'global', 'header', 'whatsapp_label' );
-$parent   = nwcs_image( 'global', 'header', 'parent_logo', 'medium' );
+$address  = trim( (string) nwcs_field( 'global', 'footer', 'address' ) );
+$email    = trim( (string) nwcs_field( 'global', 'footer', 'email' ) );
+$hours    = trim( (string) nwcs_field( 'global', 'footer', 'hours' ) );
+$map      = trim( (string) nwcs_field( 'contact', 'details', 'map_url' ) );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -36,34 +38,44 @@ $parent   = nwcs_image( 'global', 'header', 'parent_logo', 'medium' );
 
 <a href="#icerik" class="btn btn--sm btn--mark sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60]">İçeriğe geç</a>
 
-<header data-header class="sticky top-0 z-50 border-b border-line bg-paper">
-	<div class="mx-auto flex h-[4.5rem] max-w-[78rem] items-center gap-6 px-5 md:px-8">
-
-		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex shrink-0 items-center gap-3 text-ink no-underline" <?php nwcs_edit_attr( 'global', 'header', 'logo_word' ); ?>>
-			<?php if ( $logo['url'] ) : ?>
-				<img src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( trim( $word . ' ' . $rest ) ); ?>" class="h-10 w-auto" />
-			<?php else : ?>
-				<?php // Yazi logosu: sablon harfli rozet + slab isim. ?>
-				<span class="flex h-10 w-10 items-center justify-center bg-mark font-stencil text-[1.05rem] leading-none text-paper" aria-hidden="true"><?php echo esc_html( $badge ); ?></span>
-				<span class="font-slab text-[1.4rem] font-bold leading-none tracking-tight">
-					<?php echo esc_html( $word ); ?><span class="font-semibold text-muted"><?php echo esc_html( $rest ); ?></span>
-				</span>
-			<?php endif; ?>
-		</a>
-
-		<?php if ( $parent['url'] ) : ?>
-			<a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'parent_url' ) ) ); ?>" target="_blank" rel="noopener"
-				class="hidden shrink-0 border-l border-line pl-5 xl:block" <?php nwcs_edit_attr( 'global', 'header', 'parent_logo' ); ?>>
-				<img src="<?php echo esc_url( $parent['url'] ); ?>" alt="<?php echo esc_attr( nwcs_field( 'global', 'header', 'parent_label' ) ); ?>" class="h-8 w-auto" />
+<div class="hidden bg-ink-deep text-[0.875rem] text-paper/75 md:block">
+	<div class="mx-auto flex h-10 max-w-[78rem] items-center gap-7 px-5 md:px-8">
+		<?php if ( '' !== $address ) : ?>
+			<a href="<?php echo esc_url( $map ?: '#' ); ?>" <?php echo $map ? 'target="_blank" rel="noopener"' : ''; ?>
+				class="flex min-w-0 items-center gap-2 text-paper/75 no-underline hover:text-paper" <?php nwcs_edit_attr( 'global', 'footer', 'address' ); ?>>
+				<?php nwcs_the_icon( 'pin', 'shrink-0 text-mark-bright', 16 ); ?>
+				<span class="truncate"><?php echo esc_html( (string) preg_replace( '/\s*\R\s*/u', ', ', $address ) ); ?></span>
 			</a>
 		<?php endif; ?>
+		<?php if ( '' !== $email ) : ?>
+			<a href="<?php echo esc_url( 'mailto:' . $email ); ?>" class="hidden items-center gap-2 text-paper/75 no-underline hover:text-paper lg:flex"
+				<?php nwcs_edit_attr( 'global', 'footer', 'email' ); ?>>
+				<?php nwcs_the_icon( 'mail', 'shrink-0 text-mark-bright', 16 ); ?>
+				<?php echo esc_html( $email ); ?>
+			</a>
+		<?php endif; ?>
+		<?php if ( '' !== $hours ) : ?>
+			<span class="tabular ml-auto flex shrink-0 items-center gap-2" <?php nwcs_edit_attr( 'global', 'footer', 'hours' ); ?>>
+				<?php nwcs_the_icon( 'clock', 'shrink-0 text-mark-bright', 16 ); ?>
+				<?php echo esc_html( $hours ); ?>
+			</span>
+		<?php endif; ?>
+	</div>
+</div>
+
+<header data-header class="sticky top-0 z-50 border-b border-paper/10 bg-ink text-paper">
+	<div class="mx-auto flex h-[5rem] max-w-[78rem] items-center gap-6 px-5 md:px-8">
+
+		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="shrink-0 no-underline" <?php nwcs_edit_attr( 'global', 'header', 'logo_word' ); ?>>
+			<?php kr_logo( 'dark' ); ?>
+		</a>
 
 		<nav class="ml-6 hidden items-center gap-7 lg:flex" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
 			<?php foreach ( $menu as $item ) :
 				$url = (string) ( $item['url'] ?? '' );
 				?>
 				<a href="<?php echo esc_url( kr_link( $url ) ); ?>"
-					class="navline text-[0.9688rem] font-semibold text-ink no-underline transition-colors hover:text-mark"
+					class="navline text-[0.9688rem] font-semibold text-paper/90 no-underline transition-colors hover:text-paper"
 					<?php echo kr_is_current( $url ) ? 'aria-current="page"' : ( kr_is_within( $url ) ? 'data-section-current' : '' ); ?>>
 					<?php echo esc_html( $item['label'] ?? '' ); ?>
 				</a>
@@ -71,17 +83,20 @@ $parent   = nwcs_image( 'global', 'header', 'parent_logo', 'medium' );
 		</nav>
 
 		<div class="ml-auto flex items-center gap-4">
-			<a href="<?php echo esc_url( $phone['url'] ); ?>" class="tabular hidden font-semibold text-ink no-underline hover:text-mark 2xl:inline"
+			<a href="<?php echo esc_url( $phone['url'] ); ?>" class="hidden items-center gap-3 border-l border-paper/15 pl-6 text-paper no-underline xl:flex"
 				<?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>>
-				<?php echo esc_html( $phone['label'] ); ?>
+				<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mark text-paper"><?php nwcs_the_icon( 'phone', '', 20 ); ?></span>
+				<span class="grid leading-tight">
+					<span class="text-[0.8125rem] text-paper/65" <?php nwcs_edit_attr( 'global', 'header', 'phone_note' ); ?>><?php echo esc_html( $phone['note'] ); ?></span>
+					<span class="tabular kr-condensed text-[1.2rem] font-extrabold"><?php echo esc_html( $phone['label'] ); ?></span>
+				</span>
 			</a>
 
 			<?php if ( $whatsapp ) : ?>
 				<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener"
-					class="btn btn--sm btn--whatsapp hidden md:inline-flex lg:hidden xl:inline-flex xl:aspect-square xl:px-0 2xl:aspect-auto 2xl:px-4"
+					class="btn btn--sm btn--whatsapp hidden aspect-square px-0 md:inline-flex"
 					aria-label="<?php echo esc_attr( $wa_label ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 					<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 18 ); ?>
-					<span class="xl:sr-only 2xl:not-sr-only"><?php echo esc_html( $wa_label ); ?></span>
 				</a>
 			<?php endif; ?>
 
@@ -92,20 +107,20 @@ $parent   = nwcs_image( 'global', 'header', 'parent_logo', 'medium' );
 
 			<button type="button" data-nav-toggle aria-expanded="false" aria-controls="menu-mobil" aria-label="Menüyü aç"
 				class="group/btn -mr-2 flex h-11 w-11 flex-col items-center justify-center gap-[5px] lg:hidden">
-				<span class="block h-[2px] w-6 bg-ink transition-transform duration-300 group-aria-expanded/btn:translate-y-[7px] group-aria-expanded/btn:rotate-45"></span>
-				<span class="block h-[2px] w-6 bg-ink transition-opacity duration-200 group-aria-expanded/btn:opacity-0"></span>
-				<span class="block h-[2px] w-6 bg-ink transition-transform duration-300 group-aria-expanded/btn:-translate-y-[7px] group-aria-expanded/btn:-rotate-45"></span>
+				<span class="block h-[2px] w-6 bg-paper transition-transform duration-300 group-aria-expanded/btn:translate-y-[7px] group-aria-expanded/btn:rotate-45"></span>
+				<span class="block h-[2px] w-6 bg-paper transition-opacity duration-200 group-aria-expanded/btn:opacity-0"></span>
+				<span class="block h-[2px] w-6 bg-paper transition-transform duration-300 group-aria-expanded/btn:-translate-y-[7px] group-aria-expanded/btn:-rotate-45"></span>
 			</button>
 		</div>
 	</div>
 
-	<div id="menu-mobil" data-nav-panel hidden class="border-t border-line bg-paper lg:hidden">
+	<div id="menu-mobil" data-nav-panel hidden class="border-t border-paper/10 bg-ink lg:hidden">
 		<nav class="mx-auto max-w-[78rem] px-5 pb-6 pt-2 md:px-8" aria-label="Mobil menü">
 			<ul>
 				<?php foreach ( $menu as $item ) : ?>
-					<li class="border-b border-line">
+					<li class="border-b border-paper/10">
 						<a href="<?php echo esc_url( kr_link( $item['url'] ?? '' ) ); ?>"
-							class="block py-3.5 text-lg font-semibold text-ink no-underline aria-[current=page]:text-mark"
+							class="block py-3.5 text-lg font-semibold text-paper no-underline aria-[current=page]:text-mark-bright"
 							<?php echo kr_is_current( (string) ( $item['url'] ?? '' ) ) ? 'aria-current="page"' : ''; ?>>
 							<?php echo esc_html( $item['label'] ?? '' ); ?>
 						</a>
@@ -113,7 +128,10 @@ $parent   = nwcs_image( 'global', 'header', 'parent_logo', 'medium' );
 				<?php endforeach; ?>
 			</ul>
 			<div class="mt-5 grid gap-3 sm:grid-cols-2">
-				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="btn btn--md btn--outline tabular"><?php echo esc_html( $phone['label'] ); ?></a>
+				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="btn btn--md btn--ghost tabular">
+					<?php nwcs_the_icon( 'phone', 'shrink-0', 18 ); ?>
+					<?php echo esc_html( $phone['label'] ); ?>
+				</a>
 				<?php if ( $whatsapp ) : ?>
 					<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp">
 						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 18 ); ?>
@@ -122,12 +140,6 @@ $parent   = nwcs_image( 'global', 'header', 'parent_logo', 'medium' );
 				<?php endif; ?>
 				<a href="<?php echo esc_url( kr_quote_fallback_url() ); ?>" data-kr-quote class="btn btn--md btn--mark <?php echo $whatsapp ? 'sm:col-span-2' : ''; ?>"><?php echo esc_html( $cta ); ?></a>
 			</div>
-			<?php if ( $parent['url'] ) : ?>
-				<p class="mt-6 flex items-center gap-3 text-sm text-muted">
-					<img src="<?php echo esc_url( $parent['url'] ); ?>" alt="" class="h-7 w-auto" />
-					<?php echo esc_html( nwcs_field( 'global', 'header', 'parent_label' ) ); ?>
-				</p>
-			<?php endif; ?>
 		</nav>
 	</div>
 </header>

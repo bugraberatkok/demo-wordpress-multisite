@@ -44,7 +44,7 @@ function ip_assets(): void {
 
 	wp_enqueue_style(
 		'ip-fonts',
-		'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap',
+		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
 		array(),
 		null
 	);

@@ -22,7 +22,7 @@ $products = nwcs_rows( 'services', 'grid', 'items' );
 $requested = isset( $_GET['urun'] ) ? sanitize_text_field( wp_unslash( $_GET['urun'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $picked    = '' !== ( $values['product'] ?? '' ) ? $values['product'] : $requested;
 
-$field  = 'w-full rounded-sm border border-ink/18 bg-surface px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/30';
+$field  = 'w-full rounded-sm border border-ink/18 bg-surface px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-signal focus:outline-none focus:ring-2 focus:ring-signal/30';
 $broken = 'w-full rounded-sm border border-alert bg-alert-soft px-4 py-3 text-base text-ink transition-colors duration-150 placeholder:text-moss/70 focus:border-alert focus:outline-none focus:ring-2 focus:ring-alert/30';
 $label  = 'mb-2 block font-display text-sm font-medium text-ink/80';
 
@@ -49,8 +49,8 @@ $details = array(
 
 			<?php if ( $success ) : ?>
 
-				<div class="rounded-sm border border-forest/30 bg-forest/8 p-8 md:p-10" role="status">
-					<span class="flex h-11 w-11 items-center justify-center rounded-full bg-forest text-bone" aria-hidden="true">
+				<div class="rounded-sm border border-signal/30 bg-signal/8 p-8 md:p-10" role="status">
+					<span class="flex h-11 w-11 items-center justify-center rounded-full bg-signal text-bone" aria-hidden="true">
 						<?php nwcs_the_icon( 'check', '', 22 ); ?>
 					</span>
 
@@ -208,7 +208,7 @@ $details = array(
 
 							<?php if ( $row['url'] ) : ?>
 								<a href="<?php echo esc_url( ahsapambalaj_link( nwcs_field( 'contact', 'details', $row['url'] ) ) ); ?>"
-									class="mt-1 block font-display text-lg font-medium text-ink transition-colors hover:text-forest"
+									class="mt-1 block font-display text-lg font-medium text-ink transition-colors hover:text-signal"
 									<?php nwcs_edit_attr( 'contact', 'details', $row['value'] ); ?>>
 									<?php echo esc_html( nwcs_field( 'contact', 'details', $row['value'] ) ); ?>
 								</a>

@@ -49,6 +49,7 @@
 
 .sp-story__lead {
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: clamp(1.75rem, 3vw, 2.375rem);
 	font-weight: 700;
 	line-height: 1.12;
@@ -130,6 +131,7 @@
 	margin-top: 0.2rem;
 	color: var(--yanik);
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: 1.625rem;
 	font-weight: 700;
 	line-height: 1.15;
@@ -293,6 +295,7 @@ textarea.sp-field__input { resize: vertical; }
 	border-radius: 999px;
 	color: var(--yanik);
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: 1.1875rem;
 	font-weight: 700;
 	text-decoration: none;
@@ -350,7 +353,7 @@ textarea.sp-field__input { resize: vertical; }
 
 .sp-draw__dim line { stroke: var(--yanik); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
 
-.sp-draw__label { fill: var(--yanik); font-family: var(--font-baslik); font-size: 8px; font-weight: 700; }
+.sp-draw__label { fill: var(--yanik); font-family: var(--font-baslik); font-stretch: var(--baslik-genislik); font-size: 8px; font-weight: 700; }
 
 /* Olcusu belirtilmemis palet: olcek iddiasi yok, kenarlar kesik cizgi. */
 .sp-draw--generic .sp-draw__board,
@@ -393,6 +396,7 @@ textarea.sp-field__input { resize: vertical; }
 .sp-pallet__more summary::after {
 	content: "+";
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: 1.5rem;
 	line-height: 1;
 	transition: transform 0.2s ease;

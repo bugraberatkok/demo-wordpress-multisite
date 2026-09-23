@@ -34,6 +34,10 @@
 	--color-stamp:     var(--site-stamp, var(--site-mark, #0b5c6b));
 
 	--color-ink:    var(--site-ink, #1e2226);
+	/* Ust bilgi seridi: ink'in bir ton koyusu. */
+	--color-ink-deep: var(--site-ink-deep, #15181b);
+	/* Koyu zeminde okunan vurgu (logo ust satiri, seritteki simgeler). */
+	--color-mark-bright: var(--site-mark-bright, #6cc0cf);
 	--color-muted:  #5e656b;
 	--color-paper:  #ffffff;
 	--color-stone:  var(--site-stone, #f2f3f0);
@@ -45,9 +49,14 @@
 	--color-alert:  #b42318;
 	--color-alert-soft: #fdecea;
 
-	--font-slab:    "Zilla Slab", "Rockwell", Georgia, serif;
-	--font-sans:    "Source Sans 3", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-	--font-stencil: "Saira Stencil One", "Arial Black", sans-serif;
+	/* Ag geneli ortak font: Archivo (degisken; genislik ekseni 62-125).
+	   Onceki fontlar (geri donus icin): baslik Zilla Slab 600/700, metin
+	   Source Sans 3 400/600/700, olcu etiketi Saira Stencil One.
+	   Token adlari sablonlar degismesin diye korundu; genislik ve kalinlik
+	   asagidaki temel kurallarda. */
+	--font-slab:    "Archivo", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+	--font-sans:    "Archivo", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+	--font-stencil: "Archivo", "Arial Narrow", ui-sans-serif, sans-serif;
 
 	--text-base: 1.0625rem;
 	--text-base--line-height: 1.65;
@@ -67,13 +76,18 @@
 		-webkit-font-smoothing: antialiased;
 	}
 
-	/* Slab basliklar: eski ahsap matbaa harflerinin (wood type) karakteri. */
-	h1, h2, h3, .u-slab {
+	/* Basliklar: dar ve kalin Archivo (Istanbul Keresteci ile ayni dil). */
+	h1, h2, h3, .u-slab, .font-slab {
 		font-family: var(--font-slab);
-		font-weight: 700;
-		line-height: 1.05;
-		letter-spacing: -0.01em;
+		font-weight: 800;
+		font-stretch: 75%;
+		line-height: 1.02;
+		letter-spacing: -0.005em;
 		text-wrap: balance;
+	}
+
+	.kr-condensed {
+		font-stretch: 75%;
 	}
 
 	h4 {
@@ -130,8 +144,10 @@ body.admin-bar [data-header] {
 	 * ---------------------------------------------------------------- */
 	.stencil {
 		font-family: var(--font-stencil);
-		font-weight: 400;
-		letter-spacing: 0.02em;
+		font-weight: 900;
+		font-stretch: 62%;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
 		line-height: 1;
 		color: var(--color-stamp);
 		font-variant-numeric: tabular-nums;
@@ -229,6 +245,39 @@ body.admin-bar [data-header] {
 		}
 	}
 
+	/* ---------------------------------------------------------------- *
+	 * Logo: cam agaci ve iki satir dar buyuk harf. Koyu zeminde ust satir
+	 * parlak vurgu, alt satir beyaz; acik zeminde vurgu ve murekkep.
+	 * ---------------------------------------------------------------- */
+	.kr-logo {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		color: var(--color-mark-bright);
+	}
+
+	.kr-logo__mark { width: 1.9rem; height: auto; flex: none; }
+
+	.kr-logo__text {
+		display: grid;
+		font-family: var(--font-slab);
+		font-weight: 800;
+		font-stretch: 75%;
+		font-size: 1.3rem;
+		line-height: 1;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	.kr-logo__bottom { color: var(--color-paper); }
+	.kr-logo__image { max-height: 3rem; width: auto; }
+
+	.kr-logo--light { color: var(--color-mark); }
+	.kr-logo--light .kr-logo__bottom { color: var(--color-ink); }
+
+	.kr-logo--sm .kr-logo__mark { width: 1.5rem; }
+	.kr-logo--sm .kr-logo__text { font-size: 1.1rem; }
+
 	/* Gorsel standardi: sabit oran, kirpilarak doldurur. */
 	.shot {
 		position: relative;
@@ -325,7 +374,7 @@ body.admin-bar [data-header] {
 		right: 0;
 		bottom: -8px;
 		height: 3px;
-		background: var(--color-mark);
+		background: var(--color-mark-bright);
 		transform: scaleX(0);
 		transform-origin: left center;
 		transition: transform 200ms ease;

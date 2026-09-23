@@ -29,7 +29,7 @@
 }
 .sp-logo:hover { color: var(--yanik); }
 .sp-logo__image { height: 48px; width: auto; }
-.sp-logo__name { font-family: var(--font-baslik); font-size: 2rem; font-weight: 800; letter-spacing: -0.005em; }
+.sp-logo__name { font-family: var(--font-baslik); font-stretch: var(--baslik-genislik); font-size: 2rem; font-weight: 800; letter-spacing: -0.005em; }
 .sp-logo__sub { margin-top: 0.2rem; color: var(--toz); font-size: 0.8125rem; }
 
 .sp-nav ul {
@@ -46,6 +46,7 @@
 	border-bottom: 3px solid transparent;
 	color: var(--yanik);
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: 1.3125rem;
 	font-weight: 700;
 	text-decoration: none;
@@ -97,6 +98,7 @@
 		background: none;
 		color: var(--yanik);
 		font-family: var(--font-baslik);
+		font-stretch: var(--baslik-genislik);
 		font-size: 1.25rem;
 		font-weight: 700;
 		cursor: pointer;

@@ -44,7 +44,7 @@ function ahsapkasa_assets(): void {
 
 	wp_enqueue_style(
 		'ahsapkasa-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Literata:opsz,wght@7..72,400..600&display=swap',
+		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
 		array(),
 		null
 	);

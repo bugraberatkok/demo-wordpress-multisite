@@ -1,7 +1,7 @@
 <?php
 /**
- * Ana sayfa girisi: arka planda slayt gosterisi, uzerinde koyu perde,
- * ortada baslik, olcu cizgisi ve dugmeler. Giris sirali (.rise), arka plan
+ * Ana sayfa girisi: arka planda slayt gosterisi, uzerinde soldan koyulasan
+ * perde, sola hizali dar baslik, olcu cizgisi ve dugmeler. Giris sirali (.rise), arka plan
  * kaydirmaya gore hafifce kayar (data-parallax, assets/motion.js).
  */
 
@@ -17,7 +17,7 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $slide_index => $row ) {
 	}
 }
 ?>
-<section class="relative isolate flex min-h-[32rem] items-center justify-center overflow-hidden md:min-h-[40rem]">
+<section class="relative isolate flex min-h-[32rem] items-end overflow-hidden md:min-h-[40rem]">
 
 	<?php if ( $slides ) : ?>
 		<div class="parallax absolute inset-0 -z-20" data-slideshow data-parallax <?php nwcs_edit_attr( 'home', 'hero', 'slides' ); ?>>
@@ -35,12 +35,12 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $slide_index => $row ) {
 	<?php endif; ?>
 
 	<?php // Perde notr koyu tonda; yesil yalnizca eylem rengi olarak kalsin. ?>
-	<span class="absolute inset-0 -z-10 bg-night/78" aria-hidden="true"></span>
-	<span class="absolute inset-0 -z-10 bg-gradient-to-b from-night/55 via-night/20 to-night/75" aria-hidden="true"></span>
+	<span class="absolute inset-0 -z-10 bg-gradient-to-r from-night/92 via-night/70 to-night/25" aria-hidden="true"></span>
+	<span class="absolute inset-0 -z-10 bg-gradient-to-t from-night/70 to-transparent" aria-hidden="true"></span>
 
-	<div class="hero-inner mx-auto w-full max-w-[54rem] px-6 py-24 text-center">
+	<div class="hero-inner mx-auto w-full max-w-[76rem] px-6 pb-20 pt-28 md:pb-24">
 
-		<h1 class="hero-title font-display text-[2.5rem] font-semibold leading-[1.06] text-bone md:text-5xl lg:text-6xl"
+		<h1 class="hero-title title-condensed max-w-[16ch] font-display text-[2.75rem] leading-[1] text-bone md:text-6xl lg:text-[4.75rem]"
 			<?php nwcs_edit_attr( 'home', 'hero', 'title' ); ?>>
 			<?php // Her satir ayri gelir; satirlar arasi 140ms. ?>
 			<?php foreach ( preg_split( '/\R/', (string) nwcs_field( 'home', 'hero', 'title' ) ) as $line_index => $line ) : ?>
@@ -48,7 +48,7 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $slide_index => $row ) {
 			<?php endforeach; ?>
 		</h1>
 
-		<div class="measure measure--light measure--draw mx-auto mt-9 max-w-[34rem]">
+		<div class="measure measure--light measure--draw mt-9 max-w-[30rem]">
 			<span class="measure__tick" aria-hidden="true"></span>
 			<span class="measure__line" aria-hidden="true"></span>
 			<span class="measure__label" <?php nwcs_edit_attr( 'home', 'hero', 'measure_label' ); ?>>
@@ -58,7 +58,7 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $slide_index => $row ) {
 			<span class="measure__tick" aria-hidden="true"></span>
 		</div>
 
-		<div class="rise mt-11 flex flex-wrap items-center justify-center gap-3" style="--rise-delay: 640ms">
+		<div class="rise mt-11 flex flex-wrap items-center gap-3" style="--rise-delay: 640ms">
 			<a href="<?php echo esc_url( ahsapambalaj_link( nwcs_field( 'home', 'hero', 'primary_url' ) ) ); ?>"
 				class="btn btn--lg btn--solid"
 				<?php nwcs_edit_attr( 'home', 'hero', 'primary_label' ); ?>>
@@ -74,7 +74,7 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $slide_index => $row ) {
 	</div>
 
 	<?php if ( count( $slides ) > 1 ) : ?>
-		<div class="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 gap-2.5" data-slideshow-dots role="tablist" aria-label="Fotoğraflar">
+		<div class="absolute bottom-8 right-6 z-10 flex gap-2.5 md:right-[max(1.5rem,calc((100vw-76rem)/2+1.5rem))]" data-slideshow-dots role="tablist" aria-label="Fotoğraflar">
 			<?php foreach ( $slides as $index => $slide ) : ?>
 				<button type="button" role="tab" data-slide-dot
 					aria-label="<?php echo esc_attr( sprintf( '%d. fotoğraf', $index + 1 ) ); ?>"

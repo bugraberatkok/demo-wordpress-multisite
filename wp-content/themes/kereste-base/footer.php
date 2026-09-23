@@ -10,7 +10,6 @@ $menu   = nwcs_rows( 'global', 'header', 'menu' );
 $family = nwcs_rows( 'global', 'footer', 'family' );
 $phone  = (string) nwcs_field( 'global', 'header', 'phone_label' );
 $email  = (string) nwcs_field( 'global', 'footer', 'email' );
-$parent = nwcs_image( 'global', 'header', 'parent_logo', 'medium' );
 
 $heading = 'font-sans text-[0.8125rem] font-bold text-paper/55';
 $link    = 'text-paper/85 no-underline transition-colors hover:text-paper';
@@ -22,25 +21,12 @@ $link    = 'text-paper/85 no-underline transition-colors hover:text-paper';
 
 		<div class="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
 			<div>
-				<p class="flex items-center gap-3">
-					<span class="flex h-10 w-10 items-center justify-center bg-mark font-stencil text-[1.05rem] text-paper" aria-hidden="true">
-						<?php echo esc_html( nwcs_field( 'global', 'header', 'logo_mark' ) ); ?>
-					</span>
-					<span class="font-slab text-[1.4rem] font-bold leading-none text-paper">
-						<?php echo esc_html( nwcs_field( 'global', 'header', 'logo_word' ) ); ?><span class="font-semibold text-paper/60"><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_rest' ) ); ?></span>
-					</span>
-				</p>
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block no-underline" <?php nwcs_edit_attr( 'global', 'header', 'logo_word' ); ?>>
+					<?php kr_logo( 'dark' ); ?>
+				</a>
 				<p class="mt-5 max-w-[22rem] text-[0.9375rem] leading-relaxed text-paper/70" <?php nwcs_edit_attr( 'global', 'footer', 'tagline' ); ?>>
 					<?php echo esc_html( nwcs_field( 'global', 'footer', 'tagline' ) ); ?>
 				</p>
-				<?php if ( $parent['url'] ) : ?>
-					<?php // Grup logosu renkli ve acik zemine gore cizilmis; koyu alt bilgide beyaz plaka uzerinde. ?>
-					<a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'parent_url' ) ) ); ?>" target="_blank" rel="noopener"
-						class="mt-6 inline-flex items-center gap-4 no-underline" <?php nwcs_edit_attr( 'global', 'header', 'parent_logo' ); ?>>
-						<span class="bg-paper px-3 py-2"><img src="<?php echo esc_url( $parent['url'] ); ?>" alt="" class="h-8 w-auto" /></span>
-						<span class="max-w-[10rem] text-sm leading-snug text-paper/65"><?php echo esc_html( nwcs_field( 'global', 'header', 'parent_label' ) ); ?></span>
-					</a>
-				<?php endif; ?>
 			</div>
 
 			<div>

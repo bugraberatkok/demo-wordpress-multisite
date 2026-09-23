@@ -461,6 +461,7 @@ Kurulum: `install.sh` içindeki `SITES` listesinde; tek başına
 `wp eval-file /scripts/seed-ithalkeresteci.php --url=http://localhost:8080/ithalkeresteci/`
 (kavak için `seed-kavakkeresteci.php` ve `/kavakkeresteci/`).
 Ana tema ayrıca `build/kereste.css` kaynağından derlenir (`npm run build:kereste`).
+Ahşap Ambalaj'ın Tailwind kaynağı tema içindedir; `npm run build:ahsapambalaj` derler.
 
 ## SEO ve GEO
 
@@ -531,6 +532,36 @@ add_filter( 'nwcs_seo_default_logo', fn() => nwcs_seo_theme_file_image( 'assets/
 
 `seo` bileşen adı ve `site_seo` sayfa adı eklentiye ayrılmıştır; temalar kullanmaz.
 Kararlar ve kontrol listesi: [DECISIONS.md](DECISIONS.md) → "SEO ve GEO — kalıcı ilke".
+
+### Uyumluluk puanı
+
+SEO ve GEO sekmesi her site için 0–100 puan gösterir (SEO ve GEO alt puanlarıyla).
+Ağ özetinde sütun, site görünümünde kontrol listesi: eksik olan, kaç puan kaybettirdiği
+ve nasıl düzeltileceği. 85 ve üstü "Güçlü", 60–84 "Orta", altı "Zayıf".
+
+## Formlar ve e-posta
+
+Bütün sitelerin teklif/iletişim formları gönderimi WordPress'e kaydeder (site
+yönetiminde "Teklif İstekleri" ya da "İletişim Mesajları"). Eklenti her yeni kayıtta
+sitenin firma e-postasına (SEO ve GEO → Firma bilgisi → E-posta; boşsa yönetici
+e-postası) bildirim gönderir; müşterinin e-postası "Yanıtla" adresindedir. Alıcı
+`nwcs_form_recipient` süzgeciyle değiştirilebilir.
+
+Yerelde posta sunucusu olmadığı için e-posta gitmez (günlüğe "E-posta gonderilemedi"
+yazılır; form yine çalışır). Canlıda (Natro cPanel):
+
+1. Her alan adı için bir posta kutusu açın (ör. `form@alanadi` ya da `info@alanadi`).
+2. WP Mail SMTP (ya da FluentSMTP) kurun; SMTP ile bu kutudan gönderin (465 SSL /
+   587 TLS). PHP `mail()`'e bırakmayın: `wordpress@alanadi` göndericisi çoğu zaman
+   spama düşer.
+3. cPanel → Email Deliverability: her alan adında SPF ve DKIM'i onarın, DMARC kaydı
+   ekleyin (başta `p=none`). DNS Natro'da değilse kayıtları DNS sağlayıcısına girin.
+4. Alıcı adreslerini firma ile teyit edin (SEO sekmesindeki e-postalar).
+5. Canlıda her siteden bir deneme formu gönderin.
+
+Dikkat: sayfa önbelleği (LiteSpeed vb.) açılırsa form içeren sayfalar (iletişim,
+kereste sitelerinde her sayfa, istanbulpaletci ana sayfa) önbellek dışında tutulmalı;
+yoksa formun güvenlik belirteci süresi dolar.
 
 ## Yeni site ekleme
 

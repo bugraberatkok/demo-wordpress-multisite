@@ -116,10 +116,9 @@ return static function ( array $s ): array {
 				'header' => array(
 					'label'  => 'Üst Menü',
 					'fields' => array(
-						'logo_image'   => $image( 'Logo görseli (boşsa yazı logosu kullanılır)' ),
-						'logo_word'    => $text( 'Logo: ilk kelime', $s['logo'][0] ),
-						'logo_rest'    => $text( 'Logo: ikinci kelime', $s['logo'][1] ),
-						'logo_mark'    => $text( 'Logo: şablon harf rozeti', $s['logo'][2] ),
+						'logo_image'   => $image( 'Logo görseli (boşsa çam ağaçlı yazı logosu kullanılır)' ),
+						'logo_word'    => $text( 'Logo: üst satır', $s['logo'][0] ),
+						'logo_rest'    => $text( 'Logo: alt satır', $s['logo'][1] ),
 						'menu'         => $rows(
 							'Menü Öğeleri',
 							7,
@@ -136,12 +135,10 @@ return static function ( array $s ): array {
 						),
 						'phone_label'  => $text( 'Telefon Metni', $c['phone_label'] ),
 						'phone_url'    => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => $c['phone_url'] ),
+						'phone_note'   => $text( 'Telefon Kutusu Üst Yazısı', 'Fiyat ve stok için arayın' ),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı (boşsa düğme gizlenir)', 'type' => 'url', 'default' => $c['whatsapp_url'] ),
 						'whatsapp_label' => $text( 'WhatsApp Düğmesi Metni', 'WhatsApp' ),
 						'cta_label'      => $text( 'Teklif Düğmesi Metni', 'Teklif al' ),
-						'parent_logo'    => $image( 'Grup logosu (Koçist; üst menüde ve alt bilgide)' ),
-						'parent_label'   => $text( 'Grup logosunun yanındaki yazı', 'Bir Koçist Orman Ürünleri sitesi' ),
-						'parent_url'     => array( 'label' => 'Grup logosunun bağlantısı', 'type' => 'url', 'default' => 'https://www.kocist.com.tr' ),
 					),
 				),
 				'footer' => array(

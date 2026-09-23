@@ -39,8 +39,8 @@ return array(
 					'label'  => 'Üst Menü',
 					'fields' => array(
 						'logo_image' => array( 'label' => 'Logo Görseli', 'type' => 'image', 'default' => 0 ),
-						'logo_text'  => array( 'label' => 'Logo Yazısı', 'type' => 'text', 'default' => 'Koçist' ),
-						'logo_sub'   => array( 'label' => 'Logo Alt Yazısı', 'type' => 'text', 'default' => 'Orman Ürünleri' ),
+						'logo_text'  => array( 'label' => 'Logo Yazısı', 'type' => 'text', 'default' => 'Ahşap Ambalaj' ),
+						'logo_sub'   => array( 'label' => 'Logo Alt Yazısı', 'type' => 'text', 'default' => 'Sanayi' ),
 						'menu'       => array(
 							'label'   => 'Menü Öğeleri',
 							'type'    => 'repeater',

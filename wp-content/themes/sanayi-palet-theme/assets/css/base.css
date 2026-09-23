@@ -31,6 +31,7 @@ a:hover { color: var(--yesil-koyu); }
 h1, h2, h3 {
 	margin: 0;
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-weight: 800;
 	line-height: 1;
 	letter-spacing: 0.005em;
@@ -111,6 +112,7 @@ p { margin: 0; }
 	border: 2px solid transparent;
 	border-radius: var(--kose);
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: 1.25rem;
 	font-weight: 700;
 	line-height: 1;
@@ -138,6 +140,7 @@ p { margin: 0; }
 /* Metin baglantisi: kartlarda "Ayrintilar" gibi. */
 .sp-link {
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: 1.25rem;
 	font-weight: 700;
 	text-decoration: underline;

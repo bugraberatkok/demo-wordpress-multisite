@@ -188,6 +188,518 @@ function nwcs_seo_consistency( array $reports, array $sites ): array {
 }
 
 /* ====================================================================== *
+ * Uyumluluk puani
+ *
+ * Her site icin 0-100 arasi puan: SEO (arama motorlari) ve GEO (yapay zeka
+ * aramalari) alt puanlari ile her kontrolun durumu ve duzeltme onerisi.
+ * Yalnizca okur; veritabanina yazmaz. Siteye uymayan kontrol (ornegin urun
+ * sayfasi olmayan sitede urun ozellikleri) puana katilmaz, eksik sayilmaz.
+ * ====================================================================== */
+
+/**
+ * Puan bandi: 85 ve ustu guclu, 60-84 orta, altinda zayif.
+ *
+ * @return array{key:string, label:string}
+ */
+function nwcs_seo_score_band( int $score ): array {
+	if ( $score >= 85 ) {
+		return array( 'key' => 'strong', 'label' => 'Güçlü' );
+	}
+
+	if ( $score >= 60 ) {
+		return array( 'key' => 'medium', 'label' => 'Orta' );
+	}
+
+	return array( 'key' => 'weak', 'label' => 'Zayıf' );
+}
+
+/**
+ * Aktif sitenin temasi (ya da ust temasi) functions.php dosyasinda verilen
+ * suzgece baglaniyor mu. Ag yonetiminde sitenin temasi yuklu olmadigindan
+ * suzgec calistirilamaz; temanin bu bilgiyi verdigi dosyadan anlasilir.
+ */
+function nwcs_seo_score_theme_declares( string $hook ): bool {
+	static $sources = array();
+
+	$found = false;
+
+	foreach ( array_unique( array( get_stylesheet_directory(), get_template_directory() ) ) as $dir ) {
+		$file = $dir . '/functions.php';
+
+		if ( ! isset( $sources[ $file ] ) ) {
+			$sources[ $file ] = is_readable( $file ) ? (string) file_get_contents( $file ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions -- yerel tema dosyasi.
+		}
+
+		if ( str_contains( $sources[ $file ], "'" . $hook . "'" ) ) {
+			$found = true;
+		}
+	}
+
+	return $found;
+}
+
+/**
+ * Butun sitelerin firma bilgisi ve siteler arasi tutarlilik (istek boyunca
+ * bir kez hesaplanir).
+ *
+ * @return array{sites:array, consistency:array}
+ */
+function nwcs_seo_score_network(): array {
+	static $network = null;
+
+	if ( null !== $network ) {
+		return $network;
+	}
+
+	$sites   = nwcs_editable_sites();
+	$reports = array();
+
+	foreach ( array_keys( $sites ) as $id ) {
+		switch_to_blog( $id );
+		$reports[ $id ] = array( 'org' => nwcs_seo_org_data() );
+		restore_current_blog();
+	}
+
+	$network = array(
+		'sites'       => $sites,
+		'consistency' => nwcs_seo_consistency( $reports, $sites ),
+	);
+
+	return $network;
+}
+
+/**
+ * Bir sitenin bilgisi, agdaki baska bir sitedekinin kucuk farkla yazilmis
+ * hali mi. Tamamen farkli degerler (baska sube, baska sirket) sorun degil;
+ * ayni bilginin iki yazimi sorun.
+ *
+ * @return string[] Farkli yazildigi alanlarin adlari.
+ */
+function nwcs_seo_score_near_variants( int $blog_id ): array {
+	$network = nwcs_seo_score_network();
+	$label   = $network['sites'][ $blog_id ]['label'] ?? '';
+	$found   = array();
+
+	$normal = static fn( string $text ): string => mb_strtolower( (string) preg_replace( '/[\s.,]+/u', ' ', $text ) );
+	$digits = static fn( string $text ): string => (string) preg_replace( '/\D+/', '', $text );
+
+	foreach ( $network['consistency'] as $key => $check ) {
+		$own = null;
+
+		foreach ( $check['values'] as $variant ) {
+			if ( in_array( $label, $variant['sites'], true ) ) {
+				$own = $variant['text'];
+			}
+		}
+
+		if ( null === $own ) {
+			continue;
+		}
+
+		foreach ( $check['values'] as $variant ) {
+			if ( $variant['text'] === $own ) {
+				continue;
+			}
+
+			if ( 'phone' === $key ) {
+				// Telefon: rakamlari ayni, bicimi farkli.
+				$near = $digits( $variant['text'] ) === $digits( $own );
+			} else {
+				similar_text( $normal( $variant['text'] ), $normal( $own ), $percent );
+				$near = $percent >= 85;
+			}
+
+			if ( $near ) {
+				$found[] = mb_strtolower( $check['label'] );
+				break;
+			}
+		}
+	}
+
+	return $found;
+}
+
+/**
+ * Sitenin SEO ve GEO uyumluluk puani.
+ *
+ * Her kontrol: key, group (seo|geo), label, weight, passed (0..1), detail
+ * (kisa durum, ornegin "8/10 sayfa") ve hint (tam gecmediyse ne yapilmali).
+ * Puan = gecen agirlik / uygulanan agirlik. SEO kontrollerinin agirlik
+ * toplami 60, GEO 40.
+ *
+ * @return array{score:int, seo:int, geo:int, band:array, checks:array, notes:string[]}
+ */
+function nwcs_seo_score( int $blog_id ): array {
+	static $cache = array();
+
+	if ( isset( $cache[ $blog_id ] ) ) {
+		return $cache[ $blog_id ];
+	}
+
+	// Once ag geneli (kendi icinde siteler arasi gecer), sonra bu site.
+	$near_variants = nwcs_seo_score_near_variants( $blog_id );
+	$site_count    = count( nwcs_seo_score_network()['sites'] );
+	$loaded_theme  = get_stylesheet();
+
+	switch_to_blog( $blog_id );
+
+	$manifest  = nwcs_manifest();
+	$org       = nwcs_seo_org_data();
+	$site_name = nwcs_seo_site_name();
+	$raw_name  = nwcs_seo_clean( nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'name' ) );
+	$public    = (bool) get_option( 'blog_public' );
+	$notes     = array();
+
+	// Sitenin temasi bu istekte yukluyse (on yuz, wp-cli --url) suzgecleri
+	// dogrudan calisir; ag yonetiminde temanin dosyasina bakilir.
+	$theme_live = get_stylesheet() === $loaded_theme;
+	$theme_has  = static fn( string $hook ): bool => $theme_live
+		? (bool) nwcs_seo_image_any( apply_filters( $hook, 0 ) )
+		: nwcs_seo_score_theme_declares( $hook );
+
+	$logo = (bool) nwcs_seo_image( nwcs_seo_logo_id() ) || $theme_has( 'nwcs_seo_default_logo' );
+
+	$fallback_image = (int) nwcs_field( NWCS_SEO_SITE_PAGE, 'defaults', 'share_image', 0 )
+		|| $logo
+		|| ( isset( $manifest['pages']['home'] ) && nwcs_seo_page_auto( 'home', $manifest )['image'] )
+		|| $theme_has( 'nwcs_seo_default_image' );
+
+	// Sayfalar: manifest sayfalari ve temanin bildirdigi ek sayfalar.
+	$pages         = array();
+	$faq_page      = false;
+	$faq_items     = 0;
+	$products      = 0;
+	$products_spec = 0;
+	$no_specs      = array();
+
+	foreach ( nwcs_seo_pages( $manifest ) as $key => $page ) {
+		$resolved = nwcs_seo_page_resolved( $key, $manifest );
+		$type     = (string) ( $page['seo_source']['type'] ?? '' );
+
+		$pages[] = array(
+			'name'        => $resolved['name'],
+			'title'       => $resolved['title'],
+			'description' => $resolved['description'],
+			'image'       => (bool) $resolved['image'],
+		);
+
+		if ( 'FAQPage' === $type ) {
+			$faq_page   = true;
+			$faq_items += count( nwcs_seo_faq( $key ) );
+		} elseif ( 'Product' === $type ) {
+			++$products;
+
+			if ( nwcs_seo_product_specs( $key ) ) {
+				++$products_spec;
+			} else {
+				$no_specs[] = $resolved['name'];
+			}
+		}
+	}
+
+	if ( $theme_live ) {
+		foreach ( nwcs_seo_extra_pages() as $extra ) {
+			$name = nwcs_seo_clean( $extra['name'] );
+
+			$pages[] = array(
+				'name'        => $name,
+				'title'       => nwcs_seo_title_with_site( $name, $site_name ),
+				'description' => nwcs_seo_clean( (string) ( $extra['description'] ?? '' ), 160 ),
+				'image'       => (bool) nwcs_seo_image_any( $extra['image'] ?? 0 ),
+			);
+
+			if ( 'Product' === ( $extra['type'] ?? '' ) ) {
+				++$products;
+
+				if ( nwcs_seo_product_specs( '', (array) ( $extra['properties'] ?? array() ) ) ) {
+					++$products_spec;
+				} else {
+					$no_specs[] = $name;
+				}
+			}
+		}
+	} elseif ( nwcs_seo_score_theme_declares( 'nwcs_seo_extra_pages' ) ) {
+		$notes[] = 'Temanın kendi çizdiği ek sayfalar (ör. ürün alt sayfaları) bu ekrandan ölçülemiyor; puan manifest sayfalarına göre hesaplandı.';
+	}
+
+	restore_current_blog();
+
+	// Sayfa bazli oranlar.
+	$count      = count( $pages );
+	$long_title = array();
+	$bad_desc   = array();
+	$desc_sum   = 0.0;
+	$no_image   = 0;
+
+	foreach ( $pages as $page ) {
+		if ( '' === $page['title'] || mb_strlen( $page['title'] ) > 60 ) {
+			$long_title[] = $page['name'];
+		}
+
+		$length = mb_strlen( $page['description'] );
+
+		if ( $length >= 70 && $length <= 160 ) {
+			$desc_sum += 1;
+		} else {
+			// Kisa ya da uzun aciklama yarim puan; hic yoksa sifir.
+			$desc_sum  += $length > 0 ? 0.5 : 0;
+			$bad_desc[] = $page['name'];
+		}
+
+		if ( ! $page['image'] && ! $fallback_image ) {
+			++$no_image;
+		}
+	}
+
+	$list = static function ( array $names ): string {
+		$names = array_values( array_unique( array_filter( $names ) ) );
+		$more  = count( $names ) - 3;
+
+		return implode( ', ', array_slice( $names, 0, 3 ) ) . ( $more > 0 ? ' ve ' . $more . ' sayfa daha' : '' );
+	};
+
+	$street_city     = '' !== $org['street'] && '' !== $org['city'];
+	$description_len = mb_strlen( $org['description'] );
+	$coordinates     = is_numeric( str_replace( ',', '.', $org['latitude'] ) ) && is_numeric( str_replace( ',', '.', $org['longitude'] ) );
+
+	$checks = array();
+
+	$add = static function ( string $key, string $group, string $label, int $weight, float $passed, string $detail, string $hint ) use ( &$checks ): void {
+		$checks[] = array(
+			'key'    => $key,
+			'group'  => $group,
+			'label'  => $label,
+			'weight' => $weight,
+			'passed' => max( 0.0, min( 1.0, $passed ) ),
+			'detail' => $detail,
+			'hint'   => $hint,
+		);
+	};
+
+	/* SEO: arama motorlari (agirlik toplami 60) */
+
+	$add( 'public', 'seo', 'Site arama motorlarına açık', 12, $public ? 1 : 0, $public ? 'Açık' : 'Kapalı',
+		'Ayarlar › Okuma sayfasında “Arama motorlarının bu siteyi dizine eklemesini engelle” kutusunun işaretini kaldırın.' );
+
+	$add( 'name', 'seo', 'Firma adı', 4, '' !== $raw_name ? 1 : 0.5, '' !== $raw_name ? $raw_name : 'Site başlığı kullanılıyor',
+		'Firma bilgisine aramalarda görünecek kısa firma adını yazın.' );
+
+	$add( 'phone', 'seo', 'Telefon', 6, '' !== $org['phone'] ? 1 : 0, '' !== $org['phone'] ? $org['phone'] : 'Girilmemiş',
+		'Firma bilgisine telefonu uluslararası biçimde girin (+90 …).' );
+
+	$add( 'address', 'seo', 'Açık adres ve il', 7, $street_city ? 1 : ( '' !== $org['street'] || '' !== $org['city'] ? 0.5 : 0 ),
+		$street_city ? 'Girilmiş' : 'Eksik',
+		'Firma bilgisine açık adresi ve ili girin; Google Haritalar eşleşmesi bu bilgiyle olur.' );
+
+	$add( 'postal_code', 'seo', 'Posta kodu', 3, '' !== $org['postal_code'] ? 1 : 0, '' !== $org['postal_code'] ? $org['postal_code'] : 'Girilmemiş',
+		'Firma bilgisine posta kodunu ekleyin.' );
+
+	$add( 'logo', 'seo', 'Logo', 5, $logo ? 1 : 0, $logo ? 'Var' : 'Yok',
+		'Firma bilgisine logoyu yükleyin; arama sonucundaki firma kutusunda görünür.' );
+
+	if ( $count ) {
+		$add( 'titles', 'seo', 'Sayfa başlıkları 60 karakteri aşmıyor', 8, ( $count - count( $long_title ) ) / $count,
+			( $count - count( $long_title ) ) . '/' . $count . ' sayfa',
+			'Uzun başlıklar arama sonucunda kesilir. Kısaltın: ' . $list( $long_title ) . '.' );
+
+		$add( 'descriptions', 'seo', 'Sayfa açıklamaları 70–160 karakter', 10, $desc_sum / $count,
+			( $count - count( $bad_desc ) ) . '/' . $count . ' sayfa',
+			'Boş, çok kısa ya da uzun açıklamaları düzeltin: ' . $list( $bad_desc ) . '.' );
+
+		$add( 'images', 'seo', 'Sayfaların paylaşım görseli', 5, ( $count - $no_image ) / $count,
+			( $count - $no_image ) . '/' . $count . ' sayfa',
+			'Varsayılanlar bölümüne bir paylaşım görseli (1200 × 630) yükleyin; görseli olmayan sayfalar onu kullanır.' );
+	}
+
+	/* GEO: yapay zeka aramalari (agirlik toplami 40) */
+
+	$add( 'description', 'geo', 'Firma tanımı (en az 80 karakter)', 8, $description_len >= 80 ? 1 : ( $description_len > 0 ? 0.5 : 0 ),
+		$description_len > 0 ? $description_len . ' karakter' : 'Girilmemiş',
+		'Firma bilgisine ne ürettiğinizi, nerede ve kime hizmet verdiğinizi anlatan bir iki cümle yazın; yapay zekâ aramaları bu cümleyi alıntılar.' );
+
+	$add( 'legal_name', 'geo', 'Resmî unvan', 5, '' !== $org['legal_name'] ? 1 : 0, '' !== $org['legal_name'] ? 'Girilmiş' : 'Girilmemiş',
+		'Firma bilgisine resmî unvanı, ağdaki diğer sitelerle birebir aynı yazılışla girin.' );
+
+	$add( 'llms', 'geo', 'llms.txt yayında', 5, $public ? 1 : 0, $public ? 'Yayında' : 'Site kapalı olduğu için yayında değil',
+		'llms.txt yalnızca arama motorlarına açık sitede yayınlanır; önce siteyi arama motorlarına açın.' );
+
+	$relation = '' !== $org['parent_name'] || $org['same_as'];
+	$add( 'relation', 'geo', 'Grup bağlantısı ya da firmanın diğer hesapları', 5, $relation ? 1 : 0,
+		'' !== $org['parent_name'] ? $org['parent_name'] : ( $org['same_as'] ? count( $org['same_as'] ) . ' adres' : 'Yok' ),
+		'“Bağlı olduğu grup” alanını ya da firmanın sosyal medya, Google İşletme gibi kendi adreslerini girin.' );
+
+	$add( 'coordinates', 'geo', 'Harita konumu (enlem ve boylam)', 5, $coordinates ? 1 : 0, $coordinates ? 'Girilmiş' : 'Girilmemiş',
+		'Google Haritalar’da işletmeye sağ tıklayın; çıkan enlem ve boylamı firma bilgisine girin.' );
+
+	$add( 'faq', 'geo', 'Sık sorulan sorular', 5, $faq_items ? 1 : 0,
+		$faq_items ? $faq_items . ' soru' : ( $faq_page ? 'Sayfa boş' : 'Sayfa yok' ),
+		$faq_page
+			? 'Sık sorulan sorular sayfasına soru ve cevap ekleyin; yapay zekâ aramaları en çok bu tür içerikten alıntı yapar.'
+			: 'Temada soru-cevap sayfası yok; eklenmesi geliştirici işidir. Yapay zekâ aramaları en çok bu tür içerikten alıntı yapar.' );
+
+	if ( $products ) {
+		$add( 'specs', 'geo', 'Ürünlerde teknik özellikler', 4, $products_spec / $products, $products_spec . '/' . $products . ' ürün',
+			'Ölçü, ağaç türü gibi özellik satırlarını boş olan ürünlere ekleyin: ' . $list( $no_specs ) . '.' );
+	}
+
+	if ( $site_count > 1 ) {
+		$add( 'consistency', 'geo', 'Siteler arası tutarlı yazım', 3, $near_variants ? 0 : 1,
+			$near_variants ? 'Farklı yazım: ' . implode( ', ', $near_variants ) : 'Tutarlı',
+			'Ağdaki başka bir sitede aynı bilginin biraz farklı yazımı var (' . implode( ', ', $near_variants ) . '). Ağ özetindeki tutarlılık kartından karşılaştırın.' );
+	}
+
+	// Puanlar: gecen agirlik / uygulanan agirlik.
+	$sum = static function ( ?string $group ) use ( $checks ): int {
+		$total  = 0;
+		$earned = 0.0;
+
+		foreach ( $checks as $check ) {
+			if ( null === $group || $group === $check['group'] ) {
+				$total  += $check['weight'];
+				$earned += $check['weight'] * $check['passed'];
+			}
+		}
+
+		return $total ? (int) round( 100 * $earned / $total ) : 0;
+	};
+
+	$score = $sum( null );
+
+	$cache[ $blog_id ] = array(
+		'score'  => $score,
+		'seo'    => $sum( 'seo' ),
+		'geo'    => $sum( 'geo' ),
+		'band'   => nwcs_seo_score_band( $score ),
+		'checks' => $checks,
+		'notes'  => $notes,
+	);
+
+	return $cache[ $blog_id ];
+}
+
+/**
+ * Kontrolun durumu: tam, kismen, eksik.
+ *
+ * @return array{key:string, label:string}
+ */
+function nwcs_seo_check_state( array $check ): array {
+	if ( $check['passed'] >= 1 ) {
+		return array( 'key' => 'pass', 'label' => 'Tamam' );
+	}
+
+	return $check['passed'] > 0
+		? array( 'key' => 'partial', 'label' => 'Kısmen' )
+		: array( 'key' => 'fail', 'label' => 'Eksik' );
+}
+
+/**
+ * Kucuk puan gostergesi (ag ozeti tablosu).
+ */
+function nwcs_render_seo_score_gauge( array $score ): void {
+	?>
+	<div class="nwcs-score nwcs-score--<?php echo esc_attr( $score['band']['key'] ); ?>">
+		<div class="nwcs-score__row">
+			<strong class="nwcs-score__num"><?php echo (int) $score['score']; ?></strong>
+			<span class="nwcs-score__band"><?php echo esc_html( $score['band']['label'] ); ?></span>
+		</div>
+		<div class="nwcs-score__bar" role="meter" aria-valuemin="0" aria-valuemax="100"
+			aria-valuenow="<?php echo esc_attr( (string) $score['score'] ); ?>"
+			aria-valuetext="<?php echo esc_attr( $score['score'] . ' / 100, ' . $score['band']['label'] ); ?>"
+			aria-label="Uyumluluk puanı">
+			<span style="width: <?php echo esc_attr( (string) $score['score'] ); ?>%"></span>
+		</div>
+		<span class="nwcs-table__spec">SEO <?php echo (int) $score['seo']; ?> · GEO <?php echo (int) $score['geo']; ?></span>
+	</div>
+	<?php
+}
+
+/**
+ * Site gorunumundeki puan karti: buyuk puan, alt puanlar ve kontrol listesi.
+ */
+function nwcs_render_seo_score_card( array $score ): void {
+	$groups = array(
+		'seo' => array( 'label' => 'SEO', 'lead' => 'Arama motorları' ),
+		'geo' => array( 'label' => 'GEO', 'lead' => 'Yapay zekâ aramaları' ),
+	);
+	?>
+	<section class="nwcs-pool__card nwcs-scorecard nwcs-score--<?php echo esc_attr( $score['band']['key'] ); ?>" aria-labelledby="nwcs-scorecard-title">
+		<h2 class="nwcs-pool__title" id="nwcs-scorecard-title">Uyumluluk puanı</h2>
+
+		<div class="nwcs-scorecard__head">
+			<div class="nwcs-scorecard__total">
+				<span class="nwcs-scorecard__num"><?php echo (int) $score['score']; ?></span><span class="nwcs-scorecard__of">/100</span>
+				<span class="nwcs-score__band"><?php echo esc_html( $score['band']['label'] ); ?></span>
+			</div>
+
+			<div class="nwcs-scorecard__subs">
+				<?php foreach ( $groups as $group => $info ) : ?>
+					<div class="nwcs-scorecard__sub nwcs-score--<?php echo esc_attr( nwcs_seo_score_band( (int) $score[ $group ] )['key'] ); ?>">
+						<span class="nwcs-scorecard__sub-label">
+							<strong><?php echo esc_html( $info['label'] ); ?></strong>
+							<?php echo esc_html( $info['lead'] ); ?>
+						</span>
+						<meter class="nwcs-scorecard__meter" min="0" max="100" low="60" high="85" optimum="100"
+							value="<?php echo esc_attr( (string) $score[ $group ] ); ?>"
+							aria-label="<?php echo esc_attr( $info['label'] . ' puanı' ); ?>"></meter>
+						<span class="nwcs-scorecard__sub-num"><?php echo (int) $score[ $group ]; ?></span>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+
+		<?php foreach ( $groups as $group => $info ) :
+			$checks = array_filter( $score['checks'], static fn( array $check ): bool => $group === $check['group'] );
+			$open   = array_filter( $checks, static fn( array $check ): bool => $check['passed'] < 1 );
+			$done   = array_filter( $checks, static fn( array $check ): bool => $check['passed'] >= 1 );
+			?>
+			<h3 class="nwcs-scorecard__group"><?php echo esc_html( $info['label'] . ' · ' . $info['lead'] ); ?></h3>
+
+			<?php if ( $open ) : ?>
+				<ul class="nwcs-scorecard__list">
+					<?php foreach ( $open as $check ) :
+						$state = nwcs_seo_check_state( $check );
+						?>
+						<li class="nwcs-scorecard__item is-<?php echo esc_attr( $state['key'] ); ?>">
+							<span class="nwcs-scorecard__mark" aria-hidden="true"></span>
+							<div>
+								<div class="nwcs-scorecard__line">
+									<strong><?php echo esc_html( $check['label'] ); ?></strong>
+									<span class="nwcs-scorecard__state"><?php echo esc_html( $state['label'] ); ?></span>
+								</div>
+								<span class="nwcs-table__spec"><?php echo esc_html( $check['detail'] ); ?> · <?php echo (int) round( $check['weight'] * ( 1 - $check['passed'] ) ); ?> puan kayıp</span>
+								<p class="nwcs-scorecard__hint"><?php echo esc_html( $check['hint'] ); ?></p>
+							</div>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+
+			<?php if ( $done ) : ?>
+				<details class="nwcs-scorecard__done"<?php echo $open ? '' : ' open'; ?>>
+					<summary>Tamamlananlar (<?php echo (int) count( $done ); ?>)</summary>
+					<ul class="nwcs-scorecard__list">
+						<?php foreach ( $done as $check ) : ?>
+							<li class="nwcs-scorecard__item is-pass">
+								<span class="nwcs-scorecard__mark" aria-hidden="true"></span>
+								<div class="nwcs-scorecard__line">
+									<span><?php echo esc_html( $check['label'] ); ?></span>
+									<span class="nwcs-scorecard__state"><span class="screen-reader-text">Tamam: </span><?php echo esc_html( $check['detail'] ); ?></span>
+								</div>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				</details>
+			<?php endif; ?>
+		<?php endforeach; ?>
+
+		<?php foreach ( $score['notes'] as $note ) : ?>
+			<p class="nwcs-hint"><?php echo esc_html( $note ); ?></p>
+		<?php endforeach; ?>
+	</section>
+	<?php
+}
+
+/* ====================================================================== *
  * Arayuz
  * ====================================================================== */
 
@@ -267,6 +779,7 @@ function nwcs_render_seo_overview( array $sites ): void {
 				<thead>
 					<tr>
 						<th>Site</th>
+						<th>Puan</th>
 						<th>Sayfa</th>
 						<th>Elle iyileştirilen</th>
 						<th>Firma bilgisi</th>
@@ -281,6 +794,7 @@ function nwcs_render_seo_overview( array $sites ): void {
 								<a class="nwcs-seo__site" href="<?php echo esc_url( nwcs_seo_url( $id ) ); ?>"><?php echo esc_html( $sites[ $id ]['label'] ); ?></a>
 								<span class="nwcs-table__spec"><?php echo esc_html( str_replace( array( 'http://', 'https://' ), '', $report['home'] ) ); ?></span>
 							</td>
+							<td class="nwcs-seo__score-cell"><?php nwcs_render_seo_score_gauge( nwcs_seo_score( $id ) ); ?></td>
 							<td><?php echo (int) count( $report['pages'] ); ?></td>
 							<td>
 								<?php echo (int) $report['custom']; ?> / <?php echo (int) count( $report['pages'] ); ?>
@@ -452,6 +966,8 @@ function nwcs_render_seo_site( int $blog_id, array $site ): void {
 		</div>
 
 		<aside class="nwcs-seo__side">
+			<?php nwcs_render_seo_score_card( nwcs_seo_score( $blog_id ) ); ?>
+
 			<section class="nwcs-pool__card">
 				<h2 class="nwcs-pool__title">
 					Firma bilgisi

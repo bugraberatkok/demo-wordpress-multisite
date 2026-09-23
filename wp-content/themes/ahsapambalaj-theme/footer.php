@@ -15,9 +15,9 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 		<div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
 
 			<div>
-				<p class="font-display text-xl font-semibold text-bone">
-					<?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?>
-					<span class="font-normal text-bone/60"><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_sub' ) ); ?></span>
+				<p class="stencil-mark text-[1.5rem] text-bone">
+					<span><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></span>
+					<span class="stencil-mark__sub text-timber-soft"><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_sub' ) ); ?></span>
 				</p>
 				<p class="reading mt-4 text-base/relaxed text-bone/70" <?php nwcs_edit_attr( 'global', 'footer', 'tagline' ); ?>>
 					<?php echo esc_html( nwcs_field( 'global', 'footer', 'tagline' ) ); ?>

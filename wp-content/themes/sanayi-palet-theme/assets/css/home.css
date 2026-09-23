@@ -390,6 +390,7 @@
 	padding-top: 1rem;
 	color: var(--yesil);
 	font-family: var(--font-baslik);
+	font-stretch: var(--baslik-genislik);
 	font-size: 1.25rem;
 	font-weight: 700;
 	text-decoration: underline;

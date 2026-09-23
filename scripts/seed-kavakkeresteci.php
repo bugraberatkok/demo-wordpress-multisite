@@ -52,7 +52,6 @@ $m = array(
 	'osb_3'    => kr_seed_media( 'kereste/osb-OSB__2_.jpg', 'kk-osb-3', 'OSB yüzeyi', 'Yakından OSB levha yüzeyi ve kenarları' ),
 	'osb_4'    => kr_seed_media( 'kereste/osb-OSB__3_.jpg', 'kk-osb-4', 'OSB istifi', 'Düzgün istiflenmiş OSB levha paketi' ),
 	'hero'     => kr_seed_media( 'kereste/ornek-hero-kavak.jpg', 'kk-hero-ornek', 'Örnek görsel: kavak kereste istifi', 'Açık renkli kavak kereste istifi, uçlarında yeşil boya işaretleri' ),
-	'kocist'   => kr_seed_media( 'logo coreldraw.png', 'kocist-logo', 'Koçist Orman Ürünleri logosu', 'Koçist Orman Ürünleri' ),
 );
 
 foreach ( $m as $key => $id ) {
@@ -62,7 +61,6 @@ foreach ( $m as $key => $id ) {
 kr_seed_content(
 	$manifest,
 	array(
-		'global'     => array( 'header' => array( 'parent_logo' => $m['kocist'] ) ),
 		'home'       => array( 'hero' => array( 'image' => $m['hero'] ) ),
 		'about'      => array( 'story' => array( 'image' => $m['kavak_2'] ) ),
 		'urun_kavak' => array(

@@ -38,11 +38,14 @@ function ahsapambalaj_setup(): void {
 
 add_action( 'wp_enqueue_scripts', 'ahsapambalaj_assets' );
 function ahsapambalaj_assets(): void {
-	$version = wp_get_theme()->get( 'Version' );
+	// Surum = tema surumu + varliklarin en son degisim zamani: CSS/JS her
+	// degistiginde adres degisir, tarayici ve onbellek eski dosyayi gostermez.
+	$files   = array_merge( glob( get_theme_file_path( 'assets/*.{css,js}' ), GLOB_BRACE ) ?: array(), glob( get_theme_file_path( 'assets/*/*.{css,js}' ), GLOB_BRACE ) ?: array() );
+	$version = wp_get_theme()->get( 'Version' ) . '.' . ( $files ? max( array_map( 'filemtime', $files ) ) : 0 );
 
 	wp_enqueue_style(
 		'ahsapambalaj-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Literata:opsz,wght@7..72,400..600&display=swap',
+		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
 		array(),
 		null
 	);
@@ -365,7 +368,9 @@ function ahsapambalaj_handle_quote(): void {
 		$errors['size'] = 'En, boy ve yükseklik bilgisini yazın.';
 	}
 
-	$token = wp_generate_password( 16, false, false );
+	// Kucuk harf onaltilik: okurken sanitize_key kucultur; karisik harfli
+	// belirtec nesne onbellegi (Redis, LiteSpeed) olan sunucuda bulunamazdi.
+	$token = bin2hex( random_bytes( 10 ) );
 
 	if ( $errors ) {
 		set_transient( 'ahsapambalaj_quote_' . $token, array( 'errors' => $errors, 'values' => $values ), 10 * MINUTE_IN_SECONDS );
@@ -434,6 +439,7 @@ function ahsapambalaj_handle_quote(): void {
  */
 function ahsapambalaj_quote_state(): array {
 	$token = isset( $_GET['aas'] ) ? sanitize_key( wp_unslash( $_GET['aas'] ) ) : '';
+	$token = preg_match( '/^[a-f0-9]{20}$/', $token ) ? $token : '';
 
 	if ( ! $token ) {
 		return array( 'errors' => array(), 'values' => array(), 'success' => false );

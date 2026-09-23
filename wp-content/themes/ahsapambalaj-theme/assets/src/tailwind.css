@@ -19,7 +19,9 @@
  * Tasarim jetonlari
  *
  * Renk kurali bilgi tasir, susleme degildir:
- *   forest  = eylem   (baglanti, dugme, odak halkasi)
+ *   signal  = eylem   (baglanti, dugme, odak halkasi). Ihracat sandiklarina
+ *             basilan uyari etiketlerinin pas kirmizisi; ahsapkasa'nin yesilinden
+ *             ayrissin diye (onceki: #285434 / #1d3f26).
  *   timber  = olcu    (centik, cizgi, teknik etiket)
  * ------------------------------------------------------------------ */
 @theme {
@@ -35,15 +37,17 @@
 	--color-ink-soft:     #2c362f;
 	/* Alt bilgi ve hero perdesi: notr koyu. Yesil yalnizca eylem rengi kalsin. */
 	--color-night:        #151716;
-	--color-forest:       #285434;
-	--color-forest-deep:  #1d3f26;
+	--color-signal:       #9b3a1f;
+	--color-signal-deep:  #7a2c16;
 	--color-timber:       #b08042;
 	--color-timber-soft:  #e0c597;
 	--color-alert:        #8c3a2b;
 	--color-alert-soft:   #f3e3df;
 
 	--font-display: "Archivo", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
-	--font-body:    "Literata", Georgia, "Times New Roman", serif;
+	/* Ag geneli ortak font Archivo. Onceki govde fontu (geri donus icin):
+	   "Literata", Georgia, "Times New Roman", serif. */
+	--font-body:    "Archivo", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
 
 	/* Bringhurst olceginden turetilmis basamaklar */
 	--text-2xs:   0.75rem;
@@ -94,11 +98,11 @@
 	}
 
 	a {
-		color: var(--color-forest);
+		color: var(--color-signal);
 	}
 
 	:focus-visible {
-		outline: 2px solid var(--color-forest);
+		outline: 2px solid var(--color-signal);
 		outline-offset: 3px;
 		border-radius: 2px;
 	}
@@ -135,6 +139,40 @@ body.admin-bar [data-header] {
  * Teknik cizimdeki kot/olcu okunun aynisi: uclarda centik, ortada etiket.
  * ------------------------------------------------------------------ */
 @layer components {
+
+	/* ---------------------------------------------------------------- *
+	 * Sablon etiketi: ihracat sandiginin yan yuzune puskurtulen marka
+	 * yazisi. Cerceveli, dar ve kalin buyuk harf; logo ve bolum
+	 * basliklarinda ayni dil.
+	 * ---------------------------------------------------------------- */
+	.stencil-mark {
+		display: inline-grid;
+		border: 2px solid currentColor;
+		padding: 0.3rem 0.55rem 0.28rem;
+		font-family: var(--font-display);
+		font-weight: 900;
+		/* Temanin basliklari wdth eksenini font-variation-settings ile verir;
+		   font-stretch onu ezemez, ayni ozellik kullanilir. */
+		font-variation-settings: "wdth" 62;
+		line-height: 0.95;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.stencil-mark__sub {
+		color: var(--color-signal);
+		font-size: 0.72em;
+		letter-spacing: 0.22em;
+	}
+
+	/* Basliklar: dar kesim; ahsapkasa'nin normal genislikli basliklarindan
+	   ayrisan sanayi karakteri. */
+	.title-condensed {
+		font-variation-settings: "wdth" 75;
+		font-weight: 800;
+		letter-spacing: -0.005em;
+	}
+
 	.measure {
 		display: flex;
 		align-items: center;
@@ -320,13 +358,13 @@ body.admin-bar [data-header] {
 
 	/* Dolu yesil: sayfadaki birincil eylem. */
 	.btn--solid {
-		background: var(--color-forest);
+		background: var(--color-signal);
 		color: var(--color-bone);
 	}
 
 	.btn--solid:hover,
 	.btn--solid:focus-visible {
-		background: var(--color-forest-deep);
+		background: var(--color-signal-deep);
 		color: var(--color-bone);
 	}
 
@@ -346,7 +384,7 @@ body.admin-bar [data-header] {
 	/* Koyu ya da yesil zemin uzerinde birincil eylem. */
 	.btn--light {
 		background: var(--color-surface);
-		color: var(--color-forest-deep);
+		color: var(--color-signal-deep);
 	}
 
 	.btn--light:hover,

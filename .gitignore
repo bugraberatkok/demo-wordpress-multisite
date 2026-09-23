@@ -6,3 +6,6 @@ wp-content/uploads/
 .mcp.json
 build/node_modules/
 backups/
+
+# Tema kaynagi derlenirken olusan gecici dosya (build/theme-src.mjs)
+build/.tmp-*.css

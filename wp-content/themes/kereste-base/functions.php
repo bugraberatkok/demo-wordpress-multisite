@@ -48,7 +48,7 @@ function kr_assets(): void {
 
 	wp_enqueue_style(
 		'kr-fonts',
-		'https://fonts.googleapis.com/css2?family=Saira+Stencil+One&family=Source+Sans+3:wght@400;600;700&family=Zilla+Slab:wght@600;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
 		array(),
 		null
 	);
@@ -134,6 +134,36 @@ function kr_image_tag( array $image, string $class = '', string $alt_fallback = 
 		esc_attr( $class ),
 		esc_html( $alt_fallback ?: 'Görsel eklenmedi' )
 	);
+}
+
+/**
+ * Logo: cam agaci isareti ve iki satir dar buyuk harf (ust satir sitenin
+ * adi, alt satir "Keresteci"). Istanbul Keresteci ile ayni logo dili; uc
+ * keresteci sitesi ust kisimda akraba gorunur. Logo gorseli yuklenirse o
+ * kullanilir.
+ *
+ * $tone: 'dark' koyu zemin (ust bar, alt bilgi), 'light' acik zemin.
+ */
+function kr_logo( string $tone = 'dark', string $class = '' ): void {
+	$image = nwcs_image( 'global', 'header', 'logo_image', 'medium' );
+	$top   = (string) nwcs_field( 'global', 'header', 'logo_word' );
+	$rest  = (string) nwcs_field( 'global', 'header', 'logo_rest' );
+	?>
+	<span class="kr-logo kr-logo--<?php echo esc_attr( $tone ); ?> <?php echo esc_attr( $class ); ?>">
+		<?php if ( $image['url'] ) : ?>
+			<img class="kr-logo__image" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( trim( $top . ' ' . $rest ) ); ?>" />
+		<?php else : ?>
+			<svg class="kr-logo__mark" viewBox="0 0 32 40" width="32" height="40" aria-hidden="true" focusable="false">
+				<path d="M16 2 7 13h5l-8 10h6L3 33h26l-7-10h6l-8-10h5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" />
+				<path d="M16 33v5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+			</svg>
+			<span class="kr-logo__text">
+				<span class="kr-logo__top"><?php echo esc_html( $top ); ?></span>
+				<span class="kr-logo__bottom"><?php echo esc_html( $rest ); ?></span>
+			</span>
+		<?php endif; ?>
+	</span>
+	<?php
 }
 
 function kr_multiline( string $value ): string {

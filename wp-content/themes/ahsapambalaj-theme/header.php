@@ -5,7 +5,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$logo    = ahsapambalaj_image( nwcs_image( 'global', 'header', 'logo_image', 'medium' ), 'logo' );
+// Yalnizca panelden yuklenen logo; yoksa sablon etiketi yazi logosu.
+$logo    = nwcs_image( 'global', 'header', 'logo_image', 'medium' );
 $menu    = nwcs_rows( 'global', 'header', 'menu' );
 $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms]', 'delay-[240ms]', 'delay-[290ms]' );
 ?>
@@ -38,18 +39,10 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 					alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
 					class="h-11 w-auto transition-all duration-300 ease-out group-data-[stuck=true]:h-8" />
 			<?php else : ?>
-				<span aria-hidden="true" class="flex h-9 w-9 items-center justify-center rounded-sm bg-forest transition-all duration-300 ease-out group-data-[stuck=true]:h-7 group-data-[stuck=true]:w-7">
-					<span class="h-3 w-3 rounded-full bg-timber-soft"></span>
-				</span>
-
-				<span class="leading-none">
-					<span class="block font-display text-lg font-semibold tracking-tight transition-all duration-300 ease-out group-data-[stuck=true]:text-base">
-						<?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?>
-					</span>
-					<span class="mt-1 block overflow-hidden font-display text-xs tracking-[0.16em] text-moss opacity-100 transition-all duration-300 ease-out group-data-[stuck=true]:mt-0 group-data-[stuck=true]:max-h-0 group-data-[stuck=true]:opacity-0"
-						<?php nwcs_edit_attr( 'global', 'header', 'logo_sub' ); ?>>
-						<?php echo esc_html( nwcs_field( 'global', 'header', 'logo_sub' ) ); ?>
-					</span>
+				<?php // Sablon etiketi: sandik yuzundeki marka yazisi gibi cerceveli. ?>
+				<span class="stencil-mark text-[1.35rem] text-ink transition-all duration-300 ease-out group-data-[stuck=true]:text-[1.1rem]">
+					<span><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></span>
+					<span class="stencil-mark__sub" <?php nwcs_edit_attr( 'global', 'header', 'logo_sub' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_sub' ) ); ?></span>
 				</span>
 			<?php endif; ?>
 		</a>
@@ -59,7 +52,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 				$url = ahsapambalaj_link( $item['url'] ?? '' );
 				?>
 				<a href="<?php echo esc_url( $url ); ?>"
-					class="navtick relative font-display text-sm font-medium text-ink/85 transition-colors duration-200 hover:text-forest"
+					class="navtick relative font-display text-sm font-medium text-ink/85 transition-colors duration-200 hover:text-signal"
 					<?php echo ahsapambalaj_is_current( $item['url'] ?? '' ) ? 'aria-current="page"' : ''; ?>>
 					<?php echo esc_html( $item['label'] ?? '' ); ?>
 				</a>
@@ -74,7 +67,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 				<?php echo $whatsapp ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1" title="WhatsApp bağlantısı henüz girilmedi"'; ?>
 				class="btn btn--sm btn--outline hidden md:inline-flex<?php echo $whatsapp ? '' : ' pointer-events-none opacity-55'; ?>"
 				<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
-				<span class="text-forest" aria-hidden="true"><?php nwcs_the_icon( 'whatsapp', '', 18 ); ?></span>
+				<span class="text-signal" aria-hidden="true"><?php nwcs_the_icon( 'whatsapp', '', 18 ); ?></span>
 				<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 			</a>
 
@@ -99,7 +92,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 		<nav class="mx-auto flex max-w-[76rem] flex-col gap-1 px-6 py-5" aria-label="Mobil menü">
 			<?php foreach ( $menu as $index => $item ) : ?>
 				<a href="<?php echo esc_url( ahsapambalaj_link( $item['url'] ?? '' ) ); ?>"
-					class="translate-y-2 border-b border-dust/70 py-3 font-display text-base font-medium text-ink opacity-0 transition duration-300 ease-out last:border-0 aria-[current=page]:text-forest group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 <?php echo esc_attr( $delays[ $index ] ?? 'delay-[290ms]' ); ?>"
+					class="translate-y-2 border-b border-dust/70 py-3 font-display text-base font-medium text-ink opacity-0 transition duration-300 ease-out last:border-0 aria-[current=page]:text-signal group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 <?php echo esc_attr( $delays[ $index ] ?? 'delay-[290ms]' ); ?>"
 					<?php echo ahsapambalaj_is_current( $item['url'] ?? '' ) ? 'aria-current="page"' : ''; ?>>
 					<?php echo esc_html( $item['label'] ?? '' ); ?>
 				</a>
@@ -108,7 +101,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 			<a href="<?php echo $whatsapp ? esc_url( ahsapambalaj_link( $whatsapp ) ) : '#'; ?>"
 				<?php echo $whatsapp ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1"'; ?>
 				class="btn btn--sm btn--outline mt-4 w-full translate-y-2 opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[240ms]<?php echo $whatsapp ? '' : ' pointer-events-none opacity-55'; ?>">
-				<span class="text-forest" aria-hidden="true"><?php nwcs_the_icon( 'whatsapp', '', 18 ); ?></span>
+				<span class="text-signal" aria-hidden="true"><?php nwcs_the_icon( 'whatsapp', '', 18 ); ?></span>
 				<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 			</a>
 

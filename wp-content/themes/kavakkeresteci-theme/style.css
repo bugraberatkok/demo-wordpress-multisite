@@ -22,4 +22,7 @@ Text Domain: kavakkeresteci
 	--site-stamp: #7a4a26;
 	--site-ink: #2a221c;
 	--site-stone: #eef0e9;
+	--site-ink-deep: #1d1713;
+	/* Koyu zeminde logo ust satiri: Koçist logosunun acik yesili. */
+	--site-mark-bright: #98c840;
 }

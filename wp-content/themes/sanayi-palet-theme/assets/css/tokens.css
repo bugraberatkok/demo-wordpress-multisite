@@ -24,9 +24,14 @@
 	--odak: var(--yesil);
 
 	/* Yazi tipleri */
-	--font-baslik: "Big Shoulders", "Arial Narrow", sans-serif;
-	--font-damga: "Big Shoulders Stencil", "Big Shoulders", "Arial Narrow", sans-serif;
-	--font-govde: "Instrument Sans", system-ui, sans-serif;
+	/* Ag geneli ortak font Archivo. Basliklar ve damga en dar kesimde
+	   (--baslik-genislik), eski Big Shoulders karakterine yakin.
+	   Onceki fontlar (geri donus icin): baslik "Big Shoulders" 600..800,
+	   damga "Big Shoulders Stencil" 800, govde "Instrument Sans" 400..600. */
+	--font-baslik: "Archivo", "Arial Narrow", sans-serif;
+	--font-damga: "Archivo", "Arial Narrow", sans-serif;
+	--font-govde: "Archivo", system-ui, sans-serif;
+	--baslik-genislik: 62%;
 
 	/* Olcu */
 	--sayfa-genislik: 72rem;

@@ -55,16 +55,19 @@ function sanayi_palet_setup(): void {
 
 add_action( 'wp_enqueue_scripts', 'sanayi_palet_assets' );
 function sanayi_palet_assets(): void {
-	$version = wp_get_theme()->get( 'Version' );
+	// Surum = tema surumu + varliklarin en son degisim zamani: CSS/JS her
+	// degistiginde adres degisir, tarayici ve onbellek eski dosyayi gostermez.
+	$files   = array_merge( glob( get_theme_file_path( 'assets/*.{css,js}' ), GLOB_BRACE ) ?: array(), glob( get_theme_file_path( 'assets/*/*.{css,js}' ), GLOB_BRACE ) ?: array() );
+	$version = wp_get_theme()->get( 'Version' ) . '.' . ( $files ? max( array_map( 'filemtime', $files ) ) : 0 );
 
 	/*
-	 * Big Shoulders: dar, sanayi tabelasi karakterinde baslik ailesi.
-	 * Big Shoulders Stencil: yalnizca damga. Instrument Sans: govde.
+	 * Ag geneli ortak font Archivo (baslik ve damga dar kesimde, bkz.
+	 * tokens.css). Onceki: Big Shoulders, Big Shoulders Stencil, Instrument Sans.
 	 * Surum null: URL'e ?ver eklenmesin, Google Fonts onbellegi bozulmasin.
 	 */
 	wp_enqueue_style(
 		'sanayi-palet-fonts',
-		'https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@600..800&family=Big+Shoulders+Stencil:wght@800&family=Instrument+Sans:wght@400..600&display=swap',
+		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
 		array(),
 		null
 	);

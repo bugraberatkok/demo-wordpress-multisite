@@ -1097,14 +1097,10 @@ git etiketleri `yedek/oncesi-entegrasyon-main` ve `yedek/oncesi-entegrasyon-pr`.
 ## istanbulpaletci hero: düz renk yerine fotoğraf
 
 Kullanıcı hero'yu beğendi ama diğer sitelerin fotoğraflı hero'larına uymasını istedi.
-Föy, ölçü çizgileri ve bilgi şeridi aynı kaldı; düz indigo zeminin yerine palet sahası
-fotoğrafı (forklift ve palet istifleri) geldi. Üstünde **indigo tonlu perde**: metin
-tarafı koyu, föyün arkası açık; marka rengi korunuyor. Fotoğraf yoksa eski perdeli
-indigo zemine döner (`home.hero.bg_image`, not alanı `bg_note`).
-
-Görsel, Emirhan'ın Sanayi Palet temasındaki müşteri onaylı fotoğraf
-(`resources/palet-sahasi-forklift.jpg`); Sanayi Palet onu yalnızca Hakkımızda
-başlığında kullanıyor. Yapay zekayla yeni görsel üretilemedi (Pixa kredisi bitti).
+Föy, ölçü çizgileri ve bilgi şeridi aynı kaldı; düz indigo zeminin yerine fotoğraf ve
+indigo tonlu perde geldi (`home.hero.bg_image`, not alanı `bg_note`). Fotoğraf yoksa eski
+perdeli indigo zemine döner. İlk denemede palet sahası/forklift fotoğrafı kullanıldı;
+aşağıdaki "kuzen" kararıyla palet duvarına geçildi.
 
 ## Tarayıcı önbelleği: dosya sürümü
 
@@ -1149,4 +1145,94 @@ Kalan, içerik düzeyinde küçük noktalar (Emirhan'ın metinleri; SEO sekmesin
 iyileştirilebilir): Koçist'te 4 blog yazısının kendi başlığı 60 karakterden uzun,
 6 sayfanın açıklaması 55–69 karakter. İçerik tutarsızlıkları (tecrübe yılı, ünvan,
 adres, çalışma saati, Euro palet değerleri) firma sahibinin kararını bekliyor.
+
+## Tasarım birliği turu (feature/tasarim-birlik)
+
+### Ortak font: Archivo
+
+Kullanıcı isteği: 7 sitede (Koçist hariç) ortak font; seçim, şu an en çok kullanılan
+font. Sayım: Archivo 3 site (ahsapkasa, İstanbul Keresteci, Ahşap Ambalaj), Literata 2,
+diğerleri birer site. Archivo değişken bir font (genişlik ekseni 62–125, ağırlık
+300–900): tek aileyle hem dar başlık hem normal metin yazılır. Başlıkların eski
+karakteri genişlik ekseniyle korundu (dar fontların yerine dar kesim).
+
+**Geri dönüş için önceki fontlar** (her dosyada da yorum olarak duruyor):
+
+| Site | Önceki başlık | Önceki metin | Şimdi |
+| --- | --- | --- | --- |
+| ahsapkasa | Archivo | Literata | Archivo (başlık aynı) |
+| istanbulpaletci | Barlow Condensed 500–700 | Barlow 400–600 | Archivo, başlık wdth 75 |
+| ithal/kavakkeresteci | Zilla Slab 600/700; ölçü etiketi Saira Stencil One | Source Sans 3 | Archivo, başlık wdth 75 800, etiket wdth 62 900 |
+| İstanbul Keresteci | Archivo | Archivo | değişmedi |
+| Sanayi Palet | Big Shoulders 600–800; damga Big Shoulders Stencil 800 | Instrument Sans | Archivo, başlık ve damga wdth 62 |
+| Ahşap Ambalaj | Archivo | Literata | Archivo |
+| Koçist | Archivo | Archivo | dokunulmadı |
+
+Değişen yerler: temaların `functions.php` Google Fonts adresi ve font jetonları
+(`build/*.css`, `sanayi-palet-theme/assets/css/tokens.css`,
+`ahsapambalaj-theme/assets/src/tailwind.css`). Geri dönmek için adres ve jeton eski
+değerine alınır, CSS yeniden derlenir.
+
+### Üç keresteci sitesinin üst kısmı
+
+İthal ve Kavak Keresteci'nin üst kısmı İstanbul Keresteci'ninkine benzetildi: ince
+bilgi şeridi (adres, e-posta, çalışma saati), koyu menü bandı, çam ağaçlı iki satır
+logo (üst satır sitenin adı, alt satır "Keresteci"), sağda "Fiyat ve stok için arayın"
+telefon kutusu. Logo işareti İstanbul Keresteci'nin çizimiyle aynı; renkler her sitenin
+kendi parti boyası (ithal petrol, kavak yeşil-kahve). Baş harf rozeti (İK/KK) ve Koçist
+logosu iki siteden de kaldırıldı (alanlar: `logo_mark`, `parent_logo`, `parent_label`,
+`parent_url` manifestten çıktı; yeni `phone_note`).
+
+### İstanbul Paletçi ↔ Sanayi Palet: aynı hero zemini
+
+Kullanıcı: iki site kuzen; hero arka planı benzesin, bileşenler değil. Paletçi'nin hero
+zemini artık Sanayi Palet'inkiyle aynı: palet duvarı fotoğrafı (`resources/palet-duvari.jpg`,
+Sanayi Palet temasındaki müşteri onaylı görsel) ve üstünde düz, yarı saydam perde (Sanayi
+Palet'teki gibi %58). Perde rengi Sanayi Palet'te yanık kahve, Paletçi'de koyu indigo;
+föy, ölçü çizgileri ve bilgi şeridi aynı kaldı.
+
+### Ahşap Ambalaj: ahsapkasa'dan ayrışma
+
+Ahşap Ambalaj, ahsapkasa'nın neredeyse kopyasıydı (aynı Koçist logosu, düzen, renk).
+Tema bozulmadan (alanlar, sayfalar, yapı aynı) şu kısımlar değişti:
+
+- **Logo**: Koçist varsayılanı yerine sitenin kendi adı; ihracat sandığına basılan
+  şablon etiketi gibi çerçeveli dar büyük harf ("AHŞAP AMBALAJ / SANAYİ"). Tema içindeki
+  Koçist logo dosyası artık otomatik kullanılmıyor; panelden yüklenen logo öncelikli.
+- **Eylem rengi**: orman yeşili (ahsapkasa ile aynı) → sandık uyarı etiketlerinin pas
+  kırmızısı `#9B3A1F` (jeton adı `forest` → `signal`).
+- **Hero**: ortalanmış başlık yerine sola hizalı dar başlık, soldan koyulaşan perde.
+- **Giriş**: ortalı kutu yerine iki sütun (solda dar başlık, sağda metin).
+- **Ürün grubu**: dört dikey kart yerine iki sütunlu yatay satırlar.
+- **Teklif şeridi**: yeşil bant yerine koyu bant, solda metin sağda düğme.
+
+Tailwind kaynağı temanın içinde kaldı (`assets/src/tailwind.css`); derlemek için
+`cd build && npm run build:ahsapambalaj` (`build/theme-src.mjs`). Formdaki büyük/küçük
+harfli belirteç hatası da düzeltildi (nesne önbellekli sunucuda başarı mesajı
+kaybolurdu).
+
+Metin düzeyinde hâlâ ahsapkasa ile ortak cümleler var (Hakkımızda); bunlar içerik
+kararı, firma/Emirhan tarafından yazılacak.
+
+### Panelde SEO ve GEO uyumluluk puanı
+
+SEO ve GEO sekmesinde her site için 0–100 puan (SEO ve GEO alt puanlarıyla): ağ
+özetinde sütun, site görünümünde kontrol listesi (eksik olan, kaybedilen puan, nasıl
+düzeltileceği). Puan gerçek veriden hesaplanır: firma bilgisi, başlık ve açıklama
+uzunlukları, paylaşım görseli, llms.txt, grup ilişkisi, harita konumu, soru-cevap
+sayfası, ürün şartnameleri, siteler arası tutarlılık. Siteye uymayan kontrol (ürünü
+olmayan sitede ürün şartnamesi) başarısız sayılmaz, hesaba katılmaz. İlk ölçüm:
+ahsapkasa 86, istanbulpaletci 90, ithal 90, kavak 90, Koçist 81, İstanbul Keresteci 83,
+Sanayi Palet 83, Ahşap Ambalaj 76. Ortak eksik: hiçbir sitede harita koordinatı yok.
+
+### Formlar: e-posta bildirimi
+
+7 sitenin formu da gönderimi kaydediyordu (yönetimde "Teklif İstekleri" / "İletişim
+Mesajları") ama hiçbiri e-posta göndermiyordu. Eklentiye ortak modül eklendi
+(`includes/forms.php`): yeni kayıtta sitenin firma e-postasına (SEO sekmesindeki; yoksa
+yönetici e-postası) bildirim, müşteri e-postası Yanıtla adresinde. Gönderim ziyaretçinin
+yönlendirmesinden sonra yapılır; e-posta hatası formu bozmaz, yalnızca günlüğe yazılır.
+Yerelde posta sunucusu yok, gönderim bilinçli olarak başarısız olur. Canlıda gereken:
+her alan adı için cPanel posta kutusu, SMTP eklentisi, SPF/DKIM/DMARC (README →
+"Formlar ve e-posta").
 

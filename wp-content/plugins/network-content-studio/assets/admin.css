@@ -1369,3 +1369,89 @@ button.nwcs-linkout[data-nwcs-csv-open]:hover { background: #0d9488; }
 	.nwcs-seo__grid, .nwcs-seo__layout { grid-template-columns: 1fr; }
 	.nwcs-seo__side { position: static; }
 }
+
+/* ---------- SEO ve GEO: uyumluluk puani ---------- */
+.nwcs-score { --nwcs-score: var(--nwcs-muted); --nwcs-score-soft: var(--nwcs-soft); }
+.nwcs-score--strong { --nwcs-score: var(--nwcs-teal); --nwcs-score-soft: #e6f6f4; }
+.nwcs-score--medium { --nwcs-score: var(--nwcs-amber); --nwcs-score-soft: #fdf3e7; }
+.nwcs-score--weak { --nwcs-score: #b42318; --nwcs-score-soft: #fdecea; }
+
+/* Ag ozeti tablosundaki kucuk gosterge */
+.nwcs-seo__score-cell { min-width: 120px; }
+.nwcs-score__row { display: flex; align-items: baseline; gap: 8px; }
+.nwcs-score__num { font-size: 20px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--nwcs-ink); }
+.nwcs-score__band {
+	display: inline-block;
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: var(--nwcs-score-soft);
+	color: var(--nwcs-score);
+	font-size: 11.5px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.nwcs-score__bar {
+	height: 6px;
+	margin: 6px 0 4px;
+	border-radius: 999px;
+	background: var(--nwcs-line);
+	overflow: hidden;
+}
+.nwcs-score__bar span { display: block; height: 100%; border-radius: inherit; background: var(--nwcs-score); }
+
+/* Site gorunumundeki puan karti */
+.nwcs-scorecard__head { display: grid; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--nwcs-line); }
+.nwcs-scorecard__total { display: flex; align-items: baseline; gap: 4px; }
+.nwcs-scorecard__num { font-size: 44px; line-height: 1; font-weight: 700; color: var(--nwcs-score); font-variant-numeric: tabular-nums; }
+.nwcs-scorecard__of { font-size: 14px; color: var(--nwcs-muted); margin-right: 8px; }
+.nwcs-scorecard__subs { display: grid; gap: 8px; }
+.nwcs-scorecard__sub { display: grid; grid-template-columns: 150px minmax(0, 1fr) 30px; align-items: center; gap: 10px; }
+.nwcs-scorecard__sub-label { font-size: 12px; color: var(--nwcs-muted); }
+.nwcs-scorecard__sub-label strong { color: var(--nwcs-ink); margin-right: 4px; }
+.nwcs-scorecard__sub-num { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.nwcs-scorecard__meter {
+	-webkit-appearance: none; appearance: none;
+	width: 100%; height: 6px;
+	border: 0; border-radius: 999px;
+	background: var(--nwcs-line);
+	overflow: hidden;
+}
+.nwcs-scorecard__meter::-webkit-meter-bar { background: var(--nwcs-line); border: 0; border-radius: 999px; height: 6px; }
+.nwcs-scorecard__meter::-webkit-meter-optimum-value,
+.nwcs-scorecard__meter::-webkit-meter-suboptimum-value,
+.nwcs-scorecard__meter::-webkit-meter-even-less-good-value { background: var(--nwcs-score); border-radius: 999px; }
+.nwcs-scorecard__meter::-moz-meter-bar { background: var(--nwcs-score); border-radius: 999px; }
+
+.nwcs-scorecard__group { margin: 16px 0 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--nwcs-muted); }
+.nwcs-scorecard__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.nwcs-scorecard__item { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; align-items: start; }
+.nwcs-scorecard__item.is-partial, .nwcs-scorecard__item.is-fail { padding: 9px 10px; border: 1px solid var(--nwcs-line); border-radius: 10px; }
+.nwcs-scorecard__line { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 12.5px; }
+.nwcs-scorecard__state { font-size: 11.5px; font-weight: 600; color: var(--nwcs-muted); white-space: nowrap; }
+.nwcs-scorecard__item.is-partial .nwcs-scorecard__state { color: var(--nwcs-amber); }
+.nwcs-scorecard__item.is-fail .nwcs-scorecard__state { color: #b42318; }
+.nwcs-scorecard__item.is-pass .nwcs-scorecard__state { font-weight: 400; overflow: hidden; text-overflow: ellipsis; max-width: 55%; }
+.nwcs-scorecard__hint { margin: 4px 0 0; font-size: 12px; line-height: 1.5; color: var(--nwcs-ink); }
+
+/* Durum isareti: tam (tik), kismen (yarim daire), eksik (bos halka) */
+.nwcs-scorecard__mark {
+	width: 14px; height: 14px; margin-top: 2px;
+	border-radius: 50%;
+	box-sizing: border-box;
+	position: relative;
+}
+.is-pass > .nwcs-scorecard__mark { background: var(--nwcs-teal); }
+.is-pass > .nwcs-scorecard__mark::after {
+	content: ""; position: absolute; left: 4.5px; top: 2px;
+	width: 3px; height: 6px;
+	border: solid #fff; border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+.is-partial > .nwcs-scorecard__mark { border: 2px solid var(--nwcs-amber); background: linear-gradient(90deg, var(--nwcs-amber) 50%, transparent 50%); }
+.is-fail > .nwcs-scorecard__mark { border: 2px solid #b42318; }
+
+.nwcs-scorecard__done { margin-top: 8px; }
+.nwcs-scorecard__done > summary { cursor: pointer; font-size: 12px; color: var(--nwcs-muted); margin-bottom: 8px; }
+.nwcs-scorecard__done .nwcs-scorecard__item { color: var(--nwcs-muted); }
+/* ---------- /uyumluluk puani ---------- */

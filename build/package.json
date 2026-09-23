@@ -4,13 +4,14 @@
   "version": "1.1.0",
   "description": "Tailwind derleyicisi: her tema kendi kaynak dosyasindan kendi CSS'ini uretir.",
   "scripts": {
-    "build": "npm run build:ahsapkasa && npm run build:istanbulpaletci && npm run build:kereste",
+    "build": "npm run build:ahsapkasa && npm run build:istanbulpaletci && npm run build:kereste && npm run build:ahsapambalaj",
     "build:ahsapkasa": "tailwindcss -i ./ahsapkasa.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --minify",
     "build:istanbulpaletci": "tailwindcss -i ./istanbulpaletci.css -o ../wp-content/themes/istanbulpaletci-theme/assets/tailwind.css --minify",
     "watch:ahsapkasa": "tailwindcss -i ./ahsapkasa.css -o ../wp-content/themes/ahsapkasa-theme/assets/tailwind.css --watch",
     "watch:istanbulpaletci": "tailwindcss -i ./istanbulpaletci.css -o ../wp-content/themes/istanbulpaletci-theme/assets/tailwind.css --watch",
     "build:kereste": "tailwindcss -i ./kereste.css -o ../wp-content/themes/kereste-base/assets/tailwind.css --minify",
-    "watch:kereste": "tailwindcss -i ./kereste.css -o ../wp-content/themes/kereste-base/assets/tailwind.css --watch"
+    "watch:kereste": "tailwindcss -i ./kereste.css -o ../wp-content/themes/kereste-base/assets/tailwind.css --watch",
+    "build:ahsapambalaj": "node theme-src.mjs ahsapambalaj-theme"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",

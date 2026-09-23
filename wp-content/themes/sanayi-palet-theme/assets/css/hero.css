@@ -113,6 +113,7 @@
 	border: calc(3px * var(--damga-boy)) solid currentColor;
 	border-radius: calc(10px * var(--damga-boy));
 	font-family: var(--font-damga);
+	font-stretch: var(--baslik-genislik);
 	font-weight: 800;
 	line-height: 0.95;
 	text-align: center;

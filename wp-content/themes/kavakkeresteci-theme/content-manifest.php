@@ -19,7 +19,7 @@ return $build(
 	array(
 		'key'            => 'kavakkeresteci',
 		'label'          => 'Koçist · kavakkeresteci.com',
-		'logo'           => array( 'Kavak', 'Keresteci', 'KK' ),
+		'logo'           => array( 'Kavak', 'Keresteci' ),
 
 		'contact'        => array(
 			'phone_label'  => '0549 648 19 19',

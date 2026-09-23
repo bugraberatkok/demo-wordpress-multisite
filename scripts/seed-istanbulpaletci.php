@@ -197,8 +197,8 @@ $media = array(
 	'palet1'      => ip_seed_media( 'palet_1.jpg', 'ip-palet-1', 'Ahşap palet', 'Beyaz zeminde ahşap palet' ),
 	'palet2'      => ip_seed_media( 'palet_2.jpg', 'ip-palet-2', 'İkinci el ahşap palet', 'Kullanılmış, yıpranmış ahşap palet' ),
 	'palet3'      => ip_seed_media( 'palet_3.jpg', 'ip-palet-3', 'Damgalı ahşap palet', 'Ayağında damga bulunan ahşap palet' ),
-	// Hero arka plani; Sanayi Palet temasindaki (Emirhan) musteri onayli fotograf.
-	'saha'        => ip_seed_media( 'palet-sahasi-forklift.jpg', 'ip-palet-sahasi', 'Palet sahası', 'İstiflenmiş ahşap paletlerin arasında forklift' ),
+	// Hero arka plani: kuzen Sanayi Palet'in hero fotografi (musteri onayli).
+	'saha'        => ip_seed_media( 'palet-duvari.jpg', 'ip-palet-duvari', 'Palet duvarı', 'Üst üste istiflenmiş, farklı renklerde yüzlerce ahşap palet' ),
 	'ahsap_palet' => ip_seed_media( 'ahsap_palet.jpg', 'ip-ahsap-palet', 'Ahşap palet', 'Ahşap palet, üstten görünüm' ),
 	'euro_palet'  => ip_seed_media( 'euro_palet.jpg', 'ip-euro-palet', 'Euro palet', 'EPAL damgalı Euro palet' ),
 	'kafes'       => ip_seed_media( 'ahsap_kafes.jpg', 'ip-ahsap-kafes', 'Ahşap kafes', 'Çapraz destekli ahşap kafes' ),

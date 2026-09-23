@@ -57,7 +57,6 @@ $m = array(
 	'plywood_2'  => kr_seed_media( 'kereste/playwood-Playwood__1_.jpg', 'ik-plywood-2', 'Film kaplı plywood', 'Film kaplı plywood levha paketi' ),
 	'plywood_3'  => kr_seed_media( 'kereste/playwood-Playwood__2_.jpg', 'ik-plywood-3', 'Plywood paketi', 'Kayışla bağlanmış plywood paketi' ),
 	'kontrplak'  => kr_seed_media( 'kereste/kontrplak-kapak-resmi.jpg', 'ik-kontrplak', 'Kontrplak katmanları', 'Kontrplak levhaların katmanlı kenarları' ),
-	'kocist'     => kr_seed_media( 'logo coreldraw.png', 'kocist-logo', 'Koçist Orman Ürünleri logosu', 'Koçist Orman Ürünleri' ),
 );
 
 foreach ( $m as $key => $id ) {
@@ -67,7 +66,6 @@ foreach ( $m as $key => $id ) {
 kr_seed_content(
 	$manifest,
 	array(
-		'global'               => array( 'header' => array( 'parent_logo' => $m['kocist'] ) ),
 		'home'                 => array(
 			'hero'   => array( 'image' => $m['hero'] ),
 			'supply' => array( 'photos' => array( $m['forklift'], $m['tir_4'], $m['kis'] ) ),

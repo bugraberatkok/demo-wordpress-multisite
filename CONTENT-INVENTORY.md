@@ -743,19 +743,16 @@ _Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 232._
 
 | Alan anahtarı | Türkçe etiket | Tür |
 | --- | --- | --- |
-| `logo_image` | Logo görseli (boşsa yazı logosu kullanılır) | görsel (medya kaydı + alt metin) |
-| `logo_word` | Logo: ilk kelime | tek satır metin |
-| `logo_rest` | Logo: ikinci kelime | tek satır metin |
-| `logo_mark` | Logo: şablon harf rozeti | tek satır metin |
+| `logo_image` | Logo görseli (boşsa çam ağaçlı yazı logosu kullanılır) | görsel (medya kaydı + alt metin) |
+| `logo_word` | Logo: üst satır | tek satır metin |
+| `logo_rest` | Logo: alt satır | tek satır metin |
 | `menu` | Menü Öğeleri | tekrarlı satırlar → `label` (tek satır metin), `url` (bağlantı) |
 | `phone_label` | Telefon Metni | tek satır metin |
 | `phone_url` | Telefon Bağlantısı | bağlantı |
+| `phone_note` | Telefon Kutusu Üst Yazısı | tek satır metin |
 | `whatsapp_url` | WhatsApp Bağlantısı (boşsa düğme gizlenir) | bağlantı |
 | `whatsapp_label` | WhatsApp Düğmesi Metni | tek satır metin |
 | `cta_label` | Teklif Düğmesi Metni | tek satır metin |
-| `parent_logo` | Grup logosu (Koçist; üst menüde ve alt bilgide) | görsel (medya kaydı + alt metin) |
-| `parent_label` | Grup logosunun yanındaki yazı | tek satır metin |
-| `parent_url` | Grup logosunun bağlantısı | bağlantı |
 
 **Alt Bilgi** — `global / footer`
 
@@ -1114,7 +1111,7 @@ Sıralanabilir bölümler: `products`, `supply`, `cousin`, `faq`, `quote` (heade
 | --- | --- | --- |
 | `share_image` | Varsayılan paylaşım görseli | görsel (medya kaydı + alt metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 173._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 170._
 
 
 ## Koçist · kavakkeresteci.com (`kavakkeresteci`)
@@ -1125,19 +1122,16 @@ _Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 173._
 
 | Alan anahtarı | Türkçe etiket | Tür |
 | --- | --- | --- |
-| `logo_image` | Logo görseli (boşsa yazı logosu kullanılır) | görsel (medya kaydı + alt metin) |
-| `logo_word` | Logo: ilk kelime | tek satır metin |
-| `logo_rest` | Logo: ikinci kelime | tek satır metin |
-| `logo_mark` | Logo: şablon harf rozeti | tek satır metin |
+| `logo_image` | Logo görseli (boşsa çam ağaçlı yazı logosu kullanılır) | görsel (medya kaydı + alt metin) |
+| `logo_word` | Logo: üst satır | tek satır metin |
+| `logo_rest` | Logo: alt satır | tek satır metin |
 | `menu` | Menü Öğeleri | tekrarlı satırlar → `label` (tek satır metin), `url` (bağlantı) |
 | `phone_label` | Telefon Metni | tek satır metin |
 | `phone_url` | Telefon Bağlantısı | bağlantı |
+| `phone_note` | Telefon Kutusu Üst Yazısı | tek satır metin |
 | `whatsapp_url` | WhatsApp Bağlantısı (boşsa düğme gizlenir) | bağlantı |
 | `whatsapp_label` | WhatsApp Düğmesi Metni | tek satır metin |
 | `cta_label` | Teklif Düğmesi Metni | tek satır metin |
-| `parent_logo` | Grup logosu (Koçist; üst menüde ve alt bilgide) | görsel (medya kaydı + alt metin) |
-| `parent_label` | Grup logosunun yanındaki yazı | tek satır metin |
-| `parent_url` | Grup logosunun bağlantısı | bağlantı |
 
 **Alt Bilgi** — `global / footer`
 
@@ -1495,6 +1489,6 @@ Sıralanabilir bölümler: `products`, `uses`, `cousin`, `faq`, `quote` (header 
 | --- | --- | --- |
 | `share_image` | Varsayılan paylaşım görseli | görsel (medya kaydı + alt metin) |
 
-_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 172._
+_Toplam düzenlenebilir alan (tekrarlı satır alanları dahil): 169._
 
 

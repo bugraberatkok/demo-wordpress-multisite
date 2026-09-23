@@ -53,13 +53,8 @@ $srcset   = $image['id'] ? (string) wp_get_attachment_image_srcset( $image['id']
 		<?php if ( $products ) : ?>
 			<?php // Ip hero'nun ust kenarindan iner; etiket ipin ucunda hafif yatik durur. ?>
 			<nav class="tag tag--hero hidden self-start text-ink lg:block" aria-label="Ürünler">
-				<p class="flex items-center gap-3 border-b-[1.5px] border-dashed border-ink/25 px-6 pb-4 pt-12">
-					<span class="flex h-9 w-9 items-center justify-center bg-mark font-stencil text-[0.95rem] leading-none text-paper" aria-hidden="true">
-						<?php echo esc_html( nwcs_field( 'global', 'header', 'logo_mark' ) ); ?>
-					</span>
-					<span class="font-slab text-[1.25rem] font-bold leading-none">
-						<?php echo esc_html( nwcs_field( 'global', 'header', 'logo_word' ) ); ?><span class="font-semibold text-muted"><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_rest' ) ); ?></span>
-					</span>
+				<p class="border-b-[1.5px] border-dashed border-ink/25 px-6 pb-4 pt-12">
+					<?php kr_logo( 'light', 'kr-logo--sm' ); ?>
 				</p>
 				<ul class="px-6 pb-5 pt-2">
 					<?php foreach ( $products as $product ) : ?>

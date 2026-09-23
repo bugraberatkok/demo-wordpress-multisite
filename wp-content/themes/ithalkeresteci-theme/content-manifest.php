@@ -18,7 +18,7 @@ return $build(
 	array(
 		'key'            => 'ithalkeresteci',
 		'label'          => 'Koçist · ithalkeresteci.com',
-		'logo'           => array( 'İthal', 'Keresteci', 'İK' ),
+		'logo'           => array( 'İthal', 'Keresteci' ),
 
 		'contact'        => array(
 			'phone_label'  => '0549 648 19 19',
