@@ -1,0 +1,442 @@
+/* Ana sayfa bolumleri: urun gami, surec, belge, grup, blog, teklif seridi. */
+
+/* Urun gami ---------------------------------------------------------------- */
+
+.sp-range__list {
+	display: grid;
+	gap: 3rem 1.75rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 640px) { .sp-range__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .sp-range__list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.sp-range__item {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.sp-range__media {
+	width: 100%;
+	margin-bottom: 1.25rem;
+	border-radius: var(--kose);
+	overflow: hidden;
+	background: var(--beton-acik);
+}
+
+.sp-range__image,
+.sp-range__media .sp-placeholder {
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+}
+
+.sp-range__noimage {
+	display: grid;
+	place-items: center;
+	aspect-ratio: 4 / 3;
+	background: var(--cam);
+	color: var(--yanik);
+}
+
+.sp-range__name { font-size: 2rem; }
+
+.sp-range__text { margin-top: 0.6rem; }
+
+/* Teknik not: ahsap cizgili, yapi bilgisi. */
+.sp-range__spec {
+	margin-top: 0.9rem;
+	padding-left: 0.75rem;
+	border-left: 3px solid var(--cam);
+	color: var(--toz);
+	font-size: 0.9375rem;
+	font-weight: 600;
+}
+
+.sp-range__link { margin-top: auto; padding-top: 1.25rem; }
+
+/* Surec --------------------------------------------------------------------- */
+
+.sp-process { background: var(--beton-acik); }
+
+.sp-process__grid {
+	display: grid;
+	gap: 3rem;
+	align-items: start;
+}
+
+@media (min-width: 960px) {
+	.sp-process__grid { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 5rem; }
+}
+
+/* Adimlar: ikon isaretleri dikey bir ahsap hatla birbirine bagli. */
+.sp-process__steps {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sp-process__step {
+	position: relative;
+	display: grid;
+	grid-template-columns: 3.5rem minmax(0, 1fr);
+	gap: 1.25rem;
+	padding-bottom: 2.5rem;
+}
+
+.sp-process__step:last-child { padding-bottom: 0; }
+
+.sp-process__step:not(:last-child)::before {
+	content: "";
+	position: absolute;
+	top: 3.5rem;
+	bottom: 0;
+	left: calc(1.75rem - 1.5px);
+	width: 3px;
+	background: var(--cam);
+}
+
+.sp-process__marker {
+	display: grid;
+	place-items: center;
+	width: 3.5rem;
+	height: 3.5rem;
+	border-radius: 50%;
+	background: var(--yanik);
+	color: var(--cam);
+}
+
+.sp-process__body { padding-top: 0.35rem; }
+
+.sp-process__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem 0.75rem;
+	font-size: 0.9375rem;
+}
+
+.sp-process__number { color: var(--toz); font-weight: 600; }
+
+/* Kim yapar: siz mi, biz mi. Bilgi etiketi, tiklanabilir degil. */
+.sp-process__actor {
+	padding: 0.1rem 0.6rem;
+	border-radius: 999px;
+	font-weight: 600;
+}
+
+/* Musteri adimi: ahsap zemin. Firma adimi: yanik zemin, adim isaretleriyle ayni. */
+.sp-process__actor--siz { background: var(--cam); color: var(--yanik); }
+.sp-process__actor--biz { background: var(--yanik); color: var(--beton-acik); }
+
+.sp-process__duration { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--toz); }
+
+.sp-process__name { margin-top: 0.5rem; font-size: 1.875rem; }
+
+.sp-process__text { margin-top: 0.5rem; max-width: 34rem; }
+
+/* Teklif listesi */
+.sp-checklist {
+	padding: clamp(1.5rem, 3vw, 2.25rem);
+	background: var(--beton);
+	border-radius: var(--kose);
+	border-top: 6px solid var(--cam);
+}
+
+@media (min-width: 960px) {
+	.sp-checklist { position: sticky; top: 110px; }
+}
+
+.sp-checklist__title { font-size: 2rem; }
+
+.sp-checklist__list {
+	display: grid;
+	gap: 0.9rem;
+	margin: 1.5rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sp-checklist__item {
+	display: grid;
+	grid-template-columns: 22px minmax(0, 1fr);
+	gap: 0.75rem;
+	align-items: start;
+}
+
+.sp-checklist__tick { margin-top: 0.15rem; color: var(--yanik); }
+
+.sp-checklist__label { display: block; font-weight: 600; }
+
+.sp-checklist__hint { display: block; color: var(--toz); font-size: 0.9375rem; }
+
+.sp-checklist__actions {
+	display: grid;
+	gap: 1rem;
+	justify-items: start;
+	margin-top: 1.75rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--cizgi);
+}
+
+/* WhatsApp: ikinci eylem, dokunma hedefi tam boy (48px) dugme. */
+.sp-checklist__whatsapp { white-space: normal; text-align: center; }
+
+/* Kisaca biz ---------------------------------------------------------------- */
+
+.sp-intro { background: var(--beton-acik); }
+
+.sp-intro__grid {
+	display: grid;
+	gap: 3rem;
+	align-items: start;
+}
+
+@media (min-width: 960px) {
+	.sp-intro__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 5rem; }
+}
+
+.sp-intro__text {
+	max-width: 34rem;
+	margin-top: 1.5rem;
+	font-size: 1.1875rem;
+}
+
+.sp-intro__facts {
+	display: grid;
+	gap: 2.25rem 2rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+@media (min-width: 560px) { .sp-intro__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.sp-intro__icon {
+	display: grid;
+	place-items: center;
+	width: 3.25rem;
+	height: 3.25rem;
+	border-radius: var(--kose);
+	background: var(--cam);
+	color: var(--yanik);
+}
+
+.sp-intro__name { margin-top: 1rem; font-size: 1.625rem; }
+
+.sp-intro__desc { margin-top: 0.4rem; color: var(--toz); }
+
+/* Belge --------------------------------------------------------------------- */
+
+.sp-cert__grid {
+	display: grid;
+	gap: 3rem;
+	align-items: start;
+}
+
+@media (min-width: 900px) {
+	.sp-cert__grid { grid-template-columns: minmax(0, 22rem) minmax(0, 1fr); gap: 5rem; }
+}
+
+.sp-cert__doc { margin: 0; max-width: 22rem; }
+
+.sp-cert__doc-link {
+	display: block;
+	padding: 0.75rem;
+	background: var(--beton-acik);
+	border: 1px solid var(--cizgi);
+	border-radius: var(--kose);
+}
+
+.sp-cert__text { max-width: 36rem; margin-top: 1.25rem; }
+
+.sp-cert__facts { margin: 2rem 0 0; max-width: 36rem; }
+
+.sp-cert__fact {
+	display: grid;
+	gap: 0.15rem 1.5rem;
+	padding-block: 0.8rem;
+	border-top: 1px solid var(--cizgi);
+}
+.sp-cert__fact:last-child { border-bottom: 1px solid var(--cizgi); }
+
+@media (min-width: 560px) { .sp-cert__fact { grid-template-columns: 11rem minmax(0, 1fr); } }
+
+.sp-cert__fact dt { color: var(--toz); font-size: 0.9375rem; }
+.sp-cert__fact dd { margin: 0; font-weight: 600; }
+
+.sp-cert__stamp { margin-top: 2rem; }
+
+.sp-stamp--small { --damga-boy: 0.7; }
+
+/* Grup ---------------------------------------------------------------------- */
+
+.sp-group { padding-top: 0; }
+
+.sp-group__grid {
+	display: grid;
+	gap: 2.5rem;
+	align-items: center;
+}
+
+@media (min-width: 900px) { .sp-group__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5rem; } }
+
+.sp-group__text {
+	max-width: 36rem;
+	margin: 1.25rem 0 2rem;
+	font-size: 1.1875rem;
+}
+
+.sp-group__media { border-radius: var(--kose); overflow: hidden; }
+
+.sp-group__image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+
+/* Blog ---------------------------------------------------------------------- */
+
+.sp-blog { background: var(--beton-acik); }
+
+/*
+ * Mobilde ana sayfa cok uzuyordu: blog kartlari alt alta degil, yatay kaydirilan
+ * tek satir. Sonraki kartin kenari gorunur, kaydirilabilecegi anlasilsin.
+ * Yalnizca ana sayfa bolumunde; /blog/ listesi alt alta kalir.
+ */
+@media (max-width: 699.98px) {
+	.sp-blog .sp-bloglist__grid {
+		grid-auto-flow: column;
+		grid-auto-columns: 82%;
+		gap: 1rem;
+		margin-inline: calc(-1 * var(--kenar));
+		padding: 0 var(--kenar) 0.75rem;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x mandatory;
+		scroll-padding-inline: var(--kenar);
+	}
+
+	.sp-blog .sp-post { scroll-snap-align: start; }
+}
+
+.sp-blog__head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem 2rem;
+	margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+/* Yazi karti (ana sayfa, blog listesi, yazi sonu) ------------------------------ */
+
+.sp-bloglist__grid {
+	display: grid;
+	gap: 1.75rem;
+}
+
+@media (min-width: 700px) { .sp-bloglist__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) {
+	.sp-bloglist__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	/* Yalnizca iki kart varsa ucuncu sutun bos kalmasin. */
+	.sp-bloglist__grid:has(> :nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Kart zemini bulundugu bolumun tersi: acik bantta beton, beton zeminde acik. */
+.sp-post {
+	--kart: var(--beton-acik);
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background: var(--kart);
+	border-radius: var(--kose);
+	overflow: hidden;
+}
+
+.sp-blog .sp-post,
+.sp-more .sp-post { --kart: var(--beton); }
+
+.sp-post__media { overflow: hidden; }
+
+.sp-post__image,
+.sp-post__noimage {
+	width: 100%;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+	transition: transform 0.35s ease;
+}
+
+.sp-post__body {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 1.25rem 1.375rem 1.5rem;
+}
+
+.sp-post__date { color: var(--toz); font-size: 0.9375rem; }
+
+.sp-post__title { margin-top: 0.35rem; font-size: 1.75rem; line-height: 1.02; }
+
+.sp-post__link { color: var(--yanik); text-decoration: none; }
+
+/* Kartin tamami baglanti: baslik baglantisi karti kaplar. */
+.sp-post__link::after { content: ""; position: absolute; inset: 0; }
+
+.sp-post__excerpt { margin-top: 0.6rem; color: var(--toz); }
+
+.sp-post__more {
+	margin-top: auto;
+	padding-top: 1rem;
+	color: var(--yesil);
+	font-family: var(--font-baslik);
+	font-size: 1.25rem;
+	font-weight: 700;
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+/* Etkilesime yanit: fotograf hafifce yaklasir, baslik yesile doner. */
+.sp-post:hover .sp-post__image { transform: scale(1.04); }
+.sp-post:hover .sp-post__link { color: var(--yesil); }
+.sp-post:focus-within { outline: 3px solid var(--odak); outline-offset: 3px; }
+.sp-post__link:focus-visible { outline: none; }
+
+/* Blog listesinin ilk yazisi: yatay, buyuk. */
+.sp-post--featured { margin-bottom: 1.75rem; }
+
+@media (min-width: 860px) {
+	.sp-post--featured { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+	/* Kaynak fotograflar kare de olabilir; kart boyu fotografa gore uzamasin. */
+	.sp-post--featured .sp-post__image { aspect-ratio: 4 / 3; }
+	.sp-post--featured .sp-post__body { justify-content: center; padding: 2.5rem; }
+}
+
+.sp-post--featured .sp-post__title { font-size: clamp(2.25rem, 4vw, 3.25rem); }
+.sp-post--featured .sp-post__excerpt { font-size: 1.125rem; }
+/* Ortalanmis govdede baglanti metnin hemen altinda dursun, kartin dibine itilmesin. */
+.sp-post--featured .sp-post__more { margin-top: 1.5rem; padding-top: 0; }
+
+/* Teklif seridi -------------------------------------------------------------- */
+
+.sp-cta {
+	padding-block: clamp(3.5rem, 7vw, 5rem);
+	background: var(--cam);
+}
+
+.sp-cta__inner {
+	display: grid;
+	gap: 2rem;
+	align-items: center;
+}
+
+@media (min-width: 900px) { .sp-cta__inner { grid-template-columns: minmax(0, 1fr) auto; gap: 4rem; } }
+
+.sp-cta__title { max-width: 20ch; font-size: clamp(2.25rem, 4.6vw, 3.5rem); }
+
+.sp-cta__text { margin-top: 0.75rem; max-width: 34rem; }
+
+.sp-cta__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+@media (max-width: 479.98px) { .sp-cta__actions .btn { flex: 1 1 100%; } }

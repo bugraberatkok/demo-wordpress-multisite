@@ -1,0 +1,47 @@
+/*
+ * Istanbul Keresteci — tasarim jetonlari.
+ *
+ * Renk degistirmek icin YALNIZCA bu dosyadaki degerleri duzenleyin.
+ * Diger CSS dosyalari ve sablonlar renk kodu tasimaz.
+ *
+ * Renk kurali: recine = tiklanabilir eylem, filiz = marka (logo, odak,
+ * aktif menu), cam golgesi = koyu yuzeyler.
+ */
+
+:root {
+	/* Renkler */
+	--kirec: #f3f4f0;          /* sayfa zemini: kirec badanali depo duvari */
+	--kirec-acik: #ffffff;     /* yukseltilmis yuzey: kart, form */
+	--golge: #17301f;          /* cam golgesi: ust bar, footer, koyu bolumler */
+	--filiz: #5db043;          /* logodaki yesil: logo, odak halkasi, aktif menu */
+	--recine: #e2a93b;         /* tek eylem rengi: birincil dugme, telefon */
+	--kabuk: #5a4030;          /* istif ayraclari, damga cizgisi */
+	--murekkep: #1b1d1a;       /* govde metni */
+	--toz: #5b6058;            /* ikincil metin */
+
+	/* Turetilmis tonlar */
+	--recine-koyu: color-mix(in srgb, var(--recine) 84%, black);
+	--golge-koyu: color-mix(in srgb, var(--golge) 78%, black);
+	--golge-acik: color-mix(in srgb, var(--golge) 86%, white);
+	--cizgi: color-mix(in srgb, var(--murekkep) 14%, transparent);
+	--cizgi-koyu: color-mix(in srgb, white 16%, transparent);
+	--koyu-metin: color-mix(in srgb, white 78%, var(--golge));
+	--perde: color-mix(in srgb, var(--golge) 55%, transparent);
+	--odak: var(--filiz);
+
+	/* Yazi tipi: tek aile, genislik ekseniyle iki karakter */
+	--font: "Archivo", "Arial Narrow", system-ui, sans-serif;
+	--dar: 62;                 /* baslik genisligi (wdth) */
+	--yari-dar: 75;
+
+	/* Olcu */
+	--sayfa-genislik: 77.5rem; /* 1240px */
+	--kenar: 16px;
+	--kose: 3px;
+}
+
+@media (min-width: 768px) {
+	:root {
+		--kenar: 32px;
+	}
+}

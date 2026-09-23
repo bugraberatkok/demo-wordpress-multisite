@@ -1,0 +1,420 @@
+/*
+ * Hero: solda buyuk sabit kart, sagda slayt, altinda guven seridi.
+ * Duzen referansi tuin.co.uk ana sayfasi.
+ *
+ * Renk degiskenleri style.css icindeki :root blogundan gelir.
+ */
+
+.k-hero {
+	background: var(--paper-2);
+	padding: 26px 0 0;
+}
+
+.k-hero__grid {
+	display: grid;
+	grid-template-columns: 1.75fr 1fr;
+	gap: 22px;
+	align-items: stretch;
+}
+
+/*
+ * Sol buyuk kart: atolye fotografi + ortasina oturan metin.
+ *
+ * Fotografin ortasi bos ve acik renk; bu yuzden metin beyaz degil koyu yesil
+ * basiliyor ve uzerine koyu perde atilmiyor. Okunakliligi garantilemek icin
+ * yalnizca merkezde hafif bir aydinlatma var.
+ */
+.k-hero__feature {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	min-height: 460px;
+	padding: 40px;
+	border-radius: 18px;
+	background: var(--paper-2);
+}
+
+/*
+ * Fotograf cok yavas yakinlasip geri aciliyor. Kart hareketsiz bir gorsel
+ * gibi degil, yasayan bir sahne gibi duruyor; hiz bilincli olarak fark
+ * edilmeyecek kadar dusuk.
+ */
+.k-hero__img,
+.k-hero__feature .k-placeholder {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	animation: k-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes k-drift {
+	from { transform: scale(1); }
+	to   { transform: scale(1.07); }
+}
+
+/* Merkezi yumusatan aydinlatma: fotografin dokusu yaziyi bogmasin. */
+.k-hero__feature::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(
+		ellipse 56% 50% at 50% 50%,
+		rgba(255, 255, 255, .88) 0%,
+		rgba(255, 255, 255, .66) 42%,
+		rgba(255, 255, 255, 0) 76%
+	);
+}
+
+/*
+ * Ince ic cerceve. Karti basili bir levha gibi cerceveliyor; marangoz
+ * isine yakisan, kasitli bir detay.
+ */
+.k-hero__feature::after {
+	content: "";
+	position: absolute;
+	inset: 16px;
+	border: 1px solid rgba(23, 84, 47, .22);
+	border-radius: 10px;
+	pointer-events: none;
+}
+
+.k-hero__feature-body {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 26px;
+	text-align: center;
+}
+
+.k-hero__brand {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+}
+
+.k-hero__logo {
+	flex: none;
+	width: auto;
+	height: 62px;
+	animation: k-logo-in .55s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/*
+ * Logo ile slogan arasindaki dikey cizgi. Ayni zamanda maskenin sol
+ * kenarini isaretliyor: yazi bu cizginin arkasindan cikiyormus gibi
+ * gorunuyor. Sloganla birlikte aciliyor.
+ */
+.k-hero__brand::after {
+	content: "";
+	order: 1;
+	flex: none;
+	width: 1px;
+	height: 0;
+	background: rgba(23, 84, 47, .3);
+	animation: k-divider-in .5s cubic-bezier(.22, 1, .36, 1) .34s both;
+}
+
+.k-hero__logo { order: 0; }
+.k-hero__title { order: 2; }
+
+@keyframes k-divider-in {
+	from { height: 0; }
+	to   { height: 46px; }
+}
+
+/*
+ * Slogan logonun arkasindan cikip saga aciliyor: baslik kirpma maskesi,
+ * ic span soldan kayarak geliyor. Maskenin sol kenari logonun sag kenarina
+ * dayandigi icin yazi gercekten logonun altindan cikiyormus gibi gorunuyor.
+ */
+.k-hero__title {
+	overflow: hidden;
+	margin: 0;
+	padding: .12em 0;
+	font-size: clamp(27px, 3.1vw, 44px);
+	line-height: 1.05;
+	font-weight: 800;
+	letter-spacing: -.035em;
+	color: var(--forest-3);
+	text-align: left;
+	text-wrap: balance;
+}
+
+.k-hero__title-inner {
+	display: block;
+	animation: k-slogan-in .7s cubic-bezier(.22, 1, .36, 1) .42s both;
+}
+
+.k-hero__feature-body .k-hero__btn {
+	animation: k-cta-in .5s ease .95s both;
+}
+
+@keyframes k-logo-in {
+	from { opacity: 0; transform: scale(.9); }
+	to   { opacity: 1; transform: none; }
+}
+
+@keyframes k-slogan-in {
+	from { transform: translateX(-102%); }
+	to   { transform: none; }
+}
+
+@keyframes k-cta-in {
+	from { opacity: 0; transform: translateY(10px); }
+	to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Ortak buton ---------- */
+.k-hero__btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 20px;
+	border-radius: 999px;
+	background: var(--leaf);
+	color: var(--forest-3);
+	font-size: 14px;
+	font-weight: 800;
+	text-decoration: none;
+	transition: background .2s ease, transform .2s ease, color .2s ease;
+}
+
+.k-hero__btn:hover {
+	background: #fff;
+	color: var(--forest);
+	transform: translateY(-1px);
+}
+
+/* Acik zeminde kullanilan koyu varyant (sol kart). */
+.k-hero__btn--dark {
+	background: var(--forest);
+	color: #fff;
+	box-shadow: 0 10px 22px rgba(23, 84, 47, .22);
+}
+
+.k-hero__btn--dark:hover {
+	background: var(--forest-3);
+	color: #fff;
+}
+
+/* ---------- Sag kart: slayt ---------- */
+.k-hero__slider {
+	position: relative;
+	overflow: hidden;
+	min-height: 460px;
+	border-radius: 18px;
+	background: var(--forest);
+	display: flex;
+}
+
+/*
+ * Slaytlar ust uste durur. Gecis opaklik + hafif kayma ile yapilir; boylece
+ * farkli yukseklikteki slaytlar kartin olcusunu zipzip degistirmez.
+ */
+.k-hero__track { position: relative; width: 100%; }
+
+.k-hero__slide {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateX(var(--k-slide-x, 0));
+	transition:
+		opacity    .3s ease,
+		transform  .45s cubic-bezier(.22, 1, .36, 1),
+		visibility .45s;
+}
+
+.k-hero__slide.is-active {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+}
+
+.k-hero__slide-media {
+	position: relative;
+	flex: 0 0 52%;
+	overflow: hidden;
+}
+
+.k-hero__slide-img,
+.k-hero__slide-media .k-placeholder {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.k-hero__slide-body {
+	flex: 1;
+	padding: 22px 24px 26px;
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.k-hero__slide-title {
+	margin: 0;
+	font-size: 20px;
+	line-height: 1.25;
+	font-weight: 800;
+}
+
+.k-hero__slide-text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.55;
+	color: rgba(255, 255, 255, .86);
+}
+
+.k-hero__slide-body .k-hero__btn { margin-top: auto; }
+
+/* ---------- Oklar ve noktalar ---------- */
+.k-hero__arrow {
+	position: absolute;
+	top: calc(52% - 18px);
+	z-index: 3;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: 0;
+	border-radius: 999px;
+	background: #fff;
+	color: var(--forest);
+	cursor: pointer;
+	box-shadow: 0 6px 16px rgba(15, 61, 33, .26);
+	transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.k-hero__arrow:hover {
+	background: var(--leaf);
+	transform: scale(1.06);
+}
+
+.k-hero__arrow--prev { left: 14px; }
+.k-hero__arrow--next { right: 14px; }
+
+.k-hero__dots {
+	position: absolute;
+	left: 24px;
+	bottom: 6px;
+	z-index: 3;
+	display: flex;
+}
+
+/*
+ * Buton 24px'lik dokunma alani; gorunen nokta ::before. Nokta 7px kalsa da
+ * parmakla basilabilsin diye (WCAG 2.2 hedef boyutu).
+ */
+.k-hero__dot {
+	display: grid;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	transition: width .3s cubic-bezier(.22, 1, .36, 1);
+}
+
+.k-hero__dot::before {
+	content: "";
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, .42);
+	transition: width .3s cubic-bezier(.22, 1, .36, 1), background .2s ease;
+}
+
+.k-hero__dot.is-active { width: 34px; }
+
+.k-hero__dot.is-active::before {
+	width: 22px;
+	background: var(--leaf);
+}
+
+.k-hero__dot:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: -2px;
+	border-radius: 999px;
+}
+
+/* ---------- Guven seridi ---------- */
+.k-trust {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+	gap: 10px 26px;
+	margin: 22px 0 0;
+	padding: 20px 0;
+	list-style: none;
+	border-top: 1px solid var(--line);
+}
+
+.k-trust__item {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text);
+}
+
+.k-trust__icon { flex: none; color: var(--forest); }
+
+@media (max-width: 1023.98px) {
+	.k-hero__grid { grid-template-columns: 1fr; }
+	.k-hero__feature { min-height: 300px; padding: 30px 24px; }
+	.k-hero__slider { min-height: 430px; }
+}
+
+@media (max-width: 599.98px) {
+	/* Dar ekranda logo ve slogan yan yana sigmiyor; alt alta gecer. */
+	.k-hero__brand { flex-direction: column; gap: 14px; }
+	.k-hero__title { text-align: center; }
+	.k-hero__logo { height: 46px; }
+
+	/* Dikey duzende dikey ayirici anlamsiz: yatay cizgiye donuyor. */
+	.k-hero__brand::after {
+		width: 40px;
+		height: 1px;
+		animation: none;
+	}
+
+	.k-hero__feature::after { inset: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.k-hero__slide,
+	.k-hero__dot,
+	.k-hero__arrow,
+	.k-hero__btn {
+		transition-duration: .01ms !important;
+	}
+
+	/* Giris animasyonlari ve yavas yakinlasma kapanir. */
+	.k-hero__logo,
+	.k-hero__title-inner,
+	.k-hero__feature-body .k-hero__btn,
+	.k-hero__img,
+	.k-hero__feature .k-placeholder {
+		animation: none !important;
+	}
+
+	.k-hero__brand::after { animation: none !important; height: 46px; }
+}

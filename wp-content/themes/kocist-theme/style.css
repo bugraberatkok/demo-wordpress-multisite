@@ -1,0 +1,294 @@
+/*
+Theme Name: Kocist Theme
+Theme URI: http://localhost:8081/
+Author: Demo
+Description: Kocist demo sitesi icin kurumsal/endustriyel tema. Icerik degerleri Network Content Studio veri katmanindan okunur.
+Version: 0.4.0
+Requires at least: 6.5
+Requires PHP: 8.1
+Text Domain: kocist
+*/
+
+/* ---------- Temel ---------- */
+:root {
+	/* Marka paleti: yesil + beyaz. Logo yapragi --leaf, kurumsal koyu yesil --forest. */
+	--forest: #17542f;
+	--forest-2: #1e6b3c;
+	--forest-3: #0f3d21;
+	--leaf: #7ab648;
+	--leaf-dark: #5e9433;
+	--leaf-soft: #eaf5e1;
+	--paper: #ffffff;
+	--paper-2: #f4f6f3;
+	--text: #1f2a24;
+	--muted: #5f6b63;
+	--line: #dfe5e0;
+	--maxw: 1220px;
+
+	/* Tek aile: Archivo (functions.php icinde yukleniyor). */
+	--font-sans: "Archivo", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--font-display: var(--font-sans);
+
+	/*
+	 * Gecis alias'lari. Alt bolumler (hero, catalog, footer...) henuz eski
+	 * --ink/--steel/--amber isimlerini kullaniyor; buraya baglanarak tum site
+	 * tek seferde yesile donuyor. Bir bolum Tailwind'e tasindikca ilgili
+	 * alias da silinecek.
+	 */
+	--ink: var(--forest);
+	--steel: var(--forest);
+	--steel-2: var(--forest-2);
+	--amber: var(--leaf);
+	--amber-dark: var(--leaf-dark);
+}
+
+* { box-sizing: border-box; }
+
+/* Basliklar ayni aileden, daha kalin ve daha sik dizilerek ayrisir. */
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 800; letter-spacing: -.025em; }
+
+body {
+	margin: 0;
+	background: var(--paper);
+	color: var(--text);
+	font-family: var(--font-sans);
+	-webkit-font-smoothing: antialiased;
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+
+.k-wrap {
+	width: 100%;
+	max-width: var(--maxw);
+	margin: 0 auto;
+	padding: 0 20px;
+}
+
+.k-eyebrow {
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: .18em;
+	text-transform: uppercase;
+	color: var(--amber-dark);
+	margin: 0 0 14px;
+}
+
+.k-section-title {
+	font-size: clamp(26px, 3.4vw, 38px);
+	line-height: 1.15;
+	font-weight: 800;
+	letter-spacing: -.01em;
+	margin: 0 0 10px;
+	color: var(--forest);
+}
+
+.k-section-sub { color: var(--muted); margin: 0; max-width: 60ch; }
+
+.k-section-head {
+	margin-bottom: 34px;
+}
+
+.k-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 13px 22px;
+	font-weight: 700;
+	font-size: 14px;
+	text-decoration: none;
+	border: 2px solid transparent;
+	border-radius: 999px;
+	transition: background .15s, color .15s, border-color .15s;
+}
+.k-btn--primary { background: var(--leaf); color: var(--forest-3); }
+.k-btn--primary:hover { background: var(--amber-dark); }
+.k-btn--ghost { border-color: rgba(255,255,255,.35); color: #fff; }
+.k-btn--ghost:hover { border-color: var(--amber); color: var(--amber); }
+.k-btn--dark { background: var(--ink); color: #fff; }
+.k-btn--dark:hover { background: var(--steel-2); }
+
+.k-icon { flex: none; }
+
+/* ---------- Bolumler ---------- */
+.k-section { padding: 68px 0; }
+.k-section--alt { background: var(--paper-2); }
+
+.k-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+.k-card {
+	background: #fff;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	padding: 26px 22px;
+	transition: border-color .15s;
+}
+.k-card:hover { border-color: var(--leaf); }
+.k-card__icon { color: var(--amber-dark); margin-bottom: 14px; }
+.k-card__title { font-size: 17px; font-weight: 700; margin: 0 0 8px; }
+.k-card__text { color: var(--muted); font-size: 15px; margin: 0; }
+
+/* Katalog */
+.k-catalog { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 22px; }
+.k-cat { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+.k-cat__media { aspect-ratio: 16 / 10; overflow: hidden; background: var(--paper-2); }
+.k-cat__media img { width: 100%; height: 100%; object-fit: cover; }
+.k-cat__body { padding: 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.k-cat__title { font-size: 19px; font-weight: 700; margin: 0; }
+.k-cat__text { color: var(--muted); font-size: 15px; margin: 0; flex: 1; }
+.k-cat__link {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--forest);
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	border-top: 1px solid var(--line);
+	padding-top: 12px;
+}
+.k-cat__link:hover { color: var(--amber-dark); }
+
+/* Kullanim alanlari */
+.k-refs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; }
+.k-ref { padding: 26px 24px; border-right: 1px solid var(--line); display: flex; gap: 16px; }
+.k-ref:last-child { border-right: 0; }
+.k-ref__icon { color: var(--ink); flex: none; }
+.k-ref__title { font-weight: 700; margin: 0 0 6px; }
+.k-ref__text { color: var(--muted); font-size: 15px; margin: 0; }
+
+/* CTA seridi */
+.k-cta { background: var(--ink); color: #fff; padding: 46px 0; }
+.k-cta__inner { display: flex; flex-wrap: wrap; gap: 22px; align-items: center; justify-content: space-between; }
+.k-cta__title { font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; margin: 0 0 6px; }
+.k-cta__text { color: rgba(255,255,255,.78); margin: 0; }
+.k-cta__note { color: rgba(255,255,255,.55); font-size: 13px; margin: 14px 0 0; width: 100%; }
+
+/* ---------- Ic sayfa ---------- */
+
+/*
+ * Ic sayfa basligi: ana sayfadaki hero kartlariyla ayni dil. Tam genislik
+ * bant yerine icerik genisligine oturan, 16px koseli koyu yesil kart; sag
+ * ustte footer ve iletisim bandindaki soluk yaprak isigi. Isaretleme
+ * degismedi: kart .k-wrap'in arkasina ::before ile ciziliyor, boylece urun
+ * detayi ve 404 gibi ayni sinifi kullanan sablonlar da kendiliginden uyuyor.
+ */
+.k-pagehead { padding: 26px 0 0; color: #fff; }
+
+.k-pagehead > .k-wrap {
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+	padding: 52px 64px 56px;
+}
+
+.k-pagehead > .k-wrap::before {
+	content: "";
+	position: absolute;
+	inset: 0 20px;
+	z-index: -1;
+	border-radius: 16px;
+	background:
+		radial-gradient(circle at 92% 0%, rgba(122, 182, 72, .26) 0%, rgba(122, 182, 72, 0) 42%),
+		linear-gradient(135deg, var(--forest) 0%, var(--forest-3) 100%);
+}
+
+.k-pagehead__crumb {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	font-size: 14px;
+	color: rgba(255, 255, 255, .7);
+	margin: 0 0 14px;
+}
+
+.k-pagehead__crumb a { color: var(--leaf); text-decoration: none; }
+.k-pagehead__crumb a:hover { color: #fff; text-decoration: underline; }
+.k-pagehead__crumb a:focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px; border-radius: 4px; }
+
+.k-pagehead__title {
+	font-size: clamp(32px, 4.4vw, 54px);
+	line-height: 1.04;
+	letter-spacing: -.03em;
+	font-weight: 800;
+	margin: 0 0 14px;
+	max-width: 20ch;
+}
+
+.k-pagehead__sub { color: rgba(255, 255, 255, .8); font-size: 17px; margin: 0; max-width: 58ch; }
+
+@media (max-width: 640px) {
+	.k-pagehead { padding-top: 16px; }
+	.k-pagehead > .k-wrap { padding: 34px 40px 38px; }
+	.k-pagehead > .k-wrap::before { inset: 0 16px; }
+	.k-pagehead__sub { font-size: 16px; }
+}
+
+/* Ic sayfalarda uzun metin: okunur satir boyu, paragraflar arasi nefes. */
+.k-prose { color: var(--muted); font-size: 17px; line-height: 1.75; max-width: 68ch; }
+.k-prose p { margin: 0 0 1.1em; }
+.k-prose p:last-child { margin-bottom: 0; }
+
+.k-section--tight { padding: 28px 0; }
+
+.k-story { display: grid; grid-template-columns: 1.1fr .9fr; gap: 42px; align-items: start; }
+.k-story__body { color: var(--muted); font-size: 16px; white-space: pre-line; }
+.k-points { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 12px; }
+.k-points li { display: flex; align-items: center; gap: 11px; font-weight: 600; }
+.k-points svg { color: var(--amber-dark); }
+.k-story__media img { width: 100%; aspect-ratio: 3 / 4; max-height: 520px; object-fit: cover; border-radius: 16px; }
+
+/* ---------- Duyarli ---------- */
+@media (max-width: 900px) {
+	.k-story { grid-template-columns: 1fr; }
+}
+
+/* Telefonda havuz urunleri iki sutun; tek sutunda liste cok uzuyordu. */
+@media (max-width: 600px) {
+	.k-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+	.k-cat__body { padding: 14px; gap: 6px; }
+	.k-cat__title { font-size: 16px; }
+	.k-cat__text { font-size: 14px; }
+	.k-cat__link { min-height: 36px; }
+	.k-ref { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+
+/* ---------- Yer tutucu gorsel ---------- */
+.k-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 180px;
+	height: 100%;
+	background: repeating-linear-gradient(45deg, #dfe3e8, #dfe3e8 12px, #d6dae0 12px, #d6dae0 24px);
+	color: #6b7785;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 16px;
+}
+
+/* ---------- Ürün fiyatı (havuzdan) ---------- */
+.k-cat__price {
+	font-weight: 800;
+	font-size: 17px;
+	color: var(--ink);
+	letter-spacing: -.01em;
+}
+.k-cat__price.is-quote {
+	display: inline-block;
+	align-self: flex-start;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--leaf-dark);
+	background: var(--leaf-soft);
+	padding: 3px 12px;
+	border-radius: 999px;
+}
+
+/* ---------- Ürün detay sayfası ---------- */
+.k-detail__price { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 20px; }
+.k-detail__spec { color: var(--muted); font-size: 14px; }

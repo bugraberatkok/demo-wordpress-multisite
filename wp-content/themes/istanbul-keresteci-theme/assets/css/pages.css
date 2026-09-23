@@ -1,0 +1,445 @@
+/*
+ * Ic sayfalar: baslik, urun detayi, WhatsApp kutusu, Hakkimizda, Iletisim,
+ * Blog listesi ve yazi.
+ */
+
+/* Sayfa basligi ------------------------------------------------------------ */
+
+.ik-pagehead {
+	background: var(--golge);
+	color: #fff;
+	padding-block: clamp(3rem, 7vw, 5rem) clamp(2.5rem, 5vw, 3.5rem);
+}
+
+.ik-pagehead__title { font-size: clamp(2.75rem, 7vw, 5.5rem); font-weight: 900; }
+
+.ik-pagehead__text {
+	max-width: 40rem;
+	margin-top: 1rem;
+	color: var(--koyu-metin);
+	font-size: 1.3125rem;
+	line-height: 1.5;
+}
+
+.ik-crumbs ol {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0 0 1.25rem;
+	padding: 0;
+	list-style: none;
+	font-size: 1rem;
+}
+
+.ik-crumbs a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--koyu-metin);
+	text-decoration: none;
+}
+
+.ik-crumbs a::before {
+	content: "";
+	width: 0.5rem;
+	height: 0.5rem;
+	border-left: 2px solid var(--filiz);
+	border-bottom: 2px solid var(--filiz);
+	transform: rotate(45deg);
+}
+
+.ik-crumbs a:hover { color: #fff; text-decoration: underline; }
+
+/* Genel metin sayfasi */
+.ik-prose--page { max-width: 44rem; color: var(--murekkep); }
+.ik-prose--page h2 { font-size: 2rem; margin-top: 1.25rem; }
+.ik-prose--page h3 { font-size: 1.5rem; margin-top: 1rem; }
+.ik-prose--page a { color: var(--kabuk); }
+.ik-prose--page ul { list-style: disc; padding-left: 1.25rem; }
+.ik-prose--page img { border-radius: var(--kose); }
+
+/* Urun listesi sayfasi */
+.ik-catalog .ik-stack { background: var(--kabuk); }
+
+/* Urun detayi --------------------------------------------------------------- */
+
+.ik-product__grid {
+	display: grid;
+	gap: 3rem;
+}
+
+@media (min-width: 960px) {
+	.ik-product__grid { grid-template-columns: minmax(0, 1fr) 22rem; gap: 4rem; align-items: start; }
+}
+
+.ik-product__media { margin: 0 0 2.5rem; }
+
+.ik-product__image {
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	object-fit: cover;
+	border-radius: var(--kose);
+}
+
+.ik-product__body { color: var(--murekkep); max-width: 44rem; }
+
+.ik-product__subtitle { font-size: 2rem; margin-top: 2.5rem; }
+
+.ik-specs {
+	margin: 1.25rem 0 0;
+	max-width: 44rem;
+	border-top: 2px solid var(--murekkep);
+}
+
+.ik-specs__row {
+	display: grid;
+	grid-template-columns: 11rem 1fr;
+	gap: 1rem;
+	padding-block: 0.75rem;
+	border-bottom: 1px solid var(--cizgi);
+}
+
+.ik-specs dt { font-weight: 700; }
+.ik-specs dd { margin: 0; color: var(--toz); }
+
+.ik-product__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 2.5rem;
+}
+
+.ik-product__actions .btn--ghost { color: var(--golge); }
+
+.ik-product__aside {
+	display: grid;
+	gap: 2rem;
+}
+
+@media (min-width: 960px) {
+	.ik-product__aside { position: sticky; top: 6.5rem; }
+}
+
+/* Yan liste: butun urunler */
+.ik-sidelist {
+	background: var(--kirec-acik);
+	border-top: 4px solid var(--golge);
+	padding: 1.5rem 1.5rem 1rem;
+	border-radius: var(--kose);
+}
+
+.ik-sidelist__title { font-size: 1.5rem; margin-bottom: 0.75rem; }
+
+.ik-sidelist__link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	min-height: 2.9rem;
+	border-bottom: 1px solid var(--cizgi);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.ik-sidelist li:last-child .ik-sidelist__link { border-bottom: 0; }
+
+.ik-sidelist__link .ik-icon { color: var(--toz); transition: transform 0.15s ease; }
+.ik-sidelist__link:hover .ik-icon { transform: translateX(3px); color: var(--murekkep); }
+
+.ik-sidelist__link[aria-current="page"] {
+	color: var(--golge);
+	box-shadow: inset 4px 0 0 var(--filiz);
+	padding-left: 0.85rem;
+}
+
+.ik-sidelist__link[aria-current="page"] .ik-icon { color: var(--filiz); }
+
+/* WhatsApp yardim kutusu ----------------------------------------------------- */
+
+.ik-help {
+	position: relative;
+	isolation: isolate;
+	display: grid;
+	align-content: end;
+	gap: 0.75rem;
+	min-height: 26rem;
+	padding: 2rem 1.75rem 2.25rem;
+	overflow: hidden;
+	border-radius: var(--kose);
+	background: var(--golge);
+	color: #fff;
+	text-decoration: none;
+}
+
+.ik-help__image {
+	position: absolute;
+	inset: 0;
+	z-index: -2;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ik-help::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: color-mix(in srgb, var(--golge) 78%, transparent);
+}
+
+.ik-help__icon {
+	display: grid;
+	place-items: center;
+	width: 5rem;
+	height: 5rem;
+	margin-bottom: auto;
+	border-radius: 50%;
+	background: var(--filiz);
+	color: #fff;
+	box-shadow: 0 0 0 9px color-mix(in srgb, var(--filiz) 35%, transparent);
+	transition: box-shadow 0.2s ease;
+}
+
+.ik-help:hover .ik-help__icon { box-shadow: 0 0 0 13px color-mix(in srgb, var(--filiz) 35%, transparent); }
+
+.ik-help__title {
+	margin-top: 3.5rem;
+	font-size: 1.75rem;
+	font-weight: 800;
+	font-stretch: 75%;
+	font-variation-settings: "wdth" var(--yari-dar);
+	line-height: 1.1;
+}
+
+.ik-help__text { color: var(--koyu-metin); font-size: 1.0625rem; }
+
+.ik-help__number {
+	margin-top: 0.75rem;
+	font-size: 1.3125rem;
+	font-weight: 800;
+}
+
+.ik-help:hover .ik-help__number { text-decoration: underline; text-decoration-color: var(--filiz); text-decoration-thickness: 2px; }
+
+/* Hakkimizda ---------------------------------------------------------------- */
+
+.ik-about-page__media { margin-top: -1.5rem; }
+
+.ik-about-page__image {
+	width: 100%;
+	aspect-ratio: 21 / 9;
+	object-fit: cover;
+	border-radius: var(--kose);
+}
+
+.ik-story__grid {
+	display: grid;
+	gap: 2rem;
+}
+
+@media (min-width: 900px) {
+	.ik-story__grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 5rem; }
+}
+
+.ik-story .ik-prose { color: var(--murekkep); }
+
+.ik-values { padding-top: 0; }
+
+.ik-values__list {
+	display: grid;
+	gap: 2px;
+	margin-top: 2.5rem;
+	background: var(--cizgi);
+	border-block: 2px solid var(--murekkep);
+}
+
+@media (min-width: 800px) {
+	.ik-values__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.ik-values__item {
+	padding: 2rem 1.75rem 2.25rem 0;
+	background: var(--kirec);
+}
+
+@media (min-width: 800px) {
+	.ik-values__item + .ik-values__item { padding-left: 1.75rem; }
+}
+
+.ik-values__icon { display: block; color: var(--kabuk); margin-bottom: 1rem; }
+.ik-values__title { font-size: 1.75rem; margin-bottom: 0.5rem; }
+.ik-values__item p { color: var(--toz); }
+
+/* Iletisim ------------------------------------------------------------------ */
+
+.ik-contact__grid {
+	display: grid;
+	gap: 3rem;
+}
+
+@media (min-width: 960px) {
+	.ik-contact__grid { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 5rem; align-items: start; }
+}
+
+.ik-contact__info { display: grid; gap: 1.75rem; }
+
+.ik-contact__item {
+	display: flex;
+	gap: 1.1rem;
+	align-items: flex-start;
+}
+
+.ik-contact__icon {
+	display: grid;
+	place-items: center;
+	width: 3.25rem;
+	height: 3.25rem;
+	flex: none;
+	border-radius: 50%;
+	background: var(--golge);
+	color: var(--filiz);
+}
+
+.ik-contact__label {
+	font-size: 1rem;
+	font-weight: 600;
+	font-stretch: 100%;
+	font-variation-settings: "wdth" 100;
+	color: var(--toz);
+	margin-bottom: 0.2rem;
+}
+
+.ik-contact__value {
+	font-size: 1.3125rem;
+	font-weight: 700;
+	line-height: 1.4;
+	text-decoration: none;
+}
+
+a.ik-contact__value:hover { text-decoration: underline; text-decoration-color: var(--recine); }
+
+.ik-form {
+	padding: clamp(1.5rem, 4vw, 2.75rem);
+	background: var(--kirec-acik);
+	border-top: 4px solid var(--recine);
+	border-radius: var(--kose);
+}
+
+.ik-form__title { font-size: 2.25rem; }
+.ik-form__text { margin-top: 0.75rem; color: var(--toz); }
+
+.ik-form__grid {
+	display: grid;
+	gap: 1.25rem;
+	margin-top: 1.75rem;
+}
+
+@media (min-width: 640px) {
+	.ik-form__grid { grid-template-columns: 1fr 1fr; }
+	.ik-field--wide, .ik-form__actions { grid-column: 1 / -1; }
+}
+
+.ik-field__label {
+	display: block;
+	margin-bottom: 0.4rem;
+	font-weight: 600;
+	font-size: 1rem;
+}
+
+.ik-field__note { color: var(--toz); font-weight: 400; }
+
+.ik-field__input {
+	width: 100%;
+	min-height: 3.25rem;
+	padding: 0.7rem 0.9rem;
+	border: 2px solid var(--cizgi);
+	border-radius: var(--kose);
+	background: var(--kirec);
+	color: var(--murekkep);
+	font: inherit;
+}
+
+.ik-field__input:focus { border-color: var(--golge); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--filiz) 45%, transparent); }
+.ik-field__input[aria-invalid="true"] { border-color: #b3261e; }
+
+.ik-field__error { margin-top: 0.4rem; color: #b3261e; font-size: 0.9375rem; font-weight: 600; }
+
+.ik-form__notice {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	margin-top: 1.25rem;
+	padding: 1rem 1.25rem;
+	border-radius: var(--kose);
+}
+
+.ik-form__notice--ok { background: color-mix(in srgb, var(--filiz) 16%, white); color: var(--golge); }
+.ik-form__notice--ok .ik-icon { color: var(--filiz); }
+.ik-form__notice--error { background: #fbe9e7; color: #8c1d18; }
+
+.ik-map { position: relative; }
+
+.ik-map__frame {
+	display: block;
+	width: 100%;
+	height: 26rem;
+	border: 0;
+	filter: grayscale(0.4);
+}
+
+.ik-map__bar {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 1.5rem;
+	margin-inline: auto;
+	pointer-events: none;
+}
+
+.ik-map__bar .btn { pointer-events: auto; }
+
+/* Blog ---------------------------------------------------------------------- */
+
+.ik-article__date { display: block; margin-top: 1rem; color: var(--koyu-metin); }
+
+.ik-article__title { max-width: 22ch; }
+
+.ik-article__grid {
+	display: grid;
+	gap: 3rem;
+}
+
+@media (min-width: 960px) {
+	.ik-article__grid { grid-template-columns: minmax(0, 1fr) 22rem; gap: 4rem; align-items: start; }
+	.ik-article__aside { position: sticky; top: 6.5rem; }
+}
+
+.ik-article__cover {
+	width: 100%;
+	aspect-ratio: 2 / 1;
+	object-fit: cover;
+	border-radius: var(--kose);
+	margin-bottom: 2.5rem;
+}
+
+.ik-more { background: var(--kirec-acik); }
+.ik-more .ik-title { margin-bottom: 2.5rem; }
+
+.ik-pagination { margin-top: 3rem; }
+
+.ik-pagination .nav-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.ik-pagination .page-numbers {
+	display: grid;
+	place-items: center;
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	padding: 0 0.75rem;
+	border: 2px solid var(--cizgi);
+	border-radius: var(--kose);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.ik-pagination .page-numbers.current { background: var(--golge); color: #fff; border-color: var(--golge); }

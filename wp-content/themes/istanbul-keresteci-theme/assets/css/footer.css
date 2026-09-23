@@ -1,0 +1,73 @@
+/*
+ * Alt bilgi: koyu cam golgesi zemin, dort sutun.
+ */
+
+.ik-footer {
+	background: var(--golge);
+	color: var(--koyu-metin);
+	padding-block: clamp(3.5rem, 7vw, 5rem) 2rem;
+	font-size: 1rem;
+}
+
+.ik-footer a { text-decoration: none; }
+.ik-footer a:hover { color: #fff; text-decoration: underline; }
+
+.ik-footer__grid {
+	display: grid;
+	gap: 2.5rem;
+}
+
+@media (min-width: 700px) {
+	.ik-footer__grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 1080px) {
+	.ik-footer__grid { grid-template-columns: 1.3fr 1.2fr 0.8fr 1.2fr; gap: 3rem; }
+}
+
+.ik-footer__about p { margin-top: 1.25rem; max-width: 22rem; }
+
+.ik-footer__title {
+	color: #fff;
+	font-size: 1.3125rem;
+	font-stretch: 75%;
+	font-variation-settings: "wdth" var(--yari-dar);
+	margin-bottom: 1rem;
+}
+
+.ik-footer__list { display: grid; gap: 0.4rem; }
+
+.ik-footer__list--two { grid-template-columns: 1fr 1fr; column-gap: 1.5rem; }
+
+.ik-footer__contact { font-style: normal; display: grid; gap: 0.75rem; }
+
+.ik-footer__contact p,
+.ik-footer__contact a {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.65rem;
+}
+
+.ik-footer__contact .ik-icon { margin-top: 0.2rem; color: var(--filiz); }
+
+.ik-footer__legal {
+	margin-top: 3rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--cizgi-koyu);
+	font-size: 0.875rem;
+}
+
+/* Telefonda her baglanti en az 44px yuksekliginde dokunma alani */
+@media (max-width: 699px) {
+	.ik-footer__list { gap: 0; }
+
+	.ik-footer__list a,
+	.ik-footer__contact a {
+		display: flex;
+		align-items: center;
+		min-height: 2.75rem;
+	}
+
+	.ik-footer__contact { gap: 0.25rem; }
+	.ik-footer__contact .ik-icon { margin-top: 0; }
+}

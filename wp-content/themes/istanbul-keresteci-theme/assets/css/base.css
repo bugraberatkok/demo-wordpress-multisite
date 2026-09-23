@@ -1,0 +1,178 @@
+/*
+ * Temel: sifirlama, tipografi olcegi, dugmeler, ortak kaplar.
+ * Olcek: 14 / 17 / 21 / 28 / 40 / 64 / 96 px. Renkler tokens.css'ten gelir.
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: 1rem; }
+
+body {
+	margin: 0;
+	background: var(--kirec);
+	color: var(--murekkep);
+	font-family: var(--font);
+	font-size: 1.0625rem;
+	font-variation-settings: "wdth" 100;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	overflow-x: hidden;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: inherit; text-underline-offset: 0.2em; }
+
+:focus-visible {
+	outline: 3px solid var(--odak);
+	outline-offset: 3px;
+	border-radius: 2px;
+}
+
+h1, h2, h3 {
+	margin: 0;
+	font-weight: 800;
+	font-stretch: 62%;
+	font-variation-settings: "wdth" var(--dar);
+	line-height: 0.98;
+	letter-spacing: -0.005em;
+	text-wrap: balance;
+}
+
+p { margin: 0; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+/* Kaplar ------------------------------------------------------------------ */
+
+.ik-wrap {
+	width: 100%;
+	max-width: calc(var(--sayfa-genislik) + 2 * var(--kenar));
+	margin-inline: auto;
+	padding-inline: var(--kenar);
+}
+
+.ik-section { padding-block: clamp(4rem, 9vw, 7rem); }
+
+.ik-section--dark {
+	background: var(--golge);
+	color: var(--koyu-metin);
+}
+
+.ik-section--dark .ik-title { color: #fff; }
+
+.ik-section__head {
+	display: grid;
+	gap: 1rem 3rem;
+	margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+@media (min-width: 900px) {
+	.ik-section__head {
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: end;
+	}
+}
+
+.ik-title { font-size: clamp(2.5rem, 5.4vw, 4rem); }
+
+.ik-lead {
+	color: var(--toz);
+	font-size: 1.3125rem;
+	line-height: 1.5;
+	max-width: 36rem;
+	margin-top: 1rem;
+}
+
+.ik-section--dark .ik-lead { color: var(--koyu-metin); }
+
+/* Metin baglantisi: alt cizgili, ok isaretli */
+.ik-textlink {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 700;
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-decoration-color: var(--recine);
+	text-underline-offset: 0.35em;
+	white-space: nowrap;
+}
+
+.ik-textlink:hover { text-decoration-color: currentColor; }
+
+/* Dugmeler ---------------------------------------------------------------- */
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.6rem;
+	min-height: 3.25rem;
+	padding: 0.75rem 1.5rem;
+	border: 2px solid transparent;
+	border-radius: var(--kose);
+	font: inherit;
+	font-weight: 700;
+	font-size: 1.0625rem;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn--solid {
+	background: var(--recine);
+	color: var(--murekkep);
+}
+
+.btn--solid:hover { background: var(--recine-koyu); }
+
+.btn--ghost {
+	border-color: currentColor;
+	color: inherit;
+	background: transparent;
+}
+
+.btn--ghost:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+
+.btn--sm { min-height: 2.75rem; padding: 0.5rem 1.1rem; font-size: 1rem; }
+
+.ik-icon { flex: none; }
+
+/* Yer tutucu gorsel: kesim yuzu tonu, uzerinde yil halkalari */
+.ik-placeholder {
+	background:
+		repeating-radial-gradient(circle at 30% 60%, transparent 0 10px, color-mix(in srgb, var(--kabuk) 22%, transparent) 10px 12px),
+		color-mix(in srgb, var(--recine) 45%, var(--kirec));
+}
+
+/* Erisilebilirlik ------------------------------------------------------------ */
+
+.ik-skip {
+	position: absolute;
+	left: var(--kenar);
+	top: -100px;
+	z-index: 100;
+}
+
+.ik-skip:focus { top: 12px; }
+
+.screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+	}
+}

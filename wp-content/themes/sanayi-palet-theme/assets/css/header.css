@@ -1,0 +1,146 @@
+/* Ust menu. Masaustunde tek satir; 960px altinda acilir panel. */
+
+.sp-header {
+	position: sticky;
+	top: 0;
+	z-index: 50;
+	background: var(--beton);
+	border-bottom: 1px solid var(--cizgi);
+}
+
+/* WordPress yonetim seridi varken menu onun altinda dursun. */
+.admin-bar .sp-header { top: 32px; }
+@media (max-width: 782px) { .admin-bar .sp-header { top: 0; } }
+
+.sp-header__bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.5rem;
+	min-height: 76px;
+}
+
+/* Logo: gorsel yoksa yazi. */
+.sp-logo {
+	display: grid;
+	color: var(--yanik);
+	text-decoration: none;
+	line-height: 1;
+}
+.sp-logo:hover { color: var(--yanik); }
+.sp-logo__image { height: 48px; width: auto; }
+.sp-logo__name { font-family: var(--font-baslik); font-size: 2rem; font-weight: 800; letter-spacing: -0.005em; }
+.sp-logo__sub { margin-top: 0.2rem; color: var(--toz); font-size: 0.8125rem; }
+
+.sp-nav ul {
+	display: flex;
+	gap: 0.25rem 2rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sp-nav a {
+	display: inline-block;
+	padding-block: 0.5rem;
+	border-bottom: 3px solid transparent;
+	color: var(--yanik);
+	font-family: var(--font-baslik);
+	font-size: 1.3125rem;
+	font-weight: 700;
+	text-decoration: none;
+}
+.sp-nav a:hover { border-bottom-color: var(--cizgi); }
+/* Bulunulan sayfa: ahsap cizgi (yapi), tiklanabilirlik yesilde kalir. */
+.sp-nav a[aria-current="page"] { border-bottom-color: var(--cam); }
+
+.sp-header__actions {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+}
+
+.sp-header__phone {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--yanik);
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.sp-header__phone:hover { color: var(--yesil); }
+
+.sp-header__toggle { display: none; }
+
+/* Masaustu ---------------------------------------------------------------- */
+@media (min-width: 960px) {
+	.sp-header__panel {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		justify-content: space-between;
+		gap: 2rem;
+		margin-left: 2.5rem;
+	}
+}
+
+/* Mobil / tablet ---------------------------------------------------------- */
+@media (max-width: 959.98px) {
+	.sp-header__toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		min-height: 44px;
+		padding: 0 0.25rem;
+		border: 0;
+		background: none;
+		color: var(--yanik);
+		font-family: var(--font-baslik);
+		font-size: 1.25rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	/* Uc cizgi; acikken carpiya doner. */
+	.sp-header__toggle-bars,
+	.sp-header__toggle-bars::before,
+	.sp-header__toggle-bars::after {
+		display: block;
+		width: 22px;
+		height: 2px;
+		background: currentColor;
+		transition: transform 0.2s ease, background-color 0.2s ease;
+	}
+	.sp-header__toggle-bars { position: relative; }
+	.sp-header__toggle-bars::before,
+	.sp-header__toggle-bars::after { content: ""; position: absolute; left: 0; }
+	.sp-header__toggle-bars::before { top: -7px; }
+	.sp-header__toggle-bars::after { top: 7px; }
+
+	[data-open="true"] .sp-header__toggle-bars { background: transparent; }
+	[data-open="true"] .sp-header__toggle-bars::before { transform: translateY(7px) rotate(45deg); }
+	[data-open="true"] .sp-header__toggle-bars::after { transform: translateY(-7px) rotate(-45deg); }
+
+	.sp-header__panel {
+		position: absolute;
+		inset: 100% 0 auto 0;
+		display: none;
+		padding: 0.5rem var(--kenar) 1.5rem;
+		background: var(--beton);
+		border-bottom: 1px solid var(--cizgi);
+	}
+	[data-open="true"] .sp-header__panel { display: block; }
+
+	.sp-nav ul { flex-direction: column; gap: 0; }
+	.sp-nav li + li { border-top: 1px solid var(--cizgi); }
+	.sp-nav a { display: block; padding-block: 0.9rem; font-size: 1.5rem; border-bottom: 0; }
+	.sp-nav a[aria-current="page"] { box-shadow: inset 4px 0 0 var(--cam); padding-left: 0.9rem; }
+
+	.sp-header__actions { flex-wrap: wrap; margin-top: 1.25rem; }
+	.sp-header__actions .btn { flex: 1 1 12rem; }
+}
+
+/* JS yoksa panel her zaman acik kalsin; menu kaybolmasin. */
+.no-js .sp-header__toggle { display: none; }
+.no-js .sp-header__panel { position: static; display: block; }

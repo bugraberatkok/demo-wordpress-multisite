@@ -1,0 +1,50 @@
+/* Alt bilgi: yanik zemin. */
+
+.sp-footer {
+	padding-block: clamp(3.5rem, 7vw, 5rem) 2rem;
+	background: var(--yanik);
+	color: color-mix(in srgb, var(--beton-acik) 82%, transparent);
+	font-size: 0.9875rem;
+}
+
+.sp-footer a { color: var(--beton-acik); text-decoration: none; }
+.sp-footer a:hover { text-decoration: underline; }
+.sp-footer :focus-visible { outline-color: var(--cam); }
+
+.sp-footer__grid {
+	display: grid;
+	gap: 2.5rem;
+}
+
+@media (min-width: 800px) {
+	.sp-footer__grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr) minmax(0, 1fr); gap: 3rem; }
+}
+
+.sp-footer__about { max-width: 24rem; }
+
+.sp-footer__name {
+	margin-bottom: 0.75rem;
+	color: var(--beton-acik);
+	font-family: var(--font-baslik);
+	font-size: 2rem;
+	font-weight: 800;
+	line-height: 1;
+}
+
+.sp-footer__nav ul { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+
+.sp-footer__nav a { display: inline-flex; align-items: center; min-height: 44px; font-family: var(--font-baslik); font-size: 1.25rem; font-weight: 700; }
+
+.sp-footer__contact { display: grid; gap: 0.6rem; font-style: normal; }
+
+.sp-footer__contact a { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; }
+
+.sp-footer__address { display: flex; gap: 0.5rem; }
+.sp-footer__address .sp-icon { margin-top: 0.3rem; }
+
+.sp-footer__legal {
+	margin-top: 3rem;
+	padding-top: 1.25rem;
+	border-top: 1px solid color-mix(in srgb, var(--beton-acik) 18%, transparent);
+	font-size: 0.875rem;
+}

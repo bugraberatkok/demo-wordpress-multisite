@@ -1,0 +1,435 @@
+<?php
+/**
+ * ahsapambalaj temasi (ahsapambalajsanayi.com; ahsapkasa temasindan turetildi).
+ *
+ * Tema gorunur metinleri sabit yazmaz; tum degerler Network Content Studio
+ * veri katmanindan (nwcs_*) okunur. Eklenti devre disi kalirsa sayfa fatal
+ * vermesin diye asagida guvenli yedek fonksiyonlar tanimlanir.
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+if ( ! function_exists( 'nwcs_field' ) ) {
+	function nwcs_field( $page, $component, $field, $fallback = null ) {
+		return null === $fallback ? '' : $fallback;
+	}
+	function nwcs_rows( $page, $component, $field ) {
+		return array();
+	}
+	function nwcs_image( $page, $component, $field, $size = 'large' ) {
+		return array( 'id' => 0, 'url' => '', 'alt' => '' );
+	}
+	function nwcs_image_by_id( $id, $size = 'large' ) {
+		return array( 'id' => 0, 'url' => '', 'alt' => '' );
+	}
+	function nwcs_the_icon( $key, $class = '', $size = 24 ) {}
+	function nwcs_edit_attr( $page, $component, $field = '', $row = null, $sub = '' ) {}
+	function nwcs_section_order( $page = 'home' ) {
+		return array( 'intro', 'stats', 'family', 'ctaband' );
+	}
+}
+
+add_action( 'after_setup_theme', 'ahsapambalaj_setup' );
+function ahsapambalaj_setup(): void {
+	add_theme_support( 'title-tag' );
+	add_theme_support( 'post-thumbnails' );
+	add_theme_support( 'html5', array( 'style', 'script', 'search-form' ) );
+}
+
+add_action( 'wp_enqueue_scripts', 'ahsapambalaj_assets' );
+function ahsapambalaj_assets(): void {
+	$version = wp_get_theme()->get( 'Version' );
+
+	wp_enqueue_style(
+		'ahsapambalaj-fonts',
+		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Literata:opsz,wght@7..72,400..600&display=swap',
+		array(),
+		null
+	);
+
+	wp_enqueue_style(
+		'ahsapambalaj-tailwind',
+		get_theme_file_uri( 'assets/tailwind.css' ),
+		array( 'ahsapambalaj-fonts' ),
+		$version
+	);
+
+	// style.css yalnizca tema basligini tasir; kuyruga alinmasi WordPress adeti.
+	wp_enqueue_style( 'ahsapambalaj-style', get_stylesheet_uri(), array( 'ahsapambalaj-tailwind' ), $version );
+
+	// Derlenmis Tailwind'de olmayan elle yazilmis duzeltmeler.
+	wp_enqueue_style( 'ahsapambalaj-theme', get_theme_file_uri( 'assets/theme.css' ), array( 'ahsapambalaj-tailwind' ), $version );
+
+	wp_enqueue_script( 'ahsapambalaj-nav', get_theme_file_uri( 'assets/nav.js' ), array(), $version, true );
+	wp_enqueue_script( 'ahsapambalaj-media', get_theme_file_uri( 'assets/media.js' ), array(), $version, true );
+	wp_enqueue_script( 'ahsapambalaj-motion', get_theme_file_uri( 'assets/motion.js' ), array(), $version, true );
+}
+
+add_action( 'wp_head', 'ahsapambalaj_preconnect', 1 );
+function ahsapambalaj_preconnect(): void {
+	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
+	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+}
+
+/**
+ * Bos baglantilari '#' yapar, koke gore yazilmis yollari site adresine baglar.
+ * Alt dizin multisite'ta '/iletisim/' ag kokune gider; home_url ile duzeltiyoruz.
+ */
+function ahsapambalaj_link( $url ): string {
+	$url = trim( (string) $url );
+
+	if ( '' === $url ) {
+		return '#';
+	}
+
+	if ( str_starts_with( $url, '/' ) && ! str_starts_with( $url, '//' ) ) {
+		return home_url( $url );
+	}
+
+	return $url;
+}
+
+/**
+ * Menudeki baglantinin bulunulan sayfa olup olmadigini soyler.
+ */
+function ahsapambalaj_is_current( string $url ): bool {
+	$request = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+
+	$target  = untrailingslashit( (string) wp_parse_url( ahsapambalaj_link( $url ), PHP_URL_PATH ) );
+	$current = untrailingslashit( (string) wp_parse_url( $request, PHP_URL_PATH ) );
+
+	return $target === $current;
+}
+
+/**
+ * Gorsel alani icin img etiketi; deger yoksa sessiz bir yer tutucu.
+ */
+function ahsapambalaj_image_tag( array $image, string $class = '', string $alt_fallback = '' ): string {
+	if ( ! empty( $image['url'] ) ) {
+		return sprintf(
+			'<img src="%1$s" alt="%2$s" class="%3$s" loading="lazy" decoding="async" />',
+			esc_url( $image['url'] ),
+			esc_attr( $image['alt'] ?: $alt_fallback ),
+			esc_attr( $class )
+		);
+	}
+
+	return sprintf(
+		'<div class="%1$s flex items-center justify-center bg-dust text-moss font-display text-xs tracking-[0.14em]" role="img" aria-label="%2$s">%2$s</div>',
+		esc_attr( $class ),
+		esc_html( $alt_fallback ?: 'Görsel eklenmedi' )
+	);
+}
+
+/**
+ * Gorsel alani bossa temanin kendi gorselini (assets/img) dondurur.
+ * Panelden secilen gorsel her zaman kazanir; yedek yalnizca bos alani doldurur.
+ * Boylece tema, seed ya da medya yuklemesi olmadan da eksiksiz gorunur.
+ */
+function ahsapambalaj_image_or_default( array $image, string $file, string $alt = '' ): array {
+	if ( ! empty( $image['url'] ) || '' === $file || ! file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+		return $image;
+	}
+
+	return array(
+		'id'  => 0,
+		'url' => get_theme_file_uri( 'assets/img/' . $file ),
+		'alt' => '' !== ( $image['alt'] ?? '' ) ? $image['alt'] : $alt,
+	);
+}
+
+/**
+ * Yedek gorseller: hangi alan bos kalirsa hangi dosya ve alt metin gelir.
+ * Tekrarli alanlarda sira numarasina gore secilir.
+ */
+function ahsapambalaj_default_images(): array {
+	$img = array(
+		'logo'   => array( 'logo.png', 'Koçist Orman Ürünleri logosu' ),
+		'hero-1' => array( 'hero-1.jpg', 'Farklı ölçülerde üretilmiş ahşap sandık ve kasalar' ),
+		'hero-2' => array( 'hero-2.jpg', 'Tesis önünde sevkiyata hazır bekleyen ahşap sandıklar' ),
+		'hero-3' => array( 'hero-3.jpg', 'Atölyede istiflenmiş ahşap kasa ve sandıklar' ),
+		'atolye' => array( 'atolye.jpg', 'İkitelli atölyesinde ölçüye göre üretilen ahşap sandık' ),
+		'dag'    => array( 'dag.jpg', 'Sisler arasında dağ yamacı' ),
+		'palet'  => array( 'palet.jpg', 'Üst üste dizilmiş ahşap paletler' ),
+		'sandik' => array( 'sandik.jpg', 'Sevkiyata hazır kapalı ahşap sandık' ),
+		'kafes'  => array( 'kafes.jpg', 'Ölçüye göre üretilmiş ahşap kafes' ),
+	);
+
+	return array(
+		'logo'     => $img['logo'],
+		'about'    => $img['dag'],
+		'slides'   => array( $img['hero-1'], $img['hero-2'], $img['hero-3'] ),
+		'family'   => array( $img['palet'], $img['sandik'], $img['kafes'], $img['atolye'] ),
+		// Hizmetler: her urunun kapak + ek gorselleri (image, image_2, image_3).
+		'services' => array(
+			array( $img['palet'], $img['hero-2'], $img['hero-3'] ),
+			array( $img['sandik'], $img['hero-1'], $img['atolye'] ),
+			array( $img['kafes'], $img['hero-3'], $img['hero-1'] ),
+			array( $img['atolye'], $img['hero-2'], $img['hero-1'] ),
+		),
+	);
+}
+
+/**
+ * Kisayol: ahsapambalaj_default_images() icindeki yola gore yedekli gorsel.
+ * Ornek: ahsapambalaj_image( $image, 'family', 2 ) ya da ( $image, 'services', 1, 0 ).
+ */
+function ahsapambalaj_image( array $image, string $group, ?int $index = null, ?int $sub = null ): array {
+	$entry = ahsapambalaj_default_images()[ $group ] ?? null;
+
+	if ( null !== $index ) {
+		$entry = $entry[ $index ] ?? null;
+	}
+
+	if ( null !== $sub ) {
+		$entry = $entry[ $sub ] ?? null;
+	}
+
+	if ( ! is_array( $entry ) || ! is_string( $entry[0] ?? null ) ) {
+		return $image;
+	}
+
+	return ahsapambalaj_image_or_default( $image, $entry[0], $entry[1] ?? '' );
+}
+
+/* ====================================================================== *
+ * Kurulum: sayfalar ve site ayarlari
+ *
+ * Tema etkinlestirildiginde (ve surum degistiginde bir kez yonetim
+ * panelinde) menudeki sayfalari olusturur. Idempotent: ayni slug varsa
+ * dokunmaz, kullanicinin sayfasini ezmez.
+ * ====================================================================== */
+
+const AHSAPAMBALAJ_SETUP_VERSION = '1';
+
+add_action( 'after_switch_theme', 'ahsapambalaj_setup_site' );
+add_action( 'admin_init', 'ahsapambalaj_maybe_setup_site' );
+
+function ahsapambalaj_maybe_setup_site(): void {
+	if ( get_option( 'ahsapambalaj_setup_version' ) !== AHSAPAMBALAJ_SETUP_VERSION ) {
+		ahsapambalaj_setup_site();
+	}
+}
+
+function ahsapambalaj_setup_site(): void {
+	$pages = array(
+		'hakkimizda'    => 'Hakkımızda',
+		'hizmetlerimiz' => 'Hizmetlerimiz',
+		'iletisim'      => 'İletişim',
+	);
+
+	foreach ( $pages as $slug => $title ) {
+		if ( get_page_by_path( $slug ) ) {
+			continue;
+		}
+
+		wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_name'   => $slug,
+				'post_title'  => $title,
+				'post_status' => 'publish',
+			)
+		);
+	}
+
+	// Ana sayfa front-page.php'den gelsin; statik bir sayfa secilmemisse
+	// yazi listesi ayarini koruruz (front-page.php her iki durumda da kullanilir).
+	if ( 'page' !== get_option( 'show_on_front' ) ) {
+		update_option( 'show_on_front', 'posts' );
+	}
+
+	// Menudeki /hakkimizda/ gibi adresler duz kalici baglantiyla 404 verir.
+	// Yalnizca hic ayarlanmamissa (varsayilan "duz") yazi adina cevrilir.
+	if ( '' === (string) get_option( 'permalink_structure' ) ) {
+		global $wp_rewrite;
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
+	}
+
+	flush_rewrite_rules( false );
+	update_option( 'ahsapambalaj_setup_version', AHSAPAMBALAJ_SETUP_VERSION );
+}
+
+/**
+ * Satirlari korunarak basilan cok satirli metin.
+ */
+function ahsapambalaj_multiline( string $value ): string {
+	return nl2br( esc_html( $value ) );
+}
+
+/**
+ * Bolum dosyasini basar.
+ */
+function ahsapambalaj_section( string $key, array $args = array() ): void {
+	$file = get_theme_file_path( "template-parts/sections/{$key}.php" );
+
+	if ( file_exists( $file ) ) {
+		include $file;
+	}
+}
+
+/* ====================================================================== *
+ * Teklif formu
+ *
+ * Demo sahte basari ekrani gostermez: gonderilen form gercekten kaydedilir,
+ * yonetimde "Teklif İstekleri" altinda gorulur.
+ * ====================================================================== */
+
+add_action( 'init', 'ahsapambalaj_register_quote_cpt' );
+function ahsapambalaj_register_quote_cpt(): void {
+	register_post_type(
+		'aas_quote',
+		array(
+			'labels'          => array(
+				'name'          => 'Teklif İstekleri',
+				'singular_name' => 'Teklif İsteği',
+				'menu_name'     => 'Teklif İstekleri',
+			),
+			'public'          => false,
+			'show_ui'         => true,
+			'show_in_menu'    => true,
+			'menu_icon'       => 'dashicons-email-alt',
+			'menu_position'   => 26,
+			'supports'        => array( 'title', 'editor', 'custom-fields' ),
+			'capability_type' => 'post',
+			'map_meta_cap'    => true,
+			'capabilities'    => array( 'create_posts' => 'do_not_allow' ),
+			'has_archive'     => false,
+			'rewrite'         => false,
+			'query_var'       => false,
+		)
+	);
+}
+
+add_action( 'admin_post_ahsapambalaj_quote', 'ahsapambalaj_handle_quote' );
+add_action( 'admin_post_nopriv_ahsapambalaj_quote', 'ahsapambalaj_handle_quote' );
+function ahsapambalaj_handle_quote(): void {
+	// Form yalnizca iletisim sayfasinda bulunur; referer bos gelirse oraya doneriz.
+	$fallback = home_url( '/iletisim/' );
+	$referer  = wp_get_referer();
+	$redirect = $referer ? wp_validate_redirect( $referer, $fallback ) : $fallback;
+
+	if ( '' === $redirect ) {
+		$redirect = $fallback;
+	}
+
+	// Bot tuzagi: gorunmeyen alan dolmussa sessizce geri don.
+	if ( ! empty( $_POST['ahsapambalaj_website'] ) ) {
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
+	$values = array(
+		'name'    => sanitize_text_field( wp_unslash( $_POST['aas_name'] ?? '' ) ),
+		'company' => sanitize_text_field( wp_unslash( $_POST['aas_company'] ?? '' ) ),
+		'email'   => sanitize_email( wp_unslash( $_POST['aas_email'] ?? '' ) ),
+		'phone'   => sanitize_text_field( wp_unslash( $_POST['aas_phone'] ?? '' ) ),
+		'product' => sanitize_text_field( wp_unslash( $_POST['aas_product'] ?? '' ) ),
+		'size'    => sanitize_textarea_field( wp_unslash( $_POST['aas_size'] ?? '' ) ),
+		'message' => sanitize_textarea_field( wp_unslash( $_POST['aas_message'] ?? '' ) ),
+	);
+
+	$errors = array();
+
+	if ( ! isset( $_POST['ahsapambalaj_quote_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['ahsapambalaj_quote_nonce'] ), 'ahsapambalaj_quote' ) ) {
+		$errors['form'] = 'Form oturumu zaman aşımına uğradı. Lütfen tekrar gönderin.';
+	}
+
+	if ( '' === $values['name'] ) {
+		$errors['name'] = 'Adınızı yazın.';
+	}
+
+	if ( '' === $values['email'] || ! is_email( $values['email'] ) ) {
+		$errors['email'] = 'Geçerli bir e-posta adresi yazın.';
+	}
+
+	if ( '' === $values['size'] ) {
+		$errors['size'] = 'En, boy ve yükseklik bilgisini yazın.';
+	}
+
+	$token = wp_generate_password( 16, false, false );
+
+	if ( $errors ) {
+		set_transient( 'ahsapambalaj_quote_' . $token, array( 'errors' => $errors, 'values' => $values ), 10 * MINUTE_IN_SECONDS );
+		wp_safe_redirect( add_query_arg( 'aas', $token, $redirect ) . '#teklif' );
+		exit;
+	}
+
+	// Urun secenekleri manifestten gelir; elle gonderilen baska bir deger kabul edilmez.
+	$allowed_products = array();
+	foreach ( nwcs_rows( 'services', 'grid', 'items' ) as $row ) {
+		if ( ! empty( $row['title'] ) ) {
+			$allowed_products[] = $row['title'];
+		}
+	}
+
+	if ( ! in_array( $values['product'], $allowed_products, true ) ) {
+		$values['product'] = 'Belirtilmedi';
+	}
+
+	$body = sprintf(
+		"Firma: %s\nE-posta: %s\nTelefon: %s\nÜrün: %s\n\nÖlçüler ve adet:\n%s\n\nMesaj:\n%s",
+		$values['company'] ?: '—',
+		$values['email'],
+		$values['phone'] ?: '—',
+		$values['product'],
+		$values['size'],
+		$values['message'] ?: '—'
+	);
+
+	$post_id = wp_insert_post(
+		array(
+			'post_type'    => 'aas_quote',
+			'post_status'  => 'private',
+			'post_title'   => sprintf( '%s — %s', $values['name'], $values['product'] ),
+			'post_content' => $body,
+			'meta_input'   => array(
+				'_aas_name'    => $values['name'],
+				'_aas_company' => $values['company'],
+				'_aas_email'   => $values['email'],
+				'_aas_phone'   => $values['phone'],
+				'_aas_product' => $values['product'],
+				'_aas_size'    => $values['size'],
+				'_aas_message' => $values['message'],
+			),
+		),
+		true
+	);
+
+	if ( is_wp_error( $post_id ) ) {
+		set_transient(
+			'ahsapambalaj_quote_' . $token,
+			array( 'errors' => array( 'form' => 'Kayıt sırasında bir sorun oldu. Lütfen telefonla ulaşın.' ), 'values' => $values ),
+			10 * MINUTE_IN_SECONDS
+		);
+		wp_safe_redirect( add_query_arg( 'aas', $token, $redirect ) . '#teklif' );
+		exit;
+	}
+
+	set_transient( 'ahsapambalaj_quote_' . $token, array( 'success' => true ), 10 * MINUTE_IN_SECONDS );
+	wp_safe_redirect( add_query_arg( 'aas', $token, $redirect ) . '#teklif' );
+	exit;
+}
+
+/**
+ * Yonlendirmeden sonra formun durumunu (hata / deger / basari) getirir.
+ */
+function ahsapambalaj_quote_state(): array {
+	$token = isset( $_GET['aas'] ) ? sanitize_key( wp_unslash( $_GET['aas'] ) ) : '';
+
+	if ( ! $token ) {
+		return array( 'errors' => array(), 'values' => array(), 'success' => false );
+	}
+
+	$state = get_transient( 'ahsapambalaj_quote_' . $token );
+
+	if ( ! is_array( $state ) ) {
+		return array( 'errors' => array(), 'values' => array(), 'success' => false );
+	}
+
+	return array(
+		'errors'  => $state['errors'] ?? array(),
+		'values'  => $state['values'] ?? array(),
+		'success' => ! empty( $state['success'] ),
+	);
+}

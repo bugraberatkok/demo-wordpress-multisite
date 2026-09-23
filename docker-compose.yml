@@ -63,6 +63,10 @@ services:
       - ./wp-content/themes/kereste-base:/var/www/html/wp-content/themes/kereste-base
       - ./wp-content/themes/ithalkeresteci-theme:/var/www/html/wp-content/themes/ithalkeresteci-theme
       - ./wp-content/themes/kavakkeresteci-theme:/var/www/html/wp-content/themes/kavakkeresteci-theme
+      - ./wp-content/themes/kocist-theme:/var/www/html/wp-content/themes/kocist-theme
+      - ./wp-content/themes/istanbul-keresteci-theme:/var/www/html/wp-content/themes/istanbul-keresteci-theme
+      - ./wp-content/themes/sanayi-palet-theme:/var/www/html/wp-content/themes/sanayi-palet-theme
+      - ./wp-content/themes/ahsapambalaj-theme:/var/www/html/wp-content/themes/ahsapambalaj-theme
       - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
       - ./docker/apache-wp.conf:/etc/apache2/conf-enabled/zz-wp.conf:ro
       - ./docker/php-uploads.ini:/usr/local/etc/php/conf.d/zz-uploads.ini:ro
@@ -93,6 +97,10 @@ services:
       - ./wp-content/themes/kereste-base:/var/www/html/wp-content/themes/kereste-base
       - ./wp-content/themes/ithalkeresteci-theme:/var/www/html/wp-content/themes/ithalkeresteci-theme
       - ./wp-content/themes/kavakkeresteci-theme:/var/www/html/wp-content/themes/kavakkeresteci-theme
+      - ./wp-content/themes/kocist-theme:/var/www/html/wp-content/themes/kocist-theme
+      - ./wp-content/themes/istanbul-keresteci-theme:/var/www/html/wp-content/themes/istanbul-keresteci-theme
+      - ./wp-content/themes/sanayi-palet-theme:/var/www/html/wp-content/themes/sanayi-palet-theme
+      - ./wp-content/themes/ahsapambalaj-theme:/var/www/html/wp-content/themes/ahsapambalaj-theme
       - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
       - ./scripts:/scripts:ro
       - ./resources:/resources:ro
