@@ -187,8 +187,26 @@ else
 	echo "/* SSL yok (deneme): FORCE_SSL_ADMIN bilerek eklenmedi. Sertifika gelince https paketi kurulur. */" >> "$OUT/wp-config-ek.php"
 fi
 
-sed -n "/^# WordPress Multisite/,/^RewriteRule \. index.php \[L\]/p" scripts/install.sh > "$OUT/htaccess.txt"
-[ -s "$OUT/htaccess.txt" ] || { echo "HATA: .htaccess kurallari install.sh'ten okunamadi." >&2; exit 1; }
+: > "$OUT/htaccess.txt"
+if [ -n "${MAP:-}" ]; then
+	# Canli alan adlari tek adreste: http -> https, www -> www'suz (301). Ayni
+	# sayfa iki adreste acilmasin (kopya icerik). Yalnizca bu alan adlari;
+	# SSL'i olmayan panel adresi etkilenmez.
+	HOSTS="$(for pair in $MAP; do printf '%s|' "${pair#*=}"; done | sed 's/|$//; s/\./\\./g')"
+	cat >> "$OUT/htaccess.txt" <<HT
+# Canli alan adlari: tek adres (https, www'suz)
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.($HOSTS)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteCond %{HTTP_HOST} ^($HOSTS)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+HT
+fi
+sed -n "/^# WordPress Multisite/,/^RewriteRule \. index.php \[L\]/p" scripts/install.sh >> "$OUT/htaccess.txt"
+grep -q "RewriteRule \. index.php" "$OUT/htaccess.txt" || { echo "HATA: .htaccess kurallari install.sh'ten okunamadi." >&2; exit 1; }
 
 cat > "$OUT/KURULUM.md" <<MD
 # Natro deneme kurulumu ($SCHEME://$DOMAIN)
