@@ -32,6 +32,9 @@ foreach ( array_keys( $product['categories'] ) as $slug ) {
 	}
 }
 
+// Mobil WhatsApp cubugu (footer.php) bu urunun mesajini kullansin.
+$GLOBALS['wk_current_product'] = $product;
+
 $related = array_slice(
 	array_values(
 		array_filter(

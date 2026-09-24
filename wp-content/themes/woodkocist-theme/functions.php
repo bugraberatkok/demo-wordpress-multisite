@@ -148,11 +148,24 @@ function wk_lines(): array {
 			continue;
 		}
 
+		// Kisaltma havuzdaki kategoriden: ad "Şezlonglar" iken kisaltma
+		// "ahsap-sezlonglar" olabilir; suzgec kartlardaki kisaltmayla calisir.
+		$slug = sanitize_title( $category );
+
+		foreach ( wk_products() as $product ) {
+			$found = array_search( $category, $product['categories'], true );
+
+			if ( false !== $found ) {
+				$slug = (string) $found;
+				break;
+			}
+		}
+
 		$lines[] = array(
 			'label'    => (string) ( $row['label'] ?? $category ),
 			'category' => $category,
 			'text'     => (string) ( $row['text'] ?? '' ),
-			'slug'     => sanitize_title( $category ),
+			'slug'     => $slug,
 			'count'    => count( array_filter( wk_products(), static fn( array $p ): bool => in_array( $category, $p['categories'], true ) ) ),
 		);
 	}
@@ -230,6 +243,20 @@ function wk_image( array $product ): array {
 	return array( 'url' => '', 'alt' => '' );
 }
 
+/**
+ * Havuzdaki fiyat metni ("10.250 ₺", "1.299,90 ₺") -> sayi; okunamazsa 0
+ * (0 ise yapilandirilmis veride teklif uretilmez).
+ */
+function wk_price_number( string $price ): float {
+	$digits = preg_replace( '/[^0-9,]/', '', $price );
+
+	if ( '' === $digits || null === $digits ) {
+		return 0.0;
+	}
+
+	return (float) str_replace( ',', '.', $digits );
+}
+
 function wk_order_text( array $product ): string {
 	return trim( sprintf( 'Merhaba, %s %s hakkında bilgi almak ve sipariş vermek istiyorum.', $product['code'], $product['title'] ) );
 }
@@ -255,6 +282,9 @@ function wk_seo_product_pages( array $pages ): array {
 			'image'       => ! empty( $image['id'] ) ? (int) $image['id'] : 0,
 			'type'        => 'Product',
 			'sitemap'     => true,
+			'sku'         => $product['code'],
+			'price'       => wk_price_number( (string) $product['price'] ),
+			'currency'    => 'TRY',
 			'properties'  => array_map(
 				static fn( array $pair ): array => array( 'name' => $pair[0], 'value' => $pair[1] ),
 				array_merge( array( array( 'Ürün kodu', $product['code'] ) ), wk_specs( (string) $product['spec'] ) )

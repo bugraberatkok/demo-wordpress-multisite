@@ -1,8 +1,8 @@
 <?php
 /**
  * Site haritasi saglayicisi: temanin 'sitemap' => true isaretledigi ek
- * sayfalar (bkz. includes/seo.php, nwcs_seo_extra_sitemap_urls). Yalnizca
- * wp_sitemaps_init sirasinda yuklenir; WP_Sitemaps_Provider o anda vardir.
+ * sayfalar (bkz. includes/seo.php, nwcs_seo_extra_sitemap_urls). 'init'
+ * sirasinda, site haritalari etkinse yuklenir (WP_Sitemaps_Provider vardir).
  */
 
 defined( 'ABSPATH' ) || exit;

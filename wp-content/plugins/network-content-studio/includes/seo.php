@@ -324,6 +324,9 @@ function nwcs_seo_page_for_path( string $path ): string {
  *           'type'        => 'Product',     // istege bagli
  *           'properties'  => array( array( 'name' => 'Ağaç', 'value' => 'Çam' ) ),
  *           'sitemap'     => true,          // istege bagli, asagiya bakin
+ *           'sku'         => 'W-ADR-FB01',  // istege bagli: urun kodu
+ *           'price'       => 10250,         // istege bagli: sayi; varsa Offer uretilir
+ *           'currency'    => 'TRY',
  *       );
  *       return $pages;
  *   } );
@@ -491,6 +494,9 @@ function nwcs_seo_context_extra( string $path, string $site, array $base ): arra
 			'description' => nwcs_seo_clean( (string) ( $page['description'] ?? '' ), 160 ),
 			'image'       => $page['image'] ?? 0,
 			'url'         => (string) $page['url'],
+			'sku'         => nwcs_seo_clean( (string) ( $page['sku'] ?? '' ) ),
+			'price'       => is_numeric( $page['price'] ?? null ) && (float) $page['price'] > 0 ? (float) $page['price'] : 0.0,
+			'currency'    => (string) ( $page['currency'] ?? 'TRY' ),
 		) + $base;
 	}
 
@@ -903,6 +909,15 @@ function nwcs_seo_product( array $context, string $org_id, string $page_id ): ar
 			'manufacturer'       => array( '@id' => $org_id ),
 			'mainEntityOfPage'   => array( '@id' => $page_id ),
 			'additionalProperty' => $properties,
+			'sku'                => (string) ( $context['sku'] ?? '' ),
+			// Yalnizca temanin bildirdigi gercek fiyat; fiyat yoksa teklif yok.
+			'offers'             => ! empty( $context['price'] ) ? array(
+				'@type'         => 'Offer',
+				'price'         => (string) round( (float) $context['price'], 2 ),
+				'priceCurrency' => (string) ( $context['currency'] ?? 'TRY' ),
+				'url'           => $context['url'],
+				'seller'        => array( '@id' => $org_id ),
+			) : array(),
 		)
 	);
 }
@@ -1023,7 +1038,8 @@ add_action( 'wp', 'nwcs_seo_no_author_archives' );
 function nwcs_seo_no_author_archives(): void {
 	global $wp_query;
 
-	if ( is_admin() || empty( nwcs_manifest()['pages'] ) || ! is_author() ) {
+	// Agin ana sitesi (panel kokunun) manifesti yok ama ayni kullanicilari tasir.
+	if ( is_admin() || ! is_author() || ( empty( nwcs_manifest()['pages'] ) && ! is_main_site() ) ) {
 		return;
 	}
 
@@ -1061,6 +1077,67 @@ add_filter(
 		return $data;
 	}
 );
+
+/**
+ * Agin ana sitesi (panel adresinin koku) ziyaretci icin bir sey gostermez:
+ * arama motoruna hicbir kosulda girmesin. Alt siteler ve yonetim etkilenmez.
+ */
+add_action( 'send_headers', 'nwcs_seo_noindex_main_site' );
+
+/**
+ * Surum ve kullanici adi sizintisi: WordPress surumu (generator etiketi,
+ * cekirdek dosyalarindaki ?ver=), PHP surumu (X-Powered-By) ve beslemelerdeki
+ * yazar adi gizlenir. Baska sitelerin sayfalari cerceve icinde gostermesi
+ * (clickjacking) yalnizca ayni site ve panel adresiyle sinirlanir; panelin
+ * canli onizlemesi calismaya devam eder.
+ */
+remove_action( 'wp_head', 'wp_generator' );
+add_filter( 'the_generator', '__return_empty_string' );
+
+add_filter( 'style_loader_src', 'nwcs_seo_strip_core_version', 20 );
+add_filter( 'script_loader_src', 'nwcs_seo_strip_core_version', 20 );
+function nwcs_seo_strip_core_version( $src ) {
+	if ( is_string( $src ) && str_contains( $src, 'ver=' . get_bloginfo( 'version' ) ) ) {
+		return remove_query_arg( 'ver', $src );
+	}
+
+	return $src;
+}
+
+add_filter(
+	'the_author',
+	static fn( $name ) => is_feed() ? '' : $name
+);
+
+add_action( 'send_headers', 'nwcs_seo_security_headers' );
+function nwcs_seo_security_headers(): void {
+	if ( headers_sent() ) {
+		return;
+	}
+
+	header_remove( 'X-Powered-By' );
+
+	if ( is_admin() ) {
+		return;
+	}
+
+	// Panel adresi kayitta http olup tarayicida https acilabilir (Cloudflare):
+	// iki sema da izinli, yoksa canli onizleme bos kalir.
+	$host = (string) wp_parse_url( network_site_url(), PHP_URL_HOST );
+	$port = wp_parse_url( network_site_url(), PHP_URL_PORT );
+	$host = $port ? $host . ':' . $port : $host;
+
+	if ( '' === $host ) {
+		return;
+	}
+
+	header( sprintf( "Content-Security-Policy: frame-ancestors 'self' https://%1\$s http://%1\$s", $host ), true );
+}
+function nwcs_seo_noindex_main_site(): void {
+	if ( is_multisite() && is_main_site() && ! is_admin() && ! headers_sent() ) {
+		header( 'X-Robots-Tag: noindex, nofollow', true );
+	}
+}
 
 /**
  * Ek sayfalar icin site haritasi (/wp-sitemap-nwcsextra-1.xml): temanin

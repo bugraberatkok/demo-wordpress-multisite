@@ -6,6 +6,8 @@
 defined( 'ABSPATH' ) || exit;
 
 $whatsapp = wk_whatsapp();
+// Urun sayfasinda mobil cubuk urun kodlu hazir mesajla acilir.
+$bar_link = ! empty( $GLOBALS['wk_current_product'] ) ? wk_whatsapp( wk_order_text( $GLOBALS['wk_current_product'] ) ) : $whatsapp;
 $phone    = trim( (string) nwcs_field( 'global', 'header', 'phone_label' ) );
 $email    = trim( (string) nwcs_field( 'global', 'header', 'email' ) );
 ?>
@@ -48,7 +50,7 @@ $email    = trim( (string) nwcs_field( 'global', 'header', 'email' ) );
 </footer>
 
 <?php if ( $whatsapp ) : ?>
-	<a class="wk-callbar" href="<?php echo esc_url( $whatsapp ); ?>" target="_blank" rel="noopener">
+	<a class="wk-callbar" href="<?php echo esc_url( $bar_link ); ?>" target="_blank" rel="noopener">
 		<?php echo wk_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		WhatsApp’tan sipariş verin
 	</a>

@@ -18,7 +18,9 @@
  * - /woodkocist/ sitesi varsa urunler o sitede sirasiyla secili gelir.
  */
 
-defined( 'ABSPATH' ) || die( 'Yalnizca WP-CLI ile calistirilir.' );
+if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_CLI' ) || ! WP_CLI ) {
+	exit( 'Yalnizca WP-CLI ile calistirilir.' );
+}
 
 if ( ! function_exists( 'nwcs_pool_blog_id' ) ) {
 	WP_CLI::error( 'Network Content Studio etkin degil.' );
@@ -69,7 +71,9 @@ foreach ( $items as $index => $item ) {
 	$name = html_entity_decode( (string) $item['name'], ENT_QUOTES, 'UTF-8' );
 
 	// Ad kodla basliyorsa ("W-ADR-FB01 Klasik Seri...") kod ayri alanda durur.
-	$title = trim( preg_replace( '/^' . preg_quote( (string) $item['sku'], '/' ) . '\s*/u', '', $name ) );
+	// Kaynakta ad baska bir kodla basliyor olabilir (W-ADR-KL02-1 / W-ADR-KL03):
+	// bastaki her urun kodu kalibi ayiklanir.
+	$title = trim( preg_replace( '/^W-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*\s+/u', '', $name ) );
 
 	$spec = array();
 	foreach ( (array) ( $item['attributes'] ?? array() ) as $attribute ) {

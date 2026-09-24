@@ -61,7 +61,7 @@
 				event.preventDefault();
 				apply( link.getAttribute( 'data-filter' ) || '', link );
 
-				// Adres suzgeci yansitsin (paylasilabilir, geri tusu calisir).
+				// Adres suzgeci yansitsin (paylasilabilir baglanti; gecmise kayit eklemez).
 				if ( window.history && window.history.replaceState ) {
 					window.history.replaceState( null, '', link.getAttribute( 'href' ) );
 				}

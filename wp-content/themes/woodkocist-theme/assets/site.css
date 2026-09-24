@@ -40,7 +40,8 @@ img { display: block; max-width: 100%; height: auto; }
 a { color: var(--spruce); text-underline-offset: 0.2em; }
 h1, h2, h3 { margin: 0; line-height: 1.08; font-stretch: var(--wide); font-weight: 750; letter-spacing: -0.01em; }
 p { margin: 0; }
-:focus-visible { outline: 3px solid var(--resin); outline-offset: 2px; }
+/* Odak: acik zeminde yesil halka (3:1 ustu) + recine sarisi dis cizgi. */
+:focus-visible { outline: 3px solid var(--spruce); outline-offset: 2px; box-shadow: 0 0 0 6px var(--resin); }
 
 .wk-wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: 1.25rem; }
 @media (min-width: 768px) { .wk-wrap { padding-inline: 2rem; } }
@@ -87,10 +88,13 @@ p { margin: 0; }
 
 /* Seri secici: sitenin belirgin ogesi */
 .wk-catalog { padding-bottom: clamp(3.5rem, 7vw, 5.5rem); }
-.wk-lines { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.625rem; }
+.wk-lines { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem; }
 @media (min-width: 768px) { .wk-lines { grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem; } }
 @media (max-width: 767px) {
-	.wk-line { min-height: 5.25rem; padding: 0.75rem 0.9rem; }
+	.wk-line { min-height: 5.25rem; padding: 0.75rem 0.7rem; }
+	/* Dar ekranda genis kesim sigmaz: seri adi normal genislikte, bolunmeden. */
+	.wk-lines .wk-line__name { font-size: 0.9375rem; font-stretch: 100%; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+	.wk-brand { font-size: 1.125rem; white-space: nowrap; }
 	.wk-line__text { display: none; }
 }
 .wk-line {
@@ -128,7 +132,7 @@ p { margin: 0; }
 .wk-card__title { font-size: 1.0625rem; font-weight: 700; line-height: 1.3; }
 .wk-card__specs { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.15rem; }
 .wk-card__specs span { padding: 0.1rem 0.5rem; border-radius: 4px; background: var(--paper); color: var(--muted); font-size: 0.8125rem; }
-.wk-card .wk-price { margin-top: auto; padding-top: 0.6rem; }
+.wk-card .wk-price { margin-top: auto; }
 
 /* Kod plakasi: gorsel yokken urun kodu yakma damgasi gibi */
 .wk-plate {

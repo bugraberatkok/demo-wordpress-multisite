@@ -89,7 +89,9 @@ function wk_handle_order(): void {
 	}
 
 	if ( $errors ) {
-		wk_order_redirect( $redirect, array( 'errors' => $errors, 'values' => $values ) );
+		// Oturum (nonce) hatasinda ziyaretci verisi saklanmaz: botlarin her
+		// istegi gecici kayit olarak birikmesin.
+		wk_order_redirect( $redirect, array( 'errors' => $errors, 'values' => isset( $errors['form'] ) ? array() : $values ) );
 	}
 
 	// Urun: yalnizca sitede gosterilen urunlerden biri ("KOD Ad").
