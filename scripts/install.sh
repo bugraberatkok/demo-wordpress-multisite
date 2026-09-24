@@ -109,6 +109,7 @@ kocist|kocist-theme|Koçist Orman Ürünleri|-
 istanbul-keresteci|istanbul-keresteci-theme|İstanbul Keresteci|-
 sanayi-palet|sanayi-palet-theme|Sanayi Palet|-
 ahsapambalaj|ahsapambalaj-theme|Ahşap Ambalaj|-
+istanbulpaletcivi|istanbulpaletcivi-theme|İstanbul Palet Çivi|-
 '
 
 echo "==> Turkce dil paketi"
@@ -152,5 +153,6 @@ echo "  kocist         : ${BASE_URL}/kocist/"
 echo "  istanbul-keresteci: ${BASE_URL}/istanbul-keresteci/"
 echo "  sanayi-palet   : ${BASE_URL}/sanayi-palet/"
 echo "  ahsapambalaj   : ${BASE_URL}/ahsapambalaj/"
+echo "  istanbulpaletcivi: ${BASE_URL}/istanbulpaletcivi/"
 echo "  Ağ yönetimi    : ${BASE_URL}/wp-admin/network/"
 echo "  Giriş          : ${BASE_URL}/wp-login.php  (kullanıcı: ${ADMIN_USER})"

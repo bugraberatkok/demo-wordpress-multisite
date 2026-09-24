@@ -32,6 +32,7 @@ const NWCS_BULK_THEMES = array(
 	'istanbul-keresteci-theme',
 	'sanayi-palet-theme',
 	'ahsapambalaj-theme',
+	'istanbulpaletcivi-theme',
 );
 
 add_action( 'network_admin_menu', 'nwcs_register_bulk_menu', 30 );
@@ -289,7 +290,7 @@ function nwcs_render_bulk_update(): void {
 		<section class="nwcs-pool__card nwcs-bulk">
 			<h2 class="nwcs-pool__title">Tek adres ve firma yaşı</h2>
 			<p class="nwcs-seo__lead">
-				Koçist dışındaki 7 sitede adres <strong><?php echo esc_html( nwcs_bulk_address( false ) ); ?></strong> olur;
+				Koçist dışındaki sitelerde adres <strong><?php echo esc_html( nwcs_bulk_address( false ) ); ?></strong> olur;
 				alt bilgi, iletişim sayfası, harita ve arama motorlarına verilen firma bilgisi dahil. 34494 posta kodu kaldırılır
 				(Çatalca'nın kodu değil). Firma yaşı her yerde 50 yıl olur; Sanayi Palet'teki "1980'lerden bu yana" ifadeleri çıkar.
 				Metinlerde geçen Başakşehir ve İkitelli de Çatalca olur.

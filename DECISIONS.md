@@ -1286,3 +1286,28 @@ Firma sahibinin kararıyla Koçist dışındaki 7 site tek adres ve tek yaş kul
 Canlıda uygulama: Ağ yönetimi → İçerik Stüdyosu → Toplu Güncelleme. Sayfa değişecek
 alanları listeler, "Uygula" yazar ve kayıt tutar; kurallar alanın o anki değerine bakar,
 tekrar çalıştırmak bir şey değiştirmez. Tema varsayılanları da aynı değerlere çekildi.
+
+## İstanbul Palet Çivi (9. site, 24 Eylül 2026)
+
+istanbulpaletcivi.com yeniden tasarımı: `istanbulpaletcivi-theme`.
+
+- **Renkler mevcut siteden:** lacivert `#002E5B`, gece `#0B0F3A`, sarı `#FDE428`.
+  Sarı yalnızca ölçü cetvelinde, koyu zemindeki birincil düğmede ve odak halkasında.
+- **Tek belirgin öğe sarı cetvel:** milimetre çentikli şerit (1 mm = 4 px). Çivi boy
+  boy satılan bir ürün; ana sayfada ve her iç sayfa başlığının altında.
+- **Yazı tipi grubun ortak Archivo'su;** başlıklar dar ve kalın. CSS elle yazıldı
+  (`assets/site.css`), Tailwind derlemesi gerekmez.
+- **İçerik:** eski sitenin 5 sayfası, 3 ürün sayfası (`/civiler/<ürün>/`) ve 4 blog
+  yazısı aynı adres ve tarihle. Teknik olarak yanlış anlatımlar düzeltildi: "dökme
+  çivi" dizisiz (toplu satılan) çividir, döküm değil; "tele dizili çivi" şerit
+  tabancasıyla çakılır, betonarmeyi güçlendirmez. Hakkımızda çiviye göre yazıldı
+  (eski metin Koçist'in kereste metninin kopyasıydı). Ölçü, stok ve fiyat bilgisi
+  uydurulmadı: ürün sayfalarında "Ölçü ve fiyat için arayın".
+- **Grup tutarlılığı:** Kestanelik / Çatalca adresi, 50 yıl, info@kocist.com.tr,
+  WhatsApp 0532 374 98 32. Toplu Güncelleme kapsamında.
+- **Görseller yapay zekâ ile üretildi** ve sayfada "Örnek görsel" olarak işaretli.
+  Logo firmanın mevcut logosu.
+- **Kurulum veritabanı taşımadan:** tema bir siteye atanınca sayfaları, yazıları,
+  ön sayfa ve kalıcı bağlantı ayarını, Türkçe dili ve eski demo adreslerinin 410
+  listesini kendisi kurar (`inc/setup.php`). Canlıda: Git deploy → Ağ Yönetimi'nde
+  site aç → temayı etkinleştir.

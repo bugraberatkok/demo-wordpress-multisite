@@ -33,6 +33,7 @@ function nwcs_form_post_types(): array {
 		'ik_message' => '_ik_',   // istanbul-keresteci-theme
 		'sp_message' => '_sp_',   // sanayi-palet-theme
 		'aas_quote'  => '_aas_',  // ahsapambalaj-theme
+		'pc_quote'   => '_pc_',   // istanbulpaletcivi-theme
 	);
 
 	$types = apply_filters( 'nwcs_form_post_types', $defaults );

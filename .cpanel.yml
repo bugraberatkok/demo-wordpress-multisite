@@ -1,7 +1,7 @@
 ---
 # cPanel "Git Version Control" dagitimi (Natro, hesap u7198936).
 #
-# Yalnizca KOD tasinir: 9 tema ve Network Content Studio eklentisi, WordPress
+# Yalnizca KOD tasinir: 10 tema ve Network Content Studio eklentisi, WordPress
 # kurulumunun wp-content klasorune. Icerik (metinler, gorseller, ayarlar)
 # veritabanindadir ve panelden yonetilir; burada tasinmaz.
 #
@@ -18,4 +18,4 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/u7198936/panel.sanayipalet.com/wp-content
     - test -d "$DEPLOYPATH/themes" && test -d "$DEPLOYPATH/plugins"
-    - set -e; for d in themes/ahsapambalaj-theme themes/ahsapkasa-theme themes/istanbul-keresteci-theme themes/istanbulpaletci-theme themes/ithalkeresteci-theme themes/kavakkeresteci-theme themes/kereste-base themes/kocist-theme themes/sanayi-palet-theme plugins/network-content-studio; do rm -rf "$DEPLOYPATH/$d.yeni" "$DEPLOYPATH/$d.eski"; cp -R "wp-content/$d" "$DEPLOYPATH/$d.yeni"; if [ -d "$DEPLOYPATH/$d" ]; then mv "$DEPLOYPATH/$d" "$DEPLOYPATH/$d.eski"; fi; mv "$DEPLOYPATH/$d.yeni" "$DEPLOYPATH/$d"; rm -rf "$DEPLOYPATH/$d.eski"; echo "tamam $d"; done
+    - set -e; for d in themes/ahsapambalaj-theme themes/ahsapkasa-theme themes/istanbul-keresteci-theme themes/istanbulpaletci-theme themes/ithalkeresteci-theme themes/kavakkeresteci-theme themes/kereste-base themes/kocist-theme themes/sanayi-palet-theme themes/istanbulpaletcivi-theme plugins/network-content-studio; do rm -rf "$DEPLOYPATH/$d.yeni" "$DEPLOYPATH/$d.eski"; cp -R "wp-content/$d" "$DEPLOYPATH/$d.yeni"; if [ -d "$DEPLOYPATH/$d" ]; then mv "$DEPLOYPATH/$d" "$DEPLOYPATH/$d.eski"; fi; mv "$DEPLOYPATH/$d.yeni" "$DEPLOYPATH/$d"; rm -rf "$DEPLOYPATH/$d.eski"; echo "tamam $d"; done
