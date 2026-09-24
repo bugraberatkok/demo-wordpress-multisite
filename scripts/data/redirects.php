@@ -62,6 +62,12 @@ TXT,
 /author/*                410
 /faq/                    410
 /ornek-sayfa/            410
+
+# Eski statik sayfa (public_html/old) ve eski site haritalari
+/old*                    /
+/sitemap_index.xml       /wp-sitemap.xml
+/post-sitemap.xml        /wp-sitemap.xml
+/page-sitemap.xml        /wp-sitemap.xml
 TXT,
 
 	// istanbulkeresteci.com: 19 eski adres; 16'si yeni sitede ayni.

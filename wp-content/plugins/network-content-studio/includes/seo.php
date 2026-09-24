@@ -1029,6 +1029,36 @@ function nwcs_seo_no_author_archives(): void {
 }
 
 /**
+ * REST API kullanici listesi yalnizca giris yapmis kullaniciya: yazisi olan
+ * sitede /wp-json/wp/v2/users yonetici kullanici adini herkese gosteriyordu.
+ * Panel (blok duzenleyici) giris yapmis istekle calistigi icin etkilenmez.
+ */
+add_filter( 'rest_endpoints', 'nwcs_seo_hide_rest_users' );
+function nwcs_seo_hide_rest_users( array $endpoints ): array {
+	if ( is_user_logged_in() ) {
+		return $endpoints;
+	}
+
+	foreach ( array_keys( $endpoints ) as $route ) {
+		if ( str_starts_with( $route, '/wp/v2/users' ) ) {
+			unset( $endpoints[ $route ] );
+		}
+	}
+
+	return $endpoints;
+}
+
+// Yerlestirme (oEmbed) verisinde yazar adi ve adresi de kullanici adini tasir.
+add_filter(
+	'oembed_response_data',
+	static function ( array $data ): array {
+		unset( $data['author_name'], $data['author_url'] );
+
+		return $data;
+	}
+);
+
+/**
  * Site haritasindan kullanici listesi cikarilir: yonetici kullanici adini
  * herkese acik bir dosyada listelemek gereksiz bir guvenlik acigi. Kategori
  * ve etiket arsivleri de cikar: noindex olan adres site haritasinda olmaz.
