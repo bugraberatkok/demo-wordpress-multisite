@@ -309,6 +309,48 @@ html { scroll-padding-top: 88px; }
 	padding-left: 16px;
 }
 
+/* Su an acik olan kategori: yaprak rengi cizgiyle isaretli. */
+.k-dropdown__link.is-current {
+	color: var(--forest);
+	font-weight: 700;
+	box-shadow: inset 3px 0 0 var(--leaf);
+}
+
+/*
+ * Urun grubu panosunun basi: grubun tamamina giden tek baglanti. Listeden
+ * ince bir cizgiyle ayrilir; genisligi listeyi izler, panoyu buyutmez.
+ */
+.k-dropdown__head {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	margin: 0 0 8px;
+	padding: 11px 12px 13px;
+	border-bottom: 1px solid var(--line);
+	border-radius: 9px 9px 0 0;
+	color: var(--forest);
+	text-decoration: none;
+	transition: background .18s ease;
+}
+
+.k-dropdown__head-title { font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
+.k-dropdown__head-meta { font-size: 13px; color: var(--muted); }
+
+.k-dropdown__head-arrow {
+	margin-left: auto;
+	align-self: center;
+	color: var(--leaf-dark);
+	transition: transform .18s ease;
+}
+
+.k-dropdown__head:hover,
+.k-dropdown__head:focus-visible { background: var(--leaf-soft); }
+.k-dropdown__head:hover .k-dropdown__head-arrow,
+.k-dropdown__head:focus-visible .k-dropdown__head-arrow { transform: translateX(3px); }
+
+/* Mobil akordiyondaki karsiligi. */
+.k-dropdown__link--all { font-weight: 700; color: var(--forest); }
+
 /* ---------- Mobil menu dugmesi ---------- */
 .k-burger {
 	display: none;

@@ -30,10 +30,17 @@ $item_defaults = array( 's2-kereste.jpg', 's2-ambalaj.jpg', 's2-dekorasyon.jpg',
 			<?php
 			foreach ( $items as $index => $item ) :
 				$image = kocist_image_or_default( nwcs_image_by_id( (int) ( $item['image'] ?? 0 ), 'large' ), $item_defaults[ $index ] ?? '', (string) ( $item['title'] ?? '' ) );
+
+				// Kart hala varsayilan capaya gidiyorsa kendi grubunun sayfasina.
+				$item_url = (string) ( $item['link_url'] ?? '' );
+
+				if ( kocist_is_catalog_placeholder( $item_url ) ) {
+					$item_url = kocist_catalog_url_for_text( (string) ( $item['title'] ?? '' ) ) ?: $item_url;
+				}
 				?>
 				<a
 					class="k-group"
-					href="<?php echo esc_url( kocist_link( $item['link_url'] ?? '', '/#katalog' ) ); ?>"
+					href="<?php echo esc_url( kocist_link( $item_url, '/#katalog' ) ); ?>"
 					data-k-group
 					style="--i: <?php echo (int) $index; ?>"
 					<?php nwcs_edit_attr( 'home', 'catalog', 'items', $index, 'title' ); ?>

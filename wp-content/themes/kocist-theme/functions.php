@@ -25,11 +25,12 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 	function nwcs_the_icon( $key, $class = '', $size = 24 ) {}
 	function nwcs_edit_attr( $page, $component, $field = '', $row = null, $sub = '' ) {}
 	function nwcs_section_order( $page = 'home' ) {
-		return array( 'catalog', 'products', 'capabilities', 'references', 'blog', 'ctaband' );
+		return array( 'catalog', 'latest', 'products', 'capabilities', 'references', 'blog' );
 	}
 }
 
 require_once __DIR__ . '/inc/blog.php';
+require_once __DIR__ . '/inc/catalog.php';
 
 add_action( 'after_setup_theme', 'kocist_setup' );
 function kocist_setup(): void {
@@ -225,6 +226,23 @@ function kocist_assets(): void {
 			wp_get_theme()->get( 'Version' ),
 			true
 		);
+
+		// Son eklenen urunler seridi. Surum dosya zamanindan: degisiklik
+		// tarayici onbelleginde takilmasin.
+		wp_enqueue_style(
+			'kocist-latest',
+			get_theme_file_uri( 'assets/css/latest.css' ),
+			array( 'kocist-style' ),
+			(string) filemtime( get_theme_file_path( 'assets/css/latest.css' ) )
+		);
+
+		wp_enqueue_script(
+			'kocist-latest',
+			get_theme_file_uri( 'assets/js/latest.js' ),
+			array(),
+			(string) filemtime( get_theme_file_path( 'assets/js/latest.js' ) ),
+			true
+		);
 	}
 
 	// Iletisim sayfasi varliklari yalnizca o sayfada. Betik yok: form demo,
@@ -248,8 +266,11 @@ function kocist_assets(): void {
 		);
 	}
 
-	// Blog listesi, arsivler, tekil yazi ve ana sayfadaki son yazilar.
-	if ( is_home() || is_archive() || is_singular( 'post' ) || is_front_page() ) {
+	// Blog listesi, arsivler, tekil yazi ve ana sayfadaki son yazilar. Kategori
+	// ve urun detayi WordPress'e yazi listesi gibi gorunur; onlarda gerekmez.
+	$is_blog_like = ( is_home() || is_archive() ) && ! kocist_is_catalog_request() && ! get_query_var( 'nwcs_product' );
+
+	if ( $is_blog_like || is_singular( 'post' ) || is_front_page() ) {
 		wp_enqueue_style(
 			'kocist-blog',
 			get_theme_file_uri( 'assets/css/blog.css' ),
@@ -258,8 +279,30 @@ function kocist_assets(): void {
 		);
 	}
 
-	// Urun sayfasi varliklari yalnizca o sayfada.
-	if ( is_page( 'urun' ) ) {
+	// Kategori sayfalari, konum yolu ve urun detayindaki "ayni kategoride" seridi.
+	$is_product_detail = (bool) get_query_var( 'nwcs_product' );
+
+	if ( kocist_is_catalog_request() || $is_product_detail ) {
+		wp_enqueue_style(
+			'kocist-category',
+			get_theme_file_uri( 'assets/css/category.css' ),
+			array( 'kocist-style' ),
+			(string) filemtime( get_theme_file_path( 'assets/css/category.css' ) )
+		);
+	}
+
+	// Kategori sayfasinin bos durum butonlari urun sayfasinin buton stilini kullanir.
+	if ( kocist_is_catalog_request() ) {
+		wp_enqueue_style(
+			'kocist-product',
+			get_theme_file_uri( 'assets/css/product.css' ),
+			array( 'kocist-style' ),
+			wp_get_theme()->get( 'Version' )
+		);
+	}
+
+	// Urun sayfasi varliklari: ornek urun sayfasi ve havuz urunu detayi.
+	if ( is_page( 'urun' ) || $is_product_detail ) {
 		wp_enqueue_style(
 			'kocist-product',
 			get_theme_file_uri( 'assets/css/product.css' ),
@@ -296,7 +339,8 @@ function kocist_assets(): void {
  * @return array Her oge: array{ label: string, url: string, children: array }
  */
 function kocist_menu_items(): array {
-	$menu = array();
+	$menu   = array();
+	$groups = kocist_catalog_groups();
 
 	foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $row ) {
 		$label = trim( (string) ( $row['label'] ?? '' ) );
@@ -307,6 +351,16 @@ function kocist_menu_items(): array {
 
 		$children = array();
 		$submenu  = trim( (string) ( $row['submenu'] ?? '' ) );
+		$url      = (string) ( $row['url'] ?? '' );
+
+		// Urun grubuysa (inc/catalog.php) alt ogeler kategori sayfalarina,
+		// ust oge de panelde hala varsayilan katalog capasi yaziyorsa grup
+		// sayfasina gider.
+		$group = $groups[ sanitize_title( $label ) ] ?? null;
+
+		if ( $group && kocist_is_catalog_placeholder( $url ) ) {
+			$url = $group['url'];
+		}
 
 		if ( '' !== $submenu ) {
 			foreach ( nwcs_rows( 'global', $submenu, 'items' ) as $child ) {
@@ -316,17 +370,24 @@ function kocist_menu_items(): array {
 					continue;
 				}
 
+				$child_url = (string) ( $child['url'] ?? '' );
+
+				if ( $group && kocist_is_dead_anchor( $child_url ) ) {
+					$child_url = $group['subs'][ sanitize_title( substr( trim( $child_url ), 1 ) ) ]['url'] ?? $child_url;
+				}
+
 				$children[] = array(
 					'label' => $child_label,
-					'url'   => (string) ( $child['url'] ?? '' ),
+					'url'   => $child_url,
 				);
 			}
 		}
 
 		$menu[] = array(
 			'label'    => $label,
-			'url'      => (string) ( $row['url'] ?? '' ),
+			'url'      => $url,
 			'children' => $children,
+			'group'    => $group,
 		);
 	}
 
@@ -381,22 +442,21 @@ function kocist_product_title_parts( array $parts ): array {
 /**
  * Ana sayfa bolum sirasi.
  *
- * Panel, kayitli siraya sonradan eklenen bolumu (blog) en sona koyuyor; bu
- * da blogu kapanis seridinin (ctaband) altina dusuruyordu. Kayitli sirada
- * blog hic yoksa (kullanici henuz yerini secmemis) teklif seridinin hemen
- * onune alinir; kullanici paneldeki siralamayi kaydettiyse o gecerlidir.
+ * Panel, kayitli siraya sonradan eklenen bolumu en sona koyuyor. Son eklenen
+ * urunler serit kayitli sirada yoksa (kullanici henuz yerini secmemis) urun
+ * gruplarinin hemen altina alinir; panelde sira kaydedildiyse o gecerlidir.
  */
 function kocist_home_sections(): array {
 	$order  = nwcs_section_order( 'home' );
 	$stored = get_option( 'nwcs_section_order', array() );
 	$saved  = is_array( $stored ) && isset( $stored['home'] ) && is_array( $stored['home'] ) ? $stored['home'] : array();
 
-	if ( in_array( 'blog', $saved, true ) || ! in_array( 'blog', $order, true ) || ! in_array( 'ctaband', $order, true ) ) {
+	if ( in_array( 'latest', $saved, true ) || ! in_array( 'latest', $order, true ) || ! in_array( 'catalog', $order, true ) ) {
 		return $order;
 	}
 
-	$order = array_values( array_diff( $order, array( 'blog' ) ) );
-	array_splice( $order, (int) array_search( 'ctaband', $order, true ), 0, array( 'blog' ) );
+	$order = array_values( array_diff( $order, array( 'latest' ) ) );
+	array_splice( $order, (int) array_search( 'catalog', $order, true ) + 1, 0, array( 'latest' ) );
 
 	return $order;
 }
@@ -459,11 +519,11 @@ function kocist_is_current_menu_item( string $url ): bool {
  * bu sayfalarda yol, yazilar sayfasinin yolu sayilir.
  */
 function kocist_current_path(): string {
-	// Havuz urunu detayi (/urun/<slug>/) WordPress sorgusunda yazi listesi
-	// gibi gorunur; blog sayilmasin.
+	// Havuz urunu detayi (/urun/<slug>/) ve kategori sayfalari WordPress
+	// sorgusunda yazi listesi gibi gorunur; blog sayilmasin.
 	$is_blog = ( is_home() && ! is_front_page() ) || is_archive() || is_singular( 'post' );
 
-	if ( $is_blog && ! get_query_var( 'nwcs_product' ) ) {
+	if ( $is_blog && ! get_query_var( 'nwcs_product' ) && ! kocist_is_catalog_request() ) {
 		return trim( (string) wp_parse_url( kocist_blog_url(), PHP_URL_PATH ), '/' );
 	}
 
@@ -499,7 +559,7 @@ function kocist_anchor_targets(): array {
 	return array(
 		'katalog'          => '/#katalog',
 		'urunler'          => '/#urunler',
-		'teklif'           => '/#teklif',
+		'teklif'           => '/iletisim/',
 		'harita'           => '/iletisim/#harita',
 
 		// Panelde eski demo menusunden kalan capalar; artik gercek sayfalari var.
@@ -656,7 +716,14 @@ function kocist_product_image( array $product ): array {
 		'kafes'      => 's2-ambalaj.jpg',
 		'sandik'     => 's2-ambalaj.jpg',
 	);
-	$file = 'atolye.jpg';
+	// Adindan cikmiyorsa urunun grubunun fotografi (inc/catalog.php), en son atolye.
+	$by_group = array(
+		'kereste'    => 's2-kereste.jpg',
+		'ambalaj'    => 's2-ambalaj.jpg',
+		'dekorasyon' => 's2-dekorasyon.jpg',
+		'hirdavat'   => 's2-hirdavat.jpg',
+	);
+	$file     = $by_group[ $product['group'] ?? '' ] ?? 'atolye.jpg';
 
 	foreach ( $map as $needle => $candidate ) {
 		if ( str_contains( $key, $needle ) ) {

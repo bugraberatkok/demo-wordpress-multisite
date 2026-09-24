@@ -144,6 +144,13 @@ foreach ( $menu as $menu_index => $menu_item ) {
 							<?php /* Dar ekran kopyasi; masaustunde gizli, ortak pano devreye girer. */ ?>
 							<div class="k-nav__accordion">
 								<ul class="k-dropdown__list">
+									<?php if ( ! empty( $item['group'] ) ) : ?>
+										<li class="k-dropdown__item">
+											<a class="k-dropdown__link k-dropdown__link--all" href="<?php echo esc_url( $item['group']['url'] ); ?>">
+												Tüm <?php echo esc_html( $item['group']['name'] ); ?> ürünleri
+											</a>
+										</li>
+									<?php endif; ?>
 									<?php foreach ( $children as $child ) : ?>
 										<li class="k-dropdown__item">
 											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $item['url'] ) ); ?>">
@@ -168,13 +175,35 @@ foreach ( $menu as $menu_index => $menu_item ) {
 							$pane_rows    = (int) ceil( count( $pane_children ) / $pane_columns );
 							?>
 							<div class="k-dropdown__pane" data-k-dropdown-pane="<?php echo (int) $pane_index; ?>">
+								<?php
+								/*
+								 * Urun grubunda panonun basi grubun tamamina gider; alt
+								 * kategori sayisi hangi genislikte bir liste acildigini
+								 * onceden soyler.
+								 */
+								$pane_group = $menu[ $pane_index ]['group'] ?? null;
+								?>
+								<?php if ( $pane_group ) : ?>
+									<a class="k-dropdown__head" href="<?php echo esc_url( $pane_group['url'] ); ?>">
+										<span class="k-dropdown__head-title">Tüm <?php echo esc_html( $pane_group['name'] ); ?> ürünleri</span>
+										<span class="k-dropdown__head-meta"><?php echo esc_html( sprintf( '%d kategori', count( $pane_group['subs'] ) ) ); ?></span>
+										<svg class="k-dropdown__head-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+											<path d="M3 8h9.5M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+										</svg>
+									</a>
+								<?php endif; ?>
 								<ul
 									class="k-dropdown__list"
 									style="--cols: <?php echo (int) $pane_columns; ?>; --rows: <?php echo (int) $pane_rows; ?>"
 								>
 									<?php foreach ( $pane_children as $child_index => $child ) : ?>
+										<?php $child_href = kocist_link( $child['url'], $menu[ $pane_index ]['url'] ); ?>
 										<li class="k-dropdown__item" style="--i: <?php echo (int) $child_index; ?>">
-											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $menu[ $pane_index ]['url'] ) ); ?>">
+											<a
+												class="k-dropdown__link<?php echo kocist_is_current_menu_item( $child_href ) ? ' is-current' : ''; ?>"
+												href="<?php echo esc_url( $child_href ); ?>"
+												<?php echo kocist_is_current_menu_item( $child_href ) ? 'aria-current="page"' : ''; ?>
+											>
 												<?php echo esc_html( $child['label'] ); ?>
 											</a>
 										</li>

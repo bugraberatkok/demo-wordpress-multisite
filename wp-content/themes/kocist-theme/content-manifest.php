@@ -369,7 +369,7 @@ return array(
 		'home' => array(
 			'label'             => 'Ana Sayfa',
 			'path'              => '/',
-			'sortable_sections' => array( 'catalog', 'products', 'capabilities', 'references', 'blog', 'ctaband' ),
+			'sortable_sections' => array( 'catalog', 'latest', 'products', 'capabilities', 'references', 'blog' ),
 			'components'        => array(
 
 				/*
@@ -517,6 +517,41 @@ return array(
 				),
 
 				/*
+				 * Son eklenen urunler: tek satir, saga dogru kayan serit.
+				 * Varsayilan kartlar TEST icerigidir; gercek urunler panelden girilir.
+				 */
+				'latest' => array(
+					'label'  => 'Son Eklenen Ürünler',
+					'fields' => array(
+						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Son eklenen ürünler' ),
+						'subtitle'   => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Kataloğa yeni giren ürünler. Ölçü ve adet için teklif isteyin.' ),
+						'link_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
+						'items'      => array(
+							'label'   => 'Ürün Kartları',
+							'type'    => 'repeater',
+							'max'     => 12,
+							'fields'  => array(
+								'image'    => array( 'label' => 'Görsel', 'type' => 'image' ),
+								'category' => array( 'label' => 'Kategori', 'type' => 'text' ),
+								'title'    => array( 'label' => 'Ürün Adı', 'type' => 'text' ),
+								'spec'     => array( 'label' => 'Ölçü / Özellik', 'type' => 'text' ),
+								'link_url' => array( 'label' => 'Bağlantı', 'type' => 'url' ),
+							),
+							'default' => array(
+								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Ahşap Tavuk Kümesi', 'spec' => '2 bölmeli, yumurtlama kutulu', 'link_url' => '/iletisim/' ),
+								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Kamelya 3×3 m, zeminli', 'spec' => 'Emprenyeli çam, montajlı teslim', 'link_url' => '/iletisim/' ),
+								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Oval Gölgelikli Salıncak', 'spec' => '4 kişilik, bahçe tipi', 'link_url' => '/iletisim/' ),
+								array( 'image' => 0, 'category' => 'Kereste', 'title' => 'Kontrplak (Plywood)', 'spec' => '18 mm, 125×250 cm levha', 'link_url' => '/iletisim/' ),
+								array( 'image' => 0, 'category' => 'Kereste', 'title' => 'Çam Kereste', 'spec' => '5×10 cm, 4 m boy', 'link_url' => '/iletisim/' ),
+								array( 'image' => 0, 'category' => 'Ambalaj', 'title' => 'Euro Palet', 'spec' => '80×120 cm, ısıl işlemli', 'link_url' => '/iletisim/' ),
+								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Büyük Tavuk Kümesi', 'spec' => 'Gezinme alanlı, 10 tavuk', 'link_url' => '/iletisim/' ),
+								array( 'image' => 0, 'category' => 'Hırdavat Grubu', 'title' => 'Palet Çivisi', 'spec' => 'Helezon, 5 kg kutu', 'link_url' => '/iletisim/' ),
+							),
+						),
+					),
+				),
+
+				/*
 				 * Merkezi urun havuzundan gelen urunler. Kategori kartlarindan
 				 * (catalog) ayri bir bolum: orada elle girilen dort grup var,
 				 * burada panelden bu site icin secilen tekil urunler.
@@ -567,17 +602,6 @@ return array(
 						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Blog – Haberler' ),
 						'subtitle'   => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Koçist’ten haberler; orman ürünlerinde güncel trendler ve bilgilendirmeler.' ),
 						'link_label' => array( 'label' => 'Tüm Yazılar Bağlantı Metni', 'type' => 'text', 'default' => 'Tüm yazılar' ),
-					),
-				),
-
-				'ctaband' => array(
-					'label'  => 'Teklif Şeridi',
-					'fields' => array(
-						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ölçü ve adet verin, aynı gün fiyatlayalım' ),
-						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Talebinizi telefonla veya e-posta ile iletin.' ),
-						'button_label' => array( 'label' => 'Buton Metni', 'type' => 'text', 'default' => 'Hemen Arayın' ),
-						'button_url'   => array( 'label' => 'Buton Bağlantısı', 'type' => 'url', 'default' => 'tel:+905496481919' ),
-						'note'         => array( 'label' => 'Alt Not', 'type' => 'text', 'default' => 'Demo kurulum: form gönderimi yapılmaz, telefon bağlantısı gerçektir.' ),
 					),
 				),
 			),

@@ -15,6 +15,17 @@ $image  = kocist_image_or_default( nwcs_image( 'home', 'hero', 'image', 'full' )
 $slide_defaults = array( 'ahsap-kamelya-3x3-zeminli.webp', 'playwood.webp', 'ahsap-salincak-4-kisilik-oval-golgelikli.webp' );
 $slides = nwcs_rows( 'home', 'hero', 'slides' );
 $trust  = nwcs_rows( 'home', 'hero', 'trust' );
+
+/*
+ * Panelde baglanti hala varsayilan katalog capasiysa kategori sayfalarina
+ * gidilir: ana buton tum kategorilere, slayt kendi basligina en uygun
+ * kategoriye (inc/catalog.php). Panelde baska adres yazilirsa o gecerlidir.
+ */
+$cta_url = nwcs_field( 'home', 'hero', 'cta_url' );
+
+if ( kocist_is_catalog_placeholder( $cta_url ) && kocist_catalog_groups() ) {
+	$cta_url = home_url( '/kategoriler/' );
+}
 ?>
 <section class="k-hero" id="hero" data-nwcs-section="hero">
 	<div class="k-wrap">
@@ -55,7 +66,7 @@ $trust  = nwcs_rows( 'home', 'hero', 'trust' );
 					</div>
 
 					<?php if ( nwcs_field( 'home', 'hero', 'cta_label' ) ) : ?>
-						<a class="k-hero__btn k-hero__btn--dark" href="<?php echo esc_url( kocist_link( nwcs_field( 'home', 'hero', 'cta_url' ) ) ); ?>" <?php nwcs_edit_attr( 'home', 'hero', 'cta_label' ); ?>>
+						<a class="k-hero__btn k-hero__btn--dark" href="<?php echo esc_url( kocist_link( $cta_url ) ); ?>" <?php nwcs_edit_attr( 'home', 'hero', 'cta_label' ); ?>>
 							<?php echo esc_html( nwcs_field( 'home', 'hero', 'cta_label' ) ); ?>
 						</a>
 					<?php endif; ?>
@@ -84,7 +95,14 @@ $trust  = nwcs_rows( 'home', 'hero', 'trust' );
 									<p class="k-hero__slide-text" <?php nwcs_edit_attr( 'home', 'hero', 'slides', $slide_index, 'text' ); ?>><?php echo esc_html( $slide['text'] ?? '' ); ?></p>
 
 									<?php if ( ! empty( $slide['cta_label'] ) ) : ?>
-										<a class="k-hero__btn" href="<?php echo esc_url( kocist_link( $slide['cta_url'] ?? '', '/#katalog' ) ); ?>">
+										<?php
+										$slide_url = (string) ( $slide['cta_url'] ?? '' );
+
+										if ( kocist_is_catalog_placeholder( $slide_url ) ) {
+											$slide_url = kocist_catalog_url_for_text( (string) ( $slide['title'] ?? '' ) ) ?: $slide_url;
+										}
+										?>
+										<a class="k-hero__btn" href="<?php echo esc_url( kocist_link( $slide_url, '/#katalog' ) ); ?>">
 											<?php echo esc_html( $slide['cta_label'] ); ?>
 										</a>
 									<?php endif; ?>

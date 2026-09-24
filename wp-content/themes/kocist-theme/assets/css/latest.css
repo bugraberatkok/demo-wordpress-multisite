@@ -1,0 +1,205 @@
+/*
+ * Son eklenen urunler seridi.
+ *
+ * Serit konteynerin disinda, bolumun tam genisliginde. Sol ic bosluk
+ * konteynerin sol kenarina esitlenir, sagda bosluk yok: kartlar ekranin sag
+ * kenarindan tasar. Yuzde degerli padding bolum genisligine gore hesaplanir
+ * (100vw kaydirma cubugunu da sayardi).
+ */
+
+.k-latest {
+	--k-latest-inset: max(20px, calc((100% - var(--maxw)) / 2 + 20px));
+	--k-latest-card: clamp(248px, 24vw, 300px);
+	overflow: hidden;
+}
+
+.k-latest__head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 24px;
+	margin-bottom: 30px;
+}
+
+.k-latest__nav {
+	display: flex;
+	gap: 10px;
+	flex: none;
+}
+
+.k-latest__nav[hidden] { display: none; }
+
+.k-latest__arrow {
+	display: grid;
+	place-items: center;
+	width: 46px;
+	height: 46px;
+	padding: 0;
+	border: 1.5px solid var(--line);
+	border-radius: 50%;
+	background: var(--paper);
+	color: var(--forest);
+	cursor: pointer;
+	transition: background .15s, color .15s, border-color .15s, opacity .15s;
+}
+
+.k-latest__arrow:hover:not(:disabled) {
+	background: var(--forest);
+	border-color: var(--forest);
+	color: #fff;
+}
+
+.k-latest__arrow:disabled {
+	opacity: .35;
+	cursor: default;
+}
+
+.k-latest__arrow:focus-visible,
+.k-latest__card:focus-visible,
+.k-latest__track:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 3px;
+}
+
+.k-latest__track {
+	display: flex;
+	gap: 18px;
+	margin: 0;
+	padding: 4px 20px 6px var(--k-latest-inset);
+	list-style: none;
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scroll-snap-type: x mandatory;
+	scroll-padding-left: var(--k-latest-inset);
+	scroll-behavior: smooth;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch;
+}
+
+.k-latest__track::-webkit-scrollbar { display: none; }
+
+/* Surukleme sirasinda miknatis ve yumusak kaydirma kapali; birakinca oturur. */
+.k-latest__track.is-dragging {
+	scroll-snap-type: none;
+	scroll-behavior: auto;
+	cursor: grabbing;
+	user-select: none;
+}
+
+.k-latest__track.is-dragging .k-latest__card { pointer-events: none; }
+
+.k-latest__item {
+	flex: 0 0 var(--k-latest-card);
+	scroll-snap-align: start;
+}
+
+.k-latest__card {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	background: var(--paper);
+	color: var(--text);
+	text-decoration: none;
+	transition: border-color .2s, transform .25s cubic-bezier(.22, 1, .36, 1);
+}
+
+.k-latest__card:hover {
+	border-color: var(--leaf);
+	transform: translateY(-3px);
+}
+
+.k-latest__media {
+	display: block;
+	aspect-ratio: 4 / 3;
+	overflow: hidden;
+	background: var(--leaf-soft);
+}
+
+.k-latest__img,
+.k-latest__media > .k-placeholder {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform .6s cubic-bezier(.22, 1, .36, 1);
+}
+
+.k-latest__card:hover .k-latest__img { transform: scale(1.05); }
+
+.k-latest__body {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	padding: 18px 20px 20px;
+}
+
+.k-latest__cat {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--leaf-dark);
+	margin-bottom: 4px;
+}
+
+.k-latest__title {
+	font-size: 18px;
+	font-weight: 800;
+	line-height: 1.3;
+	letter-spacing: -.015em;
+	color: var(--forest-3);
+}
+
+.k-latest__spec {
+	margin-top: 6px;
+	font-size: 14px;
+	color: var(--muted);
+}
+
+.k-latest__cta {
+	margin-top: auto;
+	padding-top: 16px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--forest);
+	text-decoration: underline;
+	text-decoration-color: var(--leaf);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 5px;
+}
+
+.k-latest__card:hover .k-latest__cta { color: var(--leaf-dark); }
+
+/* Kaydirma konumu: ince ray, ustunde yesil dolgu. */
+.k-latest__progress {
+	position: relative;
+	height: 3px;
+	margin-top: 28px;
+	border-radius: 999px;
+	background: var(--line);
+	overflow: hidden;
+}
+
+.k-latest__progress > span {
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 0;
+	border-radius: inherit;
+	background: var(--forest);
+	transition: width .15s linear;
+}
+
+@media (max-width: 640px) {
+	.k-latest { --k-latest-card: 78vw; }
+	.k-latest__nav { display: none !important; }
+	.k-latest__track { gap: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.k-latest__track { scroll-behavior: auto; }
+	.k-latest__card,
+	.k-latest__img,
+	.k-latest__progress > span { transition: none; }
+	.k-latest__card:hover { transform: none; }
+	.k-latest__card:hover .k-latest__img { transform: none; }
+}
