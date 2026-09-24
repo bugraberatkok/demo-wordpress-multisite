@@ -10,12 +10,12 @@
 # Dagitim elle tetiklenir: cPanel -> Git Version Control -> Manage ->
 # Pull or Deploy -> "Update from Remote", sonra "Deploy HEAD Commit".
 #
-# rsync --delete yalnizca bizim tema ve eklenti klasorlerimizde calisir; temadan
-# silinen dosya sunucudan da silinir. Diger eklentiler, yuklemeler (uploads)
-# ve dil dosyalari etkilenmez.
+# Sunucuda rsync yok. Her klasor once yanina kopyalanir (.yeni), sonra eskisiyle
+# yer degistirir: temadan silinen dosya sunucudan da gider, kopyalama yarida
+# kalirsa canli klasor bozulmaz. Diger eklentiler, yuklemeler (uploads) ve dil
+# dosyalari etkilenmez.
 deployment:
   tasks:
     - export DEPLOYPATH=/home/u7198936/panel.sanayipalet.com/wp-content
     - test -d "$DEPLOYPATH/themes" && test -d "$DEPLOYPATH/plugins"
-    - for t in ahsapambalaj-theme ahsapkasa-theme istanbul-keresteci-theme istanbulpaletci-theme ithalkeresteci-theme kavakkeresteci-theme kereste-base kocist-theme sanayi-palet-theme; do rsync -a --delete "wp-content/themes/$t/" "$DEPLOYPATH/themes/$t/"; done
-    - rsync -a --delete wp-content/plugins/network-content-studio/ "$DEPLOYPATH/plugins/network-content-studio/"
+    - set -e; for d in themes/ahsapambalaj-theme themes/ahsapkasa-theme themes/istanbul-keresteci-theme themes/istanbulpaletci-theme themes/ithalkeresteci-theme themes/kavakkeresteci-theme themes/kereste-base themes/kocist-theme themes/sanayi-palet-theme plugins/network-content-studio; do rm -rf "$DEPLOYPATH/$d.yeni" "$DEPLOYPATH/$d.eski"; cp -R "wp-content/$d" "$DEPLOYPATH/$d.yeni"; if [ -d "$DEPLOYPATH/$d" ]; then mv "$DEPLOYPATH/$d" "$DEPLOYPATH/$d.eski"; fi; mv "$DEPLOYPATH/$d.yeni" "$DEPLOYPATH/$d"; rm -rf "$DEPLOYPATH/$d.eski"; echo "tamam $d"; done
