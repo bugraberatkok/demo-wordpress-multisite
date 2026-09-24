@@ -109,6 +109,9 @@ if [ -n "${MAP:-}" ]; then
 		new option update home "https://$dom" --url="https://$dom/" >/dev/null
 		new option update siteurl "https://$dom" --url="https://$dom/" >/dev/null
 		new option update blog_public 1 --url="https://$dom/" >/dev/null
+		# Kayitli yeniden yazma kurallari alt dizin yoluyla uretilmisti; kok
+		# adreste robots.txt kurali yok. Silinince ilk istekte yeniden uretilir.
+		new option delete rewrite_rules --url="https://$dom/" >/dev/null 2>&1 || true
 
 		# Yalnizca sitenin kendi tablolari: agin ortak tablolarinda (wp_blogs,
 		# wp_site...) panel adresi olmasi dogru, ag panelde yasiyor.

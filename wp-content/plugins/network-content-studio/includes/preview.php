@@ -21,9 +21,12 @@ function nwcs_is_preview(): bool {
 		return $is_preview;
 	}
 
-	$value = isset( $_GET['nwcs_preview'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- salt gorunum modu, yazma yok.
-		&& is_user_logged_in()
-		&& current_user_can( 'manage_network_options' );
+	$param = isset( $_GET['nwcs_preview'] ) ? sanitize_text_field( wp_unslash( $_GET['nwcs_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- salt gorunum modu, yazma yok.
+
+	// Kendi alan adina bagli sitede panelin oturum cerezi onizlemeye ulasmaz
+	// (baska alan adi, ucuncu taraf cerez): yetkiyi panelin imzali anahtari tasir.
+	$value = '' !== $param
+		&& ( nwcs_preview_token_valid( $param ) || ( is_user_logged_in() && current_user_can( 'manage_network_options' ) ) );
 
 	// Kullanici 'init' oncesinde henuz belirlenmemis olabilir; o asamada
 	// sonucu onbellege almiyoruz ki yanlis deger sabitlenmesin.
@@ -32,6 +35,31 @@ function nwcs_is_preview(): bool {
 	}
 
 	return $value;
+}
+
+/**
+ * Onizleme anahtari: "<kullanici>.<bitis>.<imza>". Imza site, kullanici ve
+ * bitis zamanini wp-config tuzlariyla baglar; baska sitede, suresi gecince
+ * ya da yetkisi alinmis kullaniciyla gecersizdir. Anahtar yalnizca alan
+ * isaretlerini acar; sayfa icerigi zaten herkese acik.
+ */
+function nwcs_preview_token( int $blog_id ): string {
+	$user    = get_current_user_id();
+	$expires = time() + 12 * HOUR_IN_SECONDS;
+
+	return $user . '.' . $expires . '.' . hash_hmac( 'sha256', $blog_id . '|' . $user . '|' . $expires, wp_salt( 'auth' ) );
+}
+
+function nwcs_preview_token_valid( string $token ): bool {
+	$parts = explode( '.', $token );
+
+	if ( 3 !== count( $parts ) || ! ctype_digit( $parts[0] ) || ! ctype_digit( $parts[1] ) || (int) $parts[1] < time() ) {
+		return false;
+	}
+
+	$expected = hash_hmac( 'sha256', get_current_blog_id() . '|' . $parts[0] . '|' . $parts[1], wp_salt( 'auth' ) );
+
+	return hash_equals( $expected, $parts[2] ) && is_super_admin( (int) $parts[0] );
 }
 
 // Admin cubugu 'init' sirasinda karara baglanir; filtre bu yuzden erken eklenir.
@@ -45,6 +73,10 @@ function nwcs_preview_setup(): void {
 	if ( ! nwcs_is_preview() ) {
 		return;
 	}
+
+	// Anahtarli adres onbellege ve arama motoruna girmesin.
+	nocache_headers();
+	header( 'X-Robots-Tag: noindex, nofollow' );
 
 	add_filter( 'body_class', 'nwcs_preview_body_class' );
 	add_action( 'wp_enqueue_scripts', 'nwcs_preview_assets', 20 );

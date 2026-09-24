@@ -102,7 +102,9 @@
 			return;
 		}
 		previewWrap.classList.add( 'is-loading' );
-		frame.contentWindow.location.reload();
+		// Kendi alan adindaki sitede cerceve baska kokenden: location.reload()
+		// orada engellenir, adresi yeniden vermek her durumda calisir.
+		frame.src = frame.src;
 	}
 
 	/* ---------------- duzenleyici yukleme ---------------- */
@@ -235,7 +237,9 @@
 			return;
 		}
 
-		if ( cfg.previewOrigin && event.origin !== cfg.previewOrigin ) {
+		// Mesaj yalnizca onizleme cercevesinden kabul edilir (site kendi alan
+		// adindaysa koken panelinkinden farklidir).
+		if ( ! frame || event.source !== frame.contentWindow || event.origin !== new URL( frame.src ).origin ) {
 			return;
 		}
 

@@ -54,7 +54,6 @@ function nwcs_admin_assets( string $hook ): void {
 		array(
 			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 			'nonce'      => wp_create_nonce( 'nwcs_panel' ),
-			'previewOrigin' => untrailingslashit( network_site_url() ),
 			'text'       => array(
 				'confirmDiscard' => 'Kaydedilmemiş değişiklikleriniz var. Son kaydedilen hâle dönülsün mü?',
 				'confirmLeave'   => 'Kaydedilmemiş değişiklikleriniz var.',
@@ -302,7 +301,7 @@ function nwcs_render_panel(): void {
 					<iframe
 						data-nwcs-preview
 						title="Site önizlemesi"
-						src="<?php echo esc_url( add_query_arg( 'nwcs_preview', '1', $preview ) ); ?>"></iframe>
+						src="<?php echo esc_url( add_query_arg( 'nwcs_preview', nwcs_preview_token( $blog_id ), $preview ) ); ?>"></iframe>
 				</div>
 			</div>
 
