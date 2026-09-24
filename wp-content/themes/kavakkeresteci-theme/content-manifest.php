@@ -13,7 +13,7 @@
 
 $build = require dirname( __DIR__ ) . '/kereste-base/manifest.php';
 
-$address = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\n34494 Çatalca / İstanbul";
+$address = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 
 return $build(
 	array(
@@ -30,7 +30,7 @@ return $build(
 			'email'        => 'info@kocist.com.tr',
 			'address'      => $address,
 			'hours'        => '08:00 – 19:00',
-			'map_url'      => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1 Çatalca İstanbul' ),
+			'map_url'      => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
 		),
 
 		'footer_tagline' => 'Kavak kereste, çıta, ahşap takoz ve OSB levha. Ambalaj, palet ve mobilya üretimine uygun; toptan alımda Koçist Orman Ürünleri güvencesiyle.',
@@ -80,7 +80,7 @@ return $build(
 
 		'about'          => array(
 			'lead'   => 'Koçist Orman Ürünleri’nin kavak kereste sitesi: kavak kereste, çıta, takoz ve OSB tedariki.',
-			'p1'     => 'Koçist Grup 37 yıldır orman ürünleri alanında çalışıyor. Kavak kereste, çıta ve takozu ölçünüze göre hazırlıyor; ambalaj ve palet üreticilerine düzenli tedarik sağlıyoruz.',
+			'p1'     => 'Koçist Grup 50 yıldır orman ürünleri alanında çalışıyor. Kavak kereste, çıta ve takozu ölçünüze göre hazırlıyor; ambalaj ve palet üreticilerine düzenli tedarik sağlıyoruz.',
 			'p2'     => 'Amacımız kaliteli malzemeyi en kısa sürede ve uygun fiyatla teslim etmek. Ölçü ve adedi iletmeniz yeterli.',
 			'values' => array(
 				array( 'title' => 'Ölçüye göre kesim', 'text' => 'Kereste, çıta ve takoz istediğiniz kesit ve boyda hazırlanır.' ),
@@ -98,7 +98,7 @@ return $build(
 			'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
 			'district'    => 'Çatalca',
 			'city'        => 'İstanbul',
-			'postal_code' => '34494',
+			'postal_code' => '',
 			'country'     => 'TR',
 			// Kardes siteler sameAs degil; grup iliskisi parentOrganization ile.
 			'same_as'     => array(),

@@ -17,7 +17,7 @@ $phone_url      = 'tel:+902126481090';
 $whatsapp_label = '+90 532 374 98 32';
 $whatsapp_url   = 'https://wa.me/905323749832';
 $email          = 'info@istanbulkeresteci.com';
-$address        = "Şahintepe, Eski İstanbul Cd. No:176\n34494 Başakşehir / İstanbul";
+$address        = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 
 return array(
 	'site_key'   => 'istanbul-keresteci',
@@ -27,13 +27,13 @@ return array(
 	'seo_site_defaults' => array(
 		'name'        => 'İstanbul Keresteci',
 		'legal_name'  => 'Koçist Grup Dış Ticaret ve Sanayi Ltd. Şti.',
-		'description' => 'İstanbul Başakşehir’de çam, köknar, kayın ve meşe kereste; tomruk, OSB, kontrplak ve plywood plaka. İstenen ölçüde kesip adrese teslim.',
+		'description' => 'İstanbul Çatalca’da çam, köknar, kayın ve meşe kereste; tomruk, OSB, kontrplak ve plywood plaka. İstenen ölçüde kesip adrese teslim.',
 		'phone'       => '+90 212 648 10 90',
 		'email'       => 'info@istanbulkeresteci.com',
-		'street'      => 'Şahintepe, Eski İstanbul Cd. No:176',
-		'district'    => 'Başakşehir',
+		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
+		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',
-		'postal_code' => '34494',
+		'postal_code' => '',
 		'country'     => 'TR',
 		'parent_name' => 'Koçist Orman Ürünleri',
 		'parent_url'  => 'https://www.kocist.com.tr',
@@ -48,7 +48,7 @@ return array(
 				'topbar' => array(
 					'label'  => 'Üst Bilgi Şeridi',
 					'fields' => array(
-						'address'       => array( 'label' => 'Adres (tek satır)', 'type' => 'text', 'default' => 'Şahintepe, Eski İstanbul Cd. No:176, Başakşehir' ),
+						'address'       => array( 'label' => 'Adres (tek satır)', 'type' => 'text', 'default' => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
 						'address_url'   => array( 'label' => 'Adres Bağlantısı', 'type' => 'url', 'default' => '/iletisim/' ),
 						'email_label'   => array( 'label' => 'E-posta Metni', 'type' => 'text', 'default' => $email ),
 						'email_url'     => array( 'label' => 'E-posta Bağlantısı', 'type' => 'url', 'default' => 'mailto:' . $email ),
@@ -90,7 +90,7 @@ return array(
 				'footer' => array(
 					'label'  => 'Footer',
 					'fields' => array(
-						'about_text'     => array( 'label' => 'Tanıtım Metni', 'type' => 'textarea', 'default' => 'Kereste, tomruk, plaka ve ahşap ambalaj. Başakşehir’deki depomuzdan İstanbul’un her yerine teslim ediyoruz. Koçist Grup kuruluşudur.' ),
+						'about_text'     => array( 'label' => 'Tanıtım Metni', 'type' => 'textarea', 'default' => 'Kereste, tomruk, plaka ve ahşap ambalaj. Çatalca’daki depomuzdan İstanbul’un her yerine teslim ediyoruz. Koçist Grup kuruluşudur.' ),
 						'products_title' => array( 'label' => 'Ürünler Başlığı', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
 						'pages_title'    => array( 'label' => 'Sayfalar Başlığı', 'type' => 'text', 'default' => 'Kurumsal' ),
 						'links'          => array(
@@ -147,7 +147,7 @@ return array(
 					'fields' => array(
 						'heading'     => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Şantiyeye, atölyeye, fabrikaya kereste' ),
 						'company'     => array( 'label' => 'Ticari Unvan (küçük yazı)', 'type' => 'text', 'default' => 'Koçist Grup Dış Tic. ve San. Ltd. Şti.' ),
-						'text'        => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => "Kereste ve kereste alanındaki bütün ürünlerde kırk yıllık tecrübemizle hizmet veriyoruz.\n\nİstanbul’daki depomuzdan mobilya, dekorasyon, doğramalık, inşaatlık, kuyuluk ve kubbelik kereste satıyoruz. Ürün yelpazemizi her yıl genişletiyor, müşterimizin istediği ölçüyü ve kaliteyi zamanında teslim etmeyi esas alıyoruz." ),
+						'text'        => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => "Kereste ve kereste alanındaki bütün ürünlerde elli yıllık tecrübemizle hizmet veriyoruz.\n\nİstanbul’daki depomuzdan mobilya, dekorasyon, doğramalık, inşaatlık, kuyuluk ve kubbelik kereste satıyoruz. Ürün yelpazemizi her yıl genişletiyor, müşterimizin istediği ölçüyü ve kaliteyi zamanında teslim etmeyi esas alıyoruz." ),
 						'image'       => array( 'label' => 'Fotoğraf', 'type' => 'image', 'default' => 0 ),
 						'link_label'  => array( 'label' => 'Bağlantı Metni', 'type' => 'text', 'default' => 'Hakkımızda daha fazlası' ),
 						'link_url'    => array( 'label' => 'Bağlantı', 'type' => 'url', 'default' => '/hakkimizda/' ),
@@ -219,7 +219,7 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hakkımızda' ),
-						'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Kırk yıldır kereste işindeyiz. Başakşehir’deki depomuzdan İstanbul’un şantiyelerine, atölyelerine ve fabrikalarına ahşap taşıyoruz.' ),
+						'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Elli yıldır kereste işindeyiz. Çatalca’daki depomuzdan İstanbul’un şantiyelerine, atölyelerine ve fabrikalarına ahşap taşıyoruz.' ),
 						'image' => array( 'label' => 'Fotoğraf', 'type' => 'image', 'default' => 0 ),
 					),
 				),
@@ -262,7 +262,7 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
-						'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Kereste ve tomruktan plakaya, paletten sandığa. Hepsi Başakşehir’deki depomuzda.' ),
+						'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Kereste ve tomruktan plakaya, paletten sandığa. Hepsi Çatalca’daki depomuzda.' ),
 					),
 				),
 				'catalog' => array(
@@ -428,7 +428,7 @@ return array(
 				'map'  => array(
 					'label'  => 'Harita',
 					'fields' => array(
-						'query'            => array( 'label' => 'Harita Adresi', 'type' => 'text', 'default' => 'Şahintepe, Eski İstanbul Cd. No:176, 34494 Başakşehir/İstanbul' ),
+						'query'            => array( 'label' => 'Harita Adresi', 'type' => 'text', 'default' => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
 						'directions_label' => array( 'label' => 'Yol Tarifi Düğmesi', 'type' => 'text', 'default' => 'Yol tarifi alın' ),
 					),
 				),

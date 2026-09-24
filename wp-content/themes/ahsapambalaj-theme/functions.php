@@ -151,7 +151,7 @@ function ahsapambalaj_default_images(): array {
 		'hero-1' => array( 'hero-1.jpg', 'Farklı ölçülerde üretilmiş ahşap sandık ve kasalar' ),
 		'hero-2' => array( 'hero-2.jpg', 'Tesis önünde sevkiyata hazır bekleyen ahşap sandıklar' ),
 		'hero-3' => array( 'hero-3.jpg', 'Atölyede istiflenmiş ahşap kasa ve sandıklar' ),
-		'atolye' => array( 'atolye.jpg', 'İkitelli atölyesinde ölçüye göre üretilen ahşap sandık' ),
+		'atolye' => array( 'atolye.jpg', 'Çatalca atölyesinde ölçüye göre üretilen ahşap sandık' ),
 		'dag'    => array( 'dag.jpg', 'Sisler arasında dağ yamacı' ),
 		'palet'  => array( 'palet.jpg', 'Üst üste dizilmiş ahşap paletler' ),
 		'sandik' => array( 'sandik.jpg', 'Sevkiyata hazır kapalı ahşap sandık' ),

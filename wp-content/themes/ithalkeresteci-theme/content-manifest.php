@@ -12,7 +12,7 @@
 
 $build = require dirname( __DIR__ ) . '/kereste-base/manifest.php';
 
-$address = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\n34494 Çatalca / İstanbul";
+$address = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 
 return $build(
 	array(
@@ -29,7 +29,7 @@ return $build(
 			'email'        => 'info@kocist.com.tr',
 			'address'      => $address,
 			'hours'        => '08:00 – 19:00',
-			'map_url'      => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1 Çatalca İstanbul' ),
+			'map_url'      => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
 		),
 
 		'footer_tagline' => 'İthal kereste, inşaatlık ve çatılık kereste, kalas ve plywood. Koçist Orman Ürünleri güvencesiyle, toptan alıma uygun.',
@@ -78,7 +78,7 @@ return $build(
 
 		'about'          => array(
 			'lead'   => 'Koçist Orman Ürünleri’nin kereste sitesi: ithal ve yerli kereste, kalas ve plywood tedariki.',
-			'p1'     => 'Koçist Grup, orman ürünleri alanında 37 yıldır hizmet veriyor. Her ölçüde kereste, palet, sandık ve kafesi ihtiyacınıza göre hazırlıyor; mevcut ölçülerinizi ya da proje çiziminizi alarak en hızlı şekilde üretime geçiyoruz.',
+			'p1'     => 'Koçist Grup, orman ürünleri alanında 50 yıldır hizmet veriyor. Her ölçüde kereste, palet, sandık ve kafesi ihtiyacınıza göre hazırlıyor; mevcut ölçülerinizi ya da proje çiziminizi alarak en hızlı şekilde üretime geçiyoruz.',
 			'p2'     => 'Kaliteli, dürüst ve hızlı bir satış ilkesiyle, en kaliteli malzemeyi en kısa zamanda ve en uygun fiyatla müşterimize ulaştırmayı amaçlıyoruz.',
 			'values' => array(
 				array( 'title' => 'Doğru ölçü', 'text' => 'İstenen ölçü birebir kesilir; 5 × 10 yerine 4,8 × 9,8 gelmez.' ),
@@ -96,7 +96,7 @@ return $build(
 			'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
 			'district'    => 'Çatalca',
 			'city'        => 'İstanbul',
-			'postal_code' => '34494',
+			'postal_code' => '',
 			'country'     => 'TR',
 			// Kardes siteler sameAs degil; grup iliskisi parentOrganization ile.
 			'same_as'     => array(),

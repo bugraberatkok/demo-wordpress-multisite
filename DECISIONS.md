@@ -1267,3 +1267,22 @@ Kararlar:
 - Test: 141 eski adresin tamamı yerel kopyada denendi; aynı adresler 200, taşınanlar
   301 ve hedefleri 200, demo sayfalar 410, gerçek sayfalar etkilenmedi.
 
+
+## Tek adres ve firma yaşı (24 Eylül 2026)
+
+Firma sahibinin kararıyla Koçist dışındaki 7 site tek adres ve tek yaş kullanır:
+
+- **Adres:** Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul.
+  Önceden 5 site Şahintepe / Başakşehir, 2 site Kestanelik gösteriyordu; ahsapkasa ve
+  Sanayi Palet'te sayfadaki adres ile arama motorlarına verilen adres farklıydı.
+  Metinlerdeki "Başakşehir'deki depomuz", "İkitelli'de" gibi ifadeler de Çatalca oldu.
+- **Posta kodu yok:** eski kayıtlardaki 34494 Çatalca'nın kodu değil; doğrusu firmadan
+  öğrenilince SEO sekmesine girilir.
+- **Firma yaşı 50 yıl** (önceden 37, 40, 45 ve "kırk"). Sanayi Palet'teki
+  "1980'lerden bu yana" ifadeleri 50 yılla çeliştiği için çıkarıldı; kuruluş yılı
+  yazılmadı.
+- Koçist sitesi kapsam dışı: orada hâlâ 37 yıl ve 34494 geçiyor.
+
+Canlıda uygulama: Ağ yönetimi → İçerik Stüdyosu → Toplu Güncelleme. Sayfa değişecek
+alanları listeler, "Uygula" yazar ve kayıt tutar; kurallar alanın o anki değerine bakar,
+tekrar çalıştırmak bir şey değiştirmez. Tema varsayılanları da aynı değerlere çekildi.

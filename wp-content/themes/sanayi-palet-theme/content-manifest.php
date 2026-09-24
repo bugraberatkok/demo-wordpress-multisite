@@ -19,13 +19,13 @@ return array(
 	'seo_site_defaults' => array(
 		'name'        => 'Sanayi Palet',
 		'legal_name'  => 'Koçist Grup Dış Ticaret Sanayi Ltd. Şti.',
-		'description' => 'Sanayi Palet, Koçist Grup’un ahşap palet ve sandık markası. Başakşehir’deki tesiste palet, sandık ve kafes istenen ölçüde üretilir; ihracat için ISPM 15 ısıl işlem ve damga.',
+		'description' => 'Sanayi Palet, Koçist Grup’un ahşap palet ve sandık markası. Çatalca’daki tesiste palet, sandık ve kafes istenen ölçüde üretilir; ihracat için ISPM 15 ısıl işlem ve damga.',
 		'phone'       => '+90 212 648 10 90',
 		'email'       => 'info@sanayipalet.com',
-		'street'      => 'Şahintepe, Eski İstanbul Cd. No:176',
-		'district'    => 'Başakşehir',
+		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
+		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',
-		'postal_code' => '34494',
+		'postal_code' => '',
 		'country'     => 'TR',
 		'parent_name' => 'Koçist Orman Ürünleri',
 		'parent_url'  => 'https://www.kocist.com.tr',
@@ -85,7 +85,7 @@ return array(
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
-						'address'       => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Şahintepe, Eski İstanbul Cd. No:176\n34494 Başakşehir / İstanbul" ),
+						'address'       => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul" ),
 						'phone_label'   => array( 'label' => 'Telefon Metni', 'type' => 'text', 'default' => '0212 648 10 90' ),
 						'phone_url'     => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+902126481090' ),
 						'whatsapp_label' => array( 'label' => 'WhatsApp Metni', 'type' => 'text', 'default' => '0532 374 98 32' ),
@@ -109,7 +109,7 @@ return array(
 					'fields' => array(
 						'image'           => array( 'label' => 'Arka Plan Fotoğrafı', 'type' => 'image', 'default' => 0 ),
 						'title'           => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'İhracata hazır ahşap palet ve sandık' ),
-						'text'            => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Standart ölçülerin yanında istediğiniz ebatta üretiyoruz. Isıl işlemli, damgalı, Başakşehir’den teslim.' ),
+						'text'            => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Standart ölçülerin yanında istediğiniz ebatta üretiyoruz. Isıl işlemli, damgalı, Çatalca’dan teslim.' ),
 						'primary_label'   => array( 'label' => 'Birinci Düğme Metni', 'type' => 'text', 'default' => 'Teklif isteyin' ),
 						'primary_url'     => array( 'label' => 'Birinci Düğme Bağlantısı', 'type' => 'url', 'default' => '/iletisim/' ),
 						'secondary_label' => array( 'label' => 'İkinci Düğme Metni', 'type' => 'text', 'default' => '0212 648 10 90’u arayın' ),
@@ -124,7 +124,7 @@ return array(
 					'label'  => 'Kısaca Biz',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ahşap ambalajı ölçünüze göre üretiyoruz' ),
-						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Sanayi Palet, Koçist Grup’un ahşap palet ve sandık markası. Başakşehir’deki tesisimizde palet, sandık ve kafesi istediğiniz ölçüde üretiyor, ihracat siparişlerini ısıl işlemden geçirip damgalıyoruz.' ),
+						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Sanayi Palet, Koçist Grup’un ahşap palet ve sandık markası. Çatalca’daki tesisimizde palet, sandık ve kafesi istediğiniz ölçüde üretiyor, ihracat siparişlerini ısıl işlemden geçirip damgalıyoruz.' ),
 						'facts' => array(
 							'label'   => 'Öne Çıkanlar',
 							'type'    => 'repeater',
@@ -223,7 +223,7 @@ return array(
 									'icon'     => 'factory',
 									'title'    => 'Üretim ve ısıl işlem',
 									'actor'    => 'Bizden',
-									'text'     => 'Başakşehir’deki tesisimizde ölçünüze göre üretiyoruz. İhracat siparişleri ısıl işlemden geçip ISPM 15 damgasıyla işaretleniyor.',
+									'text'     => 'Çatalca’daki tesisimizde ölçünüze göre üretiyoruz. İhracat siparişleri ısıl işlemden geçip ISPM 15 damgasıyla işaretleniyor.',
 									'duration' => '',
 								),
 								array(
@@ -289,7 +289,7 @@ return array(
 					'fields' => array(
 						'image'        => array( 'label' => 'Görsel', 'type' => 'image', 'default' => 0 ),
 						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Koçist Grup’un palet ve sandık markası' ),
-						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => '1980’lerden bu yana orman ürünleri üretiyor ve dünyaya ihraç ediyoruz. 45 yıldır aynı ilkeyle çalışıyoruz: kaliteli ürün, kaliteli işçilik, müşteriyi dinleyen hizmet.' ),
+						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Orman ürünleri üretiyor ve dünyaya ihraç ediyoruz. 50 yıldır aynı ilkeyle çalışıyoruz: kaliteli ürün, kaliteli işçilik, müşteriyi dinleyen hizmet.' ),
 						'button_label' => array( 'label' => 'Düğme Metni', 'type' => 'text', 'default' => 'Hakkımızda' ),
 						'button_url'   => array( 'label' => 'Düğme Bağlantısı', 'type' => 'url', 'default' => '/hakkimizda/' ),
 					),
@@ -331,7 +331,7 @@ return array(
 					'label'  => 'Sayfa Başı',
 					'fields' => array(
 						'kicker' => array( 'label' => 'Üst Satır', 'type' => 'text', 'default' => 'Sanayi Palet hakkında' ),
-						'title'  => array( 'label' => 'Başlık', 'type' => 'text', 'default' => '45 yıllık tecrübemiz ile sanayi palette iddialıyız' ),
+						'title'  => array( 'label' => 'Başlık', 'type' => 'text', 'default' => '50 yıllık tecrübemiz ile sanayi palette iddialıyız' ),
 						'image'  => array( 'label' => 'Görsel', 'type' => 'image', 'default' => 0 ),
 					),
 				),
@@ -339,7 +339,7 @@ return array(
 				'story' => array(
 					'label'  => 'Firma Metni',
 					'fields' => array(
-						'lead' => array( 'label' => 'Giriş Paragrafı', 'type' => 'textarea', 'default' => 'Ahşap ve orman ürünleri alanında 45 yıllık deneyimimiz neticesinde hizmet verdiğimiz alanlarda müşteri memnuniyeti ve kaliteyi göz önüne alarak ilerlemekteyiz.' ),
+						'lead' => array( 'label' => 'Giriş Paragrafı', 'type' => 'textarea', 'default' => 'Ahşap ve orman ürünleri alanında 50 yıllık deneyimimiz neticesinde hizmet verdiğimiz alanlarda müşteri memnuniyeti ve kaliteyi göz önüne alarak ilerlemekteyiz.' ),
 						'body' => array( 'label' => 'Metin (boş satırla paragraf ayrılır)', 'type' => 'textarea', 'default' => "Ahşap ürünler alanında; çeşitli paletler, ahşap kafes ve ahşap sandık ürünlerinin üretimini gerçekleştirmekteyiz. Geniş ürün yelpazemizle günden güne ülke çapında öncü firma haline gelerek, sektörde ihtiyaç duyduğunuz ahşap malzemelerin tedarikçisi olarak hizmet anlayışımızı sürdürüyoruz.\n\nMüşteri ilişkilerimizi güven esasına dayalı olarak kurmakta ve ürünlerimizin her zaman arkasında durmaktayız. Son teknolojiyi kullanarak üretimini gerçekleştirdiğimiz ahşap paletleri, isteğiniz doğrultusunda imal ederek sizlere ürün teslimatını gerçekleştirmekteyiz.\n\nEndüstriyel alanda iş kolaylığı ve iş güvenliği temellerini esas aldığımız bu yolda yerli ve milli üretimi destekliyor, geri dönüşüme uygun ürün hizmetleri sunuyoruz." ),
 					),
 				),
@@ -372,7 +372,7 @@ return array(
 					'label'  => 'Koçist Grup',
 					'fields' => array(
 						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri' ),
-						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => '1980’li yıllardan beri faaliyet gösteren Koçist Orman Ürünleri, orman ürünlerini dünyanın dört bir yanına ihraç ediyor. Koçist Grup Dış Ticaret Sanayi Limited Şirketi olarak kaliteli ürün, kaliteli işçilik ve müşteri odaklı hizmeti ilke edindik. Sanayi Palet, grubun ahşap palet ve sandık markasıdır.' ),
+						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Koçist Orman Ürünleri, orman ürünlerini dünyanın dört bir yanına ihraç ediyor. Koçist Grup Dış Ticaret Sanayi Limited Şirketi olarak kaliteli ürün, kaliteli işçilik ve müşteri odaklı hizmeti ilke edindik. Sanayi Palet, grubun ahşap palet ve sandık markasıdır.' ),
 						'image'        => array( 'label' => 'Belge Görseli', 'type' => 'image', 'default' => 0 ),
 						'image_note'   => array( 'label' => 'Belge Açıklaması', 'type' => 'text', 'default' => 'Ahşap Ambalaj Malzemesi İşaretleme İzin Belgesi, TR-1080-HT' ),
 					),
@@ -520,7 +520,7 @@ return array(
 					'label'  => 'İletişim Bilgileri',
 					'fields' => array(
 						'address_label'  => array( 'label' => 'Adres Başlığı', 'type' => 'text', 'default' => 'Adresimiz' ),
-						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Şahintepe, Eski İstanbul Cd. No:176\n34494 Başakşehir / İstanbul" ),
+						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul" ),
 						'phone_label'    => array( 'label' => 'Telefon Başlığı', 'type' => 'text', 'default' => 'Telefonumuz' ),
 						'phone'          => array( 'label' => 'Telefon', 'type' => 'text', 'default' => '+90 212 648 10 90' ),
 						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+902126481090' ),
@@ -546,7 +546,7 @@ return array(
 				'map' => array(
 					'label'  => 'Harita',
 					'fields' => array(
-						'query'            => array( 'label' => 'Haritada Aranacak Adres', 'type' => 'text', 'default' => 'Şahintepe, Eski İstanbul Cd. No:176, 34494 Başakşehir/İstanbul' ),
+						'query'            => array( 'label' => 'Haritada Aranacak Adres', 'type' => 'text', 'default' => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
 						'directions_label' => array( 'label' => 'Yol Tarifi Metni', 'type' => 'text', 'default' => 'Yol tarifi alın' ),
 					),
 				),

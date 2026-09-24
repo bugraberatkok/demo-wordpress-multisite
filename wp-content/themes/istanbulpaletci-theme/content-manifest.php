@@ -85,7 +85,7 @@ $mobile_url   = 'tel:+905323749832';
 // calismiyor; burada dogru bicim kullaniliyor.
 $whatsapp_url = 'https://wa.me/905323749832';
 $email        = 'info@istanbulpaletci.com';
-$address      = "Şahintepe, Eski İstanbul Cd. No: 176\n34494 Başakşehir / İstanbul";
+$address      = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 
 return array(
 	'site_key'          => 'istanbulpaletci',
@@ -96,13 +96,13 @@ return array(
 	'seo_site_defaults' => array(
 		'name'        => 'İstanbul Paletçi',
 		'legal_name'  => 'Koçist Orman Ürünleri İnş. ve İnş. Yap. Malz. San. Tic. Ltd. Şti.',
-		'description' => 'İstanbul Başakşehir’de isteğe özel ve standart ölçülerde ahşap palet, Euro palet, ahşap kafes ve ahşap sandık üretimi. Orman ürünleri sektöründe 40 yıllık tecrübe, ihracata uygun ahşap ambalaj.',
+		'description' => 'İstanbul Çatalca’da isteğe özel ve standart ölçülerde ahşap palet, Euro palet, ahşap kafes ve ahşap sandık üretimi. Orman ürünleri sektöründe 50 yıllık tecrübe, ihracata uygun ahşap ambalaj.',
 		'phone'       => $phone_label,
 		'email'       => $email,
-		'street'      => 'Şahintepe, Eski İstanbul Cd. No: 176',
-		'district'    => 'Başakşehir',
+		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
+		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',
-		'postal_code' => '34494',
+		'postal_code' => '',
 		'country'     => 'TR',
 		// Kardes siteler sameAs degil; grup iliskisi parentOrganization ile.
 		'same_as'     => array(),
@@ -153,7 +153,7 @@ return array(
 					'label'  => 'Alt Bilgi',
 					'fields' => array(
 						'logo_image'     => array( 'label' => 'Koyu Zemin Logosu', 'type' => 'image', 'default' => 0 ),
-						'tagline'        => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'İsteğe özel ve standart ölçülerde ahşap palet, kafes ve sandık. 40 yıldır orman ürünleri sektöründeyiz.' ),
+						'tagline'        => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'İsteğe özel ve standart ölçülerde ahşap palet, kafes ve sandık. 50 yıldır orman ürünleri sektöründeyiz.' ),
 						'pages_title'    => array( 'label' => 'Sayfalar Başlığı', 'type' => 'text', 'default' => 'Sayfalar' ),
 						'products_title' => array( 'label' => 'Ürünler Başlığı', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
 						'contact_title'  => array( 'label' => 'İletişim Başlığı', 'type' => 'text', 'default' => 'İletişim' ),
@@ -185,7 +185,7 @@ return array(
 					'label'  => 'Giriş (Hero)',
 					'fields' => array(
 						'title'           => array( 'label' => 'Başlık', 'type' => 'textarea', 'default' => "İsteğe özel ölçülerde\npalet üretimi" ),
-						'lead'            => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Ahşap palet, Euro palet, ahşap kafes ve sandık. 40 yıldır orman ürünleri sektöründe, zamanında teslimat ve müşteri memnuniyetiyle çalışıyoruz.' ),
+						'lead'            => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Ahşap palet, Euro palet, ahşap kafes ve sandık. 50 yıldır orman ürünleri sektöründe, zamanında teslimat ve müşteri memnuniyetiyle çalışıyoruz.' ),
 						'primary_label'   => array( 'label' => 'Birinci Düğme Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
 						'primary_url'     => array( 'label' => 'Birinci Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/#teklif' ),
 						'secondary_label' => array( 'label' => 'İkinci Düğme Metni', 'type' => 'text', 'default' => 'Ürünleri inceleyin' ),
@@ -224,7 +224,7 @@ return array(
 								'label' => array( 'label' => 'Açıklama', 'type' => 'text' ),
 							),
 							'default' => array(
-								array( 'value' => '40 yıl', 'label' => 'orman ürünleri sektöründe' ),
+								array( 'value' => '50 yıl', 'label' => 'orman ürünleri sektöründe' ),
 								array( 'value' => '5', 'label' => 'ürün ailesi' ),
 								array( 'value' => 'İsteğe özel', 'label' => 'ölçüde üretim' ),
 								array( 'value' => 'İhracat', 'label' => 'tüm dünyaya ahşap ambalaj' ),
@@ -308,7 +308,7 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hakkımızda' ),
-						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Ağaç ve orman endüstrisinde 40 yıllık tecrübeyle, ahşap palet alanında sektörün öncü firmalarından biriyiz.' ),
+						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Ağaç ve orman endüstrisinde 50 yıllık tecrübeyle, ahşap palet alanında sektörün öncü firmalarından biriyiz.' ),
 						'image' => array( 'label' => 'Fotoğraf', 'type' => 'image', 'default' => 0 ),
 					),
 				),
@@ -317,7 +317,7 @@ return array(
 					'label'  => 'Firma Metni',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri' ),
-						'p1'    => array( 'label' => 'Birinci Paragraf', 'type' => 'textarea', 'default' => 'Ağaç ve orman endüstrisi alanında 40 yıllık tecrübemizle, ahşap ve ahşap palete dair hizmetlerimizde sektörde öncü firma olarak sürecimizi devam ettiriyoruz.' ),
+						'p1'    => array( 'label' => 'Birinci Paragraf', 'type' => 'textarea', 'default' => 'Ağaç ve orman endüstrisi alanında 50 yıllık tecrübemizle, ahşap ve ahşap palete dair hizmetlerimizde sektörde öncü firma olarak sürecimizi devam ettiriyoruz.' ),
 						'p2'    => array( 'label' => 'İkinci Paragraf', 'type' => 'textarea', 'default' => 'Müşteri talepleri doğrultusunda palet çeşitlerimizin üretim ve tedarik sürecini baştan sona takip ediyor, memnuniyeti en üst seviyede tutuyoruz. Ağaç ve orman işleri pazarındaki değişimi yakından izleyerek sürdürülebilirlik oluşturuyoruz.' ),
 						'p3'    => array( 'label' => 'Üçüncü Paragraf', 'type' => 'textarea', 'default' => 'Gün geçtikçe gelişen müşteri portföyümüzle güvenilir ve kaliteli ürünleri gönül rahatlığıyla sunuyoruz.' ),
 					),
@@ -562,7 +562,7 @@ return array(
 						'address_title'  => array( 'label' => 'Adres Başlığı', 'type' => 'text', 'default' => 'Adres' ),
 						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => $address ),
 						'map_label'      => array( 'label' => 'Yol Tarifi Metni', 'type' => 'text', 'default' => 'Yol tarifi alın' ),
-						'map_url'        => array( 'label' => 'Harita Bağlantısı', 'type' => 'url', 'default' => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Şahintepe, Eski İstanbul Cd. No:176, 34494 Başakşehir/İstanbul' ) ),
+						'map_url'        => array( 'label' => 'Harita Bağlantısı', 'type' => 'url', 'default' => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ) ),
 						'hours_title'    => array( 'label' => 'Çalışma Saatleri Başlığı', 'type' => 'text', 'default' => 'Çalışma saatleri' ),
 						'hours'          => array( 'label' => 'Çalışma Saatleri (boşsa gizlenir)', 'type' => 'text', 'default' => '' ),
 					),

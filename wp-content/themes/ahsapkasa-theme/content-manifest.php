@@ -17,11 +17,11 @@ return array(
 	'seo_site_defaults' => array(
 		'name'        => 'Koçist Orman Ürünleri',
 		'legal_name'  => 'Koçist Orman Ürünleri İnş. ve İnş. Yap. Malz. San. Tic. Ltd. Şti.',
-		'description' => 'Koçist Orman Ürünleri, İstanbul İkitelli’de 40 yıllık tecrübeyle istenen ölçü ve ebatlarda ahşap sandık, ahşap kafes, ahşap palet ve ahşap ambalaj üretir; demonte paketler hâlinde sevk eder.',
+		'description' => 'Koçist Orman Ürünleri, İstanbul Çatalca’da 50 yıllık tecrübeyle istenen ölçü ve ebatlarda ahşap sandık, ahşap kafes, ahşap palet ve ahşap ambalaj üretir; demonte paketler hâlinde sevk eder.',
 		'phone'       => '+90 212 648 10 90',
 		'email'       => 'info@kocist.com.tr',
-		'street'      => 'Şahintepe Mh. Eski İstanbul Cd. No. 176/A-B-C-D',
-		'district'    => 'Başakşehir',
+		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
+		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',
 		'country'     => 'TR',
 		// Bu site Koçist'in kendisi: kocist.com.tr ayni kurumun adresi. Kardes
@@ -72,12 +72,12 @@ return array(
 				'footer' => array(
 					'label'  => 'Alt Bilgi',
 					'fields' => array(
-						'tagline'        => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'Kırk yıldır İkitelli’de, ölçüye göre ahşap palet, sandık, kafes ve ambalaj üretiyoruz.' ),
+						'tagline'        => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'Elli yıldır Çatalca’da, ölçüye göre ahşap palet, sandık, kafes ve ambalaj üretiyoruz.' ),
 						'phone_label'    => array( 'label' => 'Telefon Metni', 'type' => 'text', 'default' => '0 212 648 10 90' ),
 						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+902126481090' ),
 						'email_label'    => array( 'label' => 'E-posta Metni', 'type' => 'text', 'default' => 'info@kocist.com.tr' ),
 						'email_url'      => array( 'label' => 'E-posta Bağlantısı', 'type' => 'url', 'default' => 'mailto:info@kocist.com.tr' ),
-						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Şahintepe Mh. Eski İstanbul Cd. No. 176/A-B-C-D\nİkitelli, Başakşehir, İstanbul" ),
+						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul" ),
 						'nav_title'      => array( 'label' => 'Menü Başlığı', 'type' => 'text', 'default' => 'Sayfalar' ),
 						'external_note'  => array( 'label' => 'Diğer Ürünler Metni', 'type' => 'text', 'default' => 'Diğer ürün gruplarımız için' ),
 						'external_label' => array( 'label' => 'Diğer Ürünler Bağlantı Metni', 'type' => 'text', 'default' => 'www.kocist.com.tr' ),
@@ -125,8 +125,8 @@ return array(
 				'intro' => array(
 					'label'  => 'Giriş Paragrafı',
 					'fields' => array(
-						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Kırk yıldır aynı işi yapıyoruz' ),
-						'lead' => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Koçist Orman Ürünleri; sektördeki 40 yıllık tecrübesi ile istediğiniz ölçü ve ebatlarda ahşap sandık, ahşap kafes, ahşap palet üretimi yapmaktadır.' ),
+						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Elli yıldır aynı işi yapıyoruz' ),
+						'lead' => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Koçist Orman Ürünleri; sektördeki 50 yıllık tecrübesi ile istediğiniz ölçü ve ebatlarda ahşap sandık, ahşap kafes, ahşap palet üretimi yapmaktadır.' ),
 						'text' => array( 'label' => 'Paragraf', 'type' => 'textarea', 'default' => 'Elinizdeki ölçüleri, proje çizimini ya da hâlihazırda kullandığınız ambalajı iletin; ürününüze uygun paleti, sandığı veya kafesi tasarlayıp üretelim. Tüm parçaları içeren demonte paketler hâlinde sevk ediyoruz.' ),
 					),
 				),
@@ -180,7 +180,7 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hakkımızda' ),
-						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Kırk yıllık tecrübeyle, istediğiniz ölçü ve ebatta ahşap sandık, kafes ve palet üretiyoruz. Kaliteli, dürüst ve hızlı.' ),
+						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Elli yıllık tecrübeyle, istediğiniz ölçü ve ebatta ahşap sandık, kafes ve palet üretiyoruz. Kaliteli, dürüst ve hızlı.' ),
 						'image' => array( 'label' => 'Arka Plan Fotoğrafı', 'type' => 'image', 'default' => 0 ),
 					),
 				),
@@ -295,7 +295,7 @@ return array(
 						'email_url'     => array( 'label' => 'E-posta Bağlantısı', 'type' => 'url', 'default' => 'mailto:info@kocist.com.tr' ),
 						'address_title' => array( 'label' => 'Adres Başlığı', 'type' => 'text', 'default' => 'Merkez ofis ve atölye' ),
 						'address_icon'  => array( 'label' => 'Adres İkonu', 'type' => 'icon', 'default' => 'pin' ),
-						'address'       => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Şahintepe Mh. Eski İstanbul Cd. No. 176/A-B-C-D\nİkitelli, Başakşehir, İstanbul" ),
+						'address'       => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul" ),
 						'hours_title'   => array( 'label' => 'Çalışma Saatleri Başlığı', 'type' => 'text', 'default' => 'Çalışma saatleri' ),
 						'hours_icon'    => array( 'label' => 'Çalışma Saatleri İkonu', 'type' => 'icon', 'default' => 'clock' ),
 						'hours'         => array( 'label' => 'Çalışma Saatleri', 'type' => 'text', 'default' => 'Hafta içi 08:00 – 18:00' ),
