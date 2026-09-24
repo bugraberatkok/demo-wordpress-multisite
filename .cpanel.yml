@@ -1,0 +1,21 @@
+---
+# cPanel "Git Version Control" dagitimi (Natro, hesap u7198936).
+#
+# Yalnizca KOD tasinir: 9 tema ve Network Content Studio eklentisi, WordPress
+# kurulumunun wp-content klasorune. Icerik (metinler, gorseller, ayarlar)
+# veritabanindadir ve panelden yonetilir; burada tasinmaz.
+#
+# Depo sunucuda web'e acik olmayan bir yere klonlanmali (cPanel varsayilani
+# /home/u7198936/repositories/...), ASLA public_html ya da site klasorune.
+# Dagitim elle tetiklenir: cPanel -> Git Version Control -> Manage ->
+# Pull or Deploy -> "Update from Remote", sonra "Deploy HEAD Commit".
+#
+# rsync --delete yalnizca bizim tema ve eklenti klasorlerimizde calisir; temadan
+# silinen dosya sunucudan da silinir. Diger eklentiler, yuklemeler (uploads)
+# ve dil dosyalari etkilenmez.
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/u7198936/panel.sanayipalet.com/wp-content
+    - test -d "$DEPLOYPATH/themes" && test -d "$DEPLOYPATH/plugins"
+    - for t in ahsapambalaj-theme ahsapkasa-theme istanbul-keresteci-theme istanbulpaletci-theme ithalkeresteci-theme kavakkeresteci-theme kereste-base kocist-theme sanayi-palet-theme; do rsync -a --delete "wp-content/themes/$t/" "$DEPLOYPATH/themes/$t/"; done
+    - rsync -a --delete wp-content/plugins/network-content-studio/ "$DEPLOYPATH/plugins/network-content-studio/"

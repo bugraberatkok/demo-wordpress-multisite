@@ -556,6 +556,30 @@ ve eklentisini kapatır, yönetici parolasını yeniler (ekrana yazılmaz; paket
 Deneme bitince site site: alan adı bağlanır, DNS çevrilir, eski adres yönlendirmeleri
 test edilir, en son o sitenin "arama motorlarına açık" ayarı açılır.
 
+### Canlıya çıkan siteler (domain mapping)
+
+```bash
+DOMAIN=panel.sanayipalet.com SCHEME=http MAP="istanbul-keresteci=istanbulkeresteci.com istanbulpaletci=istanbulpaletci.com" sh scripts/export-natro.sh
+```
+
+`MAP`'teki siteler pakette kendi alan adına bağlanır: adresleri (diğer sitelerden verilen
+bağlantılar dahil) `https://alanadi` olur, arama motorlarına açılır; diğerleri panel altında
+kapalı kalır. Alan adının SSL sertifikası sunucuda kurulu olmalı (panelin sertifikası
+bağlanan alan adlarını kapsamaz). Geçiş, alan adının belge kökünün WordPress klasörüne
+çevrilmesiyle olur; geri dönüş eski klasör yolunu geri yazmaktır.
+
+### Kod güncellemesi: cPanel Git Version Control
+
+Kök dizindeki `.cpanel.yml` yalnızca 9 temayı ve eklentiyi WordPress'in `wp-content`
+klasörüne kopyalar (`rsync --delete`, yalnızca bu klasörlerde). İçerik (metin, görsel,
+ayarlar) veritabanındadır ve panelden yönetilir; Git ile taşınmaz.
+
+1. cPanel → Git Version Control → Create: "Clone a Repository" açık, adres
+   `https://github.com/bugraberatkok/demo-wordpress-multisite.git`, depo yolu
+   `/home/u7198936/repositories/demo-wordpress-multisite` (**web'e açık bir klasör değil**).
+2. Güncellemede: Manage → Pull or Deploy → **Update from Remote**, sonra **Deploy HEAD Commit**.
+   Dağıtım elle tetiklenir; main'e gelen her commit kendiliğinden canlıya çıkmaz.
+
 ## Eski adres yönlendirmeleri (301)
 
 **Ağ Yönetimi → SEO ve GEO → Yönlendirmeler.** Her sitenin eski adres listesi: eski

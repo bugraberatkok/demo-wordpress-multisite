@@ -4,6 +4,10 @@
 #
 #   DOMAIN=panel.kocist.com.tr ADMIN_EMAIL=ad@firma.com sh scripts/export-natro.sh
 #
+# Canliya cikacak siteler (domain mapping): MAP="istanbul-keresteci=istanbulkeresteci.com"
+# Bu siteler https://alanadi adresine baglanir ve arama motorlarina acilir;
+# alan adinin SSL sertifikasi sunucuda kurulu olmali.
+#
 # SSL henuz yoksa (yalnizca deneme): SCHEME=http ekleyin. Adresler http://
 # yazilir ve yonetimde HTTPS zorunlulugu konmaz. Sertifika gelince paket
 # SCHEME=https (varsayilan) ile yeniden uretilip kurulur.
@@ -82,6 +86,39 @@ echo "==> Deneme: butun siteler arama motorlarina kapali"
 for url in $(new site list --field=url | tr -d '\r'); do
 	new option update blog_public 0 --url="$url" >/dev/null
 done
+
+# Canliya cikan siteler: kendi alan adina baglanir (domain mapping), adresleri
+# https://alanadi olur, arama motorlarina acilir. Diger siteler panel altinda
+# ve kapali kalir. MAP="slug=alanadi slug=alanadi"
+if [ -n "${MAP:-}" ]; then
+	echo "==> Alan adina baglanan siteler: $MAP"
+	for pair in $MAP; do
+		slug="${pair%%=*}"
+		dom="${pair#*=}"
+		case "$dom" in */*|*:*|"") echo "HATA: MAP'te alan adi hatali: $pair" >&2; exit 1 ;; esac
+
+		id="$(new db query "SELECT blog_id FROM wp_blogs WHERE path='/$slug/'" --skip-column-names | tr -d '\r')"
+		[ -n "$id" ] || { echo "HATA: /$slug/ adli site yok." >&2; exit 1; }
+
+		# Ag genelinde: bu sitenin panel adresleri, diger sitelerden verilen
+		# baglantilar dahil, canli alan adina.
+		new search-replace "$SCHEME://$DOMAIN/$slug/" "https://$dom/" --network --all-tables-with-prefix --skip-columns=guid --report-changed-only | tail -1
+		new search-replace "$SCHEME://$DOMAIN/$slug" "https://$dom" --network --all-tables-with-prefix --skip-columns=guid --report-changed-only | tail -1
+		new db query "UPDATE wp_blogs SET domain='$dom', path='/' WHERE blog_id=$id"
+
+		new option update home "https://$dom" --url="https://$dom/" >/dev/null
+		new option update siteurl "https://$dom" --url="https://$dom/" >/dev/null
+		new option update blog_public 1 --url="https://$dom/" >/dev/null
+
+		# Yalnizca sitenin kendi tablolari: agin ortak tablolarinda (wp_blogs,
+		# wp_site...) panel adresi olmasi dogru, ag panelde yasiyor.
+		KALAN="$(new search-replace "$DOMAIN" x "wp_${id}_*" --url="https://$dom/" --skip-columns=guid --dry-run | tail -1)"
+		case "$KALAN" in
+			*" 0 replacements"*) echo "    /$slug/ -> https://$dom (site $id): panel adresi kalmadi, arama motorlarina ACIK" ;;
+			*) echo "UYARI: https://$dom icinde panel adresi kaldi: $KALAN" >&2 ;;
+		esac
+	done
+fi
 
 echo "==> MCP: uygulama parolalari silinir, eklenti kapatilir"
 for id in $(new user list --field=ID --network | tr -d '\r'); do
@@ -181,6 +218,25 @@ Sonra (site site, deneme bitince): alan adini siteye bagla (Ag Yonetimi -> Sitel
 Site Adresi), cPanel'de alan adini ayni klasore yonlendir, SSL, DNS, yonlendirmeleri eski
 adreslerle test et, en son o sitenin "arama motorlarina acik" ayarini ac.
 MD
+
+if [ -n "${MAP:-}" ]; then
+	{
+		echo ""
+		echo "## Canliya gecis (alan adina bagli siteler)"
+		echo ""
+		echo "Bu pakette su siteler kendi alan adina bagli ve arama motorlarina ACIK:"
+		echo ""
+		for pair in $MAP; do echo "- /${pair%%=*}/ -> https://${pair#*=}"; done
+		echo ""
+		echo "Veritabani ice aktarildiginda bu alan adlari HENUZ eski siteyi gosterir. Gecis,"
+		echo "her alan adinin belge kokunun (document root) \`/home/u7198936/panel.sanayipalet.com\`"
+		echo "yapilmasiyla olur (cPanel -> Etki Alanlari -> Yonet; bu hesapta kapaliysa Natro destek)."
+		echo "Once yedek: eski site klasorunun eski yolunu not alin; geri donus = eski yolu geri yazmak."
+		echo ""
+		echo "Gecisten sonra kontrol: her sayfa 200, eski adresler 301, sertifika gecerli,"
+		echo "sayfa kaynaginda noindex YOK, /llms.txt ve /wp-sitemap.xml acik."
+	} >> "$OUT/KURULUM.md"
+fi
 
 echo ""
 echo "Paket hazir: $OUT"
