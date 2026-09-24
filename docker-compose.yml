@@ -68,6 +68,7 @@ services:
       - ./wp-content/themes/sanayi-palet-theme:/var/www/html/wp-content/themes/sanayi-palet-theme
       - ./wp-content/themes/ahsapambalaj-theme:/var/www/html/wp-content/themes/ahsapambalaj-theme
       - ./wp-content/themes/istanbulpaletcivi-theme:/var/www/html/wp-content/themes/istanbulpaletcivi-theme
+      - ./wp-content/themes/woodkocist-theme:/var/www/html/wp-content/themes/woodkocist-theme
       - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
       - ./docker/apache-wp.conf:/etc/apache2/conf-enabled/zz-wp.conf:ro
       - ./docker/php-uploads.ini:/usr/local/etc/php/conf.d/zz-uploads.ini:ro
@@ -103,6 +104,7 @@ services:
       - ./wp-content/themes/sanayi-palet-theme:/var/www/html/wp-content/themes/sanayi-palet-theme
       - ./wp-content/themes/ahsapambalaj-theme:/var/www/html/wp-content/themes/ahsapambalaj-theme
       - ./wp-content/themes/istanbulpaletcivi-theme:/var/www/html/wp-content/themes/istanbulpaletcivi-theme
+      - ./wp-content/themes/woodkocist-theme:/var/www/html/wp-content/themes/woodkocist-theme
       - ./wp-content/plugins/network-content-studio:/var/www/html/wp-content/plugins/network-content-studio
       - ./scripts:/scripts:ro
       - ./resources:/resources:ro

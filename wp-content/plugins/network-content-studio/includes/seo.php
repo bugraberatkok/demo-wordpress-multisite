@@ -323,11 +323,15 @@ function nwcs_seo_page_for_path( string $path ): string {
  *           'image'       => 12,            // ek kimligi ya da array( url, width, height, alt )
  *           'type'        => 'Product',     // istege bagli
  *           'properties'  => array( array( 'name' => 'Ağaç', 'value' => 'Çam' ) ),
+ *           'sitemap'     => true,          // istege bagli, asagiya bakin
  *       );
  *       return $pages;
  *   } );
  *
  * Bu sayfalar da baslik, aciklama, JSON-LD (urunse Product) ve llms.txt alir.
+ * 'sitemap' => true verilirse site haritasina da girer: WordPress sayfasi
+ * olmayan adresler icin (havuz urunleri /urun/<slug>/). Gercek WordPress
+ * sayfasi olan ek sayfalarda verilmez; WordPress onu zaten listeler.
  */
 function nwcs_seo_extra_pages(): array {
 	static $pages = null;
@@ -1057,6 +1061,41 @@ add_filter(
 		return $data;
 	}
 );
+
+/**
+ * Ek sayfalar icin site haritasi (/wp-sitemap-nwcsextra-1.xml): temanin
+ * 'sitemap' => true isaretledigi adresler. Site arama motorlarina kapaliysa
+ * WordPress site haritasini zaten kapatir.
+ */
+add_action( 'init', 'nwcs_seo_register_extra_sitemap' );
+function nwcs_seo_register_extra_sitemap(): void {
+	if ( ! function_exists( 'wp_register_sitemap_provider' ) || ! class_exists( 'WP_Sitemaps_Provider' ) ) {
+		return;
+	}
+
+	if ( ! class_exists( 'NWCS_Sitemap_Extra' ) ) {
+		require_once NWCS_DIR . 'includes/sitemap-extra.php';
+	}
+
+	wp_register_sitemap_provider( 'nwcsextra', new NWCS_Sitemap_Extra() );
+}
+
+/**
+ * Site haritasina girecek ek sayfa adresleri.
+ *
+ * @return string[]
+ */
+function nwcs_seo_extra_sitemap_urls(): array {
+	$urls = array();
+
+	foreach ( nwcs_seo_extra_pages() as $page ) {
+		if ( ! empty( $page['sitemap'] ) ) {
+			$urls[] = esc_url_raw( (string) $page['url'] );
+		}
+	}
+
+	return array_values( array_unique( array_filter( $urls ) ) );
+}
 
 /**
  * Site haritasindan kullanici listesi cikarilir: yonetici kullanici adini

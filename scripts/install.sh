@@ -110,6 +110,7 @@ istanbul-keresteci|istanbul-keresteci-theme|İstanbul Keresteci|-
 sanayi-palet|sanayi-palet-theme|Sanayi Palet|-
 ahsapambalaj|ahsapambalaj-theme|Ahşap Ambalaj|-
 istanbulpaletcivi|istanbulpaletcivi-theme|İstanbul Palet Çivi|-
+woodkocist|woodkocist-theme|WOOD KOCIST|-
 '
 
 echo "==> Turkce dil paketi"
