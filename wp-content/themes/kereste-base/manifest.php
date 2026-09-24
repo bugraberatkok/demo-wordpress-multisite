@@ -285,7 +285,7 @@ return static function ( array $s ): array {
 				'questions' => 'items.rows',
 			),
 			'components' => array(
-				'head'  => $head( 'Sık sorulan sorular', 'Sipariş, sevkiyat süresi, ödeme seçenekleri, ölçüye göre kesim ve kereste metreküp hesabıyla ilgili en çok sorulanlar.' ),
+				'head'  => $head( 'Sık sorulan sorular', $s['faq_lead'] ?? 'Sipariş, sevkiyat süresi, ödeme seçenekleri, ölçüye göre kesim ve kereste metreküp hesabıyla ilgili en çok sorulanlar.' ),
 				'items' => array(
 					'label'  => 'Sorular',
 					'fields' => array(
@@ -337,7 +337,7 @@ return static function ( array $s ): array {
 			'label'      => 'İletişim',
 			'path'       => '/iletisim/',
 			'components' => array(
-				'head'    => $head( 'İletişim', 'Ölçü ve adedi yazın ya da arayın; size en kısa sürede dönelim.' ),
+				'head'    => $head( 'İletişim', $s['contact_lead'] ?? 'Ölçü ve adedi yazın ya da arayın; size en kısa sürede dönelim.' ),
 				'details' => array(
 					'label'  => 'İletişim Bilgileri',
 					'fields' => array(
@@ -354,8 +354,8 @@ return static function ( array $s ): array {
 					'label'  => 'Teklif Formu',
 					'fields' => array(
 						'title'         => $text( 'Form Başlığı', 'Teklif isteyin' ),
-						'note'          => $text( 'Form Açıklaması', 'Ürün, ölçü ve adet yeterli; fiyatla dönelim.', 'textarea' ),
-						'size_hint'     => $text( 'Ölçü Alanı İpucu', 'Örn. 5 × 10 cm, 4 m, 100 adet' ),
+						'note'          => $text( 'Form Açıklaması', $s['form_note'] ?? 'Ürün, ölçü ve adet yeterli; fiyatla dönelim.', 'textarea' ),
+						'size_hint'     => $text( 'Ölçü Alanı İpucu', $s['size_hint'] ?? 'Örn. 5 × 10 cm, 4 m, 100 adet' ),
 						'submit_label'  => $text( 'Gönder Düğmesi', 'Teklif isteğini gönder' ),
 						'privacy_note'  => $text( 'Gizlilik Notu', 'Bilgileriniz yalnızca teklifinizi hazırlamak için kullanılır.' ),
 						'success_title' => $text( 'Başarı Başlığı', 'Teklif isteğiniz bize ulaştı.' ),
