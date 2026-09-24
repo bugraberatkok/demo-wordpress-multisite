@@ -25,6 +25,12 @@ return array(
 /portfolio_category/*    410
 /author/*                410
 /ornek-sayfa/            410
+
+# Eski site haritalari (Yoast): Search Console'da kayitli olabilir
+/sitemap_index.xml       /wp-sitemap.xml
+/post-sitemap.xml        /wp-sitemap.xml
+/page-sitemap.xml        /wp-sitemap.xml
+/category-sitemap.xml    /wp-sitemap.xml
 TXT,
 
 	// sanayipalet.com: 87 eski adres; 8'i yeni sitede ayni, 51'i demo icerik.
@@ -66,6 +72,12 @@ TXT,
 
 # Kategori arsivi blog sayfasina
 /category/*              /blog/
+
+# Eski site haritalari (Yoast): Search Console'da kayitli olabilir
+/sitemap_index.xml       /wp-sitemap.xml
+/post-sitemap.xml        /wp-sitemap.xml
+/page-sitemap.xml        /wp-sitemap.xml
+/category-sitemap.xml    /wp-sitemap.xml
 TXT,
 
 	// ahsapkasa.com ve ahsapambalajsanayi.com: tek sayfalik eski site.

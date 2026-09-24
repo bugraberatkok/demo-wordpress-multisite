@@ -1010,6 +1010,25 @@ function nwcs_seo_robots( array $robots ): array {
 }
 
 /**
+ * Yazar arsivi yok: bu sitelerde yazar sayfasi kullanilmiyor, ?author=1 ise
+ * yonetici kullanici adini aciga cikarir (giris denemelerinin ilk adimi).
+ * Istek 404 olur; eski sitenin /author/ adresleri icin yonlendirme listesindeki
+ * 410 kurali boylece calisir (liste yalnizca bulunamayan adreste devreye girer).
+ */
+add_action( 'wp', 'nwcs_seo_no_author_archives' );
+function nwcs_seo_no_author_archives(): void {
+	global $wp_query;
+
+	if ( is_admin() || empty( nwcs_manifest()['pages'] ) || ! is_author() ) {
+		return;
+	}
+
+	$wp_query->set_404();
+	status_header( 404 );
+	nocache_headers();
+}
+
+/**
  * Site haritasindan kullanici listesi cikarilir: yonetici kullanici adini
  * herkese acik bir dosyada listelemek gereksiz bir guvenlik acigi. Kategori
  * ve etiket arsivleri de cikar: noindex olan adres site haritasinda olmaz.

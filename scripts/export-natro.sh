@@ -208,6 +208,20 @@ RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
 HT
 fi
+# Kullanilmayan kapilar kapali: xmlrpc (toplu parola denemesi), surum bilgisi
+# veren dosyalar. X-Frame-Options bilerek yok: panel, alan adina bagli siteyi
+# onizleme cercevesinde aciyor.
+cat >> "$OUT/htaccess.txt" <<'HT'
+# Guvenlik
+Options -Indexes
+RewriteEngine On
+RewriteRule ^([_0-9a-zA-Z-]+/)?(xmlrpc\.php|readme\.html|license\.txt|wp-config-sample\.php)$ - [F,L]
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+HT
 sed -n "/^# WordPress Multisite/,/^RewriteRule \. index.php \[L\]/p" scripts/install.sh >> "$OUT/htaccess.txt"
 grep -q "RewriteRule \. index.php" "$OUT/htaccess.txt" || { echo "HATA: .htaccess kurallari install.sh'ten okunamadi." >&2; exit 1; }
 
