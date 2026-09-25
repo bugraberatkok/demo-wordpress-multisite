@@ -5,6 +5,10 @@
  * Metin sutunu okunur genislikte (en fazla ~68 karakter); kapak gorseli
  * yoksa kategorisine gore temadaki fotograf. Altta ayni kategoriden, yoksa
  * en yeni yazilardan uc ilgili yazi.
+ *
+ * Ornek yazilarin baslik, kapak ve metni panelde de duzenlenir; onizlemede
+ * tiklaninca yazinin gizli panel sayfasi acilir (functions.php: Blog
+ * yazilari panelden).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -32,23 +36,23 @@ while ( have_posts() ) :
 					<?php endif; ?>
 				</nav>
 
-				<h1 class="k-post__title" <?php kocist_post_attr( $post_id, 'Yazı başlığı' ); ?>><?php the_title(); ?></h1>
+				<h1 class="k-post__title" <?php kocist_post_edit_attr( $post_id, 'title' ); ?>><?php the_title(); ?></h1>
 
 				<p class="k-post__meta">
 					<?php if ( $term ) : ?>
 						<a class="k-post-card__cat" href="<?php echo esc_url( get_category_link( $term ) ); ?>" <?php kocist_term_attr( $term ); ?>><?php echo esc_html( $term->name ); ?></a>
 					<?php endif; ?>
-					<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php kocist_post_attr( $post_id, 'Yayın tarihi' ); ?>><?php echo esc_html( kocist_post_date( $post_id ) ); ?></time>
+					<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( kocist_post_date( $post_id ) ); ?></time>
 				</p>
 			</div>
 		</header>
 
 		<div class="k-wrap">
-			<figure class="k-post__cover" <?php kocist_post_attr( $post_id, 'Öne çıkan görsel' ); ?>>
+			<figure class="k-post__cover" <?php kocist_post_edit_attr( $post_id, 'image' ); ?>>
 				<?php echo kocist_image_tag( $image, '', '' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 			</figure>
 
-			<div class="k-post__body" <?php kocist_post_attr( $post_id, 'Yazı metni' ); ?>>
+			<div class="k-post__body" <?php kocist_post_edit_attr( $post_id, 'body' ); ?>>
 				<?php the_content(); ?>
 			</div>
 
