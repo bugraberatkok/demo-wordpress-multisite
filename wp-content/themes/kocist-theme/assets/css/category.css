@@ -398,6 +398,16 @@
 .k-product__desc--rich p { margin: 0 0 .9em; }
 .k-product__desc--rich p:last-child { margin-bottom: 0; }
 
+/* Havuz urununun olcu/fiyat tablosu (kocist.com.tr'deki tablolar). Dar ekranda yana kayar;
+   izgara sutunu tabloya gore genislemesin diye min-width: 0. */
+.k-product--pool .k-product__info { min-width: 0; }
+.k-product__desc--rich .k-table-scroll { max-width: 100%; overflow-x: auto; margin: 1.1em 0 0; }
+.k-product__desc--rich table { border-collapse: collapse; font-size: .9rem; }
+.k-product__desc--rich th,
+.k-product__desc--rich td { padding: .5em .9em .5em 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.k-product__desc--rich th { white-space: nowrap; }
+.k-product__desc--rich th { font-weight: 700; }
+
 .k-related { padding-bottom: 10px; }
 
 .k-related__head {

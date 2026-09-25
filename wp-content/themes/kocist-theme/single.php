@@ -23,37 +23,37 @@ while ( have_posts() ) :
 		<header class="k-post__head">
 			<div class="k-wrap">
 				<nav class="k-post__crumb" aria-label="Konum">
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>">Ana Sayfa</a>
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" <?php nwcs_edit_attr( 'global', 'texts', 'home_crumb' ); ?>><?php echo esc_html( nwcs_field( 'global', 'texts', 'home_crumb' ) ); ?></a>
 					<span aria-hidden="true">/</span>
-					<a href="<?php echo esc_url( $blog_url ); ?>"><?php echo esc_html( nwcs_field( 'blog', 'page_head', 'title' ) ); ?></a>
+					<a href="<?php echo esc_url( $blog_url ); ?>" <?php nwcs_edit_attr( 'blog', 'page_head', 'title' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'page_head', 'title' ) ); ?></a>
 					<?php if ( $term ) : ?>
 						<span aria-hidden="true">/</span>
-						<a href="<?php echo esc_url( get_category_link( $term ) ); ?>"><?php echo esc_html( $term->name ); ?></a>
+						<a href="<?php echo esc_url( get_category_link( $term ) ); ?>" <?php kocist_term_attr( $term ); ?>><?php echo esc_html( $term->name ); ?></a>
 					<?php endif; ?>
 				</nav>
 
-				<h1 class="k-post__title"><?php the_title(); ?></h1>
+				<h1 class="k-post__title" <?php kocist_post_attr( $post_id, 'Yazı başlığı' ); ?>><?php the_title(); ?></h1>
 
 				<p class="k-post__meta">
 					<?php if ( $term ) : ?>
-						<a class="k-post-card__cat" href="<?php echo esc_url( get_category_link( $term ) ); ?>"><?php echo esc_html( $term->name ); ?></a>
+						<a class="k-post-card__cat" href="<?php echo esc_url( get_category_link( $term ) ); ?>" <?php kocist_term_attr( $term ); ?>><?php echo esc_html( $term->name ); ?></a>
 					<?php endif; ?>
-					<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( kocist_post_date( $post_id ) ); ?></time>
+					<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php kocist_post_attr( $post_id, 'Yayın tarihi' ); ?>><?php echo esc_html( kocist_post_date( $post_id ) ); ?></time>
 				</p>
 			</div>
 		</header>
 
 		<div class="k-wrap">
-			<figure class="k-post__cover">
+			<figure class="k-post__cover" <?php kocist_post_attr( $post_id, 'Öne çıkan görsel' ); ?>>
 				<?php echo kocist_image_tag( $image, '', '' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 			</figure>
 
-			<div class="k-post__body">
+			<div class="k-post__body" <?php kocist_post_attr( $post_id, 'Yazı metni' ); ?>>
 				<?php the_content(); ?>
 			</div>
 
 			<p class="k-post__back">
-				<a href="<?php echo esc_url( $blog_url ); ?>">
+				<a href="<?php echo esc_url( $blog_url ); ?>" <?php nwcs_edit_attr( 'blog', 'single', 'back_label' ); ?>>
 					<?php nwcs_the_icon( 'arrow', 'k-post__back-icon', 16 ); ?>
 					<?php echo esc_html( nwcs_field( 'blog', 'single', 'back_label' ) ); ?>
 				</a>
@@ -107,7 +107,7 @@ while ( have_posts() ) :
 		?>
 		<section class="k-section k-section--alt k-related" aria-labelledby="k-related-title">
 			<div class="k-wrap">
-				<h2 class="k-section-title" id="k-related-title"><?php echo esc_html( nwcs_field( 'blog', 'single', 'related_title' ) ); ?></h2>
+				<h2 class="k-section-title" id="k-related-title" <?php nwcs_edit_attr( 'blog', 'single', 'related_title' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'single', 'related_title' ) ); ?></h2>
 				<div class="k-post-grid">
 					<?php
 					while ( $related->have_posts() ) :

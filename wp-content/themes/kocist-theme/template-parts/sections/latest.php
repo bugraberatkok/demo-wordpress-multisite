@@ -6,29 +6,20 @@
  * kenarindan tasiyor, yarim gorunen son kart devami oldugunu belli ediyor.
  * Oklar, ilerleme cizgisi ve fareyle surukleme assets/js/latest.js'te.
  *
- * Kartlar panelde elle girilir; varsayilanlar test icerigidir.
+ * Kartlar merkezi Urun Havuzu'ndan gelir: bu siteye secilmis urunlerden
+ * havuza en son eklenenler. Kac kart gorunecegi panelden secilir.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$items      = nwcs_rows( 'home', 'latest', 'items' );
+$items      = kocist_home_products( 'latest', (int) nwcs_field( 'home', 'latest', 'count' ) ?: 8 );
 $link_label = nwcs_field( 'home', 'latest', 'link_label' );
+$quote_url  = kocist_link( '#teklif' );
+$groups     = kocist_catalog_groups();
 
 if ( ! $items ) {
 	return;
 }
-
-// Kart gorseli panelde secilmemisse temadaki ornek fotograflar (sirayla).
-$item_defaults = array(
-	'urun-1.jpg',
-	'ahsap-kamelya-3x3-zeminli.webp',
-	'ahsap-salincak-4-kisilik-oval-golgelikli.webp',
-	'playwood.webp',
-	's2-kereste.jpg',
-	's2-ambalaj.jpg',
-	'urun-2.jpg',
-	's2-hirdavat.jpg',
-);
 ?>
 <section class="k-section k-section--alt k-latest" id="yeni-urunler" data-nwcs-section="latest" aria-labelledby="k-latest-title">
 	<div class="k-wrap k-latest__head">
@@ -47,31 +38,33 @@ $item_defaults = array(
 		</div>
 	</div>
 
-	<ul class="k-latest__track" data-k-latest-track tabindex="0" aria-label="Son eklenen ürünler listesi" <?php nwcs_edit_attr( 'home', 'latest', 'items' ); ?>>
+	<ul class="k-latest__track" data-k-latest-track tabindex="0" aria-label="<?php echo esc_attr( nwcs_field( 'home', 'latest', 'title' ) ); ?>" <?php nwcs_edit_attr( 'home', 'latest', 'count' ); ?>>
 		<?php
-		foreach ( $items as $index => $item ) :
-			$title = (string) ( $item['title'] ?? '' );
-			$image = kocist_image_or_default( nwcs_image_by_id( (int) ( $item['image'] ?? 0 ), 'large' ), $item_defaults[ $index % count( $item_defaults ) ], $title );
+		foreach ( $items as $item ) :
+			$has_page = '' !== trim( (string) $item['body'] );
+			$kind_sub = $groups[ $item['group'] ]['subs'][ $item['sub'] ] ?? null;
+			$kind     = $kind_sub['name'] ?? ( $groups[ $item['group'] ]['name'] ?? '' );
+			$spec     = kocist_product_first_spec( $item );
 			?>
 			<li class="k-latest__item">
-				<a class="k-latest__card" href="<?php echo esc_url( kocist_link( $item['link_url'] ?? '', '/iletisim/' ) ); ?>" draggable="false" <?php nwcs_edit_attr( 'home', 'latest', 'items', $index, 'title' ); ?>>
-					<span class="k-latest__media">
-						<?php echo kocist_image_tag( $image, 'k-latest__img', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+				<a class="k-latest__card" href="<?php echo esc_url( $has_page ? $item['url'] : $quote_url ); ?>" draggable="false">
+					<span class="k-latest__media" <?php kocist_product_attr( $item, 'Görsel' ); ?>>
+						<?php echo kocist_image_tag( kocist_product_image( $item ), 'k-latest__img', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					</span>
 
 					<span class="k-latest__body">
-						<?php if ( ! empty( $item['category'] ) ) : ?>
-							<span class="k-latest__cat"><?php echo esc_html( $item['category'] ); ?></span>
+						<?php if ( '' !== $kind ) : ?>
+							<span class="k-latest__cat" <?php $kind_sub ? nwcs_edit_attr( 'global', $kind_sub['edit'][0], 'items', $kind_sub['edit'][1], 'label' ) : nwcs_edit_attr( 'global', 'header', 'menu', $groups[ $item['group'] ]['menu_row'], 'label' ); ?>><?php echo esc_html( $kind ); ?></span>
 						<?php endif; ?>
 
-						<span class="k-latest__title"><?php echo esc_html( $title ); ?></span>
+						<span class="k-latest__title" <?php nwcs_edit_attr( 'home', 'products', 'pool' ); ?>><?php echo esc_html( $item['title'] ); ?></span>
 
-						<?php if ( ! empty( $item['spec'] ) ) : ?>
-							<span class="k-latest__spec"><?php echo esc_html( $item['spec'] ); ?></span>
+						<?php if ( '' !== $spec ) : ?>
+							<span class="k-latest__spec" <?php kocist_product_attr( $item, 'Özellikler' ); ?>><?php echo esc_html( $spec ); ?></span>
 						<?php endif; ?>
 
 						<?php if ( $link_label ) : ?>
-							<span class="k-latest__cta"><?php echo esc_html( $link_label ); ?></span>
+							<span class="k-latest__cta" <?php nwcs_edit_attr( 'home', 'latest', 'link_label' ); ?>><?php echo esc_html( $link_label ); ?></span>
 						<?php endif; ?>
 					</span>
 				</a>

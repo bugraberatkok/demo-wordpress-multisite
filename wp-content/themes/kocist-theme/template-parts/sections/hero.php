@@ -52,6 +52,7 @@ if ( kocist_is_catalog_placeholder( $cta_url ) && kocist_catalog_groups() ) {
 					<div class="k-hero__brand">
 						<?php if ( ! empty( $brand['url'] ) ) : ?>
 							<img
+								<?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?>
 								class="k-hero__logo"
 								src="<?php echo esc_url( $brand['url'] ); ?>"
 								alt="<?php echo esc_attr( $brand['alt'] ); ?>"
@@ -100,7 +101,7 @@ if ( kocist_is_catalog_placeholder( $cta_url ) && kocist_catalog_groups() ) {
 											$slide_url = kocist_catalog_url_for_text( (string) ( $slide['title'] ?? '' ) ) ?: $slide_url;
 										}
 										?>
-										<a class="k-hero__btn" href="<?php echo esc_url( kocist_link( $slide_url, '/#katalog' ) ); ?>">
+										<a class="k-hero__btn" href="<?php echo esc_url( kocist_link( $slide_url, '/#katalog' ) ); ?>" <?php nwcs_edit_attr( 'home', 'hero', 'slides', $slide_index, 'cta_label' ); ?>>
 											<?php echo esc_html( $slide['cta_label'] ); ?>
 										</a>
 									<?php endif; ?>

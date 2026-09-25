@@ -47,10 +47,12 @@ if ( $group ) {
 	$pool = $sub ? kocist_catalog_products_in( $group['slug'], $sub['slug'] ) : array();
 
 	if ( count( $pool ) > 1 ) {
-		$related_head = sprintf( '%s kategorisinde diğer ürünler', $sub['name'] );
+		$related_key  = 'related_sub';
+		$related_head = kocist_text( 'product', 'detail', 'related_sub', array( 'kategori' => $sub['name'] ) );
 	} else {
 		$pool          = kocist_catalog_products_in( $group['slug'] );
-		$related_head  = sprintf( '%s grubunda diğer ürünler', $group['name'] );
+		$related_key   = 'related_group';
+		$related_head  = kocist_text( 'product', 'detail', 'related_group', array( 'grup' => $group['name'] ) );
 		$related_scope = $group;
 	}
 
@@ -64,14 +66,14 @@ if ( $group ) {
 get_header();
 ?>
 <div class="k-wrap k-product__crumbs">
-	<?php kocist_the_trail( kocist_catalog_trail( $product['group'] ?? '', $product['sub'] ?? '', $product['title'] ) ); ?>
+	<?php kocist_the_trail( kocist_catalog_trail( $product['group'] ?? '', $product['sub'] ?? '', $product['title'], (int) $product['id'] ) ); ?>
 </div>
 
 <section class="k-product k-product--pool">
 	<div class="k-wrap k-product__grid">
 
 		<div class="k-product__gallery" data-k-gallery>
-			<div class="k-product__stage">
+			<div class="k-product__stage" <?php kocist_product_attr( $product, 'Görseller' ); ?>>
 				<?php echo kocist_image_tag( $main, 'k-product__photo', 'Örnek görsel — ürün' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 
 				<?php if ( count( $images ) > 1 ) : ?>
@@ -114,38 +116,38 @@ get_header();
 		<div class="k-product__info">
 			<?php if ( $category ) : ?>
 				<p class="k-product__category">
-					<a href="<?php echo esc_url( $category['url'] ); ?>"><?php echo esc_html( $category['name'] ); ?></a>
+					<a href="<?php echo esc_url( $category['url'] ); ?>" <?php $sub ? nwcs_edit_attr( 'global', $sub['edit'][0], 'items', $sub['edit'][1], 'label' ) : nwcs_edit_attr( 'global', 'header', 'menu', $group['menu_row'], 'label' ); ?>><?php echo esc_html( $category['name'] ); ?></a>
 				</p>
 			<?php endif; ?>
 
-			<h1 class="k-product__title"><?php echo esc_html( $product['title'] ); ?></h1>
+			<h1 class="k-product__title" <?php kocist_product_attr( $product, 'Ürün adı' ); ?>><?php echo esc_html( $product['title'] ); ?></h1>
 
 			<?php if ( $product['short'] ) : ?>
-				<p class="k-product__subtitle"><?php echo esc_html( $product['short'] ); ?></p>
+				<p class="k-product__subtitle" <?php kocist_product_attr( $product, 'Kısa açıklama' ); ?>><?php echo esc_html( $product['short'] ); ?></p>
 			<?php endif; ?>
 
 			<div class="k-product__facts">
-				<span class="k-product__price<?php echo $product['has_price'] ? '' : ' is-quote'; ?>"><?php echo esc_html( $product['price_label'] ); ?></span>
+				<span class="k-product__price<?php echo $product['has_price'] ? '' : ' is-quote'; ?>" <?php kocist_product_attr( $product, 'Fiyat' ); ?>><?php echo esc_html( $product['price_label'] ); ?></span>
 				<?php if ( $product['spec'] ) : ?>
-					<span class="k-product__spec"><?php echo esc_html( $product['spec'] ); ?></span>
+					<span class="k-product__spec" <?php kocist_product_attr( $product, 'Özellikler' ); ?>><?php echo esc_html( $product['spec'] ); ?></span>
 				<?php endif; ?>
 			</div>
 
-			<div class="k-product__desc k-product__desc--rich"><?php echo wp_kses_post( wpautop( $product['body'] ) ); ?></div>
+			<div class="k-product__desc k-product__desc--rich" <?php kocist_product_attr( $product, 'Detay metni' ); ?>><?php echo wp_kses_post( wpautop( $product['body'] ) ); ?></div>
 
 			<div class="k-product__actions">
-				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'cta_url' ) ?: '#teklif' ) ); ?>">
+				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'cta_url' ) ?: '#teklif' ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'cta_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'cta_label' ) ?: 'Teklif Alın' ); ?>
 				</a>
 				<?php if ( nwcs_field( 'product', 'main', 'secondary_label' ) ) : ?>
-					<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'secondary_url' ) ) ); ?>">
+					<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'secondary_url' ) ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'secondary_label' ); ?>>
 						<?php echo esc_html( nwcs_field( 'product', 'main', 'secondary_label' ) ); ?>
 					</a>
 				<?php endif; ?>
 			</div>
 
 			<?php if ( nwcs_field( 'product', 'main', 'note' ) ) : ?>
-				<p class="k-product__note"><?php echo esc_html( nwcs_field( 'product', 'main', 'note' ) ); ?></p>
+				<p class="k-product__note" <?php nwcs_edit_attr( 'product', 'main', 'note' ); ?>><?php echo esc_html( nwcs_field( 'product', 'main', 'note' ) ); ?></p>
 			<?php endif; ?>
 		</div>
 	</div>
@@ -155,9 +157,9 @@ get_header();
 	<section class="k-section k-related">
 		<div class="k-wrap">
 			<div class="k-related__head">
-				<h2 class="k-related__title"><?php echo esc_html( $related_head ); ?></h2>
-				<a class="k-shelf__all" href="<?php echo esc_url( $related_scope['url'] ); ?>">
-					Tümünü gör
+				<h2 class="k-related__title" <?php nwcs_edit_attr( 'product', 'detail', $related_key ); ?>><?php echo esc_html( $related_head ); ?></h2>
+				<a class="k-shelf__all" href="<?php echo esc_url( $related_scope['url'] ); ?>" <?php nwcs_edit_attr( 'product', 'detail', 'see_all' ); ?>>
+					<?php echo esc_html( nwcs_field( 'product', 'detail', 'see_all' ) ); ?>
 					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
 						<path d="M3 8h9.5M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
 					</svg>
@@ -169,14 +171,18 @@ get_header();
 					<?php $has_page = '' !== trim( (string) $item['body'] ); ?>
 					<li class="k-pcard">
 						<a class="k-pcard__link" href="<?php echo esc_url( $has_page ? $item['url'] : kocist_link( '#teklif' ) ); ?>">
-							<span class="k-pcard__media">
+							<span class="k-pcard__media" <?php kocist_product_attr( $item, 'Görsel' ); ?>>
 								<?php echo kocist_image_tag( kocist_product_image( $item ), 'k-pcard__img', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 							</span>
 							<span class="k-pcard__body">
-								<span class="k-pcard__title"><?php echo esc_html( $item['title'] ); ?></span>
+								<span class="k-pcard__title" <?php kocist_product_attr( $item, 'Ürün adı' ); ?>><?php echo esc_html( $item['title'] ); ?></span>
 								<span class="k-pcard__foot">
-									<span class="k-pcard__price<?php echo $item['has_price'] ? '' : ' is-quote'; ?>"><?php echo esc_html( $item['price_label'] ); ?></span>
-									<span class="k-pcard__go"><?php echo esc_html( $has_page ? 'İncele' : 'Teklif iste' ); ?></span>
+									<?php if ( $item['has_price'] ) : ?>
+										<span class="k-pcard__price" <?php kocist_product_attr( $item, 'Fiyat' ); ?>><?php echo esc_html( $item['price_label'] ); ?></span>
+									<?php else : ?>
+										<span class="k-pcard__price is-quote" <?php nwcs_edit_attr( 'kategoriler', 'texts', 'price_quote' ); ?>><?php echo esc_html( nwcs_field( 'kategoriler', 'texts', 'price_quote' ) ); ?></span>
+									<?php endif; ?>
+									<span class="k-pcard__go" <?php nwcs_edit_attr( 'kategoriler', 'texts', $has_page ? 'go_detail' : 'go_quote' ); ?>><?php echo esc_html( nwcs_field( 'kategoriler', 'texts', $has_page ? 'go_detail' : 'go_quote' ) ); ?></span>
 								</span>
 							</span>
 						</a>

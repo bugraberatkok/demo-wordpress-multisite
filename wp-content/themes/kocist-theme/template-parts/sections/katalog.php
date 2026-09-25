@@ -82,7 +82,7 @@ $tabs = array(
 										<img class="k-cert__img" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $title ); ?>" loading="lazy" decoding="async" />
 									</span>
 									<?php if ( '' !== $title ) : ?>
-										<span class="k-cert__title"><?php echo esc_html( $title ); ?></span>
+										<span class="k-cert__title" <?php nwcs_edit_attr( 'katalog', 'certificates', 'items', $index, 'title' ); ?>><?php echo esc_html( $title ); ?></span>
 									<?php endif; ?>
 								</a>
 							<?php else : ?>
@@ -92,7 +92,7 @@ $tabs = array(
 										<?php echo kocist_placeholder( 'k-cert__ph', $title ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 									</span>
 									<?php if ( '' !== $title ) : ?>
-										<span class="k-cert__title"><?php echo esc_html( $title ); ?></span>
+										<span class="k-cert__title" <?php nwcs_edit_attr( 'katalog', 'certificates', 'items', $index, 'title' ); ?>><?php echo esc_html( $title ); ?></span>
 									<?php endif; ?>
 								</div>
 							<?php endif; ?>
@@ -100,7 +100,7 @@ $tabs = array(
 					<?php endforeach; ?>
 				</ul>
 			<?php else : ?>
-				<p class="k-katalog__empty">Henüz sertifika eklenmedi.</p>
+				<p class="k-katalog__empty" <?php nwcs_edit_attr( 'katalog', 'certificates', 'empty_text' ); ?>><?php echo esc_html( nwcs_field( 'katalog', 'certificates', 'empty_text' ) ); ?></p>
 			<?php endif; ?>
 		</div>
 
@@ -125,7 +125,7 @@ $tabs = array(
 							continue;
 						}
 
-						$ext  = '' !== $file['ext'] ? strtoupper( $file['ext'] ) : 'DOSYA';
+						$ext  = '' !== $file['ext'] ? strtoupper( $file['ext'] ) : nwcs_field( 'katalog', 'documents', 'file_label' );
 						$size = $file['path'] ? size_format( (int) filesize( $file['path'] ), 1 ) : '';
 						?>
 						<li class="k-docs__item">
@@ -151,8 +151,8 @@ $tabs = array(
 									</span>
 								</span>
 
-								<span class="k-doc__action">
-									Aç
+								<span class="k-doc__action" <?php nwcs_edit_attr( 'katalog', 'documents', 'open_label' ); ?>>
+									<?php echo esc_html( nwcs_field( 'katalog', 'documents', 'open_label' ) ); ?>
 									<span class="screen-reader-text">(yeni sekmede açılır)</span>
 								</span>
 							</a>
@@ -160,7 +160,7 @@ $tabs = array(
 					<?php endforeach; ?>
 				</ul>
 			<?php else : ?>
-				<p class="k-katalog__empty">Henüz belge eklenmedi.</p>
+				<p class="k-katalog__empty" <?php nwcs_edit_attr( 'katalog', 'documents', 'empty_text' ); ?>><?php echo esc_html( nwcs_field( 'katalog', 'documents', 'empty_text' ) ); ?></p>
 			<?php endif; ?>
 		</div>
 	</div>

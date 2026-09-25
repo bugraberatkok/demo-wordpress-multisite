@@ -10,8 +10,17 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! function_exists( 'nwcs_field' ) ) {
+	// Eklenti kapaliyken metinler manifestteki varsayilanlardan gelir.
 	function nwcs_field( $page, $component, $field, $fallback = null ) {
-		return null === $fallback ? '' : $fallback;
+		static $manifest = null;
+
+		if ( null === $manifest ) {
+			$manifest = include __DIR__ . '/content-manifest.php';
+		}
+
+		$default = $manifest['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? null;
+
+		return is_scalar( $default ) ? $default : ( null === $fallback ? '' : $fallback );
 	}
 	function nwcs_rows( $page, $component, $field ) {
 		return array();
@@ -420,7 +429,7 @@ function kocist_menu_items(): array {
 		}
 
 		if ( '' !== $submenu ) {
-			foreach ( nwcs_rows( 'global', $submenu, 'items' ) as $child ) {
+			foreach ( nwcs_rows( 'global', $submenu, 'items' ) as $child_index => $child ) {
 				$child_label = trim( (string) ( $child['label'] ?? '' ) );
 
 				if ( '' === $child_label ) {
@@ -436,6 +445,8 @@ function kocist_menu_items(): array {
 				$children[] = array(
 					'label' => $child_label,
 					'url'   => $child_url,
+					// Panelde hangi satir (onizlemede tiklaninca o satir acilir).
+					'edit'  => array( $submenu, (int) $child_index ),
 				);
 			}
 		}
@@ -445,6 +456,7 @@ function kocist_menu_items(): array {
 			'url'      => $url,
 			'children' => $children,
 			'group'    => $group,
+			'submenu'  => $submenu,
 		);
 	}
 
@@ -866,6 +878,83 @@ function kocist_paragraphs( $text, string $class = '' ): string {
 }
 
 /**
+ * Panelde duzenlenen, icinde {degisken} gecen metin (orn. "{urun} ürün
+ * listeleniyor"). Degiskenler sablondan gelir; panelde metnin yalnizca
+ * kalanı degisir.
+ *
+ * @param array<string, string|int> $vars Degisken adi => deger.
+ */
+function kocist_text( string $page, string $component, string $field, array $vars = array() ): string {
+	$text = (string) nwcs_field( $page, $component, $field );
+	$map  = array();
+
+	foreach ( $vars as $key => $value ) {
+		$map[ '{' . $key . '}' ] = (string) $value;
+	}
+
+	return trim( strtr( $text, $map ) );
+}
+
+/**
+ * Havuz urununun ozelligi (ad, kod, aciklama, gorsel...): panel onizlemesinde
+ * "Ürüne ait özellik" olarak isaretlenir, tiklaninca Urun Havuzu'nda urun acilir.
+ */
+function kocist_product_attr( array $product, string $label ): void {
+	if ( function_exists( 'nwcs_product_attr' ) && ! empty( $product['id'] ) ) {
+		nwcs_product_attr( (int) $product['id'], $label );
+	}
+}
+
+/**
+ * Blog yazisinin basligi, ozeti, gorseli: onizlemede yazinin duzenleme ekrani.
+ */
+function kocist_post_attr( int $post_id, string $label = 'Blog yazısı' ): void {
+	if ( function_exists( 'nwcs_post_attr' ) ) {
+		nwcs_post_attr( $post_id, $label );
+	}
+}
+
+/**
+ * Blog kategorisinin adi: onizlemede kategorinin duzenleme ekrani.
+ */
+function kocist_term_attr( $term ): void {
+	if ( $term instanceof WP_Term && function_exists( 'nwcs_source_attr' ) && function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) {
+		nwcs_source_attr( 'admin', admin_url( 'term.php?taxonomy=' . $term->taxonomy . '&tag_ID=' . $term->term_id ), 'Blog kategorisi' );
+	}
+}
+
+/**
+ * Ana sayfa seritleri icin sinirli urun listesi.
+ *
+ * 'latest' en son havuza eklenenler (kimlik buyukten kucuge), 'featured'
+ * panelde bu site icin belirlenen siranin ilk N urunu.
+ */
+function kocist_home_products( string $which, int $count ): array {
+	$products = function_exists( 'kocist_catalog_products' ) ? kocist_catalog_products() : array();
+
+	if ( 'latest' === $which ) {
+		usort( $products, static fn( array $a, array $b ): int => (int) $b['id'] <=> (int) $a['id'] );
+	}
+
+	return array_slice( $products, 0, max( 1, $count ) );
+}
+
+/**
+ * Urunun ozellik metninden ilk satir (kart alti kisa bilgi): "Ölçü: 5×10 cm; ..." -> "5×10 cm".
+ */
+function kocist_product_first_spec( array $product ): string {
+	$first = trim( (string) strtok( (string) ( $product['spec'] ?? '' ), ";\n" ) );
+
+	if ( '' === $first ) {
+		return '';
+	}
+
+	$parts = explode( ':', $first, 2 );
+
+	return trim( $parts[1] ?? $parts[0] );
+}
+
+/**
  * Gorsel alani icin img etiketi; deger yoksa isaretli yer tutucu.
  */
 function kocist_image_tag( array $image, string $class = '', string $placeholder = 'Örnek görsel' ): string {
@@ -910,7 +999,9 @@ function kocist_placeholder( string $class = '', string $label = '' ): string {
 		$rings .= '<polygon points="' . implode( ' ', $points ) . '" />';
 	}
 
-	$label = '' !== trim( $label ) && ! kocist_is_placeholder_image( array( 'alt' => $label ) ) ? 'Görsel yakında: ' . $label : 'Görsel yakında';
+	$soon  = (string) nwcs_field( 'global', 'texts', 'image_soon' );
+	$soon  = '' !== trim( $soon ) ? $soon : 'Görsel yakında';
+	$label = '' !== trim( $label ) && ! kocist_is_placeholder_image( array( 'alt' => $label ) ) ? $soon . ': ' . $label : $soon;
 
 	return sprintf(
 		'<div class="k-placeholder %1$s" role="img" aria-label="%2$s">'
@@ -921,11 +1012,12 @@ function kocist_placeholder( string $class = '', string $label = '' ): string {
 					. '<circle cx="12" cy="12.8" r="3.3" />'
 				. '</svg>'
 			. '</span>'
-			. '<span class="k-placeholder__text" aria-hidden="true">Görsel yakında</span>'
+			. '<span class="k-placeholder__text" aria-hidden="true">%4$s</span>'
 		. '</div>',
 		esc_attr( $class ),
 		esc_attr( $label ),
-		$rings
+		$rings,
+		esc_html( $soon )
 	);
 }
 

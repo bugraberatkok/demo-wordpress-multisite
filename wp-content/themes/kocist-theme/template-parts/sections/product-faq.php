@@ -17,7 +17,7 @@ if ( ! $items ) {
 ?>
 <section class="k-faq" data-nwcs-section="faq">
 	<div class="k-wrap">
-		<h2 class="k-faq__title"><?php echo esc_html( nwcs_field( 'product', 'faq', 'title' ) ); ?></h2>
+		<h2 class="k-faq__title" <?php nwcs_edit_attr( 'product', 'faq', 'title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'faq', 'title' ) ); ?></h2>
 
 		<div class="k-faq__list" data-k-faq>
 			<?php foreach ( $items as $faq_index => $item ) : ?>
@@ -31,7 +31,7 @@ if ( ! $items ) {
 							aria-expanded="false"
 							aria-controls="<?php echo esc_attr( $faq_id ); ?>"
 						>
-							<span><?php echo esc_html( $item['question'] ?? '' ); ?></span>
+							<span <?php nwcs_edit_attr( 'product', 'faq', 'items', (int) $faq_index, 'question' ); ?>><?php echo esc_html( $item['question'] ?? '' ); ?></span>
 							<svg class="k-faq__chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
 								<path d="M4 6.5 8 10.5l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
 							</svg>
@@ -40,7 +40,7 @@ if ( ! $items ) {
 
 					<div class="k-faq__panel" id="<?php echo esc_attr( $faq_id ); ?>">
 						<div class="k-faq__answer">
-							<p><?php echo esc_html( $item['answer'] ?? '' ); ?></p>
+							<p <?php nwcs_edit_attr( 'product', 'faq', 'items', (int) $faq_index, 'answer' ); ?>><?php echo esc_html( $item['answer'] ?? '' ); ?></p>
 						</div>
 					</div>
 				</div>

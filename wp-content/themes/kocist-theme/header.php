@@ -146,14 +146,14 @@ foreach ( $menu as $menu_index => $menu_item ) {
 								<ul class="k-dropdown__list">
 									<?php if ( ! empty( $item['group'] ) ) : ?>
 										<li class="k-dropdown__item">
-											<a class="k-dropdown__link k-dropdown__link--all" href="<?php echo esc_url( $item['group']['url'] ); ?>">
-												Tüm <?php echo esc_html( $item['group']['name'] ); ?> ürünleri
+											<a class="k-dropdown__link k-dropdown__link--all" href="<?php echo esc_url( $item['group']['url'] ); ?>" <?php nwcs_edit_attr( 'kategoriler', 'texts', 'group_all' ); ?>>
+												<?php echo esc_html( kocist_text( 'kategoriler', 'texts', 'group_all', array( 'grup' => $item['group']['name'] ) ) ); ?>
 											</a>
 										</li>
 									<?php endif; ?>
 									<?php foreach ( $children as $child ) : ?>
 										<li class="k-dropdown__item">
-											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $item['url'] ) ); ?>">
+											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $item['url'] ) ); ?>" <?php nwcs_edit_attr( 'global', $child['edit'][0], 'items', $child['edit'][1], 'label' ); ?>>
 												<?php echo esc_html( $child['label'] ); ?>
 											</a>
 										</li>
@@ -185,8 +185,8 @@ foreach ( $menu as $menu_index => $menu_item ) {
 								?>
 								<?php if ( $pane_group ) : ?>
 									<a class="k-dropdown__head" href="<?php echo esc_url( $pane_group['url'] ); ?>">
-										<span class="k-dropdown__head-title">Tüm <?php echo esc_html( $pane_group['name'] ); ?> ürünleri</span>
-										<span class="k-dropdown__head-meta"><?php echo esc_html( sprintf( '%d kategori', count( $pane_group['subs'] ) ) ); ?></span>
+										<span class="k-dropdown__head-title" <?php nwcs_edit_attr( 'kategoriler', 'texts', 'group_all' ); ?>><?php echo esc_html( kocist_text( 'kategoriler', 'texts', 'group_all', array( 'grup' => $pane_group['name'] ) ) ); ?></span>
+										<span class="k-dropdown__head-meta" <?php nwcs_edit_attr( 'kategoriler', 'texts', 'meta_subs' ); ?>><?php echo esc_html( kocist_text( 'kategoriler', 'texts', 'meta_subs', array( 'kategori' => count( $pane_group['subs'] ) ) ) ); ?></span>
 										<svg class="k-dropdown__head-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
 											<path d="M3 8h9.5M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
 										</svg>
@@ -203,6 +203,7 @@ foreach ( $menu as $menu_index => $menu_item ) {
 												class="k-dropdown__link<?php echo kocist_is_current_menu_item( $child_href ) ? ' is-current' : ''; ?>"
 												href="<?php echo esc_url( $child_href ); ?>"
 												<?php echo kocist_is_current_menu_item( $child_href ) ? 'aria-current="page"' : ''; ?>
+												<?php nwcs_edit_attr( 'global', $child['edit'][0], 'items', $child['edit'][1], 'label' ); ?>
 											>
 												<?php echo esc_html( $child['label'] ); ?>
 											</a>

@@ -6,12 +6,13 @@
  * ise panelden bu site icin secilen tekil urunleri.
  *
  * Kartlar merkezi urun havuzundan gelir; bu sitenin secimi ve istisnalari
- * panelden yonetilir. Fiyat bos ise "Teklif al" gorunur.
+ * panelden yonetilir. Burada panelde belirlenen siranin ilk N urunu gorunur
+ * (N panelden); tamami kategori sayfalarinda. Fiyat bos ise "Teklif al".
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$items     = function_exists( 'nwcs_site_products' ) ? nwcs_site_products() : array();
+$items     = kocist_home_products( 'featured', (int) nwcs_field( 'home', 'products', 'count' ) ?: 8 );
 $cta_label = nwcs_field( 'home', 'products', 'cta_label' );
 
 // Ziyaretci bos bir bolum gormesin; bos uyarisi yalnizca panel onizlemesinde.
@@ -29,20 +30,20 @@ if ( ! $items && ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() )
 		<div class="k-catalog" <?php nwcs_edit_attr( 'home', 'products', 'pool' ); ?>>
 			<?php foreach ( $items as $item ) : ?>
 				<article class="k-cat">
-					<div class="k-cat__media">
+					<div class="k-cat__media" <?php kocist_product_attr( $item, 'Görsel' ); ?>>
 						<?php echo kocist_image_tag( kocist_product_image( $item ), '', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					</div>
 					<div class="k-cat__body">
-						<h3 class="k-cat__title"><?php echo esc_html( $item['title'] ); ?></h3>
+						<h3 class="k-cat__title" <?php nwcs_edit_attr( 'home', 'products', 'pool' ); ?>><?php echo esc_html( $item['title'] ); ?></h3>
 
-						<span class="k-cat__price<?php echo $item['has_price'] ? '' : ' is-quote'; ?>">
+						<span class="k-cat__price<?php echo $item['has_price'] ? '' : ' is-quote'; ?>" <?php nwcs_edit_attr( 'home', 'products', 'pool' ); ?>>
 							<?php echo esc_html( $item['price_label'] ); ?>
 						</span>
 
-						<p class="k-cat__text"><?php echo esc_html( $item['short'] ); ?></p>
+						<p class="k-cat__text" <?php kocist_product_attr( $item, 'Kısa açıklama' ); ?>><?php echo esc_html( $item['short'] ); ?></p>
 
-						<a class="k-cat__link" href="<?php echo esc_url( $item['body'] ? $item['url'] : kocist_link( '#teklif' ) ); ?>">
-							<?php echo esc_html( $item['body'] ? 'Ürün detayı' : $cta_label ); ?>
+						<a class="k-cat__link" href="<?php echo esc_url( $item['body'] ? $item['url'] : kocist_link( '#teklif' ) ); ?>" <?php nwcs_edit_attr( 'home', 'products', $item['body'] ? 'detail_label' : 'cta_label' ); ?>>
+							<?php echo esc_html( $item['body'] ? nwcs_field( 'home', 'products', 'detail_label' ) : $cta_label ); ?>
 							<?php nwcs_the_icon( 'arrow', 'k-icon', 16 ); ?>
 						</a>
 					</div>
@@ -50,7 +51,7 @@ if ( ! $items && ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() )
 			<?php endforeach; ?>
 
 			<?php if ( ! $items ) : ?>
-				<p class="k-section-sub">Bu site için henüz ürün seçilmedi.</p>
+				<p class="k-section-sub" <?php nwcs_edit_attr( 'home', 'products', 'empty_text' ); ?>><?php echo esc_html( nwcs_field( 'home', 'products', 'empty_text' ) ); ?></p>
 			<?php endif; ?>
 		</div>
 
@@ -62,7 +63,7 @@ if ( ! $items && ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() )
 		if ( $items && function_exists( 'kocist_catalog_groups' ) && kocist_catalog_groups() ) :
 			?>
 			<p class="k-section-more">
-				<a class="k-btn k-btn--dark" href="<?php echo esc_url( home_url( '/kategoriler/' ) ); ?>">Tüm ürünler</a>
+				<a class="k-btn k-btn--dark" href="<?php echo esc_url( home_url( '/kategoriler/' ) ); ?>" <?php nwcs_edit_attr( 'home', 'products', 'all_label' ); ?>><?php echo esc_html( nwcs_field( 'home', 'products', 'all_label' ) ); ?></a>
 			</p>
 		<?php endif; ?>
 	</div>

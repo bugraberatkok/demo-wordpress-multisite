@@ -52,7 +52,7 @@ $item_defaults = array( 's2-kereste.jpg', 's2-ambalaj.jpg', 's2-dekorasyon.jpg',
 						<span class="k-group__rule" aria-hidden="true"></span>
 
 						<?php if ( ! empty( $item['link_label'] ) ) : ?>
-							<span class="k-group__btn"><?php echo esc_html( $item['link_label'] ); ?></span>
+							<span class="k-group__btn" <?php nwcs_edit_attr( 'home', 'catalog', 'items', $index, 'link_label' ); ?>><?php echo esc_html( $item['link_label'] ); ?></span>
 						<?php endif; ?>
 					</span>
 				</a>

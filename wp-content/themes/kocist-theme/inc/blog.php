@@ -189,20 +189,20 @@ function kocist_post_card( string $heading = 'h2' ): void {
 	$tag   = in_array( $heading, array( 'h2', 'h3' ), true ) ? $heading : 'h2';
 	?>
 	<article class="k-post-card">
-		<a class="k-post-card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true">
+		<a class="k-post-card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true" <?php kocist_post_attr( (int) get_the_ID(), 'Öne çıkan görsel' ); ?>>
 			<?php echo kocist_image_tag( $image, '', '' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</a>
 		<div class="k-post-card__body">
 			<p class="k-post-card__meta">
 				<?php if ( $term ) : ?>
-					<span class="k-post-card__cat"><?php echo esc_html( $term->name ); ?></span>
+					<span class="k-post-card__cat" <?php kocist_term_attr( $term ); ?>><?php echo esc_html( $term->name ); ?></span>
 				<?php endif; ?>
-				<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( kocist_post_date() ); ?></time>
+				<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php kocist_post_attr( (int) get_the_ID(), 'Yayın tarihi' ); ?>><?php echo esc_html( kocist_post_date() ); ?></time>
 			</p>
-			<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit liste. ?> class="k-post-card__title">
+			<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit liste. ?> class="k-post-card__title" <?php kocist_post_attr( (int) get_the_ID(), 'Yazı başlığı' ); ?>>
 				<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
 			</<?php echo $tag; // phpcs:ignore WordPress.Security.EscapingOutput ?>>
-			<p class="k-post-card__excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 26, '…' ) ); ?></p>
+			<p class="k-post-card__excerpt" <?php kocist_post_attr( (int) get_the_ID(), 'Yazı özeti' ); ?>><?php echo esc_html( wp_trim_words( get_the_excerpt(), 26, '…' ) ); ?></p>
 		</div>
 	</article>
 	<?php

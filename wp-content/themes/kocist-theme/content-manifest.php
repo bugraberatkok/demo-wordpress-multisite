@@ -5,12 +5,159 @@
  * Bu dosya saf bir dizi dondurur; hicbir WordPress fonksiyonuna bagimli degildir.
  * Boylece ag paneli, siteye gecmeden dosya sisteminden okuyabilir.
  *
- * Alan turleri: text, textarea, url, image, icon, repeater
+ * Alan turleri: text, textarea, url, image, icon, repeater, products
  */
+
+/*
+ * Urun kategorileri (/kategoriler/<grup>/<kategori>/). Anahtarlar menudeki
+ * capalarla aynidir (#ahsap-kalas); menude ad degisse de sayfa adresi degismez.
+ *
+ * Her satir: array( sayfa etiketi, Urun Havuzu'ndaki kategori adi, [ek adlar] ).
+ * Havuz kategorisindeki urunler o sayfada listelenir ve panelde o sayfanin
+ * "Ürünler" listesinden secilir. Ek adlar: baska sitenin kategorisindeki ortak
+ * urunler de bu sayfada gorunur (orn. WOOD KOCIST'in WOODPets urunleri); onlar
+ * ana sayfadaki urun listesinden secilir. Havuz adi bos ise yalnizca metin.
+ *
+ * Havuz ortaktir: WOOD KOCIST'in urunleri (kamelya, cardak...) burada kendi
+ * havuz kategorileriyle eslenir; o urunlere Kocist icin yeni kategori
+ * eklenmez (WOOD KOCIST menusunu degistirirdi).
+ */
+$kocist_catalog = array(
+	'kereste'    => array(
+		'label' => 'Kereste',
+		'pool'  => 'Kereste',
+		'subs'  => array(
+			'ahsap-kalas'               => array( 'Ahşap Kalas', 'Ahşap Kalas' ),
+			'ahsap-cita'                => array( 'Ahşap Çıta', 'Ahşap Çıta' ),
+			'ahsap-rabita'              => array( 'Ahşap Rabıta', 'Ahşap Rabıta' ),
+			'osb-plaka-levha'           => array( 'OSB Plaka Levha', 'OSB Plaka Levha' ),
+			'kontrplak-levha'           => array( 'Kontrplak Levha', 'Kontrplak Levha' ),
+			'plywood-levha'             => array( 'Plywood Levha', 'Plywood Levha' ),
+			'maden-diregi-kereste'      => array( 'Maden Direği Kereste', 'Maden Direği Kereste' ),
+			'ahsap-takoz'               => array( 'Ahşap Takoz', 'Ahşap Takoz' ),
+			'insaatlik-catilik-kereste' => array( 'İnşaatlık & Çatılık Kereste', 'İnşaatlık ve Çatılık Kereste' ),
+		),
+	),
+	'ambalaj'    => array(
+		'label' => 'Ambalaj',
+		'pool'  => 'Ahşap Ambalaj',
+		'subs'  => array(
+			'ahsap-palet'        => array( 'Ahşap Palet', 'Ahşap Palet' ),
+			'ahsap-sandik'       => array( 'Ahşap Sandık', 'Ahşap Sandık' ),
+			'ahsap-kafes'        => array( 'Ahşap Kafes', 'Ahşap Kafes' ),
+			'triplex-bariyer'    => array( 'Triplex Bariyer', 'Triplex Bariyer' ),
+			'cam-tasima-sehpasi' => array( 'Cam Taşıma Sehpası', 'Cam Taşıma Sehpası' ),
+		),
+	),
+	'dekorasyon' => array(
+		'label' => 'Dekorasyon',
+		'pool'  => 'Dekorasyon',
+		'subs'  => array(
+			'ahsap-ev'            => array( 'Ahşap Ev', 'Ahşap Ev' ),
+			'kamelya'             => array( 'Kamelya', 'Kamelyalar' ),
+			'cardak'              => array( 'Çardak', 'Çardaklar' ),
+			'ahsap-bank'          => array( 'Ahşap Bank', 'Ahşap Bank', array( 'Piknik Masaları' ) ),
+			'saksi-sebze-yatagi'  => array( 'Saksı & Sebze Yatağı', 'Saksı ve Sebze Yatağı' ),
+			'ahsap-salincak'      => array( 'Ahşap Salıncak', 'Ahşap Salıncak' ),
+			'ahsap-pergola'       => array( 'Ahşap Pergola', 'Ahşap Pergola' ),
+			'ahsap-sezlong'       => array( 'Ahşap Şezlong', 'Şezlonglar' ),
+			'ahsap-tahterevalli'  => array( 'Ahşap Tahterevalli', 'Ahşap Tahterevalli' ),
+			'ahsap-yatak'         => array( 'Ahşap Yatak', 'Ahşap Yatak' ),
+			'ahsap-ayak-alti'     => array( 'Ahşap Ayak Altı', 'Ahşap Ayak Altı' ),
+			'hayvan-barinaklari'  => array( 'Hayvan Barınakları', 'Hayvan Barınakları', array( 'WOODPets', 'Köpek Kulübeleri', 'Kedi Yuvaları' ) ),
+			'adirondack-sandalye' => array( 'Adirondack Sandalye', 'Adirondack' ),
+			'celik-yapi'          => array( 'Çelik Yapı', 'Çelik Yapı' ),
+		),
+	),
+	'hirdavat'   => array(
+		'label' => 'Hırdavat',
+		'pool'  => 'Hırdavat',
+		'subs'  => array(
+			'civiler'                   => array( 'Çiviler', 'Çiviler' ),
+			'zimba-telleri'             => array( 'Zımba Telleri', 'Zımba Telleri' ),
+			'klipsler'                  => array( 'Klipsler', 'Klipsler' ),
+			'baglama-telleri'           => array( 'Bağlama Telleri', 'Bağlama Telleri' ),
+			'civi-tabancalari'          => array( 'Zımba & Çivi Tabancaları', 'Zımba ve Çivi Tabancaları' ),
+			'sartlandiricilar'          => array( 'Şartlandırıcılar', 'Şartlandırıcılar' ),
+			'kompresorler'              => array( 'Kompresörler', 'Kompresörler' ),
+			'somun-sokme-aletleri'      => array( 'Somun Sökme Aletleri', 'Somun Sökme Aletleri' ),
+			'yuzey-gelistirme-diskleri' => array( 'Yüzey Geliştirme Diskleri', 'Yüzey Geliştirme Diskleri' ),
+			'maket-bicagi'              => array( 'Maket Bıçağı', 'Maket Bıçağı' ),
+			'kulplar'                   => array( 'Kulplar', 'Kulplar' ),
+			'menteseler'                => array( 'Menteşeler', 'Menteşeler' ),
+			'surguler'                  => array( 'Sürgüler', 'Sürgüler' ),
+			'gonyeler'                  => array( 'Gönyeler', 'Gönyeler' ),
+			'aski-sabitleme'            => array( 'Askı & Sabitleme', 'Askı ve Sabitleme Elemanları' ),
+			'vida-grubu'                => array( 'Vida Grubu', 'Vida Grubu' ),
+			'civata-grubu'              => array( 'Civata Grubu', 'Civata Grubu' ),
+			'mandallar'                 => array( 'Mandallar', 'Mandallar' ),
+			'pergola-ayaklari'          => array( 'Pergola Ayakları', 'Pergola Ayakları' ),
+			'matkap-uclari'             => array( 'Matkap & Tornavida Uçları', 'Matkap ve Tornavida Uçları' ),
+			'purmuzler'                 => array( 'Pürmüzler', 'Pürmüzler' ),
+			'shingle-cati'              => array( 'Shingle Çatı', 'Shingle Çatı Kaplamaları' ),
+			'likit-membran'             => array( 'Likit Membran', 'Likit Membran' ),
+			'su-yalitim-membranlari'    => array( 'Su Yalıtım Membranları', 'Su Yalıtım Membranları' ),
+		),
+	),
+);
+
+/*
+ * Her grup ve kategori icin panelde gizli bir sayfa: sekme listesinde
+ * gorunmez, onizlemede kategori sayfasinda tiklaninca acilir. Ortak metinler
+ * gorunur "Kategoriler" sekmesindedir.
+ */
+$kocist_category_pages = array();
+
+$kocist_category_page = static function ( string $label, string $path, string $group, string $sub, string $pool, array $aliases = array() ): array {
+	$components = array(
+		'head' => array(
+			'label'  => 'Sayfa Başlığı',
+			'fields' => array(
+				'lead' => array(
+					'label'   => 'Alt Metin',
+					'type'    => 'textarea',
+					'default' => '',
+					'hint'    => 'Boş bırakılırsa Kategoriler sekmesindeki ortak metin görünür. Sayfa başlığı menüdeki addır.',
+				),
+			),
+		),
+	);
+
+	if ( '' !== $pool ) {
+		$components['products'] = array(
+			'label'  => 'Ürünler',
+			'fields' => array(
+				'pool' => array(
+					'label'    => 'Bu sayfadaki ürünler (Ürün Havuzu: ' . $pool . ')',
+					'type'     => 'products',
+					'category' => $pool,
+				),
+			),
+		);
+	}
+
+	return array(
+		'label'      => $label,
+		'path'       => $path,
+		'hidden'     => true,
+		'catalog'    => array( 'group' => $group, 'sub' => $sub, 'aliases' => $aliases ),
+		'components' => $components,
+	);
+};
+
+foreach ( $kocist_catalog as $kocist_group => $kocist_row ) {
+	$kocist_category_pages[ 'grp-' . $kocist_group ] = $kocist_category_page( 'Grup: ' . $kocist_row['label'], '/kategoriler/' . $kocist_group . '/', $kocist_group, '', $kocist_row['pool'] );
+
+	foreach ( $kocist_row['subs'] as $kocist_sub => $kocist_sub_row ) {
+		$kocist_category_pages[ 'kat-' . $kocist_sub ] = $kocist_category_page( 'Kategori: ' . $kocist_sub_row[0], '/kategoriler/' . $kocist_group . '/' . $kocist_sub . '/', $kocist_group, $kocist_sub, $kocist_sub_row[1], $kocist_sub_row[2] ?? array() );
+	}
+}
 
 return array(
 	'site_key'   => 'kocist',
 	'site_label' => 'Koçist',
+	// Havuz urun sayfalarinin (/urun/<urun>/) ortak metinleri bu panel sayfasinda.
+	'product_page' => 'product',
 	// SEO ve GEO firma bilgisi (Network Content Studio). Degerler bu sitenin
 	// kendi sayfalarinda yazanlardir; panelin SEO ve GEO sekmesinden duzeltilir.
 	'seo_site_defaults' => array(
@@ -173,7 +320,7 @@ return array(
 								array( 'label' => 'Ahşap Tahterevalli', 'url' => '#ahsap-tahterevalli' ),
 								array( 'label' => 'Ahşap Yatak', 'url' => '#ahsap-yatak' ),
 								array( 'label' => 'Ahşap Ayak Altı', 'url' => '#ahsap-ayak-alti' ),
-								array( 'label' => 'Hayvan Barınakları', 'url' => '/urun/' ),
+								array( 'label' => 'Hayvan Barınakları', 'url' => '#hayvan-barinaklari' ),
 								array( 'label' => 'Adirondack Sandalye', 'url' => '#adirondack-sandalye' ),
 								array( 'label' => 'Çelik Yapı', 'url' => '#celik-yapi' ),
 							),
@@ -240,6 +387,17 @@ return array(
 								array( 'label' => 'Blog – Haberler', 'url' => '/blog/' ),
 							),
 						),
+					),
+				),
+
+				/*
+				 * Sitenin her yerinde gecen kisa metinler.
+				 */
+				'texts' => array(
+					'label'  => 'Ortak Metinler',
+					'fields' => array(
+						'image_soon' => array( 'label' => 'Görseli Olmayan Alandaki Yazı', 'type' => 'text', 'default' => 'Görsel yakında' ),
+						'home_crumb' => array( 'label' => 'Yol Göstergesi: Ana Sayfa', 'type' => 'text', 'default' => 'Ana Sayfa' ),
 					),
 				),
 
@@ -494,7 +652,8 @@ return array(
 
 				/*
 				 * Son eklenen urunler: tek satir, saga dogru kayan serit.
-				 * Varsayilan kartlar TEST icerigidir; gercek urunler panelden girilir.
+				 * Kartlar Urun Havuzu'ndan gelir (bu siteye secilen urunlerden
+				 * havuza en son eklenenler); burada yalnizca metinler ve adet.
 				 */
 				'latest' => array(
 					'label'  => 'Son Eklenen Ürünler',
@@ -502,28 +661,7 @@ return array(
 						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Son eklenen ürünler' ),
 						'subtitle'   => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Kataloğa yeni giren ürünler. Ölçü ve adet için teklif isteyin.' ),
 						'link_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
-						'items'      => array(
-							'label'   => 'Ürün Kartları',
-							'type'    => 'repeater',
-							'max'     => 12,
-							'fields'  => array(
-								'image'    => array( 'label' => 'Görsel', 'type' => 'image' ),
-								'category' => array( 'label' => 'Kategori', 'type' => 'text' ),
-								'title'    => array( 'label' => 'Ürün Adı', 'type' => 'text' ),
-								'spec'     => array( 'label' => 'Ölçü / Özellik', 'type' => 'text' ),
-								'link_url' => array( 'label' => 'Bağlantı', 'type' => 'url' ),
-							),
-							'default' => array(
-								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Ahşap Tavuk Kümesi', 'spec' => '2 bölmeli, yumurtlama kutulu', 'link_url' => '/iletisim/' ),
-								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Kamelya 3×3 m, zeminli', 'spec' => 'Emprenyeli çam, montajlı teslim', 'link_url' => '/iletisim/' ),
-								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Oval Gölgelikli Salıncak', 'spec' => '4 kişilik, bahçe tipi', 'link_url' => '/iletisim/' ),
-								array( 'image' => 0, 'category' => 'Kereste', 'title' => 'Kontrplak (Plywood)', 'spec' => '18 mm, 125×250 cm levha', 'link_url' => '/iletisim/' ),
-								array( 'image' => 0, 'category' => 'Kereste', 'title' => 'Çam Kereste', 'spec' => '5×10 cm, 4 m boy', 'link_url' => '/iletisim/' ),
-								array( 'image' => 0, 'category' => 'Ambalaj', 'title' => 'Euro Palet', 'spec' => '80×120 cm, ısıl işlemli', 'link_url' => '/iletisim/' ),
-								array( 'image' => 0, 'category' => 'Ahşap Dekorasyon', 'title' => 'Büyük Tavuk Kümesi', 'spec' => 'Gezinme alanlı, 10 tavuk', 'link_url' => '/iletisim/' ),
-								array( 'image' => 0, 'category' => 'Hırdavat Grubu', 'title' => 'Palet Çivisi', 'spec' => 'Helezon, 5 kg kutu', 'link_url' => '/iletisim/' ),
-							),
-						),
+						'count'      => array( 'label' => 'Gösterilecek Ürün Sayısı', 'type' => 'text', 'default' => '8', 'hint' => 'Ürünler Ürün Havuzu’ndan gelir: bu siteye seçilenlerden havuza en son eklenenler.' ),
 					),
 				),
 
@@ -570,7 +708,11 @@ return array(
 							'label' => 'Ürünler (merkezî havuzdan)',
 							'type'  => 'products',
 						),
-						'cta_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Teklif Al' ),
+						'cta_label'    => array( 'label' => 'Kart Bağlantı Metni (detay sayfası yoksa)', 'type' => 'text', 'default' => 'Teklif Al' ),
+						'detail_label' => array( 'label' => 'Kart Bağlantı Metni (detay sayfası varsa)', 'type' => 'text', 'default' => 'Ürün detayı' ),
+						'count'        => array( 'label' => 'Gösterilecek Ürün Sayısı', 'type' => 'text', 'default' => '8', 'hint' => 'Yukarıdaki listenin ilk ürünleri gösterilir; sırayı oklarla değiştirin.' ),
+						'all_label'    => array( 'label' => 'Tüm Ürünler Buton Metni', 'type' => 'text', 'default' => 'Tüm ürünler' ),
+						'empty_text'   => array( 'label' => 'Ürün Seçilmemişse (yalnızca panel önizlemesinde)', 'type' => 'text', 'default' => 'Bu site için henüz ürün seçilmedi.' ),
 					),
 				),
 
@@ -583,6 +725,46 @@ return array(
 						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Blog – Haberler' ),
 						'subtitle'   => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Koçist’ten haberler; orman ürünlerinde güncel trendler ve bilgilendirmeler.' ),
 						'link_label' => array( 'label' => 'Tüm Yazılar Bağlantı Metni', 'type' => 'text', 'default' => 'Tüm yazılar' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Urun kategorileri: /kategoriler/ ve tum grup/kategori sayfalarinda
+		 * ortak metinler. {suslu parantez} icindeki kelimeler sayfada
+		 * gercek degerle degisir (grup adi, urun sayisi...).
+		 */
+		'kategoriler' => array(
+			'label'      => 'Kategoriler',
+			'path'       => '/kategoriler/',
+			'components' => array(
+				'index' => array(
+					'label'  => 'Kategoriler Sayfası',
+					'fields' => array(
+						'crumb' => array( 'label' => 'Yol Göstergesindeki Adı', 'type' => 'text', 'default' => 'Kategoriler' ),
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ürün kategorileri' ),
+						'lead'  => array( 'label' => 'Alt Metin — {grup} grup sayısı, {kategori} kategori sayısı olur', 'type' => 'textarea', 'default' => '{grup} ürün grubunda {kategori} kategori. Aradığınızı listede görmüyorsanız ölçüsünü yazın, fiyatlandıralım.' ),
+					),
+				),
+				'texts' => array(
+					'label'  => 'Grup ve Kategori Sayfaları (ortak)',
+					'fields' => array(
+						'lead_products'      => array( 'label' => 'Alt Metin: ürün varsa — {urun} ürün sayısı', 'type' => 'textarea', 'default' => '{urun} ürün listeleniyor. Fiyatlar ölçü ve adede göre değişir; aynı gün teklif veriyoruz.' ),
+						'lead_sub_empty'     => array( 'label' => 'Alt Metin: ürünsüz kategori — {grup} grup adı', 'type' => 'textarea', 'default' => '{grup} grubunda, ölçü ve adede göre üretim ve tedarik.' ),
+						'lead_group_empty'   => array( 'label' => 'Alt Metin: ürünsüz grup — {kategori} kategori sayısı', 'type' => 'textarea', 'default' => '{kategori} kategoride ölçü ve adede göre üretim ve tedarik.' ),
+						'group_all'          => array( 'label' => 'Grubun Tümü Bağlantısı — {grup} grup adı', 'type' => 'text', 'default' => 'Tüm {grup} ürünleri' ),
+						'meta_subs'          => array( 'label' => 'Kategori Sayısı — {kategori}', 'type' => 'text', 'default' => '{kategori} kategori' ),
+						'meta_subs_products' => array( 'label' => 'Kategori ve Ürün Sayısı — {kategori}, {urun}', 'type' => 'text', 'default' => '{kategori} kategori, {urun} ürün' ),
+						'category_label'     => array( 'label' => 'Kategori Listesi Başlığı (telefonda)', 'type' => 'text', 'default' => 'Kategori' ),
+						'all_label'          => array( 'label' => 'Listede "Tümü"', 'type' => 'text', 'default' => 'Tümü' ),
+						'others_title'       => array( 'label' => 'Diğer Gruplar Başlığı', 'type' => 'text', 'default' => 'Diğer ürün grupları' ),
+						'price_quote'        => array( 'label' => 'Fiyatı Olmayan Ürün Kartında', 'type' => 'text', 'default' => 'Fiyat teklifle' ),
+						'go_detail'          => array( 'label' => 'Kart Bağlantısı (detay sayfası varsa)', 'type' => 'text', 'default' => 'İncele' ),
+						'go_quote'           => array( 'label' => 'Kart Bağlantısı (detay sayfası yoksa)', 'type' => 'text', 'default' => 'Teklif iste' ),
+						'empty_title'        => array( 'label' => 'Ürün Yoksa Başlık — {ad} sayfa adı', 'type' => 'text', 'default' => '{ad} için listelenmiş ürün yok' ),
+						'empty_text'         => array( 'label' => 'Ürün Yoksa Metin', 'type' => 'textarea', 'default' => 'Bu kategorideki ürünleri siparişe göre hazırlıyoruz. Ölçü ve adedi yazın, aynı gün fiyat verelim.' ),
+						'empty_cta'          => array( 'label' => 'Ürün Yoksa Buton', 'type' => 'text', 'default' => 'Teklif isteyin' ),
 					),
 				),
 			),
@@ -613,7 +795,8 @@ return array(
 				'certificates' => array(
 					'label'  => 'Sertifikalar',
 					'fields' => array(
-						'tab_label' => array( 'label' => 'Sekme Adı', 'type' => 'text', 'default' => 'Sertifikalar' ),
+						'tab_label'  => array( 'label' => 'Sekme Adı', 'type' => 'text', 'default' => 'Sertifikalar' ),
+						'empty_text' => array( 'label' => 'Görsel Yoksa Gösterilecek Metin', 'type' => 'text', 'default' => 'Henüz sertifika eklenmedi.' ),
 						'items'     => array(
 							'label'   => 'Görseller',
 							'type'    => 'repeater',
@@ -641,7 +824,10 @@ return array(
 				'documents' => array(
 					'label'  => 'Belgeler',
 					'fields' => array(
-						'tab_label' => array( 'label' => 'Sekme Adı', 'type' => 'text', 'default' => 'Belgeler' ),
+						'tab_label'  => array( 'label' => 'Sekme Adı', 'type' => 'text', 'default' => 'Belgeler' ),
+						'open_label' => array( 'label' => 'Aç Bağlantısı Metni', 'type' => 'text', 'default' => 'Aç' ),
+						'file_label' => array( 'label' => 'Uzantısı Bilinmeyen Dosya Etiketi', 'type' => 'text', 'default' => 'DOSYA' ),
+						'empty_text' => array( 'label' => 'Belge Yoksa Gösterilecek Metin', 'type' => 'text', 'default' => 'Henüz belge eklenmedi.' ),
 						'items'     => array(
 							'label'   => 'Belgeler',
 							'type'    => 'repeater',
@@ -933,6 +1119,8 @@ return array(
 						'filter_label' => array( 'label' => 'Filtre Başlığı (ekran okuyucu için)', 'type' => 'text', 'default' => 'Kategoriye göre süz' ),
 						'read_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Yazıyı okuyun' ),
 						'empty_text' => array( 'label' => 'Yazı Yoksa Gösterilecek Metin', 'type' => 'text', 'default' => 'Bu kategoride henüz yazı yok.' ),
+						'prev_label' => array( 'label' => 'Sayfalama: Önceki', 'type' => 'text', 'default' => 'Önceki' ),
+						'next_label' => array( 'label' => 'Sayfalama: Sonraki', 'type' => 'text', 'default' => 'Sonraki' ),
 					),
 				),
 
@@ -958,12 +1146,12 @@ return array(
 		 * teklif toplayan bir kurumsal site.
 		 */
 		'product' => array(
-			'label'      => 'Ürün Sayfası',
+			'label'      => 'Ürün Sayfaları',
 			'path'       => '/urun/',
 			'components' => array(
 
 				'main' => array(
-					'label'  => 'Ürün Başlığı ve Galeri',
+					'label'  => 'Butonlar (tüm ürünler) ve Örnek Ürün',
 					'fields' => array(
 						'image'           => array( 'label' => 'Ana Görsel', 'type' => 'image', 'default' => 0 ),
 						'gallery'         => array(
@@ -1007,8 +1195,21 @@ return array(
 					),
 				),
 
+				/*
+				 * Havuzdan gelen her urunun sayfasinda (/urun/<urun>/) ortak
+				 * metinler. Urunun kendi bilgileri Urun Havuzu'ndadir.
+				 */
+				'detail' => array(
+					'label'  => 'Havuz Ürün Sayfaları (ortak metinler)',
+					'fields' => array(
+						'related_sub'   => array( 'label' => 'Benzer Ürünler Başlığı (kategori) — {kategori} kategorinin adı olur', 'type' => 'text', 'default' => '{kategori} kategorisinde diğer ürünler' ),
+						'related_group' => array( 'label' => 'Benzer Ürünler Başlığı (grup) — {grup} grubun adı olur', 'type' => 'text', 'default' => '{grup} grubunda diğer ürünler' ),
+						'see_all'       => array( 'label' => 'Tümünü Gör Bağlantısı', 'type' => 'text', 'default' => 'Tümünü gör' ),
+					),
+				),
+
 				'specs' => array(
-					'label'  => 'Teknik Özellikler',
+					'label'  => 'Teknik Özellikler (yalnızca örnek ürün)',
 					'fields' => array(
 						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Teknik Özellikler' ),
 						'name'  => array( 'label' => 'Tablo Başlığı (ürün modeli)', 'type' => 'text', 'default' => 'Ahşap Tavuk Kümesi — Standart Model' ),
@@ -1036,7 +1237,7 @@ return array(
 				),
 
 				'faq' => array(
-					'label'  => 'Sık Sorulan Sorular',
+					'label'  => 'Sık Sorulan Sorular (tüm ürün sayfaları)',
 					'fields' => array(
 						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Sık Sorulan Sorular' ),
 						'items' => array(
@@ -1158,5 +1359,24 @@ return array(
 				),
 			),
 		),
-	),
+
+		/*
+		 * Bulunamayan sayfa (404). Onizleme adresi bilerek olmayan bir sayfa.
+		 */
+		'notfound' => array(
+			'label'      => '404 Sayfası',
+			'path'       => '/bulunamadi-404/',
+			'components' => array(
+				'head' => array(
+					'label'  => 'Sayfa Metinleri',
+					'fields' => array(
+						'crumb'  => array( 'label' => 'Üst Etiket', 'type' => 'text', 'default' => '404' ),
+						'title'  => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sayfa bulunamadı' ),
+						'text'   => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Aradığınız sayfa taşınmış ya da hiç var olmamış olabilir.' ),
+						'button' => array( 'label' => 'Buton Metni', 'type' => 'text', 'default' => 'Ana sayfaya dön' ),
+					),
+				),
+			),
+		),
+	) + $kocist_category_pages,
 );

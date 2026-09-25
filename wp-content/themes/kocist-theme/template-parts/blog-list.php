@@ -26,17 +26,17 @@ $title      = $current ? $current->name : nwcs_field( 'blog', 'page_head', 'titl
 <div class="k-pagehead" data-nwcs-section="page_head">
 	<div class="k-wrap">
 		<nav class="k-pagehead__crumb" aria-label="Konum">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>">Ana Sayfa</a>
+			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" <?php nwcs_edit_attr( 'global', 'texts', 'home_crumb' ); ?>><?php echo esc_html( nwcs_field( 'global', 'texts', 'home_crumb' ) ); ?></a>
 			<span aria-hidden="true">/</span>
 			<?php if ( $current ) : ?>
-				<a href="<?php echo esc_url( $blog_url ); ?>"><?php echo esc_html( nwcs_field( 'blog', 'page_head', 'title' ) ); ?></a>
+				<a href="<?php echo esc_url( $blog_url ); ?>" <?php nwcs_edit_attr( 'blog', 'page_head', 'title' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'page_head', 'title' ) ); ?></a>
 				<span aria-hidden="true">/</span>
-				<span aria-current="page"><?php echo esc_html( $current->name ); ?></span>
+				<span aria-current="page" <?php kocist_term_attr( $current ); ?>><?php echo esc_html( $current->name ); ?></span>
 			<?php else : ?>
-				<span aria-current="page"><?php echo esc_html( nwcs_field( 'blog', 'page_head', 'title' ) ); ?></span>
+				<span aria-current="page" <?php nwcs_edit_attr( 'blog', 'page_head', 'title' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'page_head', 'title' ) ); ?></span>
 			<?php endif; ?>
 		</nav>
-		<h1 class="k-pagehead__title" <?php nwcs_edit_attr( 'blog', 'page_head', 'title' ); ?>><?php echo esc_html( $title ); ?></h1>
+		<h1 class="k-pagehead__title" <?php $current ? kocist_term_attr( $current ) : nwcs_edit_attr( 'blog', 'page_head', 'title' ); ?>><?php echo esc_html( $title ); ?></h1>
 		<p class="k-pagehead__sub" <?php nwcs_edit_attr( 'blog', 'page_head', 'subtitle' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'page_head', 'subtitle' ) ); ?></p>
 	</div>
 </div>
@@ -47,14 +47,14 @@ $title      = $current ? $current->name : nwcs_field( 'blog', 'page_head', 'titl
 			<nav class="k-blog-filter" aria-label="<?php echo esc_attr( nwcs_field( 'blog', 'listing', 'filter_label' ) ); ?>">
 				<ul class="k-blog-filter__list">
 					<li>
-						<a class="k-blog-filter__chip<?php echo $current ? '' : ' is-active'; ?>" href="<?php echo esc_url( $blog_url ); ?>" <?php echo $current ? '' : 'aria-current="page"'; ?>>
+						<a class="k-blog-filter__chip<?php echo $current ? '' : ' is-active'; ?>" href="<?php echo esc_url( $blog_url ); ?>" <?php echo $current ? '' : 'aria-current="page"'; ?> <?php nwcs_edit_attr( 'blog', 'listing', 'all_label' ); ?>>
 							<?php echo esc_html( nwcs_field( 'blog', 'listing', 'all_label' ) ); ?>
 						</a>
 					</li>
 					<?php foreach ( $categories as $category ) : ?>
 						<?php $is_active = $current && (int) $current->term_id === (int) $category->term_id; ?>
 						<li>
-							<a class="k-blog-filter__chip<?php echo $is_active ? ' is-active' : ''; ?>" href="<?php echo esc_url( get_category_link( $category ) ); ?>" <?php echo $is_active ? 'aria-current="page"' : ''; ?>>
+							<a class="k-blog-filter__chip<?php echo $is_active ? ' is-active' : ''; ?>" href="<?php echo esc_url( get_category_link( $category ) ); ?>" <?php echo $is_active ? 'aria-current="page"' : ''; ?> <?php kocist_term_attr( $category ); ?>>
 								<?php echo esc_html( $category->name ); ?>
 								<span class="k-blog-filter__count"><?php echo (int) $category->count; ?></span>
 							</a>
@@ -79,18 +79,18 @@ $title      = $current ? $current->name : nwcs_field( 'blog', 'page_head', 'titl
 				array(
 					'total'     => (int) $list_query->max_num_pages,
 					'current'   => max( 1, (int) get_query_var( 'paged' ) ),
-					'prev_text' => 'Önceki',
-					'next_text' => 'Sonraki',
+					'prev_text' => esc_html( nwcs_field( 'blog', 'listing', 'prev_label' ) ),
+					'next_text' => esc_html( nwcs_field( 'blog', 'listing', 'next_label' ) ),
 					'type'      => 'list',
 				)
 			);
 
 			if ( $pager ) :
 				?>
-				<nav class="k-pager" aria-label="Sayfalar"><?php echo wp_kses_post( $pager ); ?></nav>
+				<nav class="k-pager" aria-label="Sayfalar" <?php nwcs_edit_attr( 'blog', 'listing', 'prev_label' ); ?>><?php echo wp_kses_post( $pager ); ?></nav>
 			<?php endif; ?>
 		<?php else : ?>
-			<p class="k-blog__empty"><?php echo esc_html( nwcs_field( 'blog', 'listing', 'empty_text' ) ); ?></p>
+			<p class="k-blog__empty" <?php nwcs_edit_attr( 'blog', 'listing', 'empty_text' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'listing', 'empty_text' ) ); ?></p>
 		<?php endif; ?>
 
 		<?php wp_reset_postdata(); ?>

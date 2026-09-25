@@ -20,7 +20,7 @@ $features   = nwcs_rows( 'product', 'main', 'features' );
 	<div class="k-wrap k-product__grid">
 
 		<div class="k-product__gallery" data-k-gallery>
-			<div class="k-product__stage">
+			<div class="k-product__stage" <?php nwcs_edit_attr( 'product', 'main', 'image' ); ?>>
 				<?php echo kocist_image_tag( $main_image, 'k-product__photo', 'Örnek görsel — ürün' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 
 				<?php if ( count( $gallery ) > 1 ) : ?>
@@ -43,7 +43,7 @@ $features   = nwcs_rows( 'product', 'main', 'features' );
 			</div>
 
 			<?php if ( count( $gallery ) > 1 ) : ?>
-				<div class="k-product__thumbs">
+				<div class="k-product__thumbs" <?php nwcs_edit_attr( 'product', 'main', 'gallery' ); ?>>
 					<?php foreach ( $gallery as $thumb_index => $thumb ) : ?>
 						<?php
 						$thumb_image = kocist_image_or_default( nwcs_image_by_id( (int) ( $thumb['image'] ?? 0 ), 'medium' ), $gallery_defaults[ $thumb_index ] ?? '' );
@@ -71,16 +71,16 @@ $features   = nwcs_rows( 'product', 'main', 'features' );
 		</div>
 
 		<div class="k-product__info">
-			<p class="k-product__category"><?php echo esc_html( nwcs_field( 'product', 'main', 'category' ) ); ?></p>
-			<h1 class="k-product__title"><?php echo esc_html( nwcs_field( 'product', 'main', 'title' ) ); ?></h1>
-			<p class="k-product__subtitle"><?php echo esc_html( nwcs_field( 'product', 'main', 'subtitle' ) ); ?></p>
+			<p class="k-product__category" <?php nwcs_edit_attr( 'product', 'main', 'category' ); ?>><?php echo esc_html( nwcs_field( 'product', 'main', 'category' ) ); ?></p>
+			<h1 class="k-product__title" <?php nwcs_edit_attr( 'product', 'main', 'title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'main', 'title' ) ); ?></h1>
+			<p class="k-product__subtitle" <?php nwcs_edit_attr( 'product', 'main', 'subtitle' ); ?>><?php echo esc_html( nwcs_field( 'product', 'main', 'subtitle' ) ); ?></p>
 
-			<p class="k-product__desc"><?php echo esc_html( nwcs_field( 'product', 'main', 'description' ) ); ?></p>
+			<p class="k-product__desc" <?php nwcs_edit_attr( 'product', 'main', 'description' ); ?>><?php echo esc_html( nwcs_field( 'product', 'main', 'description' ) ); ?></p>
 
 			<?php if ( $features ) : ?>
 				<ul class="k-product__features">
-					<?php foreach ( $features as $feature ) : ?>
-						<li class="k-product__feature">
+					<?php foreach ( $features as $feature_index => $feature ) : ?>
+						<li class="k-product__feature" <?php nwcs_edit_attr( 'product', 'main', 'features', $feature_index, 'text' ); ?>>
 							<?php nwcs_the_icon( (string) ( $feature['icon'] ?? '' ), 'k-product__feature-icon', 19 ); ?>
 							<span><?php echo esc_html( $feature['text'] ?? '' ); ?></span>
 						</li>
@@ -89,15 +89,15 @@ $features   = nwcs_rows( 'product', 'main', 'features' );
 			<?php endif; ?>
 
 			<div class="k-product__actions">
-				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'cta_url' ) ) ); ?>">
+				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'cta_url' ) ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'cta_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'cta_label' ) ); ?>
 				</a>
-				<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'secondary_url' ) ) ); ?>">
+				<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'secondary_url' ) ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'secondary_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'secondary_label' ) ); ?>
 				</a>
 			</div>
 
-			<p class="k-product__note"><?php echo esc_html( nwcs_field( 'product', 'main', 'note' ) ); ?></p>
+			<p class="k-product__note" <?php nwcs_edit_attr( 'product', 'main', 'note' ); ?>><?php echo esc_html( nwcs_field( 'product', 'main', 'note' ) ); ?></p>
 		</div>
 	</div>
 </section>
