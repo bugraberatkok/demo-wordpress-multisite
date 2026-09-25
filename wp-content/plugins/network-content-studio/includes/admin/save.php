@@ -58,7 +58,14 @@ function nwcs_save_component( int $blog_id, array $manifest, string $page_key, s
 
 		// Urun secimi nwcs_content'e degil, sitenin urun ayarlarina yazilir.
 		if ( 'products' === $type ) {
-			nwcs_save_site_product_settings( nwcs_posted_products() );
+			$category = trim( (string) ( $definition['category'] ?? '' ) );
+
+			// Kategori sayfasindaki liste yalnizca o kategoriyi kaydeder.
+			nwcs_save_site_product_settings(
+				'' === $category
+					? nwcs_posted_products()
+					: nwcs_merge_scoped_products( nwcs_site_product_settings(), nwcs_posted_products(), $category )
+			);
 
 			continue;
 		}

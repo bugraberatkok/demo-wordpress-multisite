@@ -84,7 +84,7 @@ $menu = ik_menu();
 										<?php foreach ( $item['children'] as $child ) : ?>
 											<?php $thumb = ik_product_image( $child['product'], 'thumbnail' ); ?>
 											<li>
-												<a class="ik-drop__link" href="<?php echo esc_url( $child['url'] ); ?>"<?php echo ik_is_current( $child['url'] ) ? ' aria-current="page"' : ''; ?>>
+												<a class="ik-drop__link" href="<?php echo esc_url( $child['url'] ); ?>"<?php echo ik_is_current( $child['url'] ) ? ' aria-current="page"' : ''; ?> <?php nwcs_edit_attr( 'products', 'catalog', 'items', (int) $child['product']['index'], 'title' ); ?>>
 													<?php echo ik_image_tag( $thumb, 'ik-drop__thumb', '' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 													<span><?php echo esc_html( $child['label'] ); ?></span>
 												</a>

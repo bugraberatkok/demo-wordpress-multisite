@@ -89,6 +89,7 @@ $whatsapp  = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 									<li class="bg-sheet">
 										<a href="<?php echo esc_url( $product['url'] ); ?>"
 											class="flex items-center gap-4 p-4 text-ink no-underline transition-colors hover:bg-indigo-wash aria-[current=page]:bg-indigo-wash"
+											<?php nwcs_edit_attr( $product['key'], 'card', 'name' ); ?>
 											<?php echo ip_is_current( $product['path'] ) ? 'aria-current="page"' : ''; ?>>
 											<span class="shot aspect-[4/3] w-20 shrink-0 border border-line">
 												<?php echo ip_image_tag( $product['image'], '', $product['name'] ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
@@ -179,6 +180,7 @@ $whatsapp  = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 									<li>
 										<a href="<?php echo esc_url( $product['url'] ); ?>"
 											class="flex items-center gap-3 py-2 text-ink no-underline aria-[current=page]:text-indigo"
+											<?php nwcs_edit_attr( $product['key'], 'card', 'name' ); ?>
 											<?php echo ip_is_current( $product['path'] ) ? 'aria-current="page"' : ''; ?>>
 											<span class="shot aspect-[4/3] w-14 shrink-0 border border-line">
 												<?php echo ip_image_tag( $product['image'], '', $product['name'] ); // phpcs:ignore WordPress.Security.EscapingOutput ?>

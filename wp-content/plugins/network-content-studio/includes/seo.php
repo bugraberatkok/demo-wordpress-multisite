@@ -1267,6 +1267,11 @@ function nwcs_seo_llms_text(): string {
 
 	// Temanin bildirdigi ek sayfalar (tek sablonla cizilen urun sayfalari gibi).
 	foreach ( nwcs_seo_extra_pages() as $page ) {
+		// Ayni adres manifestte de sayfaysa (panelde duzenlenen kategori sayfasi) yukarida yazildi.
+		if ( '' !== nwcs_seo_page_for_path( untrailingslashit( (string) wp_parse_url( $page['url'], PHP_URL_PATH ) ) ) ) {
+			continue;
+		}
+
 		$line = sprintf( '- [%s](%s)', nwcs_seo_clean( $page['name'] ), $page['url'] );
 
 		if ( '' !== nwcs_seo_clean( $page['description'] ?? '' ) ) {

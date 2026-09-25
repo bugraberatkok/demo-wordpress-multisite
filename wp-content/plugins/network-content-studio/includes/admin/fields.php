@@ -300,6 +300,13 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 			$ordered[ $id ] = $product;
 		}
 	}
+
+	// Kategori sayfasi: yalnizca o kategorinin urunleri (kayit da yalnizca onlari yazar).
+	$category = trim( (string) ( $definition['category'] ?? '' ) );
+
+	if ( '' !== $category ) {
+		$ordered = array_filter( $ordered, static fn( array $product ): bool => in_array( $category, (array) $product['categories'], true ) );
+	}
 	?>
 	<div class="nwcs-field nwcs-field--products" data-nwcs-field="pool">
 		<span class="nwcs-field__label"><?php echo esc_html( $definition['label'] ?? 'Ürünler' ); ?></span>
@@ -311,6 +318,13 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 			</p>
 		<?php else : ?>
 
+			<?php if ( '' !== $category ) : ?>
+				<p class="nwcs-hint">
+					Bu listede yalnızca <strong><?php echo esc_html( $category ); ?></strong> kategorisindeki
+					<?php echo (int) count( $ordered ); ?> ürün var. İşareti kaldırılan ürün bu sitede görünmez; oklarla sırayı değiştirin.
+					Diğer kategorilere dokunulmaz.
+				</p>
+			<?php else : ?>
 			<div class="nwcs-modes" role="radiogroup" aria-label="Ürün seçim kipi">
 				<label class="nwcs-mode<?php echo 'all' === $settings['mode'] ? ' is-active' : ''; ?>">
 					<input type="radio" name="products[mode]" value="all" <?php checked( 'all', $settings['mode'] ); ?> data-nwcs-mode />
@@ -323,6 +337,7 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 					<span class="nwcs-mode__text">Yalnızca işaretledikleriniz; sırayı da siz belirlersiniz.</span>
 				</label>
 			</div>
+			<?php endif; ?>
 
 			<p class="nwcs-hint">
 				Ürünün kendisi <a href="<?php echo esc_url( nwcs_pool_url() ); ?>">Ürün Havuzu</a>'nda düzenlenir.
@@ -368,6 +383,10 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 						</div>
 
 						<div class="nwcs-product__overrides">
+							<p class="nwcs-hint">
+								Kod, özellikler, detay metni ve görseller tüm sitelerde ortak:
+								<a href="<?php echo esc_url( nwcs_pool_url( array( 'urun' => $id ) ) ); ?>" target="_blank" rel="noopener">Ürün Havuzu’nda düzenle ↗</a>
+							</p>
 							<?php if ( ! empty( $override['hidden'] ) ) : ?>
 								<?php // Gizleme Urun Havuzu'ndaki toplu islemden yonetilir; deger burada korunur. ?>
 								<input type="hidden" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][hidden]" value="1" />

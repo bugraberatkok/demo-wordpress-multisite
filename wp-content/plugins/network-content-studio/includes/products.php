@@ -468,6 +468,90 @@ function nwcs_save_site_product_settings( array $settings ): void {
 	update_option( NWCS_OPTION_OVERRIDES, $overrides );
 }
 
+/**
+ * Havuzda bu kategoride (adiyla) olan urunlerin kimlikleri, havuz sirasiyla.
+ *
+ * @return int[]
+ */
+function nwcs_pool_ids_in_category( string $category ): array {
+	$ids = array();
+
+	foreach ( nwcs_pool_products() as $id => $product ) {
+		if ( in_array( $category, (array) $product['categories'], true ) ) {
+			$ids[] = (int) $id;
+		}
+	}
+
+	return $ids;
+}
+
+/**
+ * Tek kategorinin urun listesi kaydedilirken (panelde kategori sayfasi)
+ * sitenin geri kalan secimi korunur: diger urunlerin secimi, sirasi ve
+ * istisnalari degismez; kategorinin urunleri listedeki yerlerinde yeni
+ * sirayla durur, yeni isaretlenenler sona eklenir.
+ *
+ * "Hepsi" kipindeki site, kategori listesi olduğu gibi kaydedilirse o kipte
+ * kalir; bir urun cikarilir ya da sira degisirse "Secilenler" kipine gecer
+ * (havuzun geri kalani secili kalir).
+ *
+ * @param array  $current nwcs_site_product_settings()
+ * @param array  $posted  nwcs_posted_products()
+ * @return array Kaydedilecek ayarlar (nwcs_save_site_product_settings'e).
+ */
+function nwcs_merge_scoped_products( array $current, array $posted, string $category ): array {
+	$scope  = nwcs_pool_ids_in_category( $category );
+	$picked = array();
+
+	foreach ( (array) ( $posted['selected'] ?? array() ) as $id ) {
+		$id = absint( $id );
+
+		if ( in_array( $id, $scope, true ) && ! in_array( $id, $picked, true ) ) {
+			$picked[] = $id;
+		}
+	}
+
+	$base = 'all' === $current['mode'] ? array_map( 'intval', array_keys( nwcs_pool_products() ) ) : $current['selected'];
+
+	// Kategorinin mevcut sirasi (tabandaki yerleriyle).
+	$before = array_values( array_filter( $base, static fn( int $id ): bool => in_array( $id, $scope, true ) ) );
+	$mode   = ( 'all' === $current['mode'] && $picked === $before ) ? 'all' : 'selected';
+
+	$queue    = $picked;
+	$selected = array();
+
+	foreach ( $base as $id ) {
+		if ( ! in_array( $id, $scope, true ) ) {
+			$selected[] = $id;
+		} elseif ( $queue ) {
+			$selected[] = array_shift( $queue );
+		}
+	}
+
+	$selected = array_merge( $selected, $queue );
+
+	// Istisnalar: kategori disindakiler aynen, kategoridekiler formdan.
+	$overrides = array();
+
+	foreach ( $current['overrides'] as $id => $row ) {
+		if ( ! in_array( (int) $id, $scope, true ) ) {
+			$overrides[ $id ] = $row;
+		}
+	}
+
+	foreach ( (array) ( $posted['overrides'] ?? array() ) as $id => $row ) {
+		if ( in_array( absint( $id ), $scope, true ) ) {
+			$overrides[ absint( $id ) ] = $row;
+		}
+	}
+
+	return array(
+		'mode'      => $mode,
+		'selected'  => 'all' === $mode ? $current['selected'] : $selected,
+		'overrides' => $overrides,
+	);
+}
+
 /* ------------------------------------------------------------------ */
 /* Sitede gosterilecek urunler                                          */
 /* ------------------------------------------------------------------ */
