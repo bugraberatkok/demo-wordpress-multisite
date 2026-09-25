@@ -73,6 +73,8 @@ $price_note   = 'Ölçü, stok ve fiyat bilgisi için bizi arayın ya da WhatsAp
 return array(
 	'site_key'          => 'istanbulpaletcivi',
 	'site_label'        => 'Koçist · istanbulpaletcivi.com',
+	// Panelde gorunen kisa ad (alan adi olmadan).
+	'panel_label'       => 'İstanbul Palet Çivi',
 
 	'seo_site_defaults' => array(
 		'name'        => 'İstanbul Palet Çivi',

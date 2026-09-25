@@ -11,6 +11,8 @@
 return array(
 	'site_key'          => 'ahsapkasa',
 	'site_label'        => 'Koçist · ahsapkasa.com',
+	// Panelde gorunen kisa ad (alan adi olmadan).
+	'panel_label'       => 'Ahşap Kasa',
 
 	// SEO ve GEO sekmesindeki firma bilgisinin ilk degerleri: sitenin kendi
 	// iletisim ve alt bilgi alanlarindaki bilgiler. Konum bilinmedigi icin bos.

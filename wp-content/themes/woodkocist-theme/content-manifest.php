@@ -82,6 +82,8 @@ foreach ( $categories as $slug => $c ) {
 return array(
 	'site_key'          => 'woodkocist',
 	'site_label'        => 'Koçist · woodkocist.com.tr',
+	// Panelde gorunen kisa ad (alan adi olmadan).
+	'panel_label'       => 'WOOD KOCIST',
 
 	'seo_site_defaults' => array(
 		'name'        => 'WOOD KOCIST',

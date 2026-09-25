@@ -90,6 +90,8 @@ $address      = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca
 return array(
 	'site_key'          => 'istanbulpaletci',
 	'site_label'        => 'Koçist · istanbulpaletci.com',
+	// Panelde gorunen kisa ad (alan adi olmadan).
+	'panel_label'       => 'İstanbul Paletçi',
 
 	// SEO ve GEO sekmesindeki firma bilgisinin ilk degerleri: sitenin kendi
 	// iletisim sayfasindaki bilgiler. Konum (enlem/boylam) bilinmedigi icin bos.
