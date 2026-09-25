@@ -1,6 +1,10 @@
 <?php
 /**
  * Blog yazisi: okunakli tek sutun, altta siparis cagrisi ve diger yazilar.
+ *
+ * Ornek yazilarin baslik, kapak ve metni panelde duzenlenir; onizlemede
+ * tiklaninca yazinin gizli panel sayfasi acilir (functions.php: Blog
+ * yazilari panelden).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -21,21 +25,21 @@ while ( have_posts() ) :
 		array(
 			'title'      => get_the_title(),
 			'crumbs'     => array( array( (string) nwcs_field( 'blog', 'head', 'title' ), pc_link( $blog['path'] ?? '/' ), array( 'blog', 'head', 'title' ) ) ),
-			'title_edit' => array( 'post', $id, 'Yazı başlığı' ),
+			'title_edit' => pc_post_edit_spec( $id, 'title' ),
 		)
 	);
 	?>
 
 	<article class="pc-section">
 		<div class="pc-wrap pc-narrow">
-			<time class="pc-post__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"<?php pc_post_attr( $id, 'Yayın tarihi' ); ?>><?php echo esc_html( get_the_date( 'j F Y' ) ); ?></time>
-			<figure class="pc-article__figure"<?php pc_post_attr( $id, 'Öne çıkan görsel' ); ?>>
+			<time class="pc-post__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( get_the_date( 'j F Y' ) ); ?></time>
+			<figure class="pc-article__figure"<?php pc_post_edit_attr( $id, 'image' ); ?>>
 				<?php echo pc_img_tag( $image, 'pc-article__img', true ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 				<?php if ( $image['sample'] ) : ?>
 					<span class="pc-sample"><?php echo esc_html( nwcs_field( 'global', 'common', 'sample_note' ) ); ?></span>
 				<?php endif; ?>
 			</figure>
-			<div class="pc-prose pc-prose--article"<?php pc_post_attr( $id, 'Yazı metni' ); ?>>
+			<div class="pc-prose pc-prose--article"<?php pc_post_edit_attr( $id, 'body' ); ?>>
 				<?php the_content(); ?>
 			</div>
 

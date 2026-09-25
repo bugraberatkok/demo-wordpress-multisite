@@ -11,6 +11,9 @@
  * ayni: Kestanelik / Catalca adresi, 50 yil.
  *
  * Alan turleri: text, textarea, url, image, repeater
+ *
+ * Her ornek blog yazisinin panelde gizli bir sayfasi vardir ('yazi-<slug>'):
+ * "Sayfa bul" kutusundan acilir.
  */
 
 /*
@@ -69,6 +72,47 @@ $email        = 'info@kocist.com.tr';
 $address      = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 $address_line = 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul';
 $price_note   = 'Ölçü, stok ve fiyat bilgisi için bizi arayın ya da WhatsApp’tan yazın. Tabancanızın modelini ve çakacağınız tahtaların kalınlığını söylemeniz yeterli.';
+
+/*
+ * Her ornek blog yazisi icin panelde gizli bir sayfa ('yazi-<slug>'): "Sayfa
+ * bul" kutusunda cikar, onizlemede yaziyi acar. Alanlar yazinin bugunku
+ * metniyle dolu gelir; panelde degistirilen alan sitede WordPress yazisinin
+ * yerine gecer (functions.php: Blog yazilari panelden). Degistirilmeyen alan
+ * icin WordPress'teki yazi kullanilir.
+ *
+ * Yonetimden sonradan yazilan yazi burada cikmaz (manifest sabit); o yazi
+ * Yazilar ekranindan duzenlenir.
+ */
+$pc_blog_pages = array();
+
+foreach ( (array) include __DIR__ . '/content/blog-posts.php' as $pc_post ) {
+	$pc_blog_pages[ 'yazi-' . $pc_post['slug'] ] = array(
+		'label'      => 'Yazı: ' . $pc_post['title'],
+		'path'       => '/' . $pc_post['slug'] . '/',
+		'hidden'     => true,
+		'components' => array(
+			'post' => array(
+				'label'  => 'Yazı',
+				'fields' => array(
+					'title'   => array( 'label' => 'Başlık', 'type' => 'text', 'default' => $pc_post['title'] ),
+					'excerpt' => array( 'label' => 'Özet (arama sonucu)', 'type' => 'textarea', 'default' => $pc_post['excerpt'] ),
+					'body'    => array(
+						'label'   => 'Metin (boş satırla paragraf, ## ile ara başlık)',
+						'type'    => 'textarea',
+						'default' => $pc_post['body'],
+						'hint'    => 'Burada değiştirdiğiniz metin sitede görünür. Değiştirmediğiniz alanlarda WordPress’teki yazı kullanılır.',
+					),
+					'image'   => array(
+						'label'   => 'Kapak Görseli',
+						'type'    => 'image',
+						'default' => 0,
+						'hint'    => 'Boş bırakılırsa yazının kendi kapak görseli kullanılır.',
+					),
+				),
+			),
+		),
+	);
+}
 
 return array(
 	'site_key'          => 'istanbulpaletcivi',
@@ -516,5 +560,5 @@ return array(
 				),
 			),
 		),
-	),
+	) + $pc_blog_pages,
 );

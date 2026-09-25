@@ -138,8 +138,9 @@ function pc_paragraphs( string $value, string $class = '' ): string {
 }
 
 /**
- * Blog yazisi ya da WordPress sayfasi metni: onizlemede yazinin duzenleme
- * ekrani acilir. Eklenti kapaliyken hicbir sey basmaz.
+ * Manifestte olmayan WordPress sayfasi metni (yasal metin gibi): onizlemede
+ * sayfanin duzenleme ekrani acilir. Eklenti kapaliyken hicbir sey basmaz.
+ * Ornek blog yazilari panelde duzenlenir (Blog yazilari panelden).
  */
 function pc_post_attr( int $post_id, string $label = 'Blog yazısı' ): void {
 	if ( function_exists( 'nwcs_post_attr' ) && $post_id ) {
@@ -149,7 +150,7 @@ function pc_post_attr( int $post_id, string $label = 'Blog yazısı' ): void {
 
 /**
  * Isaret tanimi: array( sayfa, bilesen, alan[, satir, alt alan] ) ya da
- * array( 'post', yazi_id, etiket ) ya da array( 'source', tur, adres, etiket ).
+ * array( 'post', sayfa_id, etiket ) (WordPress sayfasi) ya da array( 'source', tur, adres, etiket ).
  * Sayfa basi ve konum yolu gibi ortak parcalar bu tanimi arguman olarak alir.
  */
 function pc_edit( $spec ): void {
@@ -224,6 +225,165 @@ function pc_manifest(): array {
 	}
 
 	return $manifest;
+}
+
+/**
+ * Alanin manifestteki varsayilan degeri.
+ */
+function pc_manifest_default( string $page, string $component, string $field ) {
+	return pc_manifest()['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? '';
+}
+
+/* ====================================================================== *
+ * Blog yazilari panelden
+ *
+ * Ornek yazilarin panelde gizli bir sayfasi var ('yazi-<slug>', manifest).
+ * Panelde degistirilip kaydedilen alan sitede WordPress yazisinin yerine
+ * gecer: yazi sayfasi, blog listesi, ana sayfa kartlari ve arama bilgisi.
+ * Degistirilmeyen alan icin WordPress'teki yazi aynen kullanilir; yazi
+ * Yazilar ekranindan duzenlenmeye devam edebilir.
+ * ====================================================================== */
+
+/**
+ * Yazinin paneldeki gizli sayfasi; yoksa bos (sonradan yazilan yazilar).
+ */
+function pc_post_page_key( $post ): string {
+	$post = get_post( $post );
+
+	if ( ! $post || 'post' !== $post->post_type || '' === $post->post_name ) {
+		return '';
+	}
+
+	$key = 'yazi-' . $post->post_name;
+
+	return isset( pc_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Panelde degistirilmis deger; alan varsayilanindaysa (yazinin ilk metni) null.
+ *
+ * @return string|int|null
+ */
+function pc_post_override( $post, string $field ) {
+	$key = pc_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return null;
+	}
+
+	$value = nwcs_field( $key, 'post', $field );
+
+	if ( 'image' === $field ) {
+		return (int) $value ? (int) $value : null;
+	}
+
+	$clean   = static fn( $text ): string => trim( str_replace( "\r\n", "\n", (string) $text ) );
+	$value   = $clean( $value );
+	$default = $clean( pc_manifest_default( $key, 'post', $field ) );
+
+	return '' === $value || $value === $default ? null : $value;
+}
+
+/**
+ * Onizlemede tiklaninca yazinin paneldeki alanini acar.
+ */
+function pc_post_edit_attr( $post, string $field ): void {
+	$key = pc_post_page_key( $post );
+
+	if ( '' !== $key ) {
+		nwcs_edit_attr( $key, 'post', $field );
+	}
+}
+
+/**
+ * pc_edit() isaret tanimi (sayfa basi gibi ortak parcalar icin); gizli
+ * sayfasi olmayan yazida null.
+ */
+function pc_post_edit_spec( $post, string $field ): ?array {
+	$key = pc_post_page_key( $post );
+
+	return '' !== $key ? array( $key, 'post', $field ) : null;
+}
+
+/*
+ * SEO: eklenti yazi bilgisini 'wp' aksiyonunda (10) hesaplayip sakliyor.
+ * Hemen once, gizli sayfanin "Arama ve Paylasim" alanlari (yoksa paneldeki
+ * baslik, ozet ve kapak) gecerliyken hesaplatilir.
+ */
+add_action( 'wp', 'pc_post_seo', 9 );
+function pc_post_seo(): void {
+	if ( ! is_singular( 'post' ) || ! function_exists( 'nwcs_seo_context' ) ) {
+		return;
+	}
+
+	$post = get_queried_object();
+	$key  = pc_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return;
+	}
+
+	$description = trim( (string) nwcs_field( $key, 'seo', 'description' ) );
+	$description = '' !== $description ? $description : (string) pc_post_override( $post, 'excerpt' );
+	$original    = $post->post_excerpt;
+
+	if ( '' !== $description ) {
+		$post->post_excerpt = $description;
+	}
+
+	$GLOBALS['pc_post_seo_key'] = $key;
+	nwcs_seo_context();
+	unset( $GLOBALS['pc_post_seo_key'] );
+
+	$post->post_excerpt = $original;
+}
+
+/**
+ * Arama bilgisi hesaplanirken gecerli olan SEO alani; diger zamanlarda bos.
+ */
+function pc_post_seo_field( $post, string $field ): string {
+	$key = $GLOBALS['pc_post_seo_key'] ?? '';
+
+	return '' !== $key && pc_post_page_key( $post ) === $key ? trim( (string) nwcs_field( $key, 'seo', $field ) ) : '';
+}
+
+add_filter( 'the_title', 'pc_post_title', 10, 2 );
+function pc_post_title( $title, $post_id = 0 ) {
+	if ( is_admin() || ! $post_id ) {
+		return $title;
+	}
+
+	$seo = pc_post_seo_field( $post_id, 'title' );
+
+	return '' !== $seo ? $seo : ( pc_post_override( $post_id, 'title' ) ?? $title );
+}
+
+add_filter( 'get_the_excerpt', 'pc_post_excerpt', 10, 2 );
+function pc_post_excerpt( $excerpt, $post = null ) {
+	return is_admin() ? $excerpt : ( pc_post_override( $post, 'excerpt' ) ?? $excerpt );
+}
+
+// Bloklar islendikten sonra: panel metni kendi paragraf ve basliklariyla gelir.
+add_filter( 'the_content', 'pc_post_content', 99 );
+function pc_post_content( $content ) {
+	if ( is_admin() || ! in_the_loop() ) {
+		return $content;
+	}
+
+	$body = pc_post_override( get_the_ID(), 'body' );
+
+	return null === $body ? $content : pc_post_html( $body );
+}
+
+add_filter( 'post_thumbnail_id', 'pc_post_thumbnail', 10, 2 );
+function pc_post_thumbnail( $thumbnail_id, $post = null ) {
+	if ( is_admin() ) {
+		return $thumbnail_id;
+	}
+
+	$seo = (int) pc_post_seo_field( $post, 'image' );
+
+	return $seo ? $seo : ( pc_post_override( $post, 'image' ) ?? $thumbnail_id );
 }
 
 /* ====================================================================== *
