@@ -2,7 +2,8 @@
 /**
  * Sayfa sablonu.
  *
- * Temanin actigi sayfalar (kurumsal, insan-kaynaklari, katalog, iletisim, urun)
+ * Temanin actigi sayfalar (kurumsal, insan-kaynaklari, katalog, banka-bilgilerimiz,
+ * iletisim, urun)
  * manifestteki bilesenlerden cizilir; diger sayfalar normal icerikle.
  */
 
@@ -41,6 +42,10 @@ if ( is_page( 'kurumsal' ) ) {
 	// Belgeler ve sertifikalar: manifestteki 'katalog' bilesenlerinden.
 	kocist_section( 'page-head', array( 'page' => 'katalog' ) );
 	kocist_section( 'katalog' );
+} elseif ( is_page( 'banka-bilgilerimiz' ) ) {
+	// Havale ve EFT hesaplari: manifestteki 'banka' bilesenlerinden.
+	kocist_section( 'page-head', array( 'page' => 'banka' ) );
+	kocist_section( 'banka' );
 } elseif ( is_page( 'iletisim' ) ) {
 	// Iletisim sayfasi: manifestteki 'contact' bilesenlerinden cizilir.
 	kocist_section( 'contact-main' );

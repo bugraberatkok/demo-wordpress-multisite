@@ -49,7 +49,7 @@ return array(
 						'note'        => array( 'label' => 'Şerit Metni', 'type' => 'text', 'default' => 'İstanbul Teslim' ),
 						'hours'       => array( 'label' => 'Çalışma Saatleri', 'type' => 'text', 'default' => 'Çalışma: 08:00-19:00' ),
 						'bank_label'  => array( 'label' => 'Banka Bilgileri Metni', 'type' => 'text', 'default' => 'Banka Bilgilerimiz' ),
-						'bank_url'    => array( 'label' => 'Banka Bilgileri Bağlantısı', 'type' => 'url', 'default' => '#banka-bilgileri' ),
+						'bank_url'    => array( 'label' => 'Banka Bilgileri Bağlantısı', 'type' => 'url', 'default' => '/banka-bilgilerimiz/' ),
 						'phone_icon'  => array( 'label' => 'Telefon İkonu', 'type' => 'icon', 'default' => 'phone' ),
 						'phone_label' => array( 'label' => 'Telefon Metni', 'type' => 'text', 'default' => '05496481919' ),
 						'phone_url'   => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+905496481919' ),
@@ -657,6 +657,61 @@ return array(
 								array( 'title' => 'Vida, Somun ve Bits Uç Listesi 2025', 'url' => '/tema/belgeler/vida-somun-bits-uc-listesi-2025.pdf' ),
 							),
 						),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Banka Bilgilerimiz (/banka-bilgilerimiz/): havale ve EFT hesaplari.
+		 * Ust seritteki "Banka Bilgilerimiz" baglantisi buraya gelir.
+		 *
+		 * Hesaplar panelden girilir; varsayilan liste bos, cunku firmanin
+		 * gercek hesap bilgisi henuz yok. Liste bosken sayfa, ziyaretciyi
+		 * hesap bilgisini telefonla ya da WhatsApp'tan istemeye yonlendirir.
+		 */
+		'banka' => array(
+			'label'      => 'Banka Bilgilerimiz',
+			'path'       => '/banka-bilgilerimiz/',
+			'components' => array(
+
+				'page_head' => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'breadcrumb' => array( 'label' => 'Yol Göstergesi', 'type' => 'text', 'default' => 'Ana Sayfa / Banka Bilgilerimiz' ),
+						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Banka Bilgilerimiz' ),
+						'subtitle'   => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Havale ve EFT ile ödeme yapabileceğiniz hesaplarımız.' ),
+					),
+				),
+
+				'accounts' => array(
+					'label'  => 'Hesaplar',
+					'fields' => array(
+						'items' => array(
+							'label'   => 'Banka Hesapları',
+							'type'    => 'repeater',
+							'max'     => 12,
+							'fields'  => array(
+								'bank'     => array( 'label' => 'Banka Adı', 'type' => 'text' ),
+								'holder'   => array( 'label' => 'Hesap Sahibi (Unvan)', 'type' => 'text' ),
+								'branch'   => array( 'label' => 'Şube (adı ve kodu)', 'type' => 'text' ),
+								'account'  => array( 'label' => 'Hesap No', 'type' => 'text' ),
+								'currency' => array( 'label' => 'Para Birimi (TL, USD, EUR)', 'type' => 'text' ),
+								'iban'     => array( 'label' => 'IBAN', 'type' => 'text' ),
+							),
+							'default' => array(),
+						),
+						'note'  => array( 'label' => 'Ödeme Notu', 'type' => 'textarea', 'default' => 'Havale ve EFT açıklamasına firma adınızı ya da teklif numaranızı yazın. Ödeme yapmadan önce IBAN\'ı telefonla bizden doğrulayın; hesap değişikliğini e-posta ile bildirmeyiz.' ),
+					),
+				),
+
+				'empty' => array(
+					'label'  => 'Hesap Girilmemişken',
+					'fields' => array(
+						'title'    => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hesap bilgilerini bizden isteyin' ),
+						'text'     => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Banka ve IBAN bilgilerimizi telefonla ya da WhatsApp\'tan hemen iletiyoruz.' ),
+						'wa_label' => array( 'label' => 'WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp\'tan isteyin' ),
+						'wa_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => 'https://wa.me/905496481919?text=Merhaba%2C%20banka%20hesap%20bilgilerinizi%20alabilir%20miyim%3F' ),
 					),
 				),
 			),

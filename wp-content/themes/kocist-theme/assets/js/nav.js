@@ -71,12 +71,26 @@
 
 		var navRect  = nav.getBoundingClientRect();
 		var linkRect = link.getBoundingClientRect();
+		var right    = linkRect.right;
+
+		/*
+		 * Alt menusu olan ogede ok, baglantinin disinda ayri bir dugme; gosterge
+		 * yalnizca baglantiyi olcerse ok hapin disinda kalir. Hap oku da kapsar;
+		 * okun sagindaki 6px pay, yandaki ogenin yazisina degmeyecek kadar.
+		 */
+		var caret = link.parentNode.querySelector( '.k-nav__caret' );
+
+		if ( caret ) {
+			var chevron = caret.querySelector( '.k-nav__chevron' ) || caret;
+
+			right = chevron.getBoundingClientRect().right + 6;
+		}
 
 		if ( ! animate ) {
 			indicator.style.transition = 'none';
 		}
 
-		indicator.style.width     = linkRect.width + 'px';
+		indicator.style.width     = ( right - linkRect.left ) + 'px';
 		indicator.style.transform = 'translateX(' + ( linkRect.left - navRect.left ) + 'px)';
 		indicator.classList.add( 'is-visible' );
 

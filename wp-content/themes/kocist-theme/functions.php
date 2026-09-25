@@ -48,8 +48,9 @@ function kocist_setup(): void {
  *
  * Surum 2: Insan Kaynaklari ve Blog sayfalari, yazilar sayfasi ayari ve
  * ilk kurulum blog yazilari (inc/blog.php).
+ * Surum 4: Banka Bilgilerimiz sayfasi.
  */
-const KOCIST_PAGES_VERSION = '3';
+const KOCIST_PAGES_VERSION = '4';
 
 add_action( 'after_switch_theme', 'kocist_ensure_pages' );
 add_action( 'admin_init', 'kocist_maybe_ensure_pages' );
@@ -84,6 +85,7 @@ function kocist_ensure_pages(): void {
 		'insan-kaynaklari' => 'İnsan Kaynakları',
 		'blog'             => 'Blog – Haberler',
 		'katalog'          => 'Katalog',
+		'banka-bilgilerimiz' => 'Banka Bilgilerimiz',
 	);
 
 	$ids = array();
@@ -194,7 +196,7 @@ function kocist_assets(): void {
 		'kocist-nav',
 		get_theme_file_uri( 'assets/js/nav.js' ),
 		array(),
-		wp_get_theme()->get( 'Version' ),
+		(string) filemtime( get_theme_file_path( 'assets/js/nav.js' ) ),
 		true
 	);
 
@@ -289,6 +291,24 @@ function kocist_assets(): void {
 			get_theme_file_uri( 'assets/js/katalog.js' ),
 			array(),
 			(string) filemtime( get_theme_file_path( 'assets/js/katalog.js' ) ),
+			true
+		);
+	}
+
+	// Banka Bilgilerimiz: hesap kartlari ve IBAN kopyalama.
+	if ( is_page( 'banka-bilgilerimiz' ) ) {
+		wp_enqueue_style(
+			'kocist-banka',
+			get_theme_file_uri( 'assets/css/banka.css' ),
+			array( 'kocist-style' ),
+			(string) filemtime( get_theme_file_path( 'assets/css/banka.css' ) )
+		);
+
+		wp_enqueue_script(
+			'kocist-banka',
+			get_theme_file_uri( 'assets/js/banka.js' ),
+			array(),
+			(string) filemtime( get_theme_file_path( 'assets/js/banka.js' ) ),
 			true
 		);
 	}
@@ -631,6 +651,7 @@ function kocist_anchor_targets(): array {
 		'blog'             => '/blog/',
 		'referanslar'      => '/kurumsal/',
 		'belgeler'         => '/katalog/?tab=belgeler',
+		'banka-bilgileri'  => '/banka-bilgilerimiz/',
 	);
 }
 
