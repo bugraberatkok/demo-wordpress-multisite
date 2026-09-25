@@ -288,6 +288,10 @@ function nwcs_bulk_link_map(): array {
 		}
 	}
 
+	// kocist.com.tr www'siz aciliyor; www adresi bir yonlendirme fazla.
+	$map['https://www.kocist.com.tr'] = 'https://kocist.com.tr';
+	$map['http://www.kocist.com.tr']  = 'https://kocist.com.tr';
+
 	$map = (array) apply_filters( 'nwcs_bulk_link_map', $map );
 
 	// Uzun on ek once: /ahsapkasa ile /ahsapkasa-x karismasin.

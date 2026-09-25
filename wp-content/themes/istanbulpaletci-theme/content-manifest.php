@@ -109,7 +109,7 @@ return array(
 		// Kardes siteler sameAs degil; grup iliskisi parentOrganization ile.
 		'same_as'     => array(),
 		'parent_name' => 'Koçist Orman Ürünleri',
-		'parent_url'  => 'https://www.kocist.com.tr',
+		'parent_url'  => 'https://kocist.com.tr',
 	),
 
 	'pages'             => array(

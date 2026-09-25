@@ -38,7 +38,7 @@ return $build(
 
 		'family'         => array(
 			array( 'label' => 'İthal Keresteci', 'note' => 'İthal kereste, kalas, plywood', 'url' => 'https://ithalkeresteci.com' ),
-			array( 'label' => 'Koçist Orman Ürünleri', 'note' => 'Kereste, ambalaj, dekorasyon', 'url' => 'https://www.kocist.com.tr' ),
+			array( 'label' => 'Koçist Orman Ürünleri', 'note' => 'Kereste, ambalaj, dekorasyon', 'url' => 'https://kocist.com.tr' ),
 			array( 'label' => 'İstanbul Paletçi', 'note' => 'Ahşap palet ve Euro palet', 'url' => 'https://istanbulpaletci.com' ),
 			array( 'label' => 'ahsapkasa.com', 'note' => 'Ahşap sandık ve kafes', 'url' => 'https://ahsapkasa.com' ),
 		),
@@ -109,7 +109,7 @@ return $build(
 			// Kardes siteler sameAs degil; grup iliskisi parentOrganization ile.
 			'same_as'     => array(),
 			'parent_name' => 'Koçist Orman Ürünleri',
-			'parent_url'  => 'https://www.kocist.com.tr',
+			'parent_url'  => 'https://kocist.com.tr',
 		),
 
 		'products'       => array(

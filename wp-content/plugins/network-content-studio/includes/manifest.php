@@ -183,6 +183,7 @@ function nwcs_seo_site_page( array $defaults ): array {
 					'description' => $field( 'description', 'Firma tanımı', 'textarea', 'Bir iki cümle: ne üretiyorsunuz, nerede, kime. Yapay zekâ aramaları bu cümleyi alıntılar.' ),
 					'logo'        => $field( 'logo', 'Logo', 'image' ),
 					'phone'       => $field( 'phone', 'Telefon', 'text', 'Uluslararası biçimde: +90 212 648 10 90' ),
+					'mobile'      => $field( 'mobile', 'Cep ve WhatsApp', 'text', 'Uluslararası biçimde: +90 532 374 98 32. Boşsa sitenin cep hattı (Toplu Güncelleme) yazılır.' ),
 					'email'       => $field( 'email', 'E-posta' ),
 					'street'      => $field( 'street', 'Açık adres', 'text', 'Mahalle, cadde, numara' ),
 					'district'    => $field( 'district', 'İlçe' ),

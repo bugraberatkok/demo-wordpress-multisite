@@ -23,7 +23,7 @@ return array(
 		'city'        => 'İstanbul',
 		'country'     => 'TR',
 		'parent_name' => 'Koçist Orman Ürünleri',
-		'parent_url'  => 'https://www.kocist.com.tr',
+		'parent_url'  => 'https://kocist.com.tr',
 	),
 	'pages'      => array(
 
@@ -77,7 +77,7 @@ return array(
 						'nav_title'      => array( 'label' => 'Menü Başlığı', 'type' => 'text', 'default' => 'Sayfalar' ),
 						'external_note'  => array( 'label' => 'Diğer Ürünler Metni', 'type' => 'text', 'default' => 'Diğer ürün gruplarımız için' ),
 						'external_label' => array( 'label' => 'Diğer Ürünler Bağlantı Metni', 'type' => 'text', 'default' => 'www.kocist.com.tr' ),
-						'external_url'   => array( 'label' => 'Diğer Ürünler Adresi', 'type' => 'url', 'default' => 'https://www.kocist.com.tr' ),
+						'external_url'   => array( 'label' => 'Diğer Ürünler Adresi', 'type' => 'url', 'default' => 'https://kocist.com.tr' ),
 						'copyright'      => array( 'label' => 'Telif Satırı', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri' ),
 					),
 				),

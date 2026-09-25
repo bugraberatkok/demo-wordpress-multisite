@@ -649,7 +649,7 @@ function nwcs_seo_head(): void {
  * Firma bilgisi: panelde girilen degerler; bos olanlar yazilmaz.
  */
 function nwcs_seo_org_data(): array {
-	$keys = array( 'name', 'legal_name', 'description', 'phone', 'email', 'street', 'district', 'city', 'postal_code', 'country', 'latitude', 'longitude', 'parent_name', 'parent_url' );
+	$keys = array( 'name', 'legal_name', 'description', 'phone', 'mobile', 'email', 'street', 'district', 'city', 'postal_code', 'country', 'latitude', 'longitude', 'parent_name', 'parent_url' );
 	$org  = array();
 
 	foreach ( $keys as $key ) {
@@ -658,6 +658,15 @@ function nwcs_seo_org_data(): array {
 
 	$org['name']       = nwcs_seo_site_name();
 	$org['parent_url'] = esc_url_raw( $org['parent_url'] );
+
+	// Cep hatti panelde bos birakildiysa sitenin hat grubundaki cep (Toplu Guncelleme).
+	if ( '' === $org['mobile'] && function_exists( 'nwcs_bulk_phone_set' ) ) {
+		$digits = (string) ( nwcs_bulk_phone_set( (string) get_option( 'stylesheet' ) )['mobile'] ?? '' );
+
+		if ( 10 === strlen( $digits ) ) {
+			$org['mobile'] = sprintf( '+90 %s %s %s %s', substr( $digits, 0, 3 ), substr( $digits, 3, 3 ), substr( $digits, 6, 2 ), substr( $digits, 8, 2 ) );
+		}
+	}
 
 	$org['same_as'] = array_values(
 		array_filter(
@@ -697,6 +706,18 @@ function nwcs_seo_graph( array $context ): array {
 			'sameAs'      => $org['same_as'],
 		)
 	);
+
+	// Sabit hat 'telephone'da; cep ve WhatsApp hatti ayri iletisim noktasi.
+	if ( '' !== $org['mobile'] && $org['mobile'] !== $org['phone'] ) {
+		$business['contactPoint'] = array(
+			array(
+				'@type'             => 'ContactPoint',
+				'telephone'         => $org['mobile'],
+				'contactType'       => 'customer service',
+				'availableLanguage' => 'Turkish',
+			),
+		);
+	}
 
 	$logo = nwcs_seo_image( nwcs_seo_logo_id() ) ?: nwcs_seo_image_any( apply_filters( 'nwcs_seo_default_logo', 0 ) );
 
@@ -1034,18 +1055,20 @@ function nwcs_seo_robots( array $robots ): array {
  * Istek 404 olur; eski sitenin /author/ adresleri icin yonlendirme listesindeki
  * 410 kurali boylece calisir (liste yalnizca bulunamayan adreste devreye girer).
  */
-add_action( 'wp', 'nwcs_seo_no_author_archives' );
-function nwcs_seo_no_author_archives(): void {
-	global $wp_query;
-
+add_filter( 'request', 'nwcs_seo_no_author_archives' );
+function nwcs_seo_no_author_archives( array $query_vars ): array {
 	// Agin ana sitesi (panel kokunun) manifesti yok ama ayni kullanicilari tasir.
-	if ( is_admin() || ! is_author() || ( empty( nwcs_manifest()['pages'] ) && ! is_main_site() ) ) {
-		return;
+	if ( is_admin() || ( empty( nwcs_manifest()['pages'] ) && ! is_main_site() ) ) {
+		return $query_vars;
 	}
 
-	$wp_query->set_404();
-	status_header( 404 );
-	nocache_headers();
+	// Sorgu hic calismadan bulunamayan sayfa: var olan (?author=1) ile olmayan
+	// (?author=2) kullanici ayni 404'u alir; kullanici kimligi dogrulanamaz.
+	if ( isset( $query_vars['author'] ) || isset( $query_vars['author_name'] ) ) {
+		return array( 'error' => '404' );
+	}
+
+	return $query_vars;
 }
 
 /**
@@ -1134,7 +1157,13 @@ function nwcs_seo_security_headers(): void {
 	header( sprintf( "Content-Security-Policy: frame-ancestors 'self' https://%1\$s http://%1\$s", $host ), true );
 }
 function nwcs_seo_noindex_main_site(): void {
-	if ( is_multisite() && is_main_site() && ! is_admin() && ! headers_sent() ) {
+	if ( ! is_multisite() || is_admin() || headers_sent() ) {
+		return;
+	}
+
+	// Ana site ve arama motorlarina kapali alt siteler (panelde onay bekleyen
+	// Kocist, WOOD KOCIST...): beslemeler dahil her yanitta.
+	if ( is_main_site() || '0' === (string) get_option( 'blog_public' ) ) {
 		header( 'X-Robots-Tag: noindex, nofollow', true );
 	}
 }
@@ -1233,6 +1262,7 @@ function nwcs_seo_llms_text(): string {
 			'' !== $org['legal_name'] ? 'Resmî unvan: ' . $org['legal_name'] : '',
 			'' !== $org['street'] ? 'Adres: ' . implode( ', ', array_filter( array( $org['street'], $org['district'], $org['city'], $org['postal_code'] ) ) ) : '',
 			'' !== $org['phone'] ? 'Telefon: ' . $org['phone'] : '',
+			'' !== $org['mobile'] && $org['mobile'] !== $org['phone'] ? 'Cep ve WhatsApp: ' . $org['mobile'] : '',
 			'' !== $org['email'] ? 'E-posta: ' . $org['email'] : '',
 			'' !== $org['parent_name'] ? 'Bağlı olduğu grup: ' . $org['parent_name'] . ( '' !== $org['parent_url'] ? ' (' . $org['parent_url'] . ')' : '' ) : '',
 		)

@@ -89,7 +89,7 @@ return array(
 		'country'     => 'TR',
 		'same_as'     => array(),
 		'parent_name' => 'Koçist Orman Ürünleri',
-		'parent_url'  => 'https://www.kocist.com.tr',
+		'parent_url'  => 'https://kocist.com.tr',
 	),
 
 	'pages'             => array(
@@ -141,7 +141,7 @@ return array(
 						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => $address ),
 						'copyright'      => array( 'label' => 'Telif Satırı', 'type' => 'text', 'default' => 'İstanbul Palet Çivi · Koçist Grup' ),
 						'external_label' => array( 'label' => 'Grup Bağlantısı Metni', 'type' => 'text', 'default' => 'kocist.com.tr' ),
-						'external_url'   => array( 'label' => 'Grup Bağlantısı', 'type' => 'url', 'default' => 'https://www.kocist.com.tr' ),
+						'external_url'   => array( 'label' => 'Grup Bağlantısı', 'type' => 'url', 'default' => 'https://kocist.com.tr' ),
 					),
 				),
 			),
