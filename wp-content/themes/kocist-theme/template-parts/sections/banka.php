@@ -92,7 +92,7 @@ $note = trim( (string) nwcs_field( 'banka', 'accounts', 'note' ) );
 						<?php kocist_social_icon( 'whatsapp', 'WhatsApp', 'k-icon', 18 ); ?>
 						<?php echo esc_html( nwcs_field( 'banka', 'empty', 'wa_label' ) ); ?>
 					</a>
-					<a class="k-btn k-btn--outline" href="<?php echo esc_url( $phone_url ); ?>">
+					<a class="k-btn k-btn--outline" href="<?php echo esc_url( $phone_url ); ?>" <?php nwcs_edit_attr( 'global', 'topbar', 'phone_label' ); ?>>
 						<?php nwcs_the_icon( 'phone', 'k-icon', 18 ); ?>
 						<?php echo esc_html( $phone_label ); ?>
 					</a>
