@@ -168,8 +168,9 @@ function ip_edit_attr( string $page, string $component, string $field = '', ?int
 }
 
 /**
- * Blog yazisinin basligi, tarihi, ozeti, metni: onizlemede tiklaninca
- * yazinin duzenleme ekrani acilir.
+ * Manifestte olmayan WordPress sayfasi (yasal metinler gibi): onizlemede
+ * tiklaninca sayfanin duzenleme ekrani acilir. Ornek blog yazilari panelde
+ * duzenlenir; onlar icin ip_post_edit_attr() kullanilir.
  */
 function ip_post_attr( int $post_id, string $label = 'Yazı başlığı' ): void {
 	if ( function_exists( 'nwcs_post_attr' ) ) {
@@ -223,6 +224,185 @@ function ip_manifest(): array {
 	}
 
 	return $manifest;
+}
+
+/**
+ * Manifestteki alanin varsayilan degeri.
+ *
+ * @return mixed
+ */
+function ip_manifest_default( string $page, string $component, string $field ) {
+	return ip_manifest()['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? '';
+}
+
+/* ====================================================================== *
+ * Blog yazilari panelden
+ *
+ * Ornek yazilarin panelde gizli bir sayfasi var ('yazi-<slug>', manifest).
+ * Panelde degistirilip kaydedilen alan sitede WordPress yazisinin yerine
+ * gecer: yazi sayfasi, blog listesi, ana sayfa kartlari ve arama bilgisi.
+ * Degistirilmeyen alan icin WordPress'teki yazi aynen kullanilir; yazi
+ * Yazilar ekranindan duzenlenmeye devam edebilir.
+ * ====================================================================== */
+
+/**
+ * Yazinin paneldeki gizli sayfasi; yoksa bos (sonradan yazilan yazilar).
+ */
+function ip_post_page_key( $post ): string {
+	$post = get_post( $post );
+
+	if ( ! $post || 'post' !== $post->post_type || '' === $post->post_name ) {
+		return '';
+	}
+
+	$key = 'yazi-' . $post->post_name;
+
+	return isset( ip_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Panelde degistirilmis deger; alan varsayilanindaysa (yazinin ilk metni) null.
+ *
+ * @return string|int|null
+ */
+function ip_post_override( $post, string $field ) {
+	$key = ip_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return null;
+	}
+
+	$value = nwcs_field( $key, 'post', $field );
+
+	if ( 'image' === $field ) {
+		return (int) $value ? (int) $value : null;
+	}
+
+	$clean   = static fn( $text ): string => trim( str_replace( "\r\n", "\n", (string) $text ) );
+	$value   = $clean( $value );
+	$default = $clean( ip_manifest_default( $key, 'post', $field ) );
+
+	return '' === $value || $value === $default ? null : $value;
+}
+
+/**
+ * Onizlemede tiklaninca yazinin paneldeki alanini acar.
+ */
+function ip_post_edit_attr( $post, string $field ): void {
+	$key = ip_post_page_key( $post );
+
+	if ( '' !== $key ) {
+		nwcs_edit_attr( $key, 'post', $field );
+	}
+}
+
+/**
+ * Panel metnini HTML'e cevirir: bos satir paragraf, '## ' ara baslik,
+ * her satiri '- ' ile baslayan blok madde listesi.
+ */
+function ip_post_body_html( string $text ): string {
+	$html = '';
+
+	foreach ( preg_split( '/\R\s*\R/u', trim( $text ) ) ?: array() as $block ) {
+		$block = trim( $block );
+		$lines = preg_split( '/\R/u', $block ) ?: array();
+
+		if ( '' === $block ) {
+			continue;
+		}
+
+		if ( str_starts_with( $block, '## ' ) ) {
+			$html .= '<h2>' . esc_html( trim( substr( $block, 3 ) ) ) . "</h2>\n";
+		} elseif ( count( $lines ) === count( preg_grep( '/^\s*-\s+/u', $lines ) ) ) {
+			$items = array_map( static fn( string $line ): string => '<li>' . esc_html( trim( (string) preg_replace( '/^\s*-\s+/u', '', $line ) ) ) . '</li>', $lines );
+			$html .= "<ul>\n" . implode( "\n", $items ) . "\n</ul>\n";
+		} else {
+			$html .= '<p>' . ip_multiline( $block ) . "</p>\n";
+		}
+	}
+
+	return $html;
+}
+
+/*
+ * SEO: eklenti yazi bilgisini 'wp' aksiyonunda (10) hesaplayip sakliyor.
+ * Hemen once, gizli sayfanin "Arama ve Paylasim" alanlari (yoksa paneldeki
+ * baslik, ozet ve kapak) gecerliyken hesaplatilir.
+ */
+add_action( 'wp', 'ip_post_seo', 9 );
+function ip_post_seo(): void {
+	if ( ! is_singular( 'post' ) || ! function_exists( 'nwcs_seo_context' ) ) {
+		return;
+	}
+
+	$post = get_queried_object();
+	$key  = ip_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return;
+	}
+
+	$description = trim( (string) nwcs_field( $key, 'seo', 'description' ) );
+	$description = '' !== $description ? $description : (string) ip_post_override( $post, 'excerpt' );
+	$original    = $post->post_excerpt;
+
+	if ( '' !== $description ) {
+		$post->post_excerpt = $description;
+	}
+
+	$GLOBALS['ip_post_seo_key'] = $key;
+	nwcs_seo_context();
+	unset( $GLOBALS['ip_post_seo_key'] );
+
+	$post->post_excerpt = $original;
+}
+
+/**
+ * Arama bilgisi hesaplanirken gecerli olan SEO alani; diger zamanlarda bos.
+ */
+function ip_post_seo_field( $post, string $field ): string {
+	$key = $GLOBALS['ip_post_seo_key'] ?? '';
+
+	return '' !== $key && ip_post_page_key( $post ) === $key ? trim( (string) nwcs_field( $key, 'seo', $field ) ) : '';
+}
+
+add_filter( 'the_title', 'ip_post_title', 10, 2 );
+function ip_post_title( $title, $post_id = 0 ) {
+	if ( is_admin() || ! $post_id ) {
+		return $title;
+	}
+
+	$seo = ip_post_seo_field( $post_id, 'title' );
+
+	return '' !== $seo ? $seo : ( ip_post_override( $post_id, 'title' ) ?? $title );
+}
+
+add_filter( 'get_the_excerpt', 'ip_post_excerpt', 10, 2 );
+function ip_post_excerpt( $excerpt, $post = null ) {
+	return is_admin() ? $excerpt : ( ip_post_override( $post, 'excerpt' ) ?? $excerpt );
+}
+
+// wpautop'tan sonra: panel metni kendi paragraflariyla gelir.
+add_filter( 'the_content', 'ip_post_content', 99 );
+function ip_post_content( $content ) {
+	if ( is_admin() || ! in_the_loop() ) {
+		return $content;
+	}
+
+	$body = ip_post_override( get_the_ID(), 'body' );
+
+	return null === $body ? $content : ip_post_body_html( $body );
+}
+
+add_filter( 'post_thumbnail_id', 'ip_post_thumbnail', 10, 2 );
+function ip_post_thumbnail( $thumbnail_id, $post = null ) {
+	if ( is_admin() ) {
+		return $thumbnail_id;
+	}
+
+	$seo = (int) ip_post_seo_field( $post, 'image' );
+
+	return $seo ? $seo : ( ip_post_override( $post, 'image' ) ?? $thumbnail_id );
 }
 
 /* ====================================================================== *
