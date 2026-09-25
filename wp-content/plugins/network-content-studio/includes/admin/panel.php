@@ -37,7 +37,8 @@ function nwcs_admin_assets( string $hook ): void {
 		|| str_contains( $hook, 'nwcs-redirects' )
 		|| str_contains( $hook, 'nwcs-bulk-update' )
 		|| str_contains( $hook, 'nwcs-placeholders' )
-		|| str_contains( $hook, 'nwcs-pool-package' );
+		|| str_contains( $hook, 'nwcs-pool-package' )
+		|| str_contains( $hook, 'nwcs-mail-test' );
 
 	if ( ! $ours ) {
 		return;
@@ -82,7 +83,7 @@ function nwcs_fold_admin_menu( string $classes ): string {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca gorunum.
 	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
-	$ours = in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG, NWCS_SEO_SLUG, 'nwcs-redirects', 'nwcs-bulk-update', 'nwcs-placeholders', 'nwcs-pool-package' ), true );
+	$ours = in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG, NWCS_SEO_SLUG, 'nwcs-redirects', 'nwcs-bulk-update', 'nwcs-placeholders', 'nwcs-pool-package', 'nwcs-mail-test' ), true );
 
 	if ( $ours && 'o' !== get_user_setting( 'mfold' ) ) {
 		$classes .= ' folded';

@@ -56,8 +56,11 @@ services:
       WP_HOST: ${WP_HOST:-localhost:8080}
       WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-0}
       WORDPRESS_CONFIG_EXTRA: *wp_config_extra
+      # Yerel e-posta: Mailpit (docker/mu-plugins/local-mailpit.php)
+      WP_MAILPIT_HOST: mailpit
     volumes:
       - wp_core:/var/www/html
+      - ./docker/mu-plugins/local-mailpit.php:/var/www/html/wp-content/mu-plugins/local-mailpit.php:ro
       - ./wp-content/themes/ahsapkasa-theme:/var/www/html/wp-content/themes/ahsapkasa-theme
       - ./wp-content/themes/istanbulpaletci-theme:/var/www/html/wp-content/themes/istanbulpaletci-theme
       - ./wp-content/themes/kereste-base:/var/www/html/wp-content/themes/kereste-base
@@ -74,6 +77,15 @@ services:
       - ./docker/php-uploads.ini:/usr/local/etc/php/conf.d/zz-uploads.ini:ro
       - ./scripts:/scripts:ro
       - ./resources:/resources:ro
+
+  # Yerel e-posta yakalayici: sitelerin gonderdigi her e-posta burada gorunur
+  # (http://localhost:8025). Disariya hicbir e-posta cikmaz.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: dwm-mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
 
   wpcli:
     image: wordpress:cli-php8.3
@@ -92,8 +104,11 @@ services:
       WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD:-admin123}
       WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL:-admin@example.test}
       WORDPRESS_CONFIG_EXTRA: *wp_config_extra
+      # Yerel e-posta: Mailpit (docker/mu-plugins/local-mailpit.php)
+      WP_MAILPIT_HOST: mailpit
     volumes:
       - wp_core:/var/www/html
+      - ./docker/mu-plugins/local-mailpit.php:/var/www/html/wp-content/mu-plugins/local-mailpit.php:ro
       - ./wp-content/themes/ahsapkasa-theme:/var/www/html/wp-content/themes/ahsapkasa-theme
       - ./wp-content/themes/istanbulpaletci-theme:/var/www/html/wp-content/themes/istanbulpaletci-theme
       - ./wp-content/themes/kereste-base:/var/www/html/wp-content/themes/kereste-base

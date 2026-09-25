@@ -103,4 +103,9 @@ TXT,
 	// 601'i dogru sayfaya gidiyor. Eksik: /kvkk, /gizlilik, /cerezler (yeni
 	// sitede bu sayfalar henuz yok; sayfalar acilinca ayni adreste olacak).
 	'kocist'             => (string) file_get_contents( __DIR__ . '/kocist-redirects.txt' ),
+
+	// woodkocist.com.tr (WooCommerce): urun ve kategori adresleri yeni sitede
+	// ayni; yalnizca kalkan urun, urun etiketleri, hesap ve Ingilizce WooCommerce
+	// sayfalari. Yerelde 26 kural denendi; 56 eski urun adresinin hepsi 200.
+	'woodkocist'         => (string) file_get_contents( __DIR__ . '/woodkocist-redirects.txt' ),
 );

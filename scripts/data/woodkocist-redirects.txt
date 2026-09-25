@@ -1,0 +1,40 @@
+# woodkocist.com.tr eski adresleri (WooCommerce magaza)
+# Kaynak: scripts/data/woodkocist-products.json (Store API, 24.09.2026). Urun
+# (/urun/<slug>/) ve kategori (/urun-kategori/<seri>/<kategori>/) adresleri yeni
+# sitede ayni; yalnizca degisen ya da kalkan adresler burada.
+
+# Havuzda olmayan urun: kendi kategorisine
+/urun/w-adr-f02-klasik-seri-katlanir-adirondack-ahsap-sandalye-dogal-cam/   /urun-kategori/woodliving/adirondack/
+
+# Urun etiketleri (seri etiketleri) -> kategori sayfasi
+/urun-etiketi/w-adr-klasik-seri/      /urun-kategori/woodliving/adirondack/
+/urun-etiketi/w-car-klasik-seri/      /urun-kategori/woodgarden/cardaklar/
+/urun-etiketi/w-cat-klasik-seri/      /urun-kategori/woodpets/kedi-yuvalari/
+/urun-etiketi/w-dog-klasik-seri/      /urun-kategori/woodpets/kopek-kulubeleri/
+/urun-etiketi/w-dog-moduler-seri/     /urun-kategori/woodpets/kopek-kulubeleri/
+/urun-etiketi/w-dog-verandali-seri/   /urun-kategori/woodpets/kopek-kulubeleri/
+/urun-etiketi/w-kam-klasik-seri/      /urun-kategori/woodgarden/kamelyalar/
+/urun-etiketi/w-kam-master-seri/      /urun-kategori/woodgarden/kamelyalar/
+/urun-etiketi/w-kam-prestij-seri/     /urun-kategori/woodgarden/kamelyalar/
+/urun-etiketi/w-pik-aksam-sefasi/     /urun-kategori/woodliving/piknik-masalari/
+/urun-etiketi/w-pik-klasik-seri/      /urun-kategori/woodliving/piknik-masalari/
+/urun-etiketi/w-sez-klasik-seri/      /urun-kategori/woodgarden/ahsap-sezlonglar/
+/urun-etiketi/w-sez-kompakt-seri/     /urun-kategori/woodgarden/ahsap-sezlonglar/
+/urun-etiketi/*                       /magaza/
+
+# Sayfalar
+/hakkimizda/                          /sirketimiz/
+
+# WooCommerce sayfalari (yeni sitede uye hesabi yok)
+/hesabim/*                            /magaza/
+/my-account/*                         /magaza/
+/shop/                                /magaza/
+/cart/                                /sepet/
+/checkout/*                           /sepet/
+/odeme/order-received/*              /magaza/
+/wishlist/                            /magaza/
+
+# Eski WooCommerce site haritalari ve beslemeleri
+/sitemap_index.xml                    /wp-sitemap.xml
+/product-sitemap.xml                  /wp-sitemap.xml
+/product_cat-sitemap.xml              /wp-sitemap.xml
