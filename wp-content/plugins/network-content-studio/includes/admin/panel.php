@@ -401,10 +401,10 @@ function nwcs_product_page_key( array $manifest ): string {
 
 /**
  * Sayfa bulucu bu sitede acik mi? Manifestte 'page_finder' => false ile ya da
- * asagidaki listeyle kapatilir. İstanbul Keresteci'nin paneli ayri elden
- * duzenleniyor (Emirhan); orada bulucu yok.
+ * asagidaki listeyle kapatilir. Liste bos: İstanbul Keresteci de kendi gizli
+ * urun ve yazi sayfalariyla bulucuyu kullaniyor.
  */
-const NWCS_PAGE_FINDER_OFF = array( 'istanbulkeresteci', 'istanbul-keresteci' );
+const NWCS_PAGE_FINDER_OFF = array();
 
 function nwcs_page_finder_enabled( array $manifest ): bool {
 	if ( false === ( $manifest['page_finder'] ?? true ) ) {
