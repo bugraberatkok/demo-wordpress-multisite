@@ -31,6 +31,7 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 
 require_once __DIR__ . '/inc/blog.php';
 require_once __DIR__ . '/inc/catalog.php';
+require_once __DIR__ . '/inc/katalog.php';
 
 add_action( 'after_setup_theme', 'kocist_setup' );
 function kocist_setup(): void {
@@ -48,7 +49,7 @@ function kocist_setup(): void {
  * Surum 2: Insan Kaynaklari ve Blog sayfalari, yazilar sayfasi ayari ve
  * ilk kurulum blog yazilari (inc/blog.php).
  */
-const KOCIST_PAGES_VERSION = '2';
+const KOCIST_PAGES_VERSION = '3';
 
 add_action( 'after_switch_theme', 'kocist_ensure_pages' );
 add_action( 'admin_init', 'kocist_maybe_ensure_pages' );
@@ -82,6 +83,7 @@ function kocist_ensure_pages(): void {
 		'iletisim'         => 'İletişim',
 		'insan-kaynaklari' => 'İnsan Kaynakları',
 		'blog'             => 'Blog – Haberler',
+		'katalog'          => 'Katalog',
 	);
 
 	$ids = array();
@@ -270,6 +272,24 @@ function kocist_assets(): void {
 			get_theme_file_uri( 'assets/css/contact.css' ),
 			array( 'kocist-style' ),
 			wp_get_theme()->get( 'Version' )
+		);
+	}
+
+	// Katalog: belge ve sertifika sekmeleri, sertifika buyuk gorunumu.
+	if ( is_page( 'katalog' ) ) {
+		wp_enqueue_style(
+			'kocist-katalog',
+			get_theme_file_uri( 'assets/css/katalog.css' ),
+			array( 'kocist-style' ),
+			(string) filemtime( get_theme_file_path( 'assets/css/katalog.css' ) )
+		);
+
+		wp_enqueue_script(
+			'kocist-katalog',
+			get_theme_file_uri( 'assets/js/katalog.js' ),
+			array(),
+			(string) filemtime( get_theme_file_path( 'assets/js/katalog.js' ) ),
+			true
 		);
 	}
 
@@ -610,7 +630,7 @@ function kocist_anchor_targets(): array {
 		'insan-kaynaklari' => '/insan-kaynaklari/',
 		'blog'             => '/blog/',
 		'referanslar'      => '/kurumsal/',
-		'belgeler'         => '/kurumsal/',
+		'belgeler'         => '/katalog/?tab=belgeler',
 	);
 }
 

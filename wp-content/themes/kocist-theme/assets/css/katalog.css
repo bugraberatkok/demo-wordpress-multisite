@@ -1,0 +1,300 @@
+/*
+ * Katalog sayfasi: sekmeler, sertifika izgarasi, belge listesi, buyuk gorunum.
+ */
+
+.k-katalog { padding-top: 40px; }
+
+/* ---------- Sekmeler ---------- */
+
+.k-katalog__tabs {
+	display: inline-flex;
+	gap: 4px;
+	padding: 4px;
+	margin-bottom: 28px;
+	border: 1.5px solid var(--line);
+	border-radius: 999px;
+	background: var(--paper);
+}
+
+.k-katalog__tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 44px;
+	padding: 0 20px;
+	border-radius: 999px;
+	color: var(--forest);
+	font-weight: 700;
+	font-size: 15px;
+	text-decoration: none;
+	transition: background .15s, color .15s;
+}
+
+.k-katalog__tab:hover { background: var(--leaf-soft); }
+
+.k-katalog__tab[aria-selected="true"] {
+	background: var(--forest);
+	color: #fff;
+}
+
+.k-katalog__tab:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 2px;
+}
+
+.k-katalog__count {
+	display: inline-grid;
+	place-items: center;
+	min-width: 24px;
+	height: 22px;
+	padding: 0 7px;
+	border-radius: 999px;
+	background: var(--leaf-soft);
+	color: var(--forest);
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.k-katalog__tab[aria-selected="true"] .k-katalog__count {
+	background: rgba(255, 255, 255, .16);
+	color: #fff;
+}
+
+.k-katalog__panel[hidden] { display: none; }
+
+.k-katalog__empty { color: var(--muted); margin: 0; }
+
+/* ---------- Sertifikalar ---------- */
+
+.k-certs {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.k-cert {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	background: var(--paper);
+	overflow: hidden;
+	color: var(--text);
+	text-decoration: none;
+	transition: border-color .15s;
+}
+
+.k-cert:hover { border-color: var(--leaf); }
+
+.k-cert--empty:hover { border-color: var(--line); }
+
+/* Gorsel yakinda alani kartin gorsel kutusunu tamamen doldurur. */
+.k-cert__media > .k-cert__ph {
+	position: absolute;
+	inset: 0;
+	min-height: 0;
+}
+
+.k-cert--empty .k-cert__media { cursor: default; }
+
+.k-cert:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 3px;
+}
+
+/* Belgeler dikey, fotograflar yatay: ikisi de kirpilmadan ayni kutuya sigar. */
+.k-cert__media {
+	position: relative;
+	aspect-ratio: 4 / 3;
+	background: var(--paper-2);
+	cursor: zoom-in;
+}
+
+/* Mutlak konum: dikey belge kutuyu uzatmasin, oranin icinde kalsin. */
+.k-cert__img {
+	position: absolute;
+	inset: 14px;
+	width: calc(100% - 28px);
+	height: calc(100% - 28px);
+	object-fit: contain;
+}
+
+.k-cert__title {
+	padding: 14px 16px 16px;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+/* ---------- Belgeler ---------- */
+
+.k-docs {
+	display: grid;
+	gap: 12px;
+	max-width: 860px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.k-doc {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	padding: 16px 20px;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	background: var(--paper);
+	color: var(--text);
+	text-decoration: none;
+	transition: border-color .15s;
+}
+
+.k-doc:hover { border-color: var(--leaf); }
+
+.k-doc:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 3px;
+}
+
+.k-doc__icon {
+	position: relative;
+	flex: none;
+	width: 40px;
+	height: 48px;
+	color: var(--forest);
+}
+
+.k-doc__icon svg { display: block; }
+
+.k-doc__ext {
+	position: absolute;
+	left: 50%;
+	bottom: 7px;
+	transform: translateX(-50%);
+	padding: 1px 4px;
+	border-radius: 3px;
+	background: var(--forest);
+	color: #fff;
+	font-size: 9px;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+.k-doc__body {
+	display: grid;
+	gap: 2px;
+	min-width: 0;
+	flex: 1;
+}
+
+.k-doc__title {
+	font-weight: 700;
+	line-height: 1.3;
+	overflow-wrap: anywhere;
+}
+
+.k-doc__meta { color: var(--muted); font-size: 14px; }
+
+.k-doc__action {
+	flex: none;
+	padding: 8px 18px;
+	border-radius: 999px;
+	background: var(--leaf-soft);
+	color: var(--forest);
+	font-weight: 700;
+	font-size: 14px;
+	transition: background .15s, color .15s;
+}
+
+.k-doc:hover .k-doc__action {
+	background: var(--forest);
+	color: #fff;
+}
+
+/* ---------- Buyuk gorunum ---------- */
+
+.k-zoom {
+	width: min(100vw - 32px, 1100px);
+	max-width: none;
+	height: min(100vh - 32px, 900px);
+	max-height: none;
+	padding: 0;
+	border: 0;
+	border-radius: 16px;
+	background: var(--forest-3);
+	color: #fff;
+	overflow: hidden;
+}
+
+.k-zoom::backdrop { background: rgba(8, 24, 14, .82); }
+
+.k-zoom__figure {
+	display: grid;
+	grid-template-rows: minmax(0, 1fr) auto;
+	height: 100%;
+	margin: 0;
+	padding: 56px 72px 0;
+}
+
+.k-zoom__img {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.k-zoom__caption {
+	padding: 16px 0 20px;
+	text-align: center;
+	font-weight: 600;
+}
+
+.k-zoom__btn {
+	position: absolute;
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .12);
+	color: #fff;
+	cursor: pointer;
+	transition: background .15s;
+}
+
+.k-zoom__btn:hover { background: rgba(255, 255, 255, .24); }
+
+.k-zoom__btn:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 2px;
+}
+
+.k-zoom__btn--close { top: 12px; right: 12px; }
+.k-zoom__btn--prev { top: 50%; left: 14px; transform: translateY(-50%); }
+.k-zoom__btn--next { top: 50%; right: 14px; transform: translateY(-50%); }
+
+/* ---------- Dar ekran ---------- */
+
+@media (max-width: 1024px) {
+	.k-certs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+	.k-katalog { padding-top: 28px; }
+	.k-certs { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+	.k-cert__img { inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); }
+	.k-cert__title { padding: 10px 12px 12px; font-size: 14px; }
+
+	.k-doc { gap: 14px; padding: 14px; }
+	.k-doc__action { display: none; }
+
+	.k-zoom__figure { padding: 60px 12px 0; }
+	.k-zoom__btn--prev,
+	.k-zoom__btn--next { top: auto; bottom: 12px; transform: none; }
+}

@@ -95,7 +95,7 @@ return array(
 								array( 'label' => 'Dekorasyon', 'url' => '/#katalog', 'submenu' => 'menu_dekorasyon' ),
 								array( 'label' => 'Hırdavat', 'url' => '/#katalog', 'submenu' => 'menu_hirdavat' ),
 								array( 'label' => 'Kurumsal', 'url' => '/kurumsal/', 'submenu' => 'menu_kurumsal' ),
-								array( 'label' => 'Katalog', 'url' => '/#katalog', 'submenu' => '' ),
+								array( 'label' => 'Katalog', 'url' => '/katalog/', 'submenu' => '' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/', 'submenu' => '' ),
 							),
 						),
@@ -583,6 +583,80 @@ return array(
 						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Blog – Haberler' ),
 						'subtitle'   => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Koçist’ten haberler; orman ürünlerinde güncel trendler ve bilgilendirmeler.' ),
 						'link_label' => array( 'label' => 'Tüm Yazılar Bağlantı Metni', 'type' => 'text', 'default' => 'Tüm yazılar' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Katalog (/katalog/): belgeler ve sertifikalar. Iki sekme: sertifika
+		 * gorselleri (tiklayinca buyur) ve indirilebilir belgeler.
+		 *
+		 * Varsayilan dosyalar temada (assets/katalog/); '/tema/' ile baslayan
+		 * baglanti o klasore cozulur. Yeni belge: dosyayi Ortam Kutuphanesi'ne
+		 * yukleyip adresini Baglanti alanina yapistirin.
+		 */
+		'katalog' => array(
+			'label'      => 'Katalog',
+			'path'       => '/katalog/',
+			'components' => array(
+
+				'page_head' => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'breadcrumb' => array( 'label' => 'Yol Göstergesi', 'type' => 'text', 'default' => 'Ana Sayfa / Katalog' ),
+						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Belgeler ve Sertifikalar' ),
+						'subtitle'   => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'ISPM-15 ve HT yetki belgelerimiz, ısıl işlem tesisimiz ve kurumsal dokümanlarımız.' ),
+					),
+				),
+
+				'certificates' => array(
+					'label'  => 'Sertifikalar',
+					'fields' => array(
+						'tab_label' => array( 'label' => 'Sekme Adı', 'type' => 'text', 'default' => 'Sertifikalar' ),
+						'items'     => array(
+							'label'   => 'Görseller',
+							'type'    => 'repeater',
+							'max'     => 30,
+							'fields'  => array(
+								'image' => array( 'label' => 'Görsel', 'type' => 'image' ),
+								'title' => array( 'label' => 'Başlık', 'type' => 'text' ),
+							),
+							'default' => array(
+								array( 'image' => 0, 'title' => 'Ahşap Ambalaj Malzemesi İşaretleme İzin Belgesi' ),
+								array( 'image' => 0, 'title' => 'Isıl İşlem Operatör Belgesi' ),
+								array( 'image' => 0, 'title' => 'ISPM-15 ısıl işlem fırını' ),
+								array( 'image' => 0, 'title' => 'ISPM-15 ısıl işlem fırını, kapalı' ),
+								array( 'image' => 0, 'title' => 'HT damgalı kereste' ),
+								array( 'image' => 0, 'title' => 'HT damgalı palet takozu' ),
+								array( 'image' => 0, 'title' => 'Sandık üretim atölyesi' ),
+								array( 'image' => 0, 'title' => 'HT damgalı kereste istifi' ),
+								array( 'image' => 0, 'title' => 'Koçist damgalı kereste paketi' ),
+								array( 'image' => 0, 'title' => 'TR-1080 HT damgası' ),
+							),
+						),
+					),
+				),
+
+				'documents' => array(
+					'label'  => 'Belgeler',
+					'fields' => array(
+						'tab_label' => array( 'label' => 'Sekme Adı', 'type' => 'text', 'default' => 'Belgeler' ),
+						'items'     => array(
+							'label'   => 'Belgeler',
+							'type'    => 'repeater',
+							'max'     => 30,
+							'fields'  => array(
+								'title' => array( 'label' => 'Belge Adı', 'type' => 'text' ),
+								'url'   => array( 'label' => 'Dosya Bağlantısı (PDF, JPG…)', 'type' => 'url' ),
+							),
+							'default' => array(
+								array( 'title' => 'Ahşap Ambalaj Malzemesi İşaretleme İzin Belgesi', 'url' => '/tema/isaretleme-izin-belgesi.jpg' ),
+								array( 'title' => 'Kapasite Raporu', 'url' => '/tema/belgeler/kapasite-raporu.pdf' ),
+								array( 'title' => 'Sanayi Sicil Belgesi', 'url' => '/tema/belgeler/sanayi-sicil-belgesi.pdf' ),
+								array( 'title' => 'Vida, Somun ve Bits Uç Listesi 2025', 'url' => '/tema/belgeler/vida-somun-bits-uc-listesi-2025.pdf' ),
+							),
+						),
 					),
 				),
 			),

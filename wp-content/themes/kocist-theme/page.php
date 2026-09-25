@@ -2,7 +2,7 @@
 /**
  * Sayfa sablonu.
  *
- * Temanin actigi sayfalar (kurumsal, insan-kaynaklari, iletisim, urun)
+ * Temanin actigi sayfalar (kurumsal, insan-kaynaklari, katalog, iletisim, urun)
  * manifestteki bilesenlerden cizilir; diger sayfalar normal icerikle.
  */
 
@@ -37,6 +37,10 @@ if ( is_page( 'kurumsal' ) ) {
 			),
 		)
 	);
+} elseif ( is_page( 'katalog' ) ) {
+	// Belgeler ve sertifikalar: manifestteki 'katalog' bilesenlerinden.
+	kocist_section( 'page-head', array( 'page' => 'katalog' ) );
+	kocist_section( 'katalog' );
 } elseif ( is_page( 'iletisim' ) ) {
 	// Iletisim sayfasi: manifestteki 'contact' bilesenlerinden cizilir.
 	kocist_section( 'contact-main' );

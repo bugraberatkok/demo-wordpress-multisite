@@ -1,6 +1,6 @@
 <?php
 /**
- * Alt sayfa basligi (Kurumsal, Insan Kaynaklari, Blog).
+ * Alt sayfa basligi (Kurumsal, Insan Kaynaklari, Katalog, Blog).
  *
  * Hangi sayfanin 'page_head' bileseninin okunacagi $args['page'] ile gelir;
  * verilmezse Kurumsal ('inner').
