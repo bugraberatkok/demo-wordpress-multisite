@@ -17,9 +17,11 @@
 
 	var dropdowns = doc.querySelectorAll( '[data-dropdown]' );
 
-	var setOpen = function ( item, open ) {
+	var setOpen = function ( item, open, pinned ) {
 		var toggle = item.querySelector( '.wk-nav__toggle' );
 		item.classList.toggle( 'is-open', open );
+		// Dugmeyle acilan menu fare ayrilinca kapanmaz (disari tik / Esc kapatir).
+		item.toggleAttribute( 'data-pinned', open && !! pinned );
 
 		if ( toggle ) {
 			toggle.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
@@ -48,7 +50,7 @@
 		} );
 
 		item.addEventListener( 'mouseleave', function () {
-			if ( window.matchMedia( '(hover: hover)' ).matches ) {
+			if ( window.matchMedia( '(hover: hover)' ).matches && ! item.hasAttribute( 'data-pinned' ) ) {
 				timer = setTimeout( function () {
 					setOpen( item, false );
 				}, 180 );
@@ -57,9 +59,9 @@
 
 		if ( toggle ) {
 			toggle.addEventListener( 'click', function () {
-				var open = ! item.classList.contains( 'is-open' );
+				var open = ! item.hasAttribute( 'data-pinned' );
 				closeAll( item );
-				setOpen( item, open );
+				setOpen( item, open, open );
 
 				if ( open ) {
 					var first = item.querySelector( '[data-panel] a' );

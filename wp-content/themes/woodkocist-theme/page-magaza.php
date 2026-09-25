@@ -22,6 +22,15 @@ $title    = $category ? $category['label'] : ( '' !== $search ? 'Arama sonuçlar
 $parent   = $category['parent'] ?? null;
 $tree     = wk_category_tree();
 
+// Panelde bu sayfanin karsiligi: kategori sekmesi (kat-...) ya da Magaza.
+$page_key = $category ? wk_category_page_key( $category['slug'] ) : 'shop';
+$edit     = $page_key ? ( 'shop' === $page_key ? array( 'shop', 'pool', 'pool' ) : array( $page_key, 'products', 'pool' ) ) : array();
+$head     = $page_key && 'shop' !== $page_key && '' === $search;
+
+if ( $head ) {
+	$title = (string) nwcs_field( $page_key, 'head', 'title' );
+}
+
 get_header();
 ?>
 
@@ -39,8 +48,10 @@ get_header();
 				<li aria-current="page"><?php echo esc_html( $category ? $category['label'] : 'Mağaza' ); ?></li>
 			</ol>
 		</nav>
-		<h1 class="wk-hero__title"><?php echo esc_html( $title ); ?></h1>
-		<?php if ( $category && ! $parent && '' !== ( $category['text'] ?? '' ) ) : ?>
+		<h1 class="wk-hero__title" <?php $head && nwcs_edit_attr( $page_key, 'head', 'title' ); ?>><?php echo esc_html( $title ); ?></h1>
+		<?php if ( $head ) : ?>
+			<p class="wk-hero__lead" <?php nwcs_edit_attr( $page_key, 'head', 'lead' ); ?>><?php echo esc_html( nwcs_field( $page_key, 'head', 'lead' ) ); ?></p>
+		<?php elseif ( $category && ! $parent && '' !== ( $category['text'] ?? '' ) ) : ?>
 			<p class="wk-hero__lead"><?php echo esc_html( $category['text'] ); ?></p>
 		<?php elseif ( ! $category && '' === $search ) : ?>
 			<p class="wk-hero__lead" <?php nwcs_edit_attr( 'shop', 'head', 'lead' ); ?>><?php echo esc_html( nwcs_field( 'shop', 'head', 'lead' ) ); ?></p>
@@ -114,7 +125,7 @@ get_header();
 		<?php if ( $products ) : ?>
 			<div class="wk-grid">
 				<?php foreach ( $products as $product ) : ?>
-					<?php wk_part( 'product-card', array( 'product' => $product, 'heading' => 'h2' ) ); ?>
+					<?php wk_part( 'product-card', array( 'product' => $product, 'heading' => 'h2', 'edit' => $edit ) ); ?>
 				<?php endforeach; ?>
 			</div>
 		<?php else : ?>

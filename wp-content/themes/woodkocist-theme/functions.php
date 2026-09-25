@@ -125,6 +125,16 @@ function wk_brand_mark(): string {
 		. $tiles( $words[1], 'wk-mark__sub' );
 }
 
+/**
+ * Panel onizlemesi: urune ait metin/gorsel tiklaninca Urun Havuzu'ndaki urun
+ * acilir (eklentinin nwcs_product_attr'i; eklenti eskiyse hicbir sey basmaz).
+ */
+function wk_product_src( array $product, string $label ): void {
+	if ( function_exists( 'nwcs_product_attr' ) ) {
+		nwcs_product_attr( (int) $product['id'], $label );
+	}
+}
+
 function wk_icon( string $name ): string {
 	$paths = array(
 		'whatsapp' => '<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.8 8.5c.3-.6.6-.6.9-.6h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.5.6c-.1.2-.2.3 0 .6a7 7 0 0 0 3 2.6c.3.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.4.4 0 .6-.2 1.3-.9 1.7-.7.4-1.6.5-3.2-.1a10 10 0 0 1-4.5-4c-.8-1.3-.9-2.6-.4-3.4z" fill="currentColor"/>',

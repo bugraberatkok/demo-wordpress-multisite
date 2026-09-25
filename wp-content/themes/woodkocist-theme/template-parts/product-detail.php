@@ -59,7 +59,7 @@ get_header();
 </nav>
 
 <article class="wk-wrap wk-product">
-	<div class="wk-product__media">
+	<div class="wk-product__media" <?php wk_product_src( $product, 'Görsel' ); ?>>
 		<?php if ( $image['url'] ) : ?>
 			<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ?: $product['title'] ); ?>" fetchpriority="high" />
 		<?php else : ?>
@@ -68,10 +68,10 @@ get_header();
 	</div>
 
 	<div class="wk-product__info">
-		<p class="wk-product__code">Ürün kodu <span class="wk-num"><?php echo esc_html( $product['code'] ); ?></span></p>
-		<h1 class="wk-product__title"><?php echo esc_html( $product['title'] ); ?></h1>
+		<p class="wk-product__code" <?php wk_product_src( $product, 'Ürün kodu' ); ?>>Ürün kodu <span class="wk-num"><?php echo esc_html( $product['code'] ); ?></span></p>
+		<h1 class="wk-product__title" <?php wk_product_src( $product, 'Ürün adı' ); ?>><?php echo esc_html( $product['title'] ); ?></h1>
 		<?php if ( '' !== trim( (string) $product['short'] ) ) : ?>
-			<p class="wk-product__short"><?php echo esc_html( $product['short'] ); ?></p>
+			<p class="wk-product__short" <?php wk_product_src( $product, 'Kısa açıklama' ); ?>><?php echo esc_html( $product['short'] ); ?></p>
 		<?php endif; ?>
 
 		<div class="wk-buy">
@@ -105,7 +105,7 @@ get_header();
 
 		<?php if ( $specs ) : ?>
 			<h2 class="wk-product__subtitle">Teknik özellikler</h2>
-			<dl class="wk-specs">
+			<dl class="wk-specs" <?php wk_product_src( $product, 'Teknik özellikler' ); ?>>
 				<?php foreach ( $specs as $pair ) : ?>
 					<div>
 						<dt><?php echo esc_html( $pair[0] ); ?></dt>
@@ -116,7 +116,7 @@ get_header();
 		<?php endif; ?>
 	</div>
 
-	<div class="wk-product__body wk-prose">
+	<div class="wk-product__body wk-prose" <?php wk_product_src( $product, 'Detay metni' ); ?>>
 		<?php echo wp_kses_post( wpautop( (string) $product['body'] ) ); ?>
 	</div>
 </article>

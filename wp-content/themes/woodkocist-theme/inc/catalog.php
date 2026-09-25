@@ -82,6 +82,14 @@ function wk_category_tree(): array {
 
 		foreach ( $children as $slug => $child ) {
 			$children[ $slug ]['url'] = home_url( '/urun-kategori/' . $line['slug'] . '/' . $slug . '/' );
+
+			// Panelde kategori sekmesinde verilen ad (yalnizca bu sitede); bossa havuzdaki ad.
+			$page = wk_category_page_key( (string) $slug );
+			$name = $page ? trim( (string) nwcs_field( $page, 'head', 'name' ) ) : '';
+
+			if ( '' !== $name ) {
+				$children[ $slug ]['label'] = $name;
+			}
 		}
 
 		$tree[] = array(
@@ -122,6 +130,15 @@ function wk_category_url( string $slug ): string {
 	$category = wk_category( $slug );
 
 	return $category ? $category['url'] : home_url( '/magaza/' );
+}
+
+/**
+ * Kategorinin panel sayfasi (manifestte 'kat-<kisaltma>'); yoksa bos.
+ */
+function wk_category_page_key( string $slug ): string {
+	$key = 'kat-' . $slug;
+
+	return function_exists( 'nwcs_manifest' ) && isset( nwcs_manifest()['pages'][ $key ] ) ? $key : '';
 }
 
 function wk_shop_url(): string {

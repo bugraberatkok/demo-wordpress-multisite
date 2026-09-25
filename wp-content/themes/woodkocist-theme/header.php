@@ -20,7 +20,7 @@ $submenu = static function ( array $item, string $prefix ) use ( $tree, $corpora
 			<div class="wk-mega__cols">
 				<?php foreach ( $tree as $line ) : ?>
 					<div class="wk-mega__col">
-						<a class="wk-mega__head" href="<?php echo esc_url( $line['url'] ); ?>">
+						<a class="wk-mega__head" href="<?php echo esc_url( $line['url'] ); ?>" <?php nwcs_edit_attr( 'home', 'catalog', 'lines' ); ?>>
 							<span><?php echo esc_html( $line['label'] ); ?></span>
 							<?php if ( '' !== $line['text'] ) : ?>
 								<small><?php echo esc_html( $line['text'] ); ?></small>
@@ -28,7 +28,8 @@ $submenu = static function ( array $item, string $prefix ) use ( $tree, $corpora
 						</a>
 						<ul>
 							<?php foreach ( $line['children'] as $child ) : ?>
-								<li><a href="<?php echo esc_url( $child['url'] ); ?>"><?php echo esc_html( $child['label'] ); ?> <span class="wk-num"><?php echo (int) $child['count']; ?></span></a></li>
+								<?php $child_page = wk_category_page_key( $child['slug'] ); ?>
+								<li><a href="<?php echo esc_url( $child['url'] ); ?>" <?php $child_page && nwcs_edit_attr( $child_page, 'head', 'name' ); ?>><?php echo esc_html( $child['label'] ); ?> <span class="wk-num"><?php echo (int) $child['count']; ?></span></a></li>
 							<?php endforeach; ?>
 						</ul>
 					</div>
@@ -41,7 +42,7 @@ $submenu = static function ( array $item, string $prefix ) use ( $tree, $corpora
 		?>
 		<ul class="wk-drop" id="<?php echo esc_attr( $prefix ); ?>-about" data-panel>
 			<?php foreach ( $corporate as $page ) : ?>
-				<li><a href="<?php echo esc_url( $page['url'] ); ?>"><?php echo esc_html( $page['label'] ); ?></a></li>
+				<li><a href="<?php echo esc_url( $page['url'] ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'about_menu', (int) $page['row'], 'label' ); ?>><?php echo esc_html( $page['label'] ); ?></a></li>
 			<?php endforeach; ?>
 		</ul>
 		<?php
@@ -92,6 +93,13 @@ $submenu = static function ( array $item, string $prefix ) use ( $tree, $corpora
 		</nav>
 
 		<div class="wk-header__tools">
+			<?php $contact_phone = trim( (string) nwcs_field( 'global', 'header', 'phone_label' ) ); ?>
+			<?php if ( '' !== $contact_phone ) : ?>
+				<a class="wk-callbtn" href="<?php echo esc_url( wk_page_url( 'iletisim' ) ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>>
+					<?php echo wk_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+					<span class="wk-callbtn__text"><span class="wk-sr">İletişim: </span><span class="wk-num"><?php echo esc_html( $contact_phone ); ?></span></span>
+				</a>
+			<?php endif; ?>
 			<button type="button" class="wk-iconbtn" data-search-toggle aria-controls="wk-search" aria-expanded="false">
 				<?php echo wk_icon( 'search' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 				<span class="wk-sr">Ürün ara</span>

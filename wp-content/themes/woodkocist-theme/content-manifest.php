@@ -3,7 +3,8 @@
  * woodkocist temasi alan manifesti.
  *
  * Urunler burada tanimlanmaz: merkezi Urun Havuzu'ndan gelir. Hangi urunun
- * sitede gorunecegi Icerik Studyosu -> Ana Sayfa -> Urunler alanindan secilir
+ * sitede gorunecegi Icerik Studyosu -> Magaza -> Tum Urunler alanindan, ya da
+ * kategori sekmelerinden (Kopek Kulubeleri...) yalnizca o kategori icin secilir
  * (urun ekle / cikar / sirala / siteye ozel ad-fiyat). Kod gerekmez.
  *
  * Metinler woodkocist.com.tr'nin kendi sayfalarindan (25 Eylul 2026): ana sayfa,
@@ -27,6 +28,56 @@ $head = static function ( string $title, string $lead ): array {
 		),
 	);
 };
+
+/*
+ * Kategori sayfalari (/urun-kategori/<seri>/<kategori>/): panelde her biri ayri
+ * sekme. Onizleme o kategorinin sayfasini acar; "Ürünler" bolumunde yalnizca o
+ * kategorinin urunleri listelenir (secim, sira ve bu siteye ozel ad/fiyat).
+ * 'category' havuzdaki kategori adiyla birebir ayni olmali.
+ */
+$categories = array(
+	// kisaltma => array( havuzdaki ad, seri kisaltmasi, sayfa basligi, one cikan cumle )
+	'kopek-kulubeleri' => array( 'Köpek Kulübeleri', 'woodpets', 'Ahşap köpek kulübeleri', 'Verandalı, bölmeli ve farklı boylarda ahşap köpek kulübeleri. Ölçü, ahşap cinsi ve KDV dahil fiyatlarıyla.' ),
+	'kedi-yuvalari'    => array( 'Kedi Yuvaları', 'woodpets', 'Ahşap kedi yuvaları', 'Tekli, üçlü ve altılı ahşap kedi yuvaları; farklı renk seçenekleriyle.' ),
+	'kamelyalar'       => array( 'Kamelyalar', 'woodgarden', 'Ahşap kamelyalar', 'Klasik, Prestij ve Master seri ahşap kamelyalar; zemin platformlu ve kuşluklu modeller.' ),
+	'cardaklar'        => array( 'Çardaklar', 'woodgarden', 'Ahşap çardaklar', 'Kompakt, orta ve büyük boy ahşap çardaklar.' ),
+	'piknik-masalari'  => array( 'Piknik Masaları', 'woodgarden', 'Ahşap piknik masaları', 'Bahçe ve teras için oturaklı ahşap piknik masaları.' ),
+	'ahsap-sezlonglar' => array( 'Şezlonglar', 'woodgarden', 'Ahşap şezlonglar', 'Bahçe, havuz başı ve teras için ahşap şezlonglar.' ),
+	'adirondack'       => array( 'Adirondack', 'woodliving', 'Adirondack ahşap sandalyeler', 'Katlanır ve sabit, küçük ve büyük boy Adirondack sandalyeler.' ),
+);
+
+$category_pages = array();
+
+foreach ( $categories as $slug => $c ) {
+	$category_pages[ 'kat-' . $slug ] = array(
+		'label'      => $c[0] . ' (Mağaza)',
+		'path'       => '/urun-kategori/' . $c[1] . '/' . $slug . '/',
+		'seo_source' => array(
+			'title'       => 'head.title',
+			'description' => 'head.lead',
+		),
+		'components' => array(
+			'head'     => array(
+				'label'  => 'Sayfa Başı ve Menü Adı',
+				'fields' => array(
+					'name'  => array( 'label' => 'Kategori adı (menü, kenar listesi, ana sayfa kutuları)', 'type' => 'text', 'default' => $c[0], 'hint' => 'Yalnızca bu sitede görünen ad; Ürün Havuzu’ndaki kategori adı değişmez.' ),
+					'title' => array( 'label' => 'Sayfa başlığı', 'type' => 'text', 'default' => $c[2] ),
+					'lead'  => array( 'label' => 'Öne çıkan cümle', 'type' => 'textarea', 'default' => $c[3] ),
+				),
+			),
+			'products' => array(
+				'label'  => 'Ürünler',
+				'fields' => array(
+					'pool' => array(
+						'label'    => $c[0] . ': ürünler (seçin, sıralayın, bu siteye özel ad ve fiyat)',
+						'type'     => 'products',
+						'category' => $c[0],
+					),
+				),
+			),
+		),
+	);
+}
 
 return array(
 	'site_key'          => 'woodkocist',
@@ -59,7 +110,7 @@ return array(
 					'fields' => array(
 						'logo_text'      => array( 'label' => 'Marka', 'type' => 'text', 'default' => 'WOOD KOCIST' ),
 						'menu'           => array(
-							'label'   => 'Menü Öğeleri (Mağaza ve Hakkımızda açılır menüsü kendiliğinden eklenir)',
+							'label'   => 'Menü Öğeleri (adresi /magaza/ olana ürün menüsü, /sirketimiz/ olana Hakkımızda menüsü açılır)',
 							'type'    => 'repeater',
 							'max'     => 6,
 							'fields'  => array(
@@ -71,6 +122,23 @@ return array(
 								array( 'label' => 'Mağaza', 'url' => '/magaza/' ),
 								array( 'label' => 'Hakkımızda', 'url' => '/sirketimiz/' ),
 								array( 'label' => 'Çözüm Merkezi', 'url' => '/iletisim/' ),
+							),
+						),
+						'about_menu'     => array(
+							'label'   => 'Hakkımızda açılır menüsü (alt bilgideki "Kurumsal" listesi de bu)',
+							'type'    => 'repeater',
+							'max'     => 10,
+							'fields'  => array(
+								'label' => array( 'label' => 'Bağlantı Metni', 'type' => 'text' ),
+								'url'   => array( 'label' => 'Bağlantı Adresi', 'type' => 'url' ),
+							),
+							'default' => array(
+								array( 'label' => 'Hikayemiz', 'url' => '/sirketimiz/' ),
+								array( 'label' => 'Sürdürülebilirlik', 'url' => '/surdurulebilirlik/' ),
+								array( 'label' => 'Kurumsal Politikalar', 'url' => '/politikalar/' ),
+								array( 'label' => 'Sıkça Sorulan Sorular', 'url' => '/sss/' ),
+								array( 'label' => 'Çözüm Merkezi', 'url' => '/iletisim/' ),
+								array( 'label' => 'Özel Üretim', 'url' => '/ozel-uretim-talep-formu/' ),
 							),
 						),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => 'https://wa.me/905496481919' ),
@@ -123,12 +191,8 @@ return array(
 					),
 				),
 				'catalog' => array(
-					'label'  => 'Ürünler ve Seriler',
+					'label'  => 'Seriler',
 					'fields' => array(
-						'pool'  => array(
-							'label' => 'Sitede görünen ürünler (Ürün Havuzu’ndan seçin, sıralayın)',
-							'type'  => 'products',
-						),
 						'lines' => array(
 							'label'   => 'Seriler (menü, ana sayfa kutuları, mağaza)',
 							'type'    => 'repeater',
@@ -227,8 +291,18 @@ return array(
 			),
 			'components' => array(
 				'head' => $head( 'Mağaza', 'Kamelya, çardak, Adirondack sandalye, piknik masası, şezlong, köpek kulübesi ve kedi yuvası. Fiyatlar KDV dahil; üyelik gerekmeden sipariş verin.' ),
+				'pool' => array(
+					'label'  => 'Tüm Ürünler',
+					'fields' => array(
+						'pool' => array(
+							'label' => 'Sitede görünen ürünler (Ürün Havuzu’ndan seçin, sıralayın)',
+							'type'  => 'products',
+						),
+					),
+				),
 			),
 		),
+	) + $category_pages + array(
 
 		'about' => array(
 			'label'      => 'Hakkımızda (Şirketimiz)',

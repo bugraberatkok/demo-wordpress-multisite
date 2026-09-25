@@ -121,6 +121,13 @@ p { margin: 0; }
 .wk-header__custom { display: none !important; }
 .wk-nav { display: none; }
 
+/* Iletisim: numara gorunur, tiklayinca Cozum Merkezi sayfasi. Dar ekranda yalnizca ikon. */
+.wk-callbtn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-width: 2.75rem; height: 2.75rem; padding: 0 0.8rem; border: 1px solid rgb(240 232 219 / 0.35); border-radius: 999px; color: #fff; font-size: 0.9375rem; font-weight: 700; text-decoration: none; transition: background-color 0.15s ease, border-color 0.15s ease; }
+.wk-callbtn:hover { border-color: #fff; background: rgb(255 255 255 / 0.08); color: #fff; }
+.wk-callbtn svg { color: var(--brick-soft); }
+@media (max-width: 1239px) { .wk-callbtn { padding: 0; } .wk-callbtn__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+@media (min-width: 1240px) { .wk-callbtn { margin-left: 0.5rem; } }
+
 .wk-cartbtn { background: rgb(255 255 255 / 0.06); }
 .wk-cartbtn__count { position: absolute; top: -0.3rem; right: -0.3rem; min-width: 1.25rem; height: 1.25rem; padding: 0 0.3rem; border-radius: 999px; background: var(--brick); color: #fff; font-size: 0.75rem; font-weight: 800; line-height: 1.25rem; text-align: center; box-shadow: 0 0 0 2px var(--wine); }
 
@@ -310,6 +317,9 @@ p { margin: 0; }
 
 .wk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1.25rem; }
 @media (max-width: 599px) { .wk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem; } }
+/* Panel onizlemesi uzerine gelinen duzenlenebilir ogeye yari saydam zemin verir;
+   beyaz yuzeyler (kart) saydam gorunmesin, cerceve yine gosterir. */
+.nwcs-preview-mode .wk-card[data-nwcs-edit], .nwcs-preview-mode .wk-card[data-nwcs-edit]:hover { background-color: var(--card); }
 .wk-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); transition: border-color 0.15s ease, box-shadow 0.15s ease; }
 .wk-card:hover { border-color: #d9c1b8; box-shadow: var(--lift); }
 .wk-card__media { display: block; aspect-ratio: 4 / 3; text-decoration: none; margin: 0.5rem 0.5rem 0; overflow: hidden; background: var(--frame); }

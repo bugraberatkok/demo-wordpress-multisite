@@ -44,21 +44,31 @@ function wk_nav(): array {
 }
 
 /**
- * Kurumsal sayfalar (Hakkimizda acilir menusu). Yalnizca var olanlar.
+ * Kurumsal sayfalar (Hakkimizda acilir menusu, alt bilgideki Kurumsal).
  *
- * @return array<int, array{slug:string, label:string, url:string}>
+ * @return array<int, array{row:int, slug:string, label:string, url:string}>
  */
 function wk_corporate_pages(): array {
-	return wk_existing_pages(
-		array(
-			'sirketimiz'              => 'Hikayemiz',
-			'surdurulebilirlik'       => 'Sürdürülebilirlik',
-			'politikalar'             => 'Kurumsal Politikalar',
-			'sss'                     => 'Sıkça Sorulan Sorular',
-			'iletisim'                => 'Çözüm Merkezi',
-			'ozel-uretim-talep-formu' => 'Özel Üretim',
-		)
-	);
+	$out = array();
+
+	// Panelden: Tum Sayfalar -> Ust Menu -> Hakkimizda acilir menusu.
+	foreach ( nwcs_rows( 'global', 'header', 'about_menu' ) as $index => $row ) {
+		$label = trim( (string) ( $row['label'] ?? '' ) );
+		$url   = wk_link( $row['url'] ?? '' );
+
+		if ( '' === $label || '#' === $url ) {
+			continue;
+		}
+
+		$out[] = array(
+			'row'   => (int) $index, // Panel onizlemesinde tiklaninca bu satir acilir.
+			'slug'  => basename( untrailingslashit( (string) wp_parse_url( $url, PHP_URL_PATH ) ) ),
+			'label' => $label,
+			'url'   => $url,
+		);
+	}
+
+	return $out;
 }
 
 /**

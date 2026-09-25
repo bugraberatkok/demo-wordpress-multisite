@@ -105,7 +105,10 @@ $banner_cat = $by_name( trim( (string) nwcs_field( 'home', 'banner', 'category' 
 		continue;
 	}
 
-	$row_id = 'wk-row-' . (int) $index;
+	$row_id   = 'wk-row-' . (int) $index;
+	$row_page = wk_category_page_key( $category['slug'] );
+	// Satirdaki karta tiklayinca o kategorinin urun listesi acilir (panel onizlemesi).
+	$row_edit = $row_page ? array( $row_page, 'products', 'pool' ) : array();
 	?>
 	<section class="wk-rowsec<?php echo 1 === $index % 2 ? ' wk-rowsec--tint' : ''; ?>" aria-labelledby="<?php echo esc_attr( $row_id ); ?>" <?php nwcs_edit_attr( 'home', 'rows', 'items' ); ?>>
 		<div class="wk-wrap" data-rail>
@@ -119,7 +122,7 @@ $banner_cat = $by_name( trim( (string) nwcs_field( 'home', 'banner', 'category' 
 			</div>
 			<div class="wk-rail" data-rail-track>
 				<?php foreach ( array_slice( $items, 0, 10 ) as $product ) : ?>
-					<?php wk_part( 'product-card', array( 'product' => $product, 'heading' => 'h3' ) ); ?>
+					<?php wk_part( 'product-card', array( 'product' => $product, 'heading' => 'h3', 'edit' => $row_edit ) ); ?>
 				<?php endforeach; ?>
 			</div>
 		</div>

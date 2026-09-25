@@ -5,6 +5,10 @@
  * Fiyati olan urunde "Sepete ekle", olmayanda "Fiyat sor" (urun sayfasi).
  *
  * $args['product']: wk_products() ogesi. $args['heading']: baslik duzeyi (h2/h3).
+ * $args['edit']: panel onizlemesinde karta tiklayinca acilacak alan
+ * (sayfa, bilesen, alan); orn. kategori sayfasinda o kategorinin listesi.
+ * Ad ve fiyat siteye ozel degistirilebildigi icin karta (listeye) baglidir;
+ * kod, gorsel ve ozellikler havuzdaki urunu acar (wk_product_src).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,8 +24,8 @@ $image   = wk_image( $product );
 $specs   = wk_card_specs( $product );
 $buy     = wk_can_buy( $product );
 ?>
-<article class="wk-card">
-	<a href="<?php echo esc_url( $product['url'] ); ?>" class="wk-card__media" tabindex="-1" aria-hidden="true">
+<article class="wk-card" <?php ! empty( $args['edit'] ) && nwcs_edit_attr( ...$args['edit'] ); ?>>
+	<a href="<?php echo esc_url( $product['url'] ); ?>" class="wk-card__media" tabindex="-1" aria-hidden="true" <?php wk_product_src( $product, 'Görsel' ); ?>>
 		<?php if ( $image['url'] ) : ?>
 			<img src="<?php echo esc_url( $image['url'] ); ?>" alt="" loading="lazy" decoding="async" />
 		<?php else : ?>
@@ -29,12 +33,12 @@ $buy     = wk_can_buy( $product );
 		<?php endif; ?>
 	</a>
 	<div class="wk-card__body">
-		<p class="wk-card__code"><?php echo esc_html( $product['code'] ); ?></p>
+		<p class="wk-card__code" <?php wk_product_src( $product, 'Ürün kodu' ); ?>><?php echo esc_html( $product['code'] ); ?></p>
 		<<?php echo $heading; // phpcs:ignore WordPress.Security.EscapingOutput ?> class="wk-card__title">
 			<a href="<?php echo esc_url( $product['url'] ); ?>"><?php echo esc_html( $product['title'] ); ?></a>
 		</<?php echo $heading; // phpcs:ignore WordPress.Security.EscapingOutput ?>>
 		<?php if ( $specs ) : ?>
-			<ul class="wk-card__specs" aria-label="Özellikler">
+			<ul class="wk-card__specs" aria-label="Özellikler" <?php wk_product_src( $product, 'Özellikler' ); ?>>
 				<?php foreach ( $specs as $pair ) : ?>
 					<li><?php echo esc_html( $pair[1] ); ?></li>
 				<?php endforeach; ?>
