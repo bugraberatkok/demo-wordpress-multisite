@@ -6,8 +6,10 @@
  * tek adres (Kestanelik / Catalca) ve firma yasi (50 yil). Koçist sitesi
  * kapsam disi.
  *
- * Kurallar sabit bir "eski deger" aramaz; her alanin o anki degerine bakar
- * (canli veritabani yereldekinden farkli olabilir). Sayfa once yapilacak
+ * Adres, yil ve baglanti kurallari sabit bir "eski deger" aramaz; her alanin
+ * o anki degerine bakar (canli veritabani yereldekinden farkli olabilir).
+ * Istisna: bulk-content.php'deki icerik duzeltmeleri (kopya metin) eski
+ * metnin birebir aynisini arar; elle degistirilmis alana dokunmaz. Sayfa once yapilacak
  * degisiklikleri listeler, "Uygula" ile yazar. Uygulandiktan sonra kurallar
  * hicbir alanda degisiklik bulmaz; tekrar basmak bir sey yapmaz. Her
  * uygulama ag seceneginde kayit olarak tutulur.
@@ -129,6 +131,111 @@ function nwcs_bulk_prose( $value ) {
 }
 
 /**
+ * Kendi alan adina baglanmis sitelerin eski panel adresleri: sitenin yeni
+ * adresine. Kardes site baglantilari veritabaninda panel adresiyle kalmisti
+ * (siteler tek tek alan adina baglandi); panel yolu artik 404 verir.
+ *
+ * @return array<string, string> eski adres on eki => yeni adres
+ */
+function nwcs_bulk_link_map(): array {
+	static $map = null;
+
+	if ( null !== $map ) {
+		return $map;
+	}
+
+	$map     = array();
+	$network = get_network();
+
+	foreach ( get_sites( array( 'number' => 100 ) ) as $site ) {
+		// Hala panel alan adinda duran site (ana site, Kocist...) atlanir.
+		if ( $site->domain === $network->domain ) {
+			continue;
+		}
+
+		$slug = nwcs_bulk_slug_for( $site );
+
+		if ( '' === $slug ) {
+			continue;
+		}
+
+		$new = untrailingslashit( get_home_url( (int) $site->blog_id, '/' ) );
+
+		foreach ( array( 'http', 'https' ) as $scheme ) {
+			$map[ $scheme . '://' . $network->domain . '/' . $slug ] = $new;
+		}
+	}
+
+	$map = (array) apply_filters( 'nwcs_bulk_link_map', $map );
+
+	// Uzun on ek once: /ahsapkasa ile /ahsapkasa-x karismasin.
+	uksort( $map, static fn( string $a, string $b ): int => strlen( $b ) <=> strlen( $a ) );
+
+	return $map;
+}
+
+/**
+ * Alan adina baglanmis sitenin paneldeki eski yolu: temanin site anahtari
+ * (manifest site_key) panel yolu olarak kullanildi (/ahsapkasa/, /sanayi-palet/).
+ */
+function nwcs_bulk_slug_for( WP_Site $site ): string {
+	return sanitize_key( (string) ( nwcs_manifest_for_blog( (int) $site->blog_id )['site_key'] ?? '' ) );
+}
+
+/**
+ * @param mixed $value
+ * @return mixed
+ */
+function nwcs_bulk_links( $value ) {
+	if ( is_array( $value ) ) {
+		return array_map( 'nwcs_bulk_links', $value );
+	}
+
+	if ( ! is_string( $value ) || ! str_contains( $value, '://' ) ) {
+		return $value;
+	}
+
+	foreach ( nwcs_bulk_link_map() as $old => $new ) {
+		// Yalnizca tam yol: /ahsapkasa ya da /ahsapkasa/... ; /ahsapkasax degil.
+		$replaced = preg_replace( '~' . preg_quote( $old, '~' ) . '(?=/|$|["\'\s?#<])~', $new, $value );
+
+		// Ifade hata verirse deger oldugu gibi kalir; bos degerle ezilmez.
+		if ( is_string( $replaced ) ) {
+			$value = $replaced;
+		}
+	}
+
+	return $value;
+}
+
+/**
+ * Sitenin icerik duzeltmeleri (bulk-content.php): deger ya da tekrarli satir
+ * hucresi eski metnin birebir aynisiysa yenisi. Kismi eslesme yok.
+ *
+ * @param mixed                 $value
+ * @param array<string, string> $revisions eski => yeni
+ * @return mixed
+ */
+function nwcs_bulk_revise( $value, array $revisions ) {
+	if ( ! $revisions ) {
+		return $value;
+	}
+
+	if ( is_array( $value ) ) {
+		return array_map( static fn( $item ) => nwcs_bulk_revise( $item, $revisions ), $value );
+	}
+
+	if ( ! is_string( $value ) ) {
+		return $value;
+	}
+
+	// Bastaki/sondaki bosluk ve Windows satir sonu farki eslesmeyi bozmasin.
+	$key = trim( str_replace( "\r\n", "\n", $value ) );
+
+	return $revisions[ $key ] ?? $value;
+}
+
+/**
  * Degisen metin ciftleri (tekrarli satirlarda yalnizca degisen hucreler).
  *
  * @param mixed $old
@@ -165,15 +272,16 @@ function nwcs_bulk_plan(): array {
 		}
 
 		switch_to_blog( $blog_id );
-		$manifest = nwcs_manifest();
-		$stored   = nwcs_get_all();
+		$manifest  = nwcs_manifest();
+		$stored    = nwcs_get_all();
+		$revisions = nwcs_bulk_revisions()[ (string) get_option( 'stylesheet' ) ] ?? array();
 
 		foreach ( $manifest['pages'] ?? array() as $page_key => $page ) {
 			foreach ( $page['components'] as $component_key => $component ) {
 				foreach ( $component['fields'] as $field_key => $definition ) {
 					$saved = $stored[ $page_key ][ $component_key ][ $field_key ] ?? null;
 					$value = ( null !== $saved && '' !== $saved ) ? $saved : ( $definition['default'] ?? '' );
-					$new   = nwcs_bulk_transform( $page_key, $component_key, $field_key, $value );
+					$new   = nwcs_bulk_links( nwcs_bulk_revise( nwcs_bulk_transform( $page_key, $component_key, $field_key, $value ), $revisions ) );
 
 					if ( $new === $value ) {
 						continue;
@@ -293,7 +401,10 @@ function nwcs_render_bulk_update(): void {
 				Koçist dışındaki sitelerde adres <strong><?php echo esc_html( nwcs_bulk_address( false ) ); ?></strong> olur;
 				alt bilgi, iletişim sayfası, harita ve arama motorlarına verilen firma bilgisi dahil. 34494 posta kodu kaldırılır
 				(Çatalca'nın kodu değil). Firma yaşı her yerde 50 yıl olur; Sanayi Palet'teki "1980'lerden bu yana" ifadeleri çıkar.
-				Metinlerde geçen Başakşehir ve İkitelli de Çatalca olur.
+				Metinlerde geçen Başakşehir ve İkitelli de Çatalca olur. Kendi alan adına bağlanmış sitelere giden eski panel
+				bağlantıları (kardeş site bağlantıları) sitenin alan adına çevrilir.
+				Kardeş sitelerde birebir aynı olan metinler (Ahşap Ambalaj ile Ahşap Kasa; İthal ve Kavak Keresteci'nin soruları)
+				her sitenin kendi odağına göre yeniden yazılır; elle değiştirilmiş alanlara dokunulmaz.
 			</p>
 
 			<?php if ( null !== $applied ) : ?>

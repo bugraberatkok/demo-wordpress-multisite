@@ -34,6 +34,7 @@ function nwcs_form_post_types(): array {
 		'sp_message' => '_sp_',   // sanayi-palet-theme
 		'aas_quote'  => '_aas_',  // ahsapambalaj-theme
 		'pc_quote'   => '_pc_',   // istanbulpaletcivi-theme
+		'wk_order'   => '_wk_',   // woodkocist-theme
 	);
 
 	$types = apply_filters( 'nwcs_form_post_types', $defaults );

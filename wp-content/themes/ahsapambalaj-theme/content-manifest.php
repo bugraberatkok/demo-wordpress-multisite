@@ -147,8 +147,8 @@ return array(
 				'family' => array(
 					'label'  => 'Ürün Grubu Şeridi',
 					'fields' => array(
-						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Ürün grubumuz' ),
-						'note'  => array( 'label' => 'Bölüm Notu', 'type' => 'text', 'default' => 'Bunlarla sınırlı değil elbette.' ),
+						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Ne üretiyoruz' ),
+						'note'  => array( 'label' => 'Bölüm Notu', 'type' => 'text', 'default' => 'Her biri yüke göre ölçülendirilir.' ),
 						'items' => array(
 							'label'   => 'Ürünler',
 							'type'    => 'repeater',
@@ -160,10 +160,10 @@ return array(
 								'url'   => array( 'label' => 'Bağlantı Adresi', 'type' => 'url' ),
 							),
 							'default' => array(
-								array( 'label' => 'Ahşap palet', 'note' => 'Standart dışı ölçülerde, kardonlu seçenekle', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
-								array( 'label' => 'Ahşap sandık', 'note' => 'İhracata uygun, demonte sevk edilebilir', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
-								array( 'label' => 'Ahşap kafes', 'note' => 'Ürününüzün ölçüsüne göre kafes iskeleti', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
-								array( 'label' => 'Ahşap ambalaj', 'note' => 'Şartnamenize uygun paketleme çözümleri', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap palet', 'note' => 'Ağır ve standart dışı yükler için', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap sandık', 'note' => 'Makine ve kalıp için kapalı koruma', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap kafes', 'note' => 'Açık iskelet, yükün ölçüsünde', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'Ahşap ambalaj', 'note' => 'İhracat şartnamesine göre paketleme', 'image' => 0, 'url' => '/hizmetlerimiz/' ),
 							),
 						),
 					),
@@ -172,8 +172,8 @@ return array(
 				'ctaband' => array(
 					'label'  => 'Teklif Şeridi',
 					'fields' => array(
-						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ölçülerinizi gönderin, teklifinizi hazırlayalım.' ),
-						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Ürünün eni, boyu, yüksekliği ve tahmini adedi yeterli. Çiziminiz varsa daha da hızlı ilerleriz.' ),
+						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Yükün ölçüsünü ve ağırlığını gönderin.' ),
+						'text'         => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Eni, boyu, yüksekliği, ağırlığı ve gideceği yer yeterli; ambalaj önerimizle birlikte teklifimizi hazırlayalım.' ),
 						'button_label' => array( 'label' => 'Düğme Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
 						'button_url'   => array( 'label' => 'Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
 					),
@@ -193,7 +193,7 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hakkımızda' ),
-						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Elli yıllık tecrübeyle, istediğiniz ölçü ve ebatta ahşap sandık, kafes ve palet üretiyoruz. Kaliteli, dürüst ve hızlı.' ),
+						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Sanayi ve ihracat yükleri için ölçüye göre ahşap sandık, kafes ve palet. Arkasında Koçist Orman Ürünleri’nin 50 yıllık tecrübesi var.' ),
 						'image' => array( 'label' => 'Arka Plan Fotoğrafı', 'type' => 'image', 'default' => 0 ),
 					),
 				),
@@ -201,26 +201,26 @@ return array(
 				'story' => array(
 					'label'  => 'Firma Metni',
 					'fields' => array(
-						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Nasıl çalışıyoruz' ),
-						'lead'  => array( 'label' => 'Bölüm Alt Metni', 'type' => 'text', 'default' => 'Ölçüden sevkiyata kadar izlenen yol.' ),
-						'p1' => array( 'label' => 'Birinci Paragraf', 'type' => 'textarea', 'default' => 'Yeni bir ürün için ya da kullandığınız ambalajın yerine; her ölçüde kereste, palet, sandık ve kafesi ihtiyacınıza göre tasarlar, size sunarız.' ),
-						'p2' => array( 'label' => 'İkinci Paragraf', 'type' => 'textarea', 'default' => 'Ölçülerinizi, spesifikasyonları veya proje çizimini alır, en hızlı şekilde üretime geçeriz. Tüm parçaları içeren demonte paketler hâlinde sevk ederiz.' ),
+						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Bir ambalaj işi nasıl ilerler' ),
+						'lead'  => array( 'label' => 'Bölüm Alt Metni', 'type' => 'text', 'default' => 'Yükün bilgilerinden sevkiyata.' ),
+						'p1' => array( 'label' => 'Birinci Paragraf', 'type' => 'textarea', 'default' => 'Önce yükü tanırız: ürünün ölçüsü, ağırlığı ve gideceği yer. Makine, kalıp ya da yedek parça için sandığı, kafesi veya paleti bu bilgilere göre tasarlarız.' ),
+						'p2' => array( 'label' => 'İkinci Paragraf', 'type' => 'textarea', 'default' => 'Taşıyıcı kızakları, iç sabitlemeyi ve kapak yapısını planladıktan sonra üretime geçeriz. Büyük ambalajları bütün parçalarıyla demonte paketler hâlinde gönderebiliriz.' ),
 					),
 				),
 
 				'purpose' => array(
-					'label'  => 'Amacımız',
+					'label'  => 'Neyi önemsiyoruz',
 					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Amacımız' ),
-						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'En kaliteli malzemeyi en kısa zamanda müşterimizin hizmetine sunmaktır. Bu bağlamda firmamızın çalışmaları daha kaliteli ve daha hesaplı malzemeyi tüketicinin hizmetine sunma ilkesiyle devam etmektedir.' ),
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Neyi önemsiyoruz' ),
+						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Yükün yolda zarar görmeden yerine ulaşması. Bunun için doğru malzemeyi zamanında ve makul fiyatla sunmayı esas alıyoruz.' ),
 					),
 				),
 
 				'quality' => array(
-					'label'  => 'Kalite Politikamız',
+					'label'  => 'Kalite politikamız',
 					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Kalite Politikamız' ),
-						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Ürünlerimizi zamanında ve uygun fiyatla teslim ederek müşteri ihtiyaç ve beklentilerini karşılamak; işi ilk seferinde ve her seferinde doğru yapmak; çalışanlarımızın sağlığını ve çevreyi gözetmek; tedarikçilerimizle birlikte sürekli gelişmek.' ),
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Kalite politikamız' ),
+						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Teslim tarihine uymak, işi ilk seferinde doğru yapmak ve müşterinin isteğini esas almak. Bunu yaparken çalışanlarımızın sağlığını ve çevreyi gözetiyor, tedarikçilerimizle birlikte gelişmeye çalışıyoruz.' ),
 					),
 				),
 			),
@@ -238,7 +238,7 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hizmetlerimiz' ),
-						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Dört ürün grubunun hiçbirinde standart ölçü yok. Her iş, sizin verdiğiniz ölçüye göre üretilir.' ),
+						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Her ambalaj taşıyacağı yüke göre tasarlanır. Ürünün ölçüsünü ve ağırlığını verin, gerisini birlikte planlayalım.' ),
 					),
 				),
 
@@ -260,10 +260,10 @@ return array(
 								'image_4' => array( 'label' => '4. Görsel', 'type' => 'image' ),
 							),
 							'default' => array(
-								array( 'title' => 'Ahşap palet', 'text' => 'Standart dışı, istediğiniz ölçü ve ebatlarda ahşap palet üretimi yapmaktayız. Kardonlu palet ihtiyaçlarınızda da bizimle irtibat kurabilirsiniz.', 'image' => 0, 'image_2' => 0, 'image_3' => 0, 'image_4' => 0 ),
-								array( 'title' => 'Ahşap sandık', 'text' => 'Standart dışı, istediğiniz ölçü ve ebatlarda ahşap sandık üretimi yapmaktayız. Fiyatlarımız ve cazip tekliflerimiz için lütfen bizimle irtibat kurunuz.', 'image' => 0 ),
-								array( 'title' => 'Ahşap kafes', 'text' => 'Standart dışı, istediğiniz ölçü ve ebatlarda ahşap kafes üretimi yapmaktayız. Size özel teklif ve cazip fiyat seçeneklerimiz için lütfen bizimle irtibat kurunuz.', 'image' => 0 ),
-								array( 'title' => 'Ahşap ambalaj', 'text' => 'İhracat şartnamenize uygun, ölçüye göre ahşap ambalaj çözümleri üretiyoruz. Parçaları içeren demonte paketler hâlinde sevk ediyoruz.', 'image' => 0 ),
+								array( 'title' => 'Ahşap palet', 'text' => 'Ağır ve standart dışı yükler için ölçüye göre palet. Kardonlu palet seçeneği de var.', 'image' => 0, 'image_2' => 0, 'image_3' => 0, 'image_4' => 0 ),
+								array( 'title' => 'Ahşap sandık', 'text' => 'Makineyi, kalıbı ya da yedek parçayı dört yandan koruyan kapalı sandık. İhracat sevkiyatına göre hazırlanır, demonte gönderilebilir.', 'image' => 0 ),
+								array( 'title' => 'Ahşap kafes', 'text' => 'Açık iskeletli kafes, yükün ölçüsüne göre kurulur.', 'image' => 0 ),
+								array( 'title' => 'Ahşap ambalaj', 'text' => 'İhracat şartnamenize göre, yükün ölçüsüne ve ağırlığına uygun paketleme.', 'image' => 0 ),
 							),
 						),
 					),
@@ -272,8 +272,8 @@ return array(
 				'note' => array(
 					'label'  => 'Sayfa Sonu Notu',
 					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ürün grubumuz bunlarla sınırlı değil.' ),
-						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Özel boy ve ebatta kereste ile aradığınız başka bir ahşap ambalaj çözümü varsa yazın; üretilebilirliğini birlikte değerlendirelim.' ),
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Yükünüz bu dört gruba uymuyor mu?' ),
+						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Proje sevkiyatı ya da alışılmadık bir yük için ölçüleri ve bir fotoğraf gönderin; nasıl ambalajlanacağını birlikte değerlendirelim.' ),
 					),
 				),
 			),
@@ -291,14 +291,14 @@ return array(
 					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'İletişim' ),
-						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Ürünün ölçülerini ve tahmini adedi yazın, teklifinizi hazırlayalım.' ),
+						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Yükün ölçüsünü, ağırlığını ve gideceği yeri yazın; ambalaj önerimizi ve teklifimizi hazırlayalım.' ),
 					),
 				),
 
 				'details' => array(
 					'label'  => 'İletişim Bilgileri',
 					'fields' => array(
-						'phone_title'   => array( 'label' => 'Telefon Başlığı', 'type' => 'text', 'default' => 'Müşteri hizmetleri' ),
+						'phone_title'   => array( 'label' => 'Telefon Başlığı', 'type' => 'text', 'default' => 'Telefon' ),
 						'phone_icon'    => array( 'label' => 'Telefon İkonu', 'type' => 'icon', 'default' => 'phone' ),
 						'phone_label'   => array( 'label' => 'Telefon', 'type' => 'text', 'default' => '0 212 648 10 90' ),
 						'phone_url'     => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+902126481090' ),
@@ -306,7 +306,7 @@ return array(
 						'email_icon'    => array( 'label' => 'E-posta İkonu', 'type' => 'icon', 'default' => 'mail' ),
 						'email_label'   => array( 'label' => 'E-posta', 'type' => 'text', 'default' => 'info@kocist.com.tr' ),
 						'email_url'     => array( 'label' => 'E-posta Bağlantısı', 'type' => 'url', 'default' => 'mailto:info@kocist.com.tr' ),
-						'address_title' => array( 'label' => 'Adres Başlığı', 'type' => 'text', 'default' => 'Merkez ofis ve atölye' ),
+						'address_title' => array( 'label' => 'Adres Başlığı', 'type' => 'text', 'default' => 'Adres' ),
 						'address_icon'  => array( 'label' => 'Adres İkonu', 'type' => 'icon', 'default' => 'pin' ),
 						'address'       => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul" ),
 						'hours_title'   => array( 'label' => 'Çalışma Saatleri Başlığı', 'type' => 'text', 'default' => 'Çalışma saatleri' ),
@@ -318,20 +318,20 @@ return array(
 				'form' => array(
 					'label'  => 'Teklif Formu',
 					'fields' => array(
-						'title'         => array( 'label' => 'Form Başlığı', 'type' => 'text', 'default' => 'Teklif isteyin' ),
-						'note'          => array( 'label' => 'Form Açıklaması', 'type' => 'textarea', 'default' => 'Ölçü alanına en, boy ve yükseklik yazmanız yeterli. Çiziminiz varsa e-posta ile de gönderebilirsiniz.' ),
+						'title'         => array( 'label' => 'Form Başlığı', 'type' => 'text', 'default' => 'Ambalaj teklifi isteyin' ),
+						'note'          => array( 'label' => 'Form Açıklaması', 'type' => 'textarea', 'default' => 'Yükün ölçüsü (en × boy × yükseklik), ağırlığı ve gideceği yer yeterli. Çiziminiz ya da fotoğrafınız varsa e-postayla gönderin.' ),
 						'name_label'    => array( 'label' => 'Ad Soyad Etiketi', 'type' => 'text', 'default' => 'Ad soyad' ),
 						'company_label' => array( 'label' => 'Firma Etiketi', 'type' => 'text', 'default' => 'Firma' ),
 						'email_label'   => array( 'label' => 'E-posta Etiketi', 'type' => 'text', 'default' => 'E-posta' ),
 						'phone_label'   => array( 'label' => 'Telefon Etiketi', 'type' => 'text', 'default' => 'Telefon' ),
 						'product_label' => array( 'label' => 'Ürün Etiketi', 'type' => 'text', 'default' => 'Hangi ürün' ),
-						'size_label'    => array( 'label' => 'Ölçü Etiketi', 'type' => 'text', 'default' => 'Ölçüler ve adet' ),
-						'size_hint'     => array( 'label' => 'Ölçü Alanı İpucu', 'type' => 'text', 'default' => 'Örn. 120 × 80 × 100 cm, yaklaşık 50 adet' ),
-						'message_label' => array( 'label' => 'Mesaj Etiketi', 'type' => 'text', 'default' => 'Eklemek istedikleriniz' ),
+						'size_label'    => array( 'label' => 'Ölçü Etiketi', 'type' => 'text', 'default' => 'Yükün ölçüsü, ağırlığı ve adedi' ),
+						'size_hint'     => array( 'label' => 'Ölçü Alanı İpucu', 'type' => 'text', 'default' => 'Örn. 220 × 140 × 160 cm, 1.800 kg, 3 sandık' ),
+						'message_label' => array( 'label' => 'Mesaj Etiketi', 'type' => 'text', 'default' => 'Varış yeri ve eklemek istedikleriniz' ),
 						'submit_label'  => array( 'label' => 'Gönder Düğmesi Metni', 'type' => 'text', 'default' => 'Teklif isteğini gönder' ),
 						'privacy_note'  => array( 'label' => 'Gizlilik Notu', 'type' => 'text', 'default' => 'Bilgileriniz yalnızca teklifinizi hazırlamak için kullanılır.' ),
 						'success_title' => array( 'label' => 'Başarı Başlığı', 'type' => 'text', 'default' => 'Teklif isteğiniz bize ulaştı.' ),
-						'success_text'  => array( 'label' => 'Başarı Metni', 'type' => 'textarea', 'default' => 'En kısa sürede dönüş yapacağız. Acele bir işse 0 212 648 10 90 numaralı telefondan da ulaşabilirsiniz.' ),
+						'success_text'  => array( 'label' => 'Başarı Metni', 'type' => 'textarea', 'default' => 'Yükün bilgilerini aldık; ambalaj önerimizle size döneceğiz. Acele bir iş için 0 212 648 10 90’ı arayabilirsiniz.' ),
 					),
 				),
 			),

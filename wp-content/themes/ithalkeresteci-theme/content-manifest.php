@@ -41,6 +41,11 @@ return $build(
 			array( 'label' => 'ahsapkasa.com', 'note' => 'Ahşap sandık ve kafes', 'url' => 'https://ahsapkasa.com' ),
 		),
 
+		// Sayfalara ozel metinler (kardes siteyle ayni kalmasin: kopya icerik).
+		'faq_lead'       => 'İthal kereste, kalas ve plywood siparişinde en çok sorulanlar: sevkiyat süresi, ödeme, ölçüye kesim ve metreküp hesabı.',
+		'contact_lead'   => 'İthal kereste, kalas ya da plywood için ölçüyü ve adedi yazın ya da arayın; fiyatla dönelim.',
+		'form_note'      => 'Ürün, kesit, boy ve adet yeterli.',
+		'size_hint'      => 'Örn. kalas 5 × 20 cm, 4 m, 50 adet',
 		'home_sections'  => array( 'products', 'supply', 'cousin', 'faq', 'quote' ),
 
 		'hero'           => array(
@@ -69,10 +74,10 @@ return $build(
 		),
 
 		'faq'            => array(
-			array( 'question' => 'Sevkiyat süresi nedir?', 'answer' => 'Normal koşullarda 3–5 iş günü içinde sevkiyat yapılır.' ),
+			array( 'question' => 'Sipariş verdikten sonra kereste ne zaman gelir?', 'answer' => 'İthal kereste, kalas ve plywood için sevkiyat normal koşullarda 3–5 iş günü içinde yapılır.' ),
 			array( 'question' => 'Ödeme seçenekleri nelerdir?', 'answer' => 'Banka havalesi, EFT ve gerekli durumlarda kapıda ödeme seçenekleri sunulur.' ),
-			array( 'question' => 'Kereste metreküpü nasıl hesaplanır?', 'answer' => 'Kalınlık ve genişlik santimetreden metreye çevrilir, boy ve adetle çarpılır. Örneğin 5 × 10 cm kesitli, 4 m boyunda 100 adet kereste 0,05 × 0,10 × 4 × 100 = 2 m³ eder.' ),
-			array( 'question' => 'İstediğim ölçüde kesim yapılıyor mu?', 'answer' => 'Evet. Projenize uygun ebatlarda kesim ve hazırlık yapılabilir; istenen ölçü birebir kesilir.' ),
+			array( 'question' => 'Kalasın metreküpü nasıl hesaplanır?', 'answer' => 'Kalınlığı ve genişliği santimetreden metreye çevirin, boy ve adetle çarpın. Örneğin 5 × 20 cm kesitli, 4 m boyunda 50 adet kalas: 0,05 × 0,20 × 4 × 50 = 2 m³.' ),
+			array( 'question' => 'Kalas ve kereste istediğim ölçüde kesiliyor mu?', 'answer' => 'Evet. İnşaat ya da çatı projenize göre boy ve kesit birebir kesilir; ölçü listenizi göndermeniz yeterli.' ),
 			array( 'question' => 'Online sipariş verebilir miyim?', 'answer' => 'Şu anda online satış yok. Ölçü ve adetle birlikte telefonla ya da teklif formuyla sipariş verebilirsiniz.' ),
 		),
 

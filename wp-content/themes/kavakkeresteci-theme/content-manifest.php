@@ -42,6 +42,11 @@ return $build(
 			array( 'label' => 'ahsapkasa.com', 'note' => 'Ahşap sandık ve kafes', 'url' => 'https://ahsapkasa.com' ),
 		),
 
+		// Sayfalara ozel metinler (kardes siteyle ayni kalmasin: kopya icerik).
+		'faq_lead'       => 'Kavak kereste, çıta ve takozla ilgili sorular: nerede kullanılır, ölçüye kesim, sevkiyat ve metreküp hesabı.',
+		'contact_lead'   => 'Kavak kereste, çıta ya da takoz için ölçüyü ve adedi yazın ya da arayın; size en kısa sürede dönelim.',
+		'form_note'      => 'Hangi ürün, hangi ölçü ve kaç adet: bu kadarı yeterli.',
+		'size_hint'      => 'Örn. çıta 3 × 5 cm, 3 m, 200 adet',
 		'home_sections'  => array( 'products', 'uses', 'cousin', 'faq', 'quote' ),
 
 		'hero'           => array(
@@ -73,9 +78,9 @@ return $build(
 		'faq'            => array(
 			array( 'question' => 'Kavak kereste hangi işlerde kullanılır?', 'answer' => 'En çok ambalaj, sandık ve palet üretiminde; ayrıca mobilya, inşaatta destek ve kaplama işlerinde ve iç dekorasyonda kullanılır.' ),
 			array( 'question' => 'Ahşap takoz ne işe yarar?', 'answer' => 'Zemin dengeleme, yükseklik ayarı ve sabitleme için kullanılır. Fırınlanmış masif ahşaptan, zımparalanmış olarak hazırlanır; iç ve dış mekânda kullanılabilir.' ),
-			array( 'question' => 'Sevkiyat süresi nedir?', 'answer' => 'Normal koşullarda 3–5 iş günü içinde sevkiyat yapılır.' ),
-			array( 'question' => 'İstediğim ölçüde kesim yapılıyor mu?', 'answer' => 'Evet. Kereste, çıta ve takoz projenize uygun ölçüde kesilip hazırlanabilir.' ),
-			array( 'question' => 'Kereste metreküpü nasıl hesaplanır?', 'answer' => 'Kalınlık ve genişlik santimetreden metreye çevrilir, boy ve adetle çarpılır. Örneğin 5 × 10 cm kesitli, 4 m boyunda 100 adet kereste 0,05 × 0,10 × 4 × 100 = 2 m³ eder.' ),
+			array( 'question' => 'Kavak kereste, çıta ve takoz ne kadar sürede gönderilir?', 'answer' => 'Normal koşullarda sipariş 3–5 iş günü içinde sevk edilir.' ),
+			array( 'question' => 'Çıta ve takoz özel ölçüde hazırlanıyor mu?', 'answer' => 'Evet. Kavak kereste, çıta ve takoz verdiğiniz ölçüye göre kesilip hazırlanır.' ),
+			array( 'question' => 'Çıtanın metreküpü nasıl hesaplanır?', 'answer' => 'Kesit ölçülerini metreye çevirip boy ve adetle çarpın. Örneğin 3 × 5 cm kesitli, 3 m boyunda 200 adet çıta: 0,03 × 0,05 × 3 × 200 = 0,9 m³.' ),
 		),
 
 		'about'          => array(
