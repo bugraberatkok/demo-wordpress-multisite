@@ -906,21 +906,167 @@ function kocist_product_attr( array $product, string $label ): void {
 }
 
 /**
- * Blog yazisinin basligi, ozeti, gorseli: onizlemede yazinin duzenleme ekrani.
- */
-function kocist_post_attr( int $post_id, string $label = 'Blog yazısı' ): void {
-	if ( function_exists( 'nwcs_post_attr' ) ) {
-		nwcs_post_attr( $post_id, $label );
-	}
-}
-
-/**
  * Blog kategorisinin adi: onizlemede kategorinin duzenleme ekrani.
  */
 function kocist_term_attr( $term ): void {
 	if ( $term instanceof WP_Term && function_exists( 'nwcs_source_attr' ) && function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) {
 		nwcs_source_attr( 'admin', admin_url( 'term.php?taxonomy=' . $term->taxonomy . '&tag_ID=' . $term->term_id ), 'Blog kategorisi' );
 	}
+}
+
+/* ======================================================================
+ * Blog yazilari panelden
+ *
+ * Ornek yazilarin panelde gizli bir sayfasi var ('yazi-<slug>', manifest).
+ * Panelde degistirilip kaydedilen alan sitede WordPress yazisinin yerine
+ * gecer: yazi sayfasi, blog listesi, ana sayfa kartlari, ilgili yazilar ve
+ * arama bilgisi. Degistirilmeyen alan icin WordPress'teki yazi aynen
+ * kullanilir; yazi Yazilar ekranindan duzenlenmeye devam edebilir.
+ * ====================================================================== */
+
+/**
+ * Temanin alan manifesti (eklenti kapaliyken de okunur).
+ */
+function kocist_manifest(): array {
+	static $manifest = null;
+
+	if ( null === $manifest ) {
+		$manifest = (array) include get_theme_file_path( 'content-manifest.php' );
+	}
+
+	return $manifest;
+}
+
+/**
+ * Yazinin paneldeki gizli sayfasi; yoksa bos (sonradan yazilan yazilar).
+ */
+function kocist_post_page_key( $post ): string {
+	$post = get_post( $post );
+
+	if ( ! $post || 'post' !== $post->post_type || '' === $post->post_name ) {
+		return '';
+	}
+
+	$key = 'yazi-' . $post->post_name;
+
+	return isset( kocist_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Panelde degistirilmis deger; alan varsayilanindaysa (yazinin ilk metni) null.
+ *
+ * @return string|int|null
+ */
+function kocist_post_override( $post, string $field ) {
+	$key = kocist_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return null;
+	}
+
+	$value = nwcs_field( $key, 'post', $field );
+
+	if ( 'image' === $field ) {
+		return (int) $value ? (int) $value : null;
+	}
+
+	$clean   = static fn( $text ): string => trim( str_replace( "\r\n", "\n", (string) $text ) );
+	$value   = $clean( $value );
+	$default = $clean( kocist_manifest()['pages'][ $key ]['components']['post']['fields'][ $field ]['default'] ?? '' );
+
+	return '' === $value || $value === $default ? null : $value;
+}
+
+/**
+ * Onizlemede tiklaninca yazinin paneldeki alanini acar.
+ */
+function kocist_post_edit_attr( $post, string $field ): void {
+	$key = kocist_post_page_key( $post );
+
+	if ( '' !== $key ) {
+		nwcs_edit_attr( $key, 'post', $field );
+	}
+}
+
+/*
+ * SEO: eklenti yazi bilgisini 'wp' aksiyonunda (10) hesaplayip sakliyor.
+ * Hemen once, gizli sayfanin "Arama ve Paylasim" alanlari (yoksa paneldeki
+ * baslik, ozet ve kapak) gecerliyken hesaplatilir.
+ */
+add_action( 'wp', 'kocist_post_seo', 9 );
+function kocist_post_seo(): void {
+	if ( ! is_singular( 'post' ) || ! function_exists( 'nwcs_seo_context' ) ) {
+		return;
+	}
+
+	$post = get_queried_object();
+	$key  = kocist_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return;
+	}
+
+	$description = trim( (string) nwcs_field( $key, 'seo', 'description' ) );
+	$description = '' !== $description ? $description : (string) kocist_post_override( $post, 'excerpt' );
+	$original    = $post->post_excerpt;
+
+	if ( '' !== $description ) {
+		$post->post_excerpt = $description;
+	}
+
+	$GLOBALS['kocist_post_seo_key'] = $key;
+	nwcs_seo_context();
+	unset( $GLOBALS['kocist_post_seo_key'] );
+
+	$post->post_excerpt = $original;
+}
+
+/**
+ * Arama bilgisi hesaplanirken gecerli olan SEO alani; diger zamanlarda bos.
+ */
+function kocist_post_seo_field( $post, string $field ): string {
+	$key = $GLOBALS['kocist_post_seo_key'] ?? '';
+
+	return '' !== $key && kocist_post_page_key( $post ) === $key ? trim( (string) nwcs_field( $key, 'seo', $field ) ) : '';
+}
+
+add_filter( 'the_title', 'kocist_post_title', 10, 2 );
+function kocist_post_title( $title, $post_id = 0 ) {
+	if ( is_admin() || ! $post_id ) {
+		return $title;
+	}
+
+	$seo = kocist_post_seo_field( $post_id, 'title' );
+
+	return '' !== $seo ? $seo : ( kocist_post_override( $post_id, 'title' ) ?? $title );
+}
+
+add_filter( 'get_the_excerpt', 'kocist_post_excerpt', 10, 2 );
+function kocist_post_excerpt( $excerpt, $post = null ) {
+	return is_admin() ? $excerpt : ( kocist_post_override( $post, 'excerpt' ) ?? $excerpt );
+}
+
+// wpautop'tan sonra: panel metni kendi paragraflariyla gelir.
+add_filter( 'the_content', 'kocist_post_content', 99 );
+function kocist_post_content( $content ) {
+	if ( is_admin() || ! in_the_loop() ) {
+		return $content;
+	}
+
+	$body = kocist_post_override( get_the_ID(), 'body' );
+
+	return null === $body ? $content : kocist_blog_body_html( $body );
+}
+
+add_filter( 'post_thumbnail_id', 'kocist_post_thumbnail', 10, 2 );
+function kocist_post_thumbnail( $thumbnail_id, $post = null ) {
+	if ( is_admin() ) {
+		return $thumbnail_id;
+	}
+
+	$seo = (int) kocist_post_seo_field( $post, 'image' );
+
+	return $seo ? $seo : ( kocist_post_override( $post, 'image' ) ?? $thumbnail_id );
 }
 
 /**

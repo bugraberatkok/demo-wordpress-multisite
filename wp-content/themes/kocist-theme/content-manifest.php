@@ -6,6 +6,9 @@
  * Boylece ag paneli, siteye gecmeden dosya sisteminden okuyabilir.
  *
  * Alan turleri: text, textarea, url, image, icon, repeater, products
+ *
+ * Her ornek blog yazisinin panelde gizli bir sayfasi vardir ('yazi-<slug>'):
+ * "Sayfa bul" kutusundan acilir.
  */
 
 /*
@@ -151,6 +154,47 @@ foreach ( $kocist_catalog as $kocist_group => $kocist_row ) {
 	foreach ( $kocist_row['subs'] as $kocist_sub => $kocist_sub_row ) {
 		$kocist_category_pages[ 'kat-' . $kocist_sub ] = $kocist_category_page( 'Kategori: ' . $kocist_sub_row[0], '/kategoriler/' . $kocist_group . '/' . $kocist_sub . '/', $kocist_group, $kocist_sub, $kocist_sub_row[1], $kocist_sub_row[2] ?? array() );
 	}
+}
+
+/*
+ * Her ornek blog yazisi icin panelde gizli bir sayfa ('yazi-<slug>'): "Sayfa
+ * bul" kutusunda cikar, onizlemede yaziyi acar. Alanlar yazinin bugunku
+ * metniyle dolu gelir; panelde degistirilen alan sitede WordPress yazisinin
+ * yerine gecer (functions.php: Blog yazilari panelden). Degistirilmeyen alan
+ * icin WordPress'teki yazi kullanilir.
+ *
+ * Yonetimden sonradan yazilan yazi burada cikmaz (manifest sabit); o yazi
+ * Yazilar ekranindan duzenlenir.
+ */
+$kocist_blog_pages = array();
+
+foreach ( (array) include __DIR__ . '/content/blog-posts.php' as $kocist_post ) {
+	$kocist_blog_pages[ 'yazi-' . $kocist_post['slug'] ] = array(
+		'label'      => 'Yazı: ' . $kocist_post['title'],
+		'path'       => '/' . $kocist_post['slug'] . '/',
+		'hidden'     => true,
+		'components' => array(
+			'post' => array(
+				'label'  => 'Yazı',
+				'fields' => array(
+					'title'   => array( 'label' => 'Başlık', 'type' => 'text', 'default' => $kocist_post['title'] ),
+					'excerpt' => array( 'label' => 'Özet (kart ve arama sonucu)', 'type' => 'textarea', 'default' => $kocist_post['excerpt'] ),
+					'body'    => array(
+						'label'   => 'Metin (boş satırla paragraf)',
+						'type'    => 'textarea',
+						'default' => $kocist_post['body'],
+						'hint'    => 'Burada değiştirdiğiniz metin sitede görünür. Tam metni yazınca “' . KOCIST_BLOG_PENDING . '” satırını silin; o satır sitede soluk görünür.',
+					),
+					'image'   => array(
+						'label'   => 'Kapak Görseli',
+						'type'    => 'image',
+						'default' => 0,
+						'hint'    => 'Boş bırakılırsa yazının kendi kapak görseli, o da yoksa kategorisine uygun fotoğraf kullanılır.',
+					),
+				),
+			),
+		),
+	);
 }
 
 return array(
@@ -1384,5 +1428,5 @@ return array(
 				),
 			),
 		),
-	) + $kocist_category_pages,
+	) + $kocist_category_pages + $kocist_blog_pages,
 );

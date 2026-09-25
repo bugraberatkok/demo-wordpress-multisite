@@ -2,9 +2,9 @@
 /**
  * Blog: ilk kurulum yazilari ve sablon yardimcilari.
  *
- * Yazilar firmanin mevcut blogundaki basliklar, tarihler, kategoriler ve
- * ozetlerdir. Tam metinler henuz yok; govdeye ozet ve "hazirlaniyor" notu
- * konur. Tema yazilari yalnizca bir kez olusturur (kocist_blog_seeded):
+ * Yazilarin metinleri content/blog-posts.php'de; panel de ayni dosyadan
+ * okur (her yazinin gizli sayfasi, functions.php: Blog yazilari panelden).
+ * Tema yazilari yalnizca bir kez olusturur (kocist_blog_seeded):
  * kullanici bir yaziyi silerse geri gelmez. Olusturulan her yazi
  * _kocist_seed meta anahtariyla isaretlenir.
  */
@@ -12,26 +12,36 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Ilk kurulum yazilari: tarih | kategori | adres adi | baslik | ozet.
+ * Ornek yazilar (content/blog-posts.php): slug, title, excerpt, body, date,
+ * category.
  */
 function kocist_blog_seed_posts(): array {
-	return array(
-		array( '2025-01-12 10:00:00', 'İhracat', 'ispm-15-belgeli-ahsap-sandik-ve-kafes-uretimi', 'ISPM 15 Belgeli Ahşap Sandık ve Kafes Üretimi – Çatalca ve Çevresi', 'Ahşap ambalajda uluslararası ısıl işlem standardının kapsamı, işaretleme ve sevkiyat etkileri.' ),
-		array( '2025-02-03 10:00:00', 'Kontrplak', 'kontrplak-secim-rehberi', 'Kontrplak Seçim Rehberi', 'Kalınlık, sınıf ve tutkal tipine göre projenize uygun kontrplak seçimi.' ),
-		array( '2025-02-18 10:00:00', 'OSB', 'osb-mi-kontrplak-mi', 'OSB mi, Kontrplak mı?', 'Kalıp ve iskele uygulamalarında OSB-3/4 ile kontrplak karşılaştırması.' ),
-		array( '2025-03-05 10:00:00', 'Ahşap Palet', 'ispm-15-palet-uretiminde-dikkat-edilecekler', 'ISPM-15 Palet Üretiminde Dikkat Edilecekler', 'Fırınlama, nem kontrolü ve standarda uygun işaretleme ile sorunsuz ihracat.' ),
-		array( '2025-03-22 10:00:00', 'Ahşap Sandık', 'ahsap-sandik-ile-guvenli-ambalaj-cozumleri', 'Ahşap Sandık ile Güvenli Ambalaj Çözümleri', 'Hassas ekipman ve ihracat sevkiyatlarında sandık tasarım ipuçları.' ),
-		array( '2025-04-10 10:00:00', 'Lojistik', 'lojistikte-ahsap-ambalajin-rolu', 'Lojistikte Ahşap Ambalajın Rolü', 'Tedarik zincirinde palet ve sandık standardizasyonunun operasyonel etkileri.' ),
-		array( '2025-04-20 10:00:00', 'Ahşap Palet', 'ahsap-palet-fiyatlari-ve-ispm-15-uygulamalari', 'Ahşap Palet Fiyatları ve ISPM-15 Uygulamaları', 'Ahşap palet, palet fiyatları ve ISPM 15 ısıl işlem (HT) süreçleri; ihracat uyumu ve maliyet planı.' ),
-		array( '2025-04-20 11:00:00', 'Ahşap Sandık', 'ahsap-sandik-fiyatlari-ve-ambalaj-sandigi-secimi', 'Ahşap Sandık Fiyatları ve Ambalaj Sandığı Seçimi', 'Ahşap sandık ve ambalaj sandığı fiyatlarını belirleyen etmenler; ISPM 15 uyumu ve koruma çözümleri.' ),
-		array( '2025-04-21 10:00:00', 'Kereste', 'kereste-fiyatlari-ve-cesitleri', 'Kereste Fiyatları ve Çeşitleri', 'Kereste fiyatları ve kereste çeşitleri: inşaatlık, doğramalık, mobilyalık ve ısıl işlem kereste.' ),
-		array( '2025-04-22 10:00:00', 'Kontrplak', 'kontrplak-ve-osb-plaka-secim-kilavuzu', 'Kontrplak ve OSB Plaka Seçim Kılavuzu', 'Kontrplak ile OSB plaka karşılaştırması: WBP tutkal, sınıf ve kalınlık seçimi; uygulama rehberi.' ),
-		array( '2025-04-25 10:00:00', 'Ahşap Dekorasyon', 'ahsap-dekorasyon-kamelya-salincak-ve-kopek-kulubesi', 'Ahşap Dekorasyon: Kamelya, Salıncak ve Köpek Kulübesi', 'Ahşap kamelya, ahşap salıncak ve ahşap köpek kulübesi seçiminde malzeme, ölçü ve bakım ipuçları.' ),
-		array( '2025-12-09 10:00:00', 'Kereste', 'tomruk-fiyatlari-olculer-siniflar-ve-kalite', 'Tomruk Fiyatları: Ölçüler, Sınıflar ve Kalite', 'Tomruk fiyatları; çap sınıfı, boy, tür (çam, ladin) ve kaliteye göre belirlenir.' ),
-		array( '2026-01-20 10:00:00', 'Ahşap Ambalaj', 'ahsap-sandik-fiyatlari-2026', 'Ahşap Sandık Fiyatları 2026 – ISPM 15 Belgeli Özel Üretim Çözümleri', '2026 yılında ahşap sandık fiyatları; ölçü, ahşap türü, ISPM 15 belgesi ve kullanım amacına göre değişkenlik göstermektedir. Bu yazıda Koçist Orman Ürünleri olarak fiyatları etkileyen tüm faktörleri ve doğru ahşap sandık seçimini detaylıca ele alıyoruz.' ),
-		array( '2026-01-20 11:00:00', 'Ahşap Dekorasyon', 'ahsap-cardak-modelleri-ve-fiyatlari', 'Ahşap Çardak Modelleri ve Fiyatları – Bahçeniz İçin Doğal Çözümler', 'Ahşap çardak modelleri; bahçe, villa, site ve sosyal alanlarda hem estetik hem de fonksiyonel çözümler sunar. Bu yazıda ahşap çardak nedir, hangi modeller tercih edilir, fiyatları neler etkiler ve Çatalca çevresinde neden ahşap çardak daha avantajlıdır detaylıca ele alıyoruz.' ),
-		array( '2026-01-26 10:00:00', 'Ahşap Sandık', 'ihracat-sandigi-fiyatlari-2026-istanbul', 'İhracat Sandığı Fiyatları 2026 İstanbul – ISPM 15 Belgeli Özel Üretim', 'İhracat sandığı fiyatları 2026 yılında; üretim maliyetleri, ihracat standartları ve taşıma gereksinimlerine bağlı olarak değişiklik göstermektedir.' ),
-	);
+	static $posts = null;
+
+	if ( null === $posts ) {
+		$posts = (array) include get_theme_file_path( 'content/blog-posts.php' );
+	}
+
+	return $posts;
+}
+
+/**
+ * Yazi metnini HTML'e cevirir: bos satirla ayrilan her blok bir paragraf,
+ * "hazirlaniyor" notu soluk. Ilk kurulum ve paneldeki metin ayni yoldan
+ * gecer.
+ */
+function kocist_blog_body_html( string $text ): string {
+	kocist_blog_seed_posts(); // KOCIST_BLOG_PENDING orada tanimli.
+
+	$blocks = array_filter( array_map( 'trim', preg_split( '/\R\s*\R/u', trim( $text ) ) ), 'strlen' );
+	$html   = array();
+
+	foreach ( $blocks as $block ) {
+		$class  = KOCIST_BLOG_PENDING === $block ? ' class="k-post__pending"' : '';
+		$html[] = '<p' . $class . '>' . nl2br( esc_html( $block ) ) . '</p>';
+	}
+
+	return implode( "\n\n", $html );
 }
 
 /**
@@ -53,8 +63,9 @@ function kocist_seed_blog_posts(): void {
 		wp_update_post( array( 'ID' => $hello->ID, 'post_status' => 'draft' ) );
 	}
 
-	foreach ( kocist_blog_seed_posts() as $row ) {
-		list( $date, $category, $slug, $title, $excerpt ) = $row;
+	foreach ( kocist_blog_seed_posts() as $post ) {
+		$slug     = $post['slug'];
+		$category = $post['category'];
 
 		$existing = get_posts(
 			array(
@@ -84,10 +95,10 @@ function kocist_seed_blog_posts(): void {
 				'post_type'     => 'post',
 				'post_status'   => 'publish',
 				'post_name'     => $slug,
-				'post_title'    => $title,
-				'post_excerpt'  => $excerpt,
-				'post_content'  => '<p>' . esc_html( $excerpt ) . "</p>\n\n<p class=\"k-post__pending\">Bu yazının tam metni hazırlanıyor.</p>",
-				'post_date'     => $date,
+				'post_title'    => $post['title'],
+				'post_excerpt'  => $post['excerpt'],
+				'post_content'  => kocist_blog_body_html( $post['body'] ),
+				'post_date'     => $post['date'],
 				'post_category' => $term_id ? array( $term_id ) : array(),
 			),
 			true
@@ -141,7 +152,8 @@ function kocist_post_image( ?int $post_id = null, string $size = 'large' ): arra
 	}
 
 	$term  = kocist_post_category( $post_id );
-	$key   = sanitize_title( ( $term ? $term->name : '' ) . ' ' . get_the_title( $post_id ) );
+	// Ham baslik: panelde baslik degisse de yedek fotograf ayni kalir.
+	$key   = sanitize_title( ( $term ? $term->name : '' ) . ' ' . get_post_field( 'post_title', $post_id ) );
 	$rules = array(
 		'kamelya'    => 'ahsap-kamelya-3x3-zeminli.webp',
 		'dekorasyon' => 's2-dekorasyon.jpg',
@@ -182,6 +194,9 @@ function kocist_post_date( ?int $post_id = null ): string {
 
 /**
  * Blog karti (liste, ana sayfa, ilgili yazilar ayni karti kullanir).
+ *
+ * Onizlemede baslik, ozet ve gorsel yazinin panel sayfasindaki alani acar
+ * (sonradan yazilan yazida isaret yok).
  */
 function kocist_post_card( string $heading = 'h2' ): void {
 	$term  = kocist_post_category();
@@ -189,7 +204,7 @@ function kocist_post_card( string $heading = 'h2' ): void {
 	$tag   = in_array( $heading, array( 'h2', 'h3' ), true ) ? $heading : 'h2';
 	?>
 	<article class="k-post-card">
-		<a class="k-post-card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true" <?php kocist_post_attr( (int) get_the_ID(), 'Öne çıkan görsel' ); ?>>
+		<a class="k-post-card__media" href="<?php the_permalink(); ?>" tabindex="-1" aria-hidden="true" <?php kocist_post_edit_attr( get_the_ID(), 'image' ); ?>>
 			<?php echo kocist_image_tag( $image, '', '' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</a>
 		<div class="k-post-card__body">
@@ -197,12 +212,12 @@ function kocist_post_card( string $heading = 'h2' ): void {
 				<?php if ( $term ) : ?>
 					<span class="k-post-card__cat" <?php kocist_term_attr( $term ); ?>><?php echo esc_html( $term->name ); ?></span>
 				<?php endif; ?>
-				<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php kocist_post_attr( (int) get_the_ID(), 'Yayın tarihi' ); ?>><?php echo esc_html( kocist_post_date() ); ?></time>
+				<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( kocist_post_date() ); ?></time>
 			</p>
-			<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit liste. ?> class="k-post-card__title" <?php kocist_post_attr( (int) get_the_ID(), 'Yazı başlığı' ); ?>>
+			<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit liste. ?> class="k-post-card__title" <?php kocist_post_edit_attr( get_the_ID(), 'title' ); ?>>
 				<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
 			</<?php echo $tag; // phpcs:ignore WordPress.Security.EscapingOutput ?>>
-			<p class="k-post-card__excerpt" <?php kocist_post_attr( (int) get_the_ID(), 'Yazı özeti' ); ?>><?php echo esc_html( wp_trim_words( get_the_excerpt(), 26, '…' ) ); ?></p>
+			<p class="k-post-card__excerpt" <?php kocist_post_edit_attr( get_the_ID(), 'excerpt' ); ?>><?php echo esc_html( wp_trim_words( get_the_excerpt(), 26, '…' ) ); ?></p>
 		</div>
 	</article>
 	<?php
