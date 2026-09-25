@@ -1311,3 +1311,22 @@ istanbulpaletcivi.com yeniden tasarımı: `istanbulpaletcivi-theme`.
   ön sayfa ve kalıcı bağlantı ayarını, Türkçe dili ve eski demo adreslerinin 410
   listesini kendisi kurar (`inc/setup.php`). Canlıda: Git deploy → Ağ Yönetimi'nde
   site aç → temayı etkinleştir.
+
+## Telefonlar, tek adres ve 50 yıl: on site (25 Eylül 2026)
+
+Kullanıcı kararı. Toplu Güncelleme kuralları genişletildi (`includes/admin/bulk-update.php`):
+
+- **İki hat grubu.** Koçist ve WOOD KOCIST: sabit 0212 648 19 19, cep/WhatsApp
+  0549 648 19 19. Diğer sekiz site: sabit 0212 648 10 90, cep/WhatsApp 0532 374 98 32.
+  Telefon alanlarına sabit hat, WhatsApp/cep alanlarına cep yazılır; metinde geçen
+  numara kendi türündeki hatla değişir. Yalnızca bu dört numara tanınır. Boş WhatsApp
+  bağlantısı (Ahşap Kasa, Ahşap Ambalaj) sitenin cep hattıyla dolar. Arama motorlarına
+  verilen firma telefonu (JSON-LD) her sitede sabit hat.
+- **Koçist ve WOOD KOCIST de kapsamda:** adres Kestanelik ... 2125/1, Çatalca, İstanbul
+  (34494 kaldırıldı; Koçist tema varsayılanı da boş); Koçist'teki "37 yıl" 50 yıl oldu.
+  WOOD KOCIST'in "yarım asırlık" ifadeleri aynı anlamda olduğu için kaldı.
+- Tek telefon alanı olan temalarda (Koçist, İthal/Kavak Keresteci) cep numarası metin
+  olarak görünmez, WhatsApp bağlantısında durur.
+
+Canlıda: Git deploy'dan sonra Ağ yönetimi → İçerik Stüdyosu → Toplu Güncelleme → Uygula
+(veritabanı Git ile taşınmaz).

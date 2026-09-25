@@ -3,8 +3,8 @@
  * Ag yonetimi -> Icerik Studyosu -> Toplu Guncelleme.
  *
  * Firma bilgisinin sitelerde tek tip olmasi icin kurala dayali guncelleme:
- * tek adres (Kestanelik / Catalca) ve firma yasi (50 yil). Koçist sitesi
- * kapsam disi.
+ * tek adres (Kestanelik / Catalca), firma yasi (50 yil) ve telefonlar (iki
+ * hat grubu, bkz. NWCS_BULK_PHONES). On site de kapsamda.
  *
  * Adres, yil ve baglanti kurallari sabit bir "eski deger" aramaz; her alanin
  * o anki degerine bakar (canli veritabani yereldekinden farkli olabilir).
@@ -35,6 +35,27 @@ const NWCS_BULK_THEMES = array(
 	'sanayi-palet-theme',
 	'ahsapambalaj-theme',
 	'istanbulpaletcivi-theme',
+	'kocist-theme',
+	'woodkocist-theme',
+);
+
+/**
+ * Telefonlar: sabit hat ve cep (WhatsApp). Koçist ve WOOD KOCIST kendi
+ * hatlarini kullanir; diger sekiz site ortak hatti. Yalnizca bu dort numara
+ * taninir; baska rakamlara (adres no, fiyat) dokunulmaz.
+ */
+const NWCS_BULK_PHONES = array(
+	'kocist-theme'      => array( 'land' => '2126481919', 'mobile' => '5496481919' ),
+	'woodkocist-theme'  => array( 'land' => '2126481919', 'mobile' => '5496481919' ),
+	''                  => array( 'land' => '2126481090', 'mobile' => '5323749832' ),
+);
+
+/** Taninan numaralar ve turleri. */
+const NWCS_BULK_KNOWN_PHONES = array(
+	'2126481919' => 'land',
+	'5496481919' => 'mobile',
+	'2126481090' => 'land',
+	'5323749832' => 'mobile',
 );
 
 add_action( 'network_admin_menu', 'nwcs_register_bulk_menu', 30 );
@@ -54,6 +75,107 @@ function nwcs_register_bulk_menu(): void {
  */
 function nwcs_bulk_address( bool $multiline ): string {
 	return NWCS_BULK_STREET . ( $multiline ? "\n" : ', ' ) . NWCS_BULK_CITY;
+}
+
+/**
+ * Sitenin hatlari (temaya gore).
+ *
+ * @return array{land:string, mobile:string}
+ */
+function nwcs_bulk_phone_set( string $theme ): array {
+	return NWCS_BULK_PHONES[ $theme ] ?? NWCS_BULK_PHONES[''];
+}
+
+/**
+ * Alanin hangi hatti tasidigi: WhatsApp / cep alani 'mobile', telefon alani
+ * 'land', digerleri (metin) '' — metinde her numara kendi turundeki hatla
+ * degisir.
+ */
+function nwcs_bulk_phone_slot( string $component, string $field, string $value ): string {
+	if ( preg_match( '/whatsapp|mobile|gsm|(^|[._])cep/i', $component . '.' . $field ) || str_contains( $value, 'wa.me' ) ) {
+		return 'mobile';
+	}
+
+	if ( preg_match( '/(^|_)(phone|tel)(_|$)/', $field ) || 'phone' === $field ) {
+		return 'land';
+	}
+
+	return '';
+}
+
+/**
+ * Degerdeki taninan numaralari sitenin hatlariyla degistirir; yazim bicimi
+ * (+90 / 0 / tel: / wa.me) korunur.
+ */
+function nwcs_bulk_phone_text( string $value, string $slot, array $set ): string {
+	if ( ! preg_match( '/\d/', $value ) ) {
+		return $value;
+	}
+
+	$target = static function ( string $digits ) use ( $slot, $set ): ?string {
+		$type = NWCS_BULK_KNOWN_PHONES[ $digits ] ?? null;
+
+		return null === $type ? null : $set[ '' !== $slot ? $slot : $type ];
+	};
+
+	// Baglanti bicimleri: tel:+90..., wa.me/90..., phone=90...
+	$value = (string) preg_replace_callback(
+		'/(tel:\+?|wa\.me\/|phone=)(90)?(\d{10})(?!\d)/',
+		static function ( array $m ) use ( $target ): string {
+			$new = $target( $m[3] );
+
+			return null === $new ? $m[0] : $m[1] . '90' . $new;
+		},
+		$value
+	);
+
+	// Gorunen bicimler: +90 212 648 10 90, 0 212 648 10 90, 0212 648 1090, 05496481919.
+	// Baglanti icindeki numara (tel:, wa.me/) yukarida yazildi; burada atlanir.
+	return (string) preg_replace_callback(
+		'/(?<![\d\/:=])(\+90\s?|0\s?)?\(?(\d{3})\)?[\s.\-]?(\d{3})[\s.\-]?(\d{2})[\s.\-]?(\d{2})(?!\d)/',
+		static function ( array $m ) use ( $target ): string {
+			$new = $target( $m[2] . $m[3] . $m[4] . $m[5] );
+
+			if ( null === $new ) {
+				return $m[0];
+			}
+
+			$prefix = trim( (string) $m[1] );
+			$lead   = '+90' === $prefix ? '+90 ' : ( '' !== (string) $m[1] && ' ' === substr( (string) $m[1], -1 ) ? '0 ' : ( '0' === $prefix ? '0' : '' ) );
+
+			return $lead . substr( $new, 0, 3 ) . ' ' . substr( $new, 3, 3 ) . ' ' . substr( $new, 6, 2 ) . ' ' . substr( $new, 8, 2 );
+		},
+		$value
+	);
+}
+
+/**
+ * @param mixed $value
+ * @return mixed
+ */
+function nwcs_bulk_phones( string $component, string $field, $value, array $set ) {
+	if ( is_array( $value ) ) {
+		$out = array();
+
+		foreach ( $value as $key => $item ) {
+			// Tekrarli satirda alt alan adi (url, label...) de hat turunu belirler.
+			$sub         = is_string( $key ) ? $field . '_' . $key : $field;
+			$out[ $key ] = nwcs_bulk_phones( $component, $sub, $item, $set );
+		}
+
+		return $out;
+	}
+
+	// Bos WhatsApp baglantisi dugmeyi gizliyordu (Ahsap Kasa, Ahsap Ambalaj): sitenin cep hatti.
+	if ( 'whatsapp_url' === $field && '' === $value ) {
+		return 'https://wa.me/90' . $set['mobile'];
+	}
+
+	if ( ! is_string( $value ) || '' === $value ) {
+		return $value;
+	}
+
+	return nwcs_bulk_phone_text( $value, nwcs_bulk_phone_slot( $component, $field, $value ), $set );
 }
 
 /**
@@ -282,6 +404,7 @@ function nwcs_bulk_plan(): array {
 					$saved = $stored[ $page_key ][ $component_key ][ $field_key ] ?? null;
 					$value = ( null !== $saved && '' !== $saved ) ? $saved : ( $definition['default'] ?? '' );
 					$new   = nwcs_bulk_links( nwcs_bulk_revise( nwcs_bulk_transform( $page_key, $component_key, $field_key, $value ), $revisions ) );
+					$new   = nwcs_bulk_phones( $component_key, $field_key, $new, nwcs_bulk_phone_set( (string) get_option( 'stylesheet' ) ) );
 
 					if ( $new === $value ) {
 						continue;
@@ -396,9 +519,14 @@ function nwcs_render_bulk_update(): void {
 		</header>
 
 		<section class="nwcs-pool__card nwcs-bulk">
-			<h2 class="nwcs-pool__title">Tek adres ve firma yaşı</h2>
+			<h2 class="nwcs-pool__title">Tek adres, firma yaşı ve telefonlar</h2>
 			<p class="nwcs-seo__lead">
-				Koçist dışındaki sitelerde adres <strong><?php echo esc_html( nwcs_bulk_address( false ) ); ?></strong> olur;
+				Telefonlar: Koçist ve WOOD KOCIST’te sabit hat 0212 648 19 19, cep ve WhatsApp 0549 648 19 19; diğer sekiz sitede
+				sabit hat 0212 648 10 90, cep ve WhatsApp 0532 374 98 32. Telefon alanlarına sabit hat, WhatsApp ve cep alanlarına
+				cep numarası yazılır; metinlerde geçen numaralar da sitenin hattına çevrilir.
+			</p>
+			<p class="nwcs-seo__lead">
+				Bütün sitelerde adres <strong><?php echo esc_html( nwcs_bulk_address( false ) ); ?></strong> olur;
 				alt bilgi, iletişim sayfası, harita ve arama motorlarına verilen firma bilgisi dahil. 34494 posta kodu kaldırılır
 				(Çatalca'nın kodu değil). Firma yaşı her yerde 50 yıl olur; Sanayi Palet'teki "1980'lerden bu yana" ifadeleri çıkar.
 				Metinlerde geçen Başakşehir ve İkitelli de Çatalca olur. Kendi alan adına bağlanmış sitelere giden eski panel

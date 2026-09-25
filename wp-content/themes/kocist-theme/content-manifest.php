@@ -22,7 +22,7 @@ return array(
 		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
 		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',
-		'postal_code' => '34494',
+		'postal_code' => '', // 34494 Catalca'nin kodu degil; tek adres kurali (Toplu Guncelleme)
 		'country'     => 'TR',
 	),
 	'pages'      => array(
