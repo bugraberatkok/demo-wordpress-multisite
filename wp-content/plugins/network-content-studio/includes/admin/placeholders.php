@@ -21,12 +21,31 @@ function nwcs_placeholders_save(): void {
 
 	$on = array_map( 'absint', (array) ( $_POST['sites'] ?? array() ) );
 
-	foreach ( get_sites( array( 'number' => 100 ) ) as $site ) {
-		update_blog_option( (int) $site->blog_id, NWCS_PLACEHOLDER_OPTION, in_array( (int) $site->blog_id, $on, true ) ? '1' : '0' );
+	foreach ( nwcs_placeholder_sites() as $site ) {
+		$id  = (int) $site->blog_id;
+		$new = in_array( $id, $on, true ) ? '1' : '0';
+
+		if ( get_blog_option( $id, NWCS_PLACEHOLDER_OPTION, '0' ) === $new ) {
+			continue;
+		}
+
+		update_blog_option( $id, NWCS_PLACEHOLDER_OPTION, $new );
+
+		// Sayfa onbellegi eklentisi varsa (LiteSpeed Cache) degisen site temizlenir.
+		switch_to_blog( $id );
+		do_action( 'litespeed_purge_all' );
+		restore_current_blog();
 	}
 
 	wp_safe_redirect( add_query_arg( array( 'page' => NWCS_PLACEHOLDER_SLUG, 'kaydedildi' => 1 ), network_admin_url( 'admin.php' ) ) );
 	exit;
+}
+
+/**
+ * Etkin siteler (arsivlenmis ve silinmis haric).
+ */
+function nwcs_placeholder_sites(): array {
+	return get_sites( array( 'number' => 100, 'deleted' => 0, 'archived' => 0 ) );
 }
 
 function nwcs_render_placeholders(): void {
@@ -49,14 +68,14 @@ function nwcs_render_placeholders(): void {
 			</p>
 
 			<?php if ( isset( $_GET['kaydedildi'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca bilgi. ?>
-				<p class="nwcs-badge nwcs-badge--ok">Kaydedildi. Önbelleği (LiteSpeed) temizleyin.</p>
+				<p class="nwcs-badge nwcs-badge--ok">Kaydedildi. Sunucu önbelleği kullanılıyorsa (LiteSpeed) bir kez temizleyin.</p>
 			<?php endif; ?>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="nwcs_placeholders_save" />
 				<?php wp_nonce_field( 'nwcs_placeholders_save' ); ?>
 				<ul style="list-style:none;margin:1rem 0;padding:0;display:grid;gap:.5rem">
-					<?php foreach ( get_sites( array( 'number' => 100 ) ) as $site ) :
+					<?php foreach ( nwcs_placeholder_sites() as $site ) :
 						$id = (int) $site->blog_id;
 						?>
 						<li>

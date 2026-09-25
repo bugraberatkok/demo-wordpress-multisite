@@ -7,9 +7,16 @@
  * kapatilinca hepsi geri gelir. Her kutu farkli: desen ve aci gorselin
  * adresinden turetilir (ayni gorsel her yerde ayni kutu olur).
  *
- * Dokunulmayanlar: logolar (sinif ya da dosya adinda "logo"), SVG ve 64
- * pikselden kucuk simgeler, yonetim ekranlari, beslemeler, REST. Paylasim
- * onizlemesi gorseli (og:image) degismez; ziyaretci onu sayfada gormez.
+ * Kapsam (yalnizca <body>):
+ *   - <img> etiketleri yer tutucuya, <picture> icindeki <source> kaldirilir;
+ *   - satir ici ve <style> icindeki arka plan fotograflari (url(...)) desene;
+ *   - buyutme penceresi verisindeki (data-full, data-gallery, baglantilar)
+ *     fotograf adresleri "Gorsel gelecek" SVG'sine: buyutunce de fotograf acilmaz;
+ *   - temalarin "Ornek gorsel" notu kaldirilir.
+ * Dokunulmayanlar: <header> ve <footer> icindeki ilk gorsel (logo), adinda
+ * "logo" gecen dosyalar, SVG ve 64 pikselden kucuk simgeler; <head> (og:image,
+ * JSON-LD); yonetim, besleme, REST. Herhangi bir adim basarisiz olursa sayfa
+ * hic degistirilmeden gonderilir.
  *
  * Ac/kapa: Ag Yonetimi -> Icerik Studyosu -> Gorsel Yer Tutucu (site basina).
  */
@@ -40,10 +47,13 @@ function nwcs_placeholders_css(): void {
 	}
 	?>
 	<style id="nwcs-placeholders">
-		/* Etiket sag altta: arka plan gorsellerinde (hero) basliklarla cakismaz. */
-		.nwcs-ph{display:flex;align-items:flex-end;justify-content:flex-end;padding:.75rem;box-sizing:border-box;max-width:100%;overflow:hidden;background-color:#e7eae8;color:#55605a;--ph-line:rgba(40,50,45,.09)}
+		/* :where -> temanin sinif kurallari (hidden, md:block...) kazanir. Etiket
+		   sol ustte: urun etiketleri ve Buyut dugmeleri alt kosede durur. */
+		:where(.nwcs-ph){display:flex;align-items:flex-start;justify-content:flex-start;padding:.75rem;box-sizing:border-box;max-width:100%;overflow:hidden;container-type:inline-size}
+		.nwcs-ph{background-color:#e7eae8;color:#55605a;--ph-line:rgba(40,50,45,.09)}
 		.nwcs-ph[data-ph-w]{width:var(--ph-w)}
-		.nwcs-ph__t{padding:.35rem .7rem;border-radius:3px;background:rgba(255,255,255,.82);font:600 .8125rem/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.01em;white-space:nowrap}
+		.nwcs-ph__t{max-width:100%;overflow:hidden;text-overflow:ellipsis;padding:.35rem .7rem;border-radius:3px;background:rgba(255,255,255,.85);font:600 .8125rem/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.01em;white-space:nowrap}
+		@container (max-width:170px){.nwcs-ph__t{display:none}}
 		.nwcs-ph--p0{background-image:repeating-linear-gradient(var(--ph-a),var(--ph-line) 0 2px,transparent 2px 14px)}
 		.nwcs-ph--p1{background-image:radial-gradient(var(--ph-line) 1.6px,transparent 1.8px);background-size:14px 14px}
 		.nwcs-ph--p2{background-image:linear-gradient(var(--ph-line) 1px,transparent 1px),linear-gradient(90deg,var(--ph-line) 1px,transparent 1px);background-size:22px 22px}
@@ -59,11 +69,12 @@ function nwcs_placeholders_css(): void {
 
 /**
  * Gorsel adresinden kararli bir cesit: desen (6), aci (4), ton (4).
+ * crc32 32 bit PHP'de negatif olabilir: isaretsiz okunur.
  *
  * @return array{pattern:int, angle:int, tone:int}
  */
 function nwcs_placeholder_variant( string $key ): array {
-	$hash = crc32( $key );
+	$hash = (int) sprintf( '%u', crc32( $key ) );
 
 	return array(
 		'pattern' => $hash % 6,
@@ -73,24 +84,53 @@ function nwcs_placeholder_variant( string $key ): array {
 }
 
 /**
+ * Etiketin bir niteligi (tirnakli). Yalnizca bosluktan sonra gelen ad aranir.
+ */
+function nwcs_placeholder_attr( string $tag, string $name ): string {
+	if ( ! preg_match( '/(?<=\s)' . preg_quote( $name, '/' ) . '\s*=\s*("([^"]*)"|\'([^\']*)\')/i', $tag, $m ) ) {
+		return '';
+	}
+
+	// Cift tirnakta deger 2. grupta, tek tirnakta 3. grupta.
+	return html_entity_decode( '"' === $m[1][0] ? $m[2] : ( $m[3] ?? '' ), ENT_QUOTES );
+}
+
+/**
+ * Fotograf adresi mi (logo, SVG ve veri adresi haric)?
+ */
+function nwcs_placeholder_is_photo_url( string $url ): bool {
+	$path = (string) wp_parse_url( str_replace( '\\/', '/', $url ), PHP_URL_PATH );
+
+	return (bool) preg_match( '/\.(jpe?g|png|webp|gif|avif)$/i', $path ) && ! preg_match( '/logo/i', basename( $path ) );
+}
+
+/**
+ * Buyutme penceresinde gosterilecek "Gorsel gelecek" gorseli (SVG, base64:
+ * nitelik ve JSON icinde guvenli).
+ */
+function nwcs_placeholder_svg_uri(): string {
+	static $uri = null;
+
+	if ( null === $uri ) {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">'
+			. '<defs><pattern id="p" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="28" fill="#28322d" fill-opacity=".09"/></pattern></defs>'
+			. '<rect width="1200" height="900" fill="#e7eae8"/><rect width="1200" height="900" fill="url(#p)"/>'
+			. '<rect x="470" y="420" width="260" height="60" rx="6" fill="#fff" fill-opacity=".85"/>'
+			. '<text x="600" y="459" font-family="system-ui,Segoe UI,sans-serif" font-size="26" font-weight="600" fill="#55605a" text-anchor="middle">Görsel gelecek</text></svg>';
+		$uri = 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions -- veri adresi.
+	}
+
+	return $uri;
+}
+
+/**
  * Tek bir img etiketi icin yer tutucu. Degistirilmeyecekse null.
  */
 function nwcs_placeholder_for_img( string $tag ): ?string {
-	$attr = static function ( string $name ) use ( $tag ): string {
-		if ( ! preg_match( '/\s' . $name . '\s*=\s*("([^"]*)"|\'([^\']*)\')/i', $tag, $m ) ) {
-			return '';
-		}
-
-		// Cift tirnakta deger 2. grupta, tek tirnakta 3. grupta.
-		$value = '"' === $m[1][0] ? $m[2] : ( $m[3] ?? '' );
-
-		return html_entity_decode( $value, ENT_QUOTES );
-	};
-
-	$src   = $attr( 'src' );
-	$class = $attr( 'class' );
-	$w     = (int) $attr( 'width' );
-	$h     = (int) $attr( 'height' );
+	$src   = nwcs_placeholder_attr( $tag, 'src' );
+	$class = trim( nwcs_placeholder_attr( $tag, 'class' ) );
+	$w     = (int) nwcs_placeholder_attr( $tag, 'width' );
+	$h     = (int) nwcs_placeholder_attr( $tag, 'height' );
 
 	if ( '' === $src || str_starts_with( $src, 'data:' ) || preg_match( '/\.svg(\?|$)/i', $src )
 		|| preg_match( '/logo/i', $class . ' ' . basename( (string) wp_parse_url( $src, PHP_URL_PATH ) ) )
@@ -98,8 +138,7 @@ function nwcs_placeholder_for_img( string $tag ): ?string {
 		return null;
 	}
 
-	$variant = nwcs_placeholder_variant( preg_replace( '/-\d+x\d+(?=\.\w+$)/', '', (string) wp_parse_url( $src, PHP_URL_PATH ) ) );
-	$style   = $attr( 'style' );
+	$variant = nwcs_placeholder_variant( (string) preg_replace( '/-\d+x\d+(?=\.\w+$)/', '', (string) wp_parse_url( $src, PHP_URL_PATH ) ) );
 	$css     = '--ph-a:' . $variant['angle'] . 'deg;';
 
 	if ( $w && $h ) {
@@ -108,64 +147,128 @@ function nwcs_placeholder_for_img( string $tag ): ?string {
 		$css .= 'aspect-ratio:4 / 3;';
 	}
 
-	$alt = trim( $attr( 'alt' ) );
+	// Panel onizlemesindeki tikla-duzenle isaretleri korunur.
+	$data = '';
+	if ( preg_match_all( '/(?<=\s)(data-nwcs-[a-z0-9-]+)\s*=\s*("([^"]*)"|\'([^\']*)\')/i', $tag, $pairs, PREG_SET_ORDER ) ) {
+		foreach ( $pairs as $pair ) {
+			$data .= sprintf( ' %s="%s"', esc_attr( strtolower( $pair[1] ) ), esc_attr( html_entity_decode( '"' === $pair[2][0] ? $pair[3] : ( $pair[4] ?? '' ), ENT_QUOTES ) ) );
+		}
+	}
+
+	$alt = trim( nwcs_placeholder_attr( $tag, 'alt' ) );
 
 	return sprintf(
-		'<span class="nwcs-ph nwcs-ph--p%1$d nwcs-ph--t%2$d %3$s" role="img" aria-label="%4$s" style="%5$s"%6$s><span class="nwcs-ph__t">Görsel gelecek</span></span>',
-		$variant['pattern'],
-		$variant['tone'],
-		esc_attr( $class ),
+		'<span class="%1$s" role="img" aria-label="%2$s" style="%3$s"%4$s%5$s><span class="nwcs-ph__t">Görsel gelecek</span></span>',
+		esc_attr( trim( sprintf( 'nwcs-ph nwcs-ph--p%d nwcs-ph--t%d %s', $variant['pattern'], $variant['tone'], $class ) ) ),
 		esc_attr( '' !== $alt ? 'Görsel gelecek: ' . $alt : 'Görsel gelecek' ),
-		esc_attr( $css . $style ),
-		$w && $h ? ' data-ph-w' : ''
+		esc_attr( $css . nwcs_placeholder_attr( $tag, 'style' ) ),
+		$w && $h ? ' data-ph-w' : '',
+		$data
 	);
 }
 
 /**
- * Sayfa ciktisi: img etiketleri yer tutucuya, <picture> icindeki <source>
- * etiketleri kaldirilir, satir ici background-image adresleri desene doner.
+ * Bir govde parcasina (header/footer disi) donusumleri uygular. Herhangi
+ * bir duzenli ifade basarisiz olursa null: cagiran sayfayi degistirmez.
+ */
+function nwcs_placeholders_transform( string $part ): ?string {
+	$steps = array(
+		static fn( string $s ) => preg_replace( '#<source\b[^>]*\bsrcset=[^>]*>#i', '', $s ),
+
+		// Temalarin "Ornek gorsel" notu: gorsel gosterilmedigi icin anlamsiz.
+		// Kalip UTF-8 bayt olarak yazili (/u yok): bozuk bir karakter sayfayi
+		// dusurmesin.
+		static fn( string $s ) => preg_replace( "#<(span|p|div)\\b[^>]*>\\s*(?:\xC3\x96rnek|Ornek) g\xC3\xB6rsel\\s*</\\1>#i", '', $s ),
+
+		static fn( string $s ) => preg_replace_callback(
+			'#<img\b[^>]*>#i',
+			static fn( array $m ): string => nwcs_placeholder_for_img( $m[0] ) ?? $m[0],
+			$s
+		),
+
+		// Arka plan fotograflari: yalnizca url(...) belirteci desene doner; ayni
+		// bildirimdeki gradyan, konum ve boyut gecerli kalir (background kisa
+		// yazimi, katmanli arka plan, <style> bloklari dahil).
+		static fn( string $s ) => preg_replace_callback(
+			'#url\(\s*([\'"]?)([^\'")]+)\1\s*\)#i',
+			static function ( array $m ): string {
+				if ( ! nwcs_placeholder_is_photo_url( $m[2] ) ) {
+					return $m[0];
+				}
+
+				return 'repeating-linear-gradient(' . nwcs_placeholder_variant( $m[2] )['angle'] . 'deg,rgba(40,50,45,.12) 0 2px,rgba(231,234,232,.96) 2px 14px)';
+			},
+			$s
+		),
+
+		// Buyutme verisi (data-full, data-gallery JSON, gorsele giden baglanti):
+		// fotograf adresi "Gorsel gelecek" SVG'sine. JSON icindeki \/ da yakalanir.
+		static fn( string $s ) => preg_replace_callback(
+			'#https?:(?:\\\\?/){2}[^\s"\'<>()]+?\.(?:jpe?g|png|webp|gif|avif)(?:\?[^\s"\'<>()]*)?(?=["\'\s)&])#i',
+			static fn( array $m ): string => nwcs_placeholder_is_photo_url( $m[0] ) ? nwcs_placeholder_svg_uri() : $m[0],
+			$s
+		),
+	);
+
+	foreach ( $steps as $step ) {
+		$result = $step( $part );
+
+		if ( ! is_string( $result ) ) {
+			return null;
+		}
+
+		$part = $result;
+	}
+
+	return $part;
+}
+
+/**
+ * Sayfa ciktisi. <head> ve <header>/<footer> (logolar) oldugu gibi kalir.
  */
 function nwcs_placeholders_filter_html( string $html ): string {
 	if ( '' === $html || false === stripos( $html, '<html' ) ) {
 		return $html;
 	}
 
-	// Paylasim onizlemesi ve yapilandirilmis veri <head> icinde: dokunulmaz.
 	$split = stripos( $html, '<body' );
 
 	if ( false === $split ) {
 		return $html;
 	}
 
-	$head = substr( $html, 0, $split );
-	$body = substr( $html, $split );
+	$parts = preg_split( '#(<header\b.*?</header>|<footer\b.*?</footer>)#is', substr( $html, $split ), -1, PREG_SPLIT_DELIM_CAPTURE );
 
-	$body = (string) preg_replace( '#<source\b[^>]*\bsrcset=[^>]*>#i', '', $body );
+	if ( ! is_array( $parts ) ) {
+		return $html;
+	}
 
-	// Temalarin "Ornek gorsel" notu: gorsel gosterilmedigi icin anlamsiz ve
-	// yer tutucu etiketinin ustune biner. Yalnizca bu metni tasiyan tek oge.
-	$body = (string) preg_replace( '#<(span|p|div)\b[^>]*>\s*(?:Örnek|Ornek) görsel\s*</\1>#iu', '', $body );
+	foreach ( $parts as $index => $part ) {
+		// Ust menu ve alt bilgide ilk gorsel logodur: o korunur, digerleri
+		// (acilir menudeki urun gorselleri gibi) yer tutucuya doner.
+		$logo = '';
 
-	$body = (string) preg_replace_callback(
-		'#<img\b[^>]*>#i',
-		static fn( array $m ): string => nwcs_placeholder_for_img( $m[0] ) ?? $m[0],
-		$body
-	);
+		// Logo menuden (<nav>) once gelir; menunun icindeki ilk gorsel logo degildir.
+		$nav = stripos( $part, '<nav' );
 
-	// Satir ici arka plan fotograflari (hero bantlari): ayni desen dili.
-	$body = (string) preg_replace_callback(
-		'#background-image\s*:\s*url\(\s*([\'"]?)([^\'")]+)\1\s*\)#i',
-		static function ( array $m ): string {
-			if ( preg_match( '/\.svg(\?|$)|logo/i', $m[2] ) ) {
-				return $m[0];
-			}
+		if ( preg_match( '#^<(header|footer)\b#i', $part ) && preg_match( '#<img\b[^>]*>#i', $part, $first, PREG_OFFSET_CAPTURE )
+			&& ( false === $nav || (int) $first[0][1] < $nav ) ) {
+			$logo = $first[0][0];
+			$part = substr_replace( $part, "\x00nwcs-logo\x00", (int) $first[0][1], strlen( $logo ) );
+		}
 
-			$angle = nwcs_placeholder_variant( $m[2] )['angle'];
+		$done = nwcs_placeholders_transform( $part );
 
-			return 'background-image:repeating-linear-gradient(' . $angle . 'deg,rgba(40,50,45,.09) 0 2px,transparent 2px 14px);background-color:#e7eae8';
-		},
-		$body
-	);
+		if ( null !== $done && '' !== $logo ) {
+			$done = str_replace( "\x00nwcs-logo\x00", $logo, $done );
+		}
 
-	return $head . $body;
+		if ( null === $done ) {
+			return $html; // Bir adim basarisiz: sayfa hic degismeden gider.
+		}
+
+		$parts[ $index ] = $done;
+	}
+
+	return substr( $html, 0, $split ) . implode( '', $parts );
 }
