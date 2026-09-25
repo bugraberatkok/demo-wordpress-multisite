@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Network Content Studio
  * Description:       Ag genelinde tek icerik veri katmani ve alan manifesti. Icerik Studyosu paneli, canli onizleme, merkezi urun havuzu, SEO ve GEO, MCP yetenekleri.
- * Version:           0.14.1
+ * Version:           0.15.0
  * Network:           true
  * Requires at least: 6.5
  * Requires PHP:      8.1
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NWCS_VERSION', '0.14.1' );
+define( 'NWCS_VERSION', '0.15.0' );
 define( 'NWCS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NWCS_URL', plugin_dir_url( __FILE__ ) );
 
@@ -23,6 +23,7 @@ require_once NWCS_DIR . 'includes/preview.php';
 require_once NWCS_DIR . 'includes/products.php';
 require_once NWCS_DIR . 'includes/forms.php';
 require_once NWCS_DIR . 'includes/redirects.php';
+require_once NWCS_DIR . 'includes/placeholders.php';
 require_once NWCS_DIR . 'includes/xlsx-reader.php';
 
 // Panel dosyalari yalnizca yonetimde degil, Abilities API cagrilari icin de
@@ -38,6 +39,7 @@ require_once NWCS_DIR . 'includes/admin/seo.php';
 require_once NWCS_DIR . 'includes/admin/redirects.php';
 require_once NWCS_DIR . 'includes/admin/bulk-content.php';
 require_once NWCS_DIR . 'includes/admin/bulk-update.php';
+require_once NWCS_DIR . 'includes/admin/placeholders.php';
 
 // WordPress 6.9+ cekirdeginde Abilities API bulunur; yoksa sessizce atlanir.
 if ( function_exists( 'wp_register_ability' ) ) {
