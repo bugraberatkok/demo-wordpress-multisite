@@ -2,6 +2,10 @@
 /**
  * Blog yazisi: baslik, kapak, okuma sutunu; yanda WhatsApp kutusu,
  * altta diger yazilar.
+ *
+ * Ornek yazilarin baslik, kapak ve metni panelde de duzenlenir; onizlemede
+ * tiklaninca yazinin gizli panel sayfasi acilir (functions.php: Blog
+ * yazilari panelden).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -30,7 +34,7 @@ while ( have_posts() ) :
 						<li><a href="<?php echo esc_url( ik_link( '/blog/' ) ); ?>" <?php nwcs_edit_attr( 'blog', 'post', 'back_label' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'post', 'back_label' ) ); ?></a></li>
 					</ol>
 				</nav>
-				<h1 class="ik-pagehead__title ik-article__title"><?php the_title(); ?></h1>
+				<h1 class="ik-pagehead__title ik-article__title" <?php ik_post_edit_attr( $current, 'title' ); ?>><?php the_title(); ?></h1>
 				<time class="ik-article__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( ik_date( $current ) ); ?></time>
 			</div>
 		</header>
@@ -39,9 +43,9 @@ while ( have_posts() ) :
 			<div class="ik-wrap ik-article__grid">
 				<div class="ik-article__main">
 					<?php if ( $image ) : ?>
-						<img class="ik-article__cover" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+						<img class="ik-article__cover" <?php ik_post_edit_attr( $current, 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
 					<?php endif; ?>
-					<div class="ik-prose ik-prose--page">
+					<div class="ik-prose ik-prose--page" <?php ik_post_edit_attr( $current, 'body' ); ?>>
 						<?php the_content(); ?>
 					</div>
 				</div>

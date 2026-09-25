@@ -4,7 +4,9 @@
  * eski tarihli); yazi sayfasinda kucuk basilir.
  *
  * Beklenen $args: post (WP_Post), featured (bool). Kartin tamami baslik
- * baglantisiyla tiklanir (baglanti ::after ile karti kaplar).
+ * baglantisiyla tiklanir (baglanti ::after ile karti kaplar). Bu yuzden
+ * panel isareti yalnizca baslikta: onizlemede kart yazinin panel sayfasini
+ * acar, ozet ve kapak da orada.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -25,7 +27,7 @@ $heading  = $featured ? 'h2' : 'h3';
 	</div>
 
 	<div class="ik-post__body">
-		<<?php echo esc_html( $heading ); ?> class="ik-post__title">
+		<<?php echo esc_html( $heading ); ?> class="ik-post__title" <?php ik_post_edit_attr( $post_item, 'title' ); ?>>
 			<a class="ik-post__link" href="<?php echo esc_url( get_permalink( $post_item ) ); ?>"><?php echo esc_html( get_the_title( $post_item ) ); ?></a>
 		</<?php echo esc_html( $heading ); ?>>
 		<p class="ik-post__excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt( $post_item ), $featured ? 40 : 22 ) ); ?></p>

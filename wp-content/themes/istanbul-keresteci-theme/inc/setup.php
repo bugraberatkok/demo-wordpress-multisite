@@ -126,32 +126,8 @@ function ik_setup_demo_posts(): void {
 		wp_update_post( array( 'ID' => $hello->ID, 'post_status' => 'draft' ) );
 	}
 
-	$posts = array(
-		array(
-			'slug'    => 'mese-agaci-nedir',
-			'title'   => 'Meşe Ağacı Nedir? Meşe Ağacı Özellikleri Nelerdir?',
-			'excerpt' => 'Meşe ağacı, genel olarak esmer ve kirli sarı rengindedir. Dış kısmı odunsu sarımsı kirli beyaz, göbek kısmı ise koyu sarı renkten oluşur.',
-			'content' => "<p>Meşe ağacı, genel olarak esmer ve kirli sarı rengindedir. Dış kısmı odunsu sarımsı kirli beyaz renkte, göbek kısmı ise koyu sarı renkten oluşmaktadır.</p>\n<p>Birçok farklı türü bulunan meşe ağacı, açık pembe veya açık kahverengi tonlarında da olabilir. Sert veya yumuşak olarak iki farklı türde meşe ağacı vardır. Bu durum yetiştiği yerin veya bölgenin özelliğine göre değişir.</p>",
-			'date'    => '2022-05-07 10:00:00',
-			'image'   => array( 'blog-mese.jpg', 'Meşe kereste', 'Kurumaya dizilmiş, aralarına çıta konmuş meşe kereste istifi' ),
-		),
-		array(
-			'slug'    => 'istanbul-kereste-fiyatlari',
-			'title'   => 'İstanbul Kereste Fiyatları Nedir?',
-			'excerpt' => 'Kereste tüm Türkiye genelinde oldukça yaygın kullanım alanına sahip bir üründür. İstanbul’da kereste fiyatları hakkında güncel bilgileri bu yazıda derledik.',
-			'content' => "<p>Kereste tüm Türkiye genelinde oldukça yaygın kullanım alanına sahip bir üründür. İstanbul içerisinde kereste fiyatları hakkında güncel bilgileri derlediğimiz bu yazımızda sizlere güncel kereste fiyatları hakkında bilgiler derledik.</p>\n<p>Kereste pek çok alanda kullanıma uygun bir ürün olmasından ötürü kolay işleme alınarak hazırlanabilmektedir. Uygun fiyatlı olan bu keresteler mobilya, dekorasyon ve inşaat sektörlerinin kullanım alanlarında önemli bir yere sahiptir.</p>",
-			'date'    => '2022-05-07 11:00:00',
-			'image'   => array( 'blog-kereste.jpg', 'Kereste kesitleri', 'Üst üste dizilmiş kerestelerin kesim yüzleri' ),
-		),
-		array(
-			'slug'    => 'ahsap-insaatlik-kereste-nedir',
-			'title'   => 'Ahşap İnşaatlık Kereste Nedir?',
-			'excerpt' => 'İnşaat yapı malzemesi alanlarında kullanımı oldukça yaygın olan ahşap inşaatlık keresteler son dönemlerde sıkça tercih edilmeye başlanmıştır.',
-			'content' => "<p>İnşaat yapı malzeme alanlarında kullanımı oldukça yaygın olan ahşap inşaatlık keresteler son dönemlerde sıkça tercih edilmeye başlanmıştır. Performans bakımından oldukça avantajlı olan bu ürünler, kaliteli ve oldukça sağlam kerestelerdir.</p>\n<p>Ahşap inşaatlık keresteler kolay işlenebilir yapıya sahiptir ve oldukça dayanıklıdır. Kullanım alanı inşaat olmakla birlikte; çatı, palet ve ambalaj imalatlarında kullanıma oldukça uygun ürünlerdir.</p>",
-			'date'    => '2022-05-07 12:00:00',
-			'image'   => array( 'blog-insaatlik.jpg', 'İnşaatlık kereste', 'Kademeli istiflenmiş açık renkli inşaatlık kereste' ),
-		),
-	);
+	// Metinler content/blog-posts.php'de; panel de ayni dosyadan okur.
+	$posts = (array) include get_theme_file_path( 'content/blog-posts.php' );
 
 	foreach ( $posts as $post ) {
 		$existing = get_posts(
@@ -174,7 +150,7 @@ function ik_setup_demo_posts(): void {
 				'post_name'    => $post['slug'],
 				'post_title'   => $post['title'],
 				'post_excerpt' => $post['excerpt'],
-				'post_content' => $post['content'],
+				'post_content' => ik_setup_paragraphs( $post['body'] ),
 				'post_status'  => 'publish',
 				'post_date'    => $post['date'],
 				'meta_input'   => array( '_ik_demo' => 1 ),
@@ -191,6 +167,15 @@ function ik_setup_demo_posts(): void {
 			set_post_thumbnail( $id, $media );
 		}
 	}
+}
+
+/**
+ * Bos satirla ayrilmis metni <p> paragraflarina cevirir.
+ */
+function ik_setup_paragraphs( string $text ): string {
+	$blocks = array_filter( array_map( 'trim', preg_split( '/\R\s*\R/u', trim( $text ) ) ) );
+
+	return implode( "\n", array_map( static fn( string $block ): string => '<p>' . esc_html( $block ) . '</p>', $blocks ) );
 }
 
 /**

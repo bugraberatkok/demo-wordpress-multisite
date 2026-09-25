@@ -356,6 +356,155 @@ function ik_specs( string $text ): array {
 }
 
 /* ======================================================================
+ * Blog yazilari panelden
+ *
+ * Ornek yazilarin panelde gizli bir sayfasi var ('yazi-<slug>', manifest).
+ * Panelde degistirilip kaydedilen alan sitede WordPress yazisinin yerine
+ * gecer: yazi sayfasi, blog listesi, ana sayfa kartlari ve arama bilgisi.
+ * Degistirilmeyen alan icin WordPress'teki yazi aynen kullanilir; yazi
+ * Yazilar ekranindan duzenlenmeye devam edebilir.
+ * ====================================================================== */
+
+/**
+ * Yazinin paneldeki gizli sayfasi; yoksa bos (sonradan yazilan yazilar).
+ */
+function ik_post_page_key( $post ): string {
+	$post = get_post( $post );
+
+	if ( ! $post || 'post' !== $post->post_type || '' === $post->post_name ) {
+		return '';
+	}
+
+	$key = 'yazi-' . $post->post_name;
+
+	return isset( ik_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Panelde degistirilmis deger; alan varsayilanindaysa (yazinin ilk metni) null.
+ *
+ * @return string|int|null
+ */
+function ik_post_override( $post, string $field ) {
+	$key = ik_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return null;
+	}
+
+	$value = nwcs_field( $key, 'post', $field );
+
+	if ( 'image' === $field ) {
+		return (int) $value ? (int) $value : null;
+	}
+
+	$clean   = static fn( $text ): string => trim( str_replace( "\r\n", "\n", (string) $text ) );
+	$value   = $clean( $value );
+	$default = $clean( ik_manifest_default( $key, 'post', $field ) );
+
+	return '' === $value || $value === $default ? null : $value;
+}
+
+/**
+ * Onizlemede tiklaninca yazinin paneldeki alanini acar.
+ */
+function ik_post_edit_attr( $post, string $field ): void {
+	$key = ik_post_page_key( $post );
+
+	if ( '' !== $key ) {
+		nwcs_edit_attr( $key, 'post', $field );
+	}
+}
+
+/*
+ * SEO: eklenti yazi bilgisini 'wp' aksiyonunda (10) hesaplayip sakliyor.
+ * Hemen once, gizli sayfanin "Arama ve Paylasim" alanlari (yoksa paneldeki
+ * baslik, ozet ve kapak) gecerliyken hesaplatilir.
+ */
+add_action( 'wp', 'ik_post_seo', 9 );
+function ik_post_seo(): void {
+	if ( ! is_singular( 'post' ) || ! function_exists( 'nwcs_seo_context' ) ) {
+		return;
+	}
+
+	$post = get_queried_object();
+	$key  = ik_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return;
+	}
+
+	$description = trim( (string) nwcs_field( $key, 'seo', 'description' ) );
+	$description = '' !== $description ? $description : (string) ik_post_override( $post, 'excerpt' );
+	$original    = $post->post_excerpt;
+
+	if ( '' !== $description ) {
+		$post->post_excerpt = $description;
+	}
+
+	$GLOBALS['ik_post_seo_key'] = $key;
+	nwcs_seo_context();
+	unset( $GLOBALS['ik_post_seo_key'] );
+
+	$post->post_excerpt = $original;
+}
+
+/**
+ * Arama bilgisi hesaplanirken gecerli olan SEO alani; diger zamanlarda bos.
+ */
+function ik_post_seo_field( $post, string $field ): string {
+	$key = $GLOBALS['ik_post_seo_key'] ?? '';
+
+	return '' !== $key && ik_post_page_key( $post ) === $key ? trim( (string) nwcs_field( $key, 'seo', $field ) ) : '';
+}
+
+add_filter( 'the_title', 'ik_post_title', 10, 2 );
+function ik_post_title( $title, $post_id = 0 ) {
+	if ( is_admin() || ! $post_id ) {
+		return $title;
+	}
+
+	$seo = ik_post_seo_field( $post_id, 'title' );
+
+	return '' !== $seo ? $seo : ( ik_post_override( $post_id, 'title' ) ?? $title );
+}
+
+add_filter( 'get_the_excerpt', 'ik_post_excerpt', 10, 2 );
+function ik_post_excerpt( $excerpt, $post = null ) {
+	return is_admin() ? $excerpt : ( ik_post_override( $post, 'excerpt' ) ?? $excerpt );
+}
+
+// wpautop'tan sonra: panel metni kendi paragraflariyla gelir.
+add_filter( 'the_content', 'ik_post_content', 99 );
+function ik_post_content( $content ) {
+	if ( is_admin() || ! in_the_loop() ) {
+		return $content;
+	}
+
+	$body = ik_post_override( get_the_ID(), 'body' );
+
+	if ( null === $body ) {
+		return $content;
+	}
+
+	ob_start();
+	ik_paragraphs( $body );
+
+	return (string) ob_get_clean();
+}
+
+add_filter( 'post_thumbnail_id', 'ik_post_thumbnail', 10, 2 );
+function ik_post_thumbnail( $thumbnail_id, $post = null ) {
+	if ( is_admin() ) {
+		return $thumbnail_id;
+	}
+
+	$seo = (int) ik_post_seo_field( $post, 'image' );
+
+	return $seo ? $seo : ( ik_post_override( $post, 'image' ) ?? $thumbnail_id );
+}
+
+/* ======================================================================
  * Menu
  * ====================================================================== */
 

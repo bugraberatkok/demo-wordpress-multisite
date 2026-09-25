@@ -11,8 +11,8 @@
  *
  * Alan turleri: text, textarea, url, image, icon, repeater
  *
- * Her urunun panelde gizli bir sayfasi vardir ('urun-<slug>'): "Sayfa bul"
- * kutusundan acilir.
+ * Her urunun ('urun-<slug>') ve ornek blog yazisinin ('yazi-<slug>') panelde
+ * gizli bir sayfasi vardir: "Sayfa bul" kutusundan acilir.
  */
 
 $phone_label    = '+90 212 648 1090';
@@ -134,6 +134,47 @@ foreach ( $ik_products as $ik_row ) {
 						'type'    => 'textarea',
 						'default' => '',
 						'hint'    => 'Boş bırakılırsa Ürün Listesi’ndeki kısa açıklama görünür. Ürün adı, metni, özellikleri ve fotoğrafı Ürünlerimiz → Ürün Listesi’nden düzenlenir.',
+					),
+				),
+			),
+		),
+	);
+}
+
+/*
+ * Her ornek blog yazisi icin panelde gizli bir sayfa ('yazi-<slug>'): "Sayfa
+ * bul" kutusunda cikar, onizlemede yaziyi acar. Alanlar yazinin bugunku
+ * metniyle dolu gelir; panelde degistirilen alan sitede WordPress yazisinin
+ * yerine gecer (functions.php: Blog yazilari). Degistirilmeyen alan icin
+ * WordPress'teki yazi kullanilir.
+ *
+ * Yonetimden sonradan yazilan yazi burada cikmaz (manifest sabit); o yazi
+ * Yazilar ekranindan duzenlenir.
+ */
+$ik_blog_pages = array();
+
+foreach ( (array) include __DIR__ . '/content/blog-posts.php' as $ik_post ) {
+	$ik_blog_pages[ 'yazi-' . $ik_post['slug'] ] = array(
+		'label'      => 'Yazı: ' . $ik_post['title'],
+		'path'       => '/' . $ik_post['slug'] . '/',
+		'hidden'     => true,
+		'components' => array(
+			'post' => array(
+				'label'  => 'Yazı',
+				'fields' => array(
+					'title'   => array( 'label' => 'Başlık', 'type' => 'text', 'default' => $ik_post['title'] ),
+					'excerpt' => array( 'label' => 'Özet (kart ve arama sonucu)', 'type' => 'textarea', 'default' => $ik_post['excerpt'] ),
+					'body'    => array(
+						'label'   => 'Metin (boş satırla paragraf)',
+						'type'    => 'textarea',
+						'default' => $ik_post['body'],
+						'hint'    => 'Burada değiştirdiğiniz metin sitede görünür. Değiştirmediğiniz alanlarda WordPress’teki yazı kullanılır.',
+					),
+					'image'   => array(
+						'label'   => 'Kapak Görseli',
+						'type'    => 'image',
+						'default' => 0,
+						'hint'    => 'Boş bırakılırsa yazının kendi kapak görseli kullanılır.',
 					),
 				),
 			),
@@ -518,5 +559,5 @@ return array(
 				),
 			),
 		),
-	) + $ik_product_pages,
+	) + $ik_product_pages + $ik_blog_pages,
 );
