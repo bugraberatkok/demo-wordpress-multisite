@@ -106,6 +106,9 @@ if ( ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
 						</a>
 					</li>
 					<li><a href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'phone_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'phone_label' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'phone_label' ) ); ?></a></li>
+					<?php if ( '' !== trim( (string) nwcs_field( 'global', 'footer', 'mobile_label' ) ) ) : ?>
+						<li><a href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'mobile_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'mobile_label' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'mobile_label' ) ); ?></a></li>
+					<?php endif; ?>
 					<li><a href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'footer', 'email_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'email_label' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'email_label' ) ); ?></a></li>
 				</ul>
 			</div>

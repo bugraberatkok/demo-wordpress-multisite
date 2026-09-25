@@ -21,11 +21,12 @@ return $build(
 		'logo'           => array( 'İthal', 'Keresteci' ),
 
 		'contact'        => array(
-			'phone_label'  => '0549 648 19 19',
-			'phone_url'    => 'tel:+905496481919',
-			// Kaynak sitedeki WhatsApp baglantisinda numara yok; telefonla ayni
-			// hat varsayildi. Sahibi farkli bir hat verirse panelden degisir.
-			'whatsapp_url' => 'https://wa.me/905496481919',
+			// Koçist ve WOOD KOCIST disindaki siteler: sabit hat + cep (WhatsApp).
+			'phone_label'  => '0212 648 10 90',
+			'phone_url'    => 'tel:+902126481090',
+			'mobile_label' => '0532 374 98 32',
+			'mobile_url'   => 'tel:+905323749832',
+			'whatsapp_url' => 'https://wa.me/905323749832',
 			'email'        => 'info@kocist.com.tr',
 			'address'      => $address,
 			'hours'        => '08:00 – 19:00',

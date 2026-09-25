@@ -50,7 +50,11 @@ $link    = 'text-paper/85 no-underline transition-colors hover:text-paper';
 			<div>
 				<h2 class="<?php echo esc_attr( $heading ); ?>">İletişim</h2>
 				<ul class="mt-4 space-y-2 text-[0.9375rem]">
-					<li><a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'phone_url' ) ) ); ?>" class="tabular <?php echo esc_attr( $link ); ?>"><?php echo esc_html( $phone ); ?></a></li>
+					<li><a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'phone_url' ) ) ); ?>" class="tabular <?php echo esc_attr( $link ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>><?php echo esc_html( $phone ); ?></a></li>
+					<?php $mobile = trim( (string) nwcs_field( 'global', 'header', 'mobile_label' ) ); ?>
+					<?php if ( '' !== $mobile ) : ?>
+						<li><a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'mobile_url' ) ) ); ?>" class="tabular <?php echo esc_attr( $link ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'mobile_label' ); ?>><?php echo esc_html( $mobile ); ?></a></li>
+					<?php endif; ?>
 					<?php if ( '' !== trim( $email ) ) : ?>
 						<li><a href="<?php echo esc_url( 'mailto:' . $email ); ?>" class="<?php echo esc_attr( $link ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'email' ); ?>><?php echo esc_html( $email ); ?></a></li>
 					<?php endif; ?>

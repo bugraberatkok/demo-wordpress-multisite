@@ -135,6 +135,8 @@ return static function ( array $s ): array {
 						),
 						'phone_label'  => $text( 'Telefon Metni', $c['phone_label'] ),
 						'phone_url'    => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => $c['phone_url'] ),
+						'mobile_label' => $text( 'Cep Telefonu Metni', $c['mobile_label'] ?? '' ),
+						'mobile_url'   => array( 'label' => 'Cep Telefonu Bağlantısı', 'type' => 'url', 'default' => $c['mobile_url'] ?? '' ),
 						'phone_note'   => $text( 'Telefon Kutusu Üst Yazısı', 'Fiyat ve stok için arayın' ),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı (boşsa düğme gizlenir)', 'type' => 'url', 'default' => $c['whatsapp_url'] ),
 						'whatsapp_label' => $text( 'WhatsApp Düğmesi Metni', 'WhatsApp' ),
@@ -343,6 +345,8 @@ return static function ( array $s ): array {
 					'fields' => array(
 						'phone_label' => $text( 'Telefon', $c['phone_label'] ),
 						'phone_url'   => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => $c['phone_url'] ),
+						'mobile_label' => $text( 'Cep ve WhatsApp', $c['mobile_label'] ?? '' ),
+						'mobile_url'  => array( 'label' => 'Cep Telefonu Bağlantısı', 'type' => 'url', 'default' => $c['mobile_url'] ?? '' ),
 						'email'       => $text( 'E-posta', $c['email'] ),
 						'address'     => $text( 'Adres', $c['address'], 'textarea' ),
 						'hours'       => $text( 'Çalışma Saatleri', $c['hours'] ),

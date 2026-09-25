@@ -28,6 +28,7 @@ $label  = 'mb-2 block font-display text-sm font-medium text-ink/80';
 
 $details = array(
 	array( 'key' => 'phone',   'icon' => 'phone_icon',   'title' => 'phone_title',   'value' => 'phone_label',   'url' => 'phone_url' ),
+	array( 'key' => 'mobile',  'icon' => 'mobile_icon',  'title' => 'mobile_title',  'value' => 'mobile_label',  'url' => 'mobile_url' ),
 	array( 'key' => 'email',   'icon' => 'email_icon',   'title' => 'email_title',   'value' => 'email_label',   'url' => 'email_url' ),
 	array( 'key' => 'address', 'icon' => 'address_icon', 'title' => 'address_title', 'value' => 'address',       'url' => '' ),
 	array( 'key' => 'hours',   'icon' => 'hours_icon',   'title' => 'hours_title',   'value' => 'hours',         'url' => '' ),

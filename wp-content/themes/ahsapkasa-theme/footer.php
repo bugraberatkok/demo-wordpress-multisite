@@ -59,6 +59,15 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 							<?php echo esc_html( nwcs_field( 'global', 'footer', 'phone_label' ) ); ?>
 						</a>
 					</li>
+					<?php if ( '' !== trim( (string) nwcs_field( 'global', 'footer', 'mobile_label' ) ) ) : ?>
+						<li>
+							<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'global', 'footer', 'mobile_url' ) ) ); ?>"
+								class="font-display text-bone transition-colors hover:text-timber-soft"
+								<?php nwcs_edit_attr( 'global', 'footer', 'mobile_label' ); ?>>
+								<?php echo esc_html( nwcs_field( 'global', 'footer', 'mobile_label' ) ); ?>
+							</a>
+						</li>
+					<?php endif; ?>
 					<li>
 						<a href="<?php echo esc_url( ahsapkasa_link( nwcs_field( 'global', 'footer', 'email_url' ) ) ); ?>"
 							class="font-display text-bone/80 transition-colors hover:text-timber-soft"

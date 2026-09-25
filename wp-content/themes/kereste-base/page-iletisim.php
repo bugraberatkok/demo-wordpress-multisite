@@ -9,6 +9,7 @@ get_header();
 
 $rows = array(
 	array( 'Telefon', 'phone_label', 'phone_url' ),
+	array( 'Cep ve WhatsApp', 'mobile_label', 'mobile_url' ),
 	array( 'E-posta', 'email', 'mailto' ),
 	array( 'Adres', 'address', '' ),
 	array( 'Çalışma saatleri', 'hours', '' ),

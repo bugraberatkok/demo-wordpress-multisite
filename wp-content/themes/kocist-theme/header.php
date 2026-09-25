@@ -72,6 +72,11 @@ foreach ( $menu as $menu_index => $menu_item ) {
 				<?php nwcs_the_icon( nwcs_field( 'global', 'topbar', 'phone_icon' ), 'k-icon', 15 ); ?>
 				<?php echo esc_html( nwcs_field( 'global', 'topbar', 'phone_label' ) ); ?>
 			</a>
+			<?php if ( '' !== trim( (string) nwcs_field( 'global', 'topbar', 'mobile_label' ) ) ) : ?>
+				<a class="k-topbar__item" href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'topbar', 'mobile_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'topbar', 'mobile_label' ); ?>>
+					<?php echo esc_html( nwcs_field( 'global', 'topbar', 'mobile_label' ) ); ?>
+				</a>
+			<?php endif; ?>
 			<a class="k-topbar__item" href="<?php echo esc_url( kocist_link( nwcs_field( 'global', 'topbar', 'email_url' ) ) ); ?>" <?php nwcs_edit_attr( 'global', 'topbar', 'email_label' ); ?>>
 				<?php nwcs_the_icon( nwcs_field( 'global', 'topbar', 'email_icon' ), 'k-icon', 15 ); ?>
 				<?php echo esc_html( nwcs_field( 'global', 'topbar', 'email_label' ) ); ?>
