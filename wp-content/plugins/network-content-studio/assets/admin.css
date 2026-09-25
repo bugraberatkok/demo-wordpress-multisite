@@ -273,7 +273,7 @@
 	.nwcs-wrap .nwcs-finder__input { transition: none; }
 }
 
-.nwcs-screen { display: none; overflow-y: auto; flex: 1; }
+.nwcs-screen { display: none; overflow-y: auto; overflow-x: hidden; flex: 1; }
 .nwcs-screen.is-active { display: block; }
 
 .nwcs-screen__hint {
@@ -439,7 +439,10 @@ textarea.nwcs-input { min-height: 76px; line-height: 1.55; }
 	gap: 10px; margin-bottom: 9px;
 }
 .nwcs-repeater__meta { font-size: 11px; color: var(--nwcs-muted); text-align: right; }
-.nwcs-repeater__rows { display: grid; gap: 8px; }
+.nwcs-repeater__rows { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.nwcs-row, .nwcs-image__controls, .nwcs-repeater { min-width: 0; }
+.nwcs-image__controls { flex: 1 1 auto; }
+.nwcs-image__controls .nwcs-input { max-width: 100%; }
 .nwcs-row { background: #fff; border: 1px solid var(--nwcs-line); border-radius: 9px; padding: 0 12px 8px; }
 .nwcs-row.is-nwcs-focus { border-color: #f0b429; box-shadow: 0 0 0 3px #fef3c7; }
 .nwcs-row__bar {
@@ -462,9 +465,9 @@ textarea.nwcs-input { min-height: 76px; line-height: 1.55; }
 
 /* Aksiyon çubuğu */
 .nwcs-actions {
-	position: sticky; bottom: 0;
-	display: flex; align-items: center; gap: 10px;
-	padding: 12px 16px 4px;
+	position: sticky; bottom: 0; z-index: 5;
+	display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+	padding: 12px 16px;
 	background: #fff;
 	border-top: 1px solid var(--nwcs-line);
 }
@@ -475,10 +478,11 @@ textarea.nwcs-input { min-height: 76px; line-height: 1.55; }
 }
 .nwcs-actions .button-primary:hover { background: var(--nwcs-brand-dark); border-color: var(--nwcs-brand-dark); }
 .nwcs-actions .button { border-radius: 8px; }
+/* Kaydet cubugunun altinda tam satir; cubukla birlikte yapisik kalir. */
 .nwcs-actions__note {
-	margin: 0; padding: 4px 16px 12px;
+	flex: 1 0 100%;
+	margin: -4px 0 0;
 	font-size: 11px; color: var(--nwcs-muted);
-	background: #fff; position: sticky; bottom: 0;
 }
 .nwcs-dirty { color: var(--nwcs-amber); font-size: 12px; font-weight: 600; }
 .nwcs-empty { padding: 22px 16px; color: var(--nwcs-muted); }
@@ -686,8 +690,12 @@ textarea.nwcs-input { min-height: 76px; line-height: 1.55; }
 .nwcs-side { background: var(--nwcs-soft); }
 .nwcs-screen { background: var(--nwcs-soft); }
 
-.nwcs-fields { padding: 12px; display: grid; gap: 10px; }
+/* minmax(0, 1fr) ve min-width: 0: uzun adres ya da kod iceren alan sutunu
+   genisletip yana kaydirma cubugu cikariyordu. */
+.nwcs-fields { padding: 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.nwcs-hint code, .nwcs-field__label code { overflow-wrap: anywhere; }
 .nwcs-field {
+	min-width: 0;
 	background: #fff;
 	border: 1px solid var(--nwcs-line);
 	border-radius: 10px;

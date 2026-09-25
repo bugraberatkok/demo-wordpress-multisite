@@ -418,7 +418,7 @@ function nwcs_seo_context(): array {
 	if ( is_singular( 'post' ) ) {
 		$post    = get_queried_object();
 		$name    = nwcs_seo_clean( get_the_title( $post ) );
-		$excerpt = has_excerpt( $post ) ? $post->post_excerpt : $post->post_content;
+		$excerpt = nwcs_seo_post_text( $post );
 
 		$context = array(
 			'kind'        => 'post',
@@ -527,7 +527,7 @@ function nwcs_seo_context_wordpress( string $site, array $base ): array {
 	} elseif ( is_singular() ) {
 		$post        = get_queried_object();
 		$name        = nwcs_seo_clean( get_the_title( $post ) );
-		$description = $post->post_excerpt ?: $post->post_content;
+		$description = nwcs_seo_post_text( $post );
 		$url         = (string) get_permalink( $post );
 		$image       = (int) get_post_thumbnail_id( $post );
 	}
@@ -639,6 +639,47 @@ function nwcs_seo_head(): void {
 		'<script type="application/ld+json">%s</script>' . "\n",
 		wp_json_encode( nwcs_seo_graph( $context ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG )
 	);
+}
+
+/**
+ * Yazinin ozeti (arama aciklamasi, llms.txt): elle yazilmis ozet, yoksa metnin
+ * basi. Temanin panelden gelen degisiklikleri (baslik, ozet, metin) de
+ * uygulansin diye yazi dongude okunuyormus gibi okunur: temalar metin
+ * degisikligini yalnizca donguyken uyguluyor.
+ */
+function nwcs_seo_post_text( WP_Post $post ): string {
+	global $wp_query;
+
+	$saved_post = $GLOBALS['post'] ?? null;
+	$saved_loop = $wp_query instanceof WP_Query ? $wp_query->in_the_loop : false;
+
+	$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- asagida geri alinir.
+	setup_postdata( $post );
+
+	if ( $wp_query instanceof WP_Query ) {
+		$wp_query->in_the_loop = true;
+	}
+
+	$text = has_excerpt( $post )
+		? (string) apply_filters( 'get_the_excerpt', $post->post_excerpt, $post )
+		: (string) apply_filters( 'get_the_excerpt', '', $post );
+
+	// Ozet bos ve tema bir sey vermediyse: temanin uyguladigi metin.
+	if ( '' === trim( wp_strip_all_tags( $text ) ) ) {
+		$text = (string) apply_filters( 'the_content', $post->post_content );
+	}
+
+	if ( $wp_query instanceof WP_Query ) {
+		$wp_query->in_the_loop = $saved_loop;
+	}
+
+	$GLOBALS['post'] = $saved_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	if ( $saved_post instanceof WP_Post ) {
+		setup_postdata( $saved_post );
+	}
+
+	// wp_trim_excerpt'in "devami" isareti aciklamaya girmesin.
+	return trim( str_replace( array( '[&hellip;]', '[…]', '&hellip;' ), '', $text ) );
 }
 
 /* ====================================================================== *
@@ -1344,7 +1385,7 @@ function nwcs_seo_llms_text(): string {
 		$lines[] = '';
 
 		foreach ( $posts as $post ) {
-			$excerpt = nwcs_seo_clean( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content, 140 );
+			$excerpt = nwcs_seo_clean( nwcs_seo_post_text( $post ), 140 );
 			$lines[] = sprintf( '- [%s](%s): %s', nwcs_seo_clean( get_the_title( $post ) ), get_permalink( $post ), $excerpt );
 		}
 	}

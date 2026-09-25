@@ -71,6 +71,35 @@
 				screens[ key ].classList.toggle( 'is-active', key === name );
 			}
 		} );
+
+		if ( 'editor' === name ) {
+			revealSide();
+		}
+	}
+
+	/*
+	 * Sol sutun ekran boyunda ve yapiskan; ustunde site seridi oldugu icin sayfa
+	 * en ustteyken sutunun alti (Kaydet dugmesi) ekranin disinda kaliyordu.
+	 * Duzenleyici acilinca sayfa, sutun yapistigi yere gelecek kadar kaydirilir.
+	 */
+	function revealSide() {
+		var side = wrap.querySelector( '.nwcs-side' );
+
+		if ( ! side || window.matchMedia( '(max-width: 1100px)' ).matches ) {
+			return;
+		}
+
+		var stickTop = parseFloat( window.getComputedStyle( side ).top ) || 0;
+		var offset = side.getBoundingClientRect().top - stickTop;
+
+		if ( offset > 1 ) {
+			window.scrollBy( 0, offset );
+		}
+	}
+
+	// Baglantiyla dogrudan bir bolume gelindiyse (…&component=hero) duzenleyici zaten acik.
+	if ( screens.editor && screens.editor.classList.contains( 'is-active' ) ) {
+		window.addEventListener( 'load', revealSide );
 	}
 
 	function post( action, data ) {

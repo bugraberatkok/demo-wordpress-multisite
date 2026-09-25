@@ -693,6 +693,13 @@ function nwcs_product_template(): void {
 		status_header( 404 );
 		nocache_headers();
 
+		// Eski adresler icin yonlendirme listesi (ornegin kaldirilan urun):
+		// liste yalnizca bulunamayan sayfada calisir, burada ilk kez 404 oldu.
+		// Kural varsa yonlendirip cikar ya da durumu 410 yapar.
+		if ( function_exists( 'nwcs_redirects_apply' ) ) {
+			nwcs_redirects_apply();
+		}
+
 		// Tema 404.php vermiyorsa index.php'ye dus.
 		$not_found = get_query_template( '404' );
 

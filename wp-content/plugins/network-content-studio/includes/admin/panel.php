@@ -380,6 +380,17 @@ function nwcs_clean_preview_path( $path ): string {
 }
 
 /**
+ * Sitede bu yolda gercek bir WordPress sayfasi var mi (Kocist'teki ornek /urun/ gibi)?
+ */
+function nwcs_page_path_exists( int $blog_id, string $path ): bool {
+	switch_to_blog( $blog_id );
+	$page = get_page_by_path( trim( $path, '/' ), OBJECT, 'page' );
+	restore_current_blog();
+
+	return $page instanceof WP_Post && 'publish' === $page->post_status;
+}
+
+/**
  * Havuz urunlerinin ortak metinlerinin durdugu manifest sayfasi: manifestte
  * 'product_page' yazilidir; yoksa adresi /urun/ olan sayfa; yoksa bos.
  */
@@ -441,6 +452,22 @@ function nwcs_render_page_picker( int $blog_id, array $manifest, string $page_ke
 		);
 	}
 
+	// Urunlerin ortak metin sayfasi (/urun/): kendi adresi urun gostermez; onizleme
+	// sitedeki ilk urunun sayfasinda acilir (yoksa 404 gorunurdu).
+	$product_page_key = nwcs_product_page_key( $manifest );
+	$sample_product   = '';
+
+	if ( '' !== $product_page_key && function_exists( 'nwcs_site_products' ) && nwcs_site_supports_products( $blog_id ) ) {
+		switch_to_blog( $blog_id );
+		foreach ( nwcs_site_products() as $product ) {
+			if ( '' !== trim( (string) $product['body'] ) && '' !== (string) $product['slug'] ) {
+				$sample_product = '/urun/' . $product['slug'] . '/';
+				break;
+			}
+		}
+		restore_current_blog();
+	}
+
 	foreach ( nwcs_pickable_pages( $manifest ) as $key => $page ) {
 		// "Kategori: Kamelya" -> ad "Kamelya", tur "Kategori"
 		$label = (string) $page['label'];
@@ -451,15 +478,33 @@ function nwcs_render_page_picker( int $blog_id, array $manifest, string $page_ke
 			$label = $m[2];
 		}
 
+		// Grup, sayfa anahtarinin onekinden: yazi-, kat-/grp-/seri-, urun-.
+		$key   = (string) $key;
+		$group = 'Diğer sayfalar';
+
+		if ( str_starts_with( $key, 'yazi-' ) ) {
+			$group = 'Blog yazıları';
+		} elseif ( preg_match( '/^(kat|grp|seri)-/', $key ) ) {
+			$group = 'Kategori sayfaları';
+		} elseif ( str_starts_with( $key, 'urun-' ) ) {
+			$group = 'Ürün sayfaları';
+		}
+
+		$url = nwcs_panel_url( $blog_id, $key );
+
+		if ( $key === $product_page_key && '' !== $sample_product && '/urun/' === ( $page['path'] ?? '' ) && ! nwcs_page_path_exists( $blog_id, '/urun/' ) ) {
+			$url = add_query_arg( 'onizleme', rawurlencode( $sample_product ), $url );
+		}
+
 		$items[] = array(
 			't' => $label,
 			'k' => $kind,
-			'g' => 'Kategori sayfaları',
-			'u' => nwcs_panel_url( $blog_id, (string) $key ),
+			'g' => $group,
+			'u' => $url,
 		);
 
 		if ( '' === $preview_path && $key === $page_key ) {
-			$current = $label . ' (' . mb_strtolower( $kind, 'UTF-8' ) . ' sayfası)';
+			$current = 'Sayfa' === $kind ? $label : $label . ' (' . mb_strtolower( $kind, 'UTF-8' ) . ')';
 		}
 	}
 
@@ -679,8 +724,9 @@ function nwcs_render_editor_form( int $blog_id, array $manifest, string $page_ke
 			<button type="submit" class="button button-primary">Kaydet ve Yayınla</button>
 			<button type="button" class="button" data-nwcs-discard>Vazgeç</button>
 			<span class="nwcs-dirty" data-nwcs-dirty hidden>● kaydedilmedi</span>
+			<?php // Not cubugun icinde: ikisi ayri yapisinca not dugmelerin ustune biniyordu. ?>
+			<p class="nwcs-actions__note">Kaydettiğiniz anda sitede yayınlanır; taslak tutulmaz.</p>
 		</footer>
-		<p class="nwcs-actions__note">Kaydettiğiniz anda sitede yayınlanır; taslak tutulmaz.</p>
 	</form>
 	<?php
 }
