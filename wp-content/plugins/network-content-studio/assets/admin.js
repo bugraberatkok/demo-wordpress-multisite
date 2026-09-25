@@ -744,4 +744,232 @@
 			previewWrap.classList.remove( 'is-loading' );
 		} );
 	}
+	/* ---------------- sayfa bulucu ---------------- */
+
+	( function () {
+		var finder = wrap.querySelector( '[data-nwcs-finder]' );
+		if ( ! finder ) {
+			return;
+		}
+
+		var input = finder.querySelector( '[data-nwcs-finder-input]' );
+		var list = finder.querySelector( '[data-nwcs-finder-list]' );
+		var status = finder.querySelector( '[data-nwcs-finder-status]' );
+		var items = [];
+
+		try {
+			items = JSON.parse( finder.querySelector( '[data-nwcs-finder-data]' ).textContent || '[]' );
+		} catch ( e ) {
+			return;
+		}
+
+		// Turkce harfler ve buyuk/kucuk harf farki aramayi bozmasin: "civi" = "Çivi".
+		var fold = function ( text ) {
+			return String( text )
+				.replace( /İ/g, 'i' ).replace( /I/g, 'ı' )
+				.toLowerCase()
+				.replace( /ı/g, 'i' ).replace( /ğ/g, 'g' ).replace( /ü/g, 'u' )
+				.replace( /ş/g, 's' ).replace( /ö/g, 'o' ).replace( /ç/g, 'c' )
+				.replace( /[âà]/g, 'a' ).replace( /[îì]/g, 'i' ).replace( /[ûù]/g, 'u' );
+		};
+
+		items.forEach( function ( item ) {
+			item.f = fold( item.t + ' ' + item.k );
+			item.ft = fold( item.t );
+		} );
+
+		var LIMIT = 60;
+		var shown = [];
+		var active = -1;
+
+		function search( query ) {
+			var words = fold( query ).split( /\s+/ ).filter( Boolean );
+
+			// Bos arama: sayfalar ve kategori sayfalari; urunler yazinca gelir.
+			if ( ! words.length ) {
+				return items.filter( function ( item ) {
+					return 'Ürünler' !== item.g;
+				} );
+			}
+
+			var found = items.filter( function ( item ) {
+				return words.every( function ( word ) {
+					return -1 !== item.f.indexOf( word );
+				} );
+			} );
+
+			// Adi aranan kelimeyle baslayanlar once.
+			var first = words[ 0 ];
+			return found.sort( function ( a, b ) {
+				var sa = 0 === a.ft.indexOf( first ) ? 0 : 1;
+				var sb = 0 === b.ft.indexOf( first ) ? 0 : 1;
+				return sa - sb;
+			} );
+		}
+
+		function option( item, index ) {
+			var li = document.createElement( 'li' );
+			li.className = 'nwcs-finder__item';
+			li.id = 'nwcs-finder-opt-' + index;
+			li.setAttribute( 'role', 'option' );
+			li.setAttribute( 'data-index', String( index ) );
+
+			var title = document.createElement( 'span' );
+			title.className = 'nwcs-finder__title';
+			title.textContent = item.t;
+
+			var kind = document.createElement( 'span' );
+			kind.className = 'nwcs-finder__kind';
+			kind.textContent = item.k;
+
+			li.appendChild( title );
+			li.appendChild( kind );
+			return li;
+		}
+
+		function render() {
+			var query = input.value;
+			var results = search( query );
+			var total = results.length;
+
+			shown = results.slice( 0, LIMIT );
+			active = shown.length ? 0 : -1;
+			list.innerHTML = '';
+
+			var group = '';
+			shown.forEach( function ( item, index ) {
+				if ( item.g !== group ) {
+					group = item.g;
+					var head = document.createElement( 'li' );
+					head.className = 'nwcs-finder__group';
+					head.setAttribute( 'role', 'presentation' );
+					head.textContent = group;
+					list.appendChild( head );
+				}
+				list.appendChild( option( item, index ) );
+			} );
+
+			var note = document.createElement( 'li' );
+			note.className = 'nwcs-finder__note';
+			note.setAttribute( 'role', 'presentation' );
+
+			if ( ! total ) {
+				note.textContent = '“' + query.trim() + '” ile eşleşen sayfa ya da ürün yok. Ürün adının bir kısmını ya da kategorisini yazın.';
+				list.appendChild( note );
+			} else if ( total > shown.length ) {
+				note.textContent = ( total - shown.length ) + ' sonuç daha var; aramayı biraz daha yazın.';
+				list.appendChild( note );
+			} else if ( ! query.trim() && items.some( function ( item ) { return 'Ürünler' === item.g; } ) ) {
+				note.textContent = 'Bir ürüne gitmek için adını yazın.';
+				list.appendChild( note );
+			}
+
+			status.textContent = total ? total + ' sonuç' : 'Sonuç yok';
+			open( true );
+			highlight();
+		}
+
+		function highlight() {
+			var nodes = list.querySelectorAll( '[role="option"]' );
+
+			nodes.forEach( function ( node ) {
+				var on = String( active ) === node.getAttribute( 'data-index' );
+				node.classList.toggle( 'is-active', on );
+				node.setAttribute( 'aria-selected', on ? 'true' : 'false' );
+
+				if ( on ) {
+					input.setAttribute( 'aria-activedescendant', node.id );
+					node.scrollIntoView( { block: 'nearest' } );
+				}
+			} );
+
+			if ( active < 0 ) {
+				input.removeAttribute( 'aria-activedescendant' );
+			}
+		}
+
+		function open( state ) {
+			list.hidden = ! state;
+			input.setAttribute( 'aria-expanded', state ? 'true' : 'false' );
+			finder.classList.toggle( 'is-open', state );
+		}
+
+		function go( index ) {
+			var item = shown[ index ];
+			if ( ! item ) {
+				return;
+			}
+			if ( dirty && ! window.confirm( T.confirmDiscard ) ) {
+				return;
+			}
+			dirty = false;
+			window.location.href = item.u;
+		}
+
+		input.addEventListener( 'input', render );
+		input.addEventListener( 'focus', render );
+
+		input.addEventListener( 'keydown', function ( event ) {
+			if ( 'ArrowDown' === event.key || 'ArrowUp' === event.key ) {
+				event.preventDefault();
+				if ( list.hidden ) {
+					render();
+					return;
+				}
+				if ( shown.length ) {
+					active = ( active + ( 'ArrowDown' === event.key ? 1 : -1 ) + shown.length ) % shown.length;
+					highlight();
+				}
+			} else if ( 'Enter' === event.key ) {
+				event.preventDefault();
+				go( active );
+			} else if ( 'Escape' === event.key ) {
+				if ( input.value ) {
+					input.value = '';
+					render();
+				} else {
+					open( false );
+					input.blur();
+				}
+			}
+		} );
+
+		list.addEventListener( 'mousedown', function ( event ) {
+			// Tiklama sirasinda kutu odagi kaybedip liste kapanmasin.
+			event.preventDefault();
+		} );
+
+		list.addEventListener( 'click', function ( event ) {
+			var node = event.target.closest ? event.target.closest( '[role="option"]' ) : null;
+			if ( node ) {
+				go( parseInt( node.getAttribute( 'data-index' ), 10 ) );
+			}
+		} );
+
+		list.addEventListener( 'mousemove', function ( event ) {
+			var node = event.target.closest ? event.target.closest( '[role="option"]' ) : null;
+			if ( node && String( active ) !== node.getAttribute( 'data-index' ) ) {
+				active = parseInt( node.getAttribute( 'data-index' ), 10 );
+				highlight();
+			}
+		} );
+
+		input.addEventListener( 'blur', function () {
+			window.setTimeout( function () {
+				open( false );
+			}, 120 );
+		} );
+
+		// "/" ile her yerden kutuya: yazi alaninda degilken.
+		document.addEventListener( 'keydown', function ( event ) {
+			var tag = ( document.activeElement && document.activeElement.tagName ) || '';
+			var typing = /^(INPUT|TEXTAREA|SELECT)$/.test( tag ) || ( document.activeElement && document.activeElement.isContentEditable );
+
+			if ( '/' === event.key && ! typing && ! event.ctrlKey && ! event.metaKey && ! event.altKey ) {
+				event.preventDefault();
+				input.focus();
+				input.select();
+			}
+		} );
+	}() );
 }() );

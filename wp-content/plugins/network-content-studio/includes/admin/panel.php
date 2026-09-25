@@ -91,6 +91,20 @@ function nwcs_fold_admin_menu( string $classes ): string {
 }
 
 /**
+ * Panelde gorunen site adi: alan adi olmadan, kisa. Manifestte 'panel_label'
+ * varsa o; yoksa 'site_label'in sonundaki " · alanadi.com" kismi atilir.
+ */
+function nwcs_site_panel_name( array $manifest, int $blog_id ): string {
+	$name = trim( (string) ( $manifest['panel_label'] ?? '' ) );
+
+	if ( '' === $name ) {
+		$name = trim( (string) preg_replace( '/\s*[·|\-]\s*[a-z0-9.-]+\.(?:com|net|org|com\.tr|tr)$/iu', '', (string) ( $manifest['site_label'] ?? '' ) ) );
+	}
+
+	return '' !== $name ? $name : (string) get_blog_option( $blog_id, 'blogname', '' );
+}
+
+/**
  * Ag icindeki, manifesti olan siteler. Ana site (ag yonetimi) listeye girmez.
  */
 function nwcs_editable_sites(): array {
@@ -106,7 +120,7 @@ function nwcs_editable_sites(): array {
 
 		$sites[ $blog_id ] = array(
 			'blog_id'  => $blog_id,
-			'label'    => $manifest['site_label'] ?? get_blog_option( $blog_id, 'blogname', '' ),
+			'label'    => nwcs_site_panel_name( $manifest, $blog_id ),
 			'url'      => get_home_url( $blog_id, '/' ),
 			'path'     => $site->path,
 			'manifest' => $manifest,
@@ -170,6 +184,13 @@ function nwcs_render_panel(): void {
 	$pages    = nwcs_visible_pages( $manifest );
 
 	$page_key = isset( $_GET['content_page'] ) ? sanitize_key( wp_unslash( $_GET['content_page'] ) ) : '';
+
+	// Sekmesi olmayan sayfa (kategori sayfalari gibi) sayfa seciciden acilir;
+	// o sayfa acikken sekme listesinin sonunda gorunur.
+	if ( ! isset( $pages[ $page_key ] ) && isset( nwcs_pickable_pages( $manifest )[ $page_key ] ) ) {
+		$pages[ $page_key ] = $manifest['pages'][ $page_key ];
+	}
+
 	if ( ! isset( $pages[ $page_key ] ) ) {
 		$page_key = isset( $pages['home'] ) ? 'home' : (string) array_key_first( $pages );
 	}
@@ -183,6 +204,12 @@ function nwcs_render_panel(): void {
 	$ordered  = nwcs_ordered_components( $manifest, $page_key, $blog_id );
 	$sortable = nwcs_sortable_sections( $manifest, $page_key );
 	$preview  = nwcs_preview_url( $blog_id, $manifest, $page_key );
+
+	// Sayfa seciciden bir urun sayfasi secildiyse onizleme o adreste acilir.
+	$preview_path = isset( $_GET['onizleme'] ) ? nwcs_clean_preview_path( wp_unslash( $_GET['onizleme'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( '' !== $preview_path ) {
+		$preview = get_home_url( $blog_id, $preview_path );
+	}
 	?>
 	<div class="wrap nwcs-wrap"
 		data-nwcs-site="<?php echo esc_attr( (string) $blog_id ); ?>"
@@ -235,6 +262,8 @@ function nwcs_render_panel(): void {
 						</a>
 					<?php endforeach; ?>
 				</div>
+
+				<?php nwcs_render_page_picker( $blog_id, $manifest, $page_key, $preview_path ); ?>
 
 				<!-- Ekran 1: bolum listesi -->
 				<div class="nwcs-screen nwcs-screen--list<?php echo $component_key ? '' : ' is-active'; ?>" data-nwcs-screen="list">
@@ -321,6 +350,183 @@ function nwcs_short_page_label( string $label ): string {
 	$short = preg_replace( '/\s*\(.*\)$/u', '', $label );
 
 	return $short ? $short : $label;
+}
+
+/**
+ * Sekmesi olmayan ama panelden acilabilen sayfalar (kategori sayfalari gibi).
+ * Site geneli SEO sayfasi kendi ekranindan duzenlendigi icin haric.
+ */
+function nwcs_pickable_pages( array $manifest ): array {
+	return array_filter(
+		$manifest['pages'] ?? array(),
+		static fn( $page, $key ): bool => ! empty( $page['hidden'] ) && 'site_seo' !== $key && ! empty( $page['path'] ),
+		ARRAY_FILTER_USE_BOTH
+	);
+}
+
+/**
+ * Onizleme adresi olarak kabul edilen yol: sitenin kendi icinde, "/" ile
+ * baslayan, sema ya da baska alan adi tasimayan bir yol.
+ */
+function nwcs_clean_preview_path( $path ): string {
+	$path = (string) $path;
+
+	if ( ! preg_match( '#^/[A-Za-z0-9/_\-.%]*$#', $path ) || str_contains( $path, '//' ) || str_contains( $path, '..' ) ) {
+		return '';
+	}
+
+	return $path;
+}
+
+/**
+ * Havuz urunlerinin ortak metinlerinin durdugu manifest sayfasi: manifestte
+ * 'product_page' yazilidir; yoksa adresi /urun/ olan sayfa; yoksa bos.
+ */
+function nwcs_product_page_key( array $manifest ): string {
+	$key = (string) ( $manifest['product_page'] ?? '' );
+
+	if ( '' !== $key && isset( $manifest['pages'][ $key ] ) ) {
+		return $key;
+	}
+
+	foreach ( $manifest['pages'] ?? array() as $page_key => $page ) {
+		if ( '/urun/' === ( $page['path'] ?? '' ) ) {
+			return (string) $page_key;
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Sayfa bulucu: sitenin panelden acilabilen her yeri tek arama kutusunda.
+ * Sekmeli sayfalar, sekmesi olmayan sayfalar (kategori sayfalari) ve bu
+ * sitede gosterilen her urunun sayfasi. Secilince panel o sayfayla acilir;
+ * onizlemede metne tiklamak her zamanki gibi calisir (urune ait alanlar
+ * Urun Havuzu'na gider).
+ *
+ * Liste sunucuda uretilir, arama tarayicida yapilir (assets/admin.js).
+ * JavaScript kapaliysa kutu yerine duz bir baglanti listesi kalir.
+ */
+function nwcs_render_page_picker( int $blog_id, array $manifest, string $page_key, string $preview_path ): void {
+	$items   = array();
+	$current = '';
+
+	foreach ( nwcs_visible_pages( $manifest ) as $key => $page ) {
+		$items[] = array(
+			't' => nwcs_short_page_label( (string) $page['label'] ),
+			'k' => 'Sayfa',
+			'g' => 'Sayfalar',
+			'u' => nwcs_panel_url( $blog_id, (string) $key ),
+		);
+	}
+
+	foreach ( nwcs_pickable_pages( $manifest ) as $key => $page ) {
+		// "Kategori: Kamelya" -> ad "Kamelya", tur "Kategori"
+		$label = (string) $page['label'];
+		$kind  = 'Sayfa';
+
+		if ( preg_match( '/^([^:]{2,20}):\s*(.+)$/u', $label, $m ) ) {
+			$kind  = $m[1];
+			$label = $m[2];
+		}
+
+		$items[] = array(
+			't' => $label,
+			'k' => $kind,
+			'g' => 'Kategori sayfaları',
+			'u' => nwcs_panel_url( $blog_id, (string) $key ),
+		);
+
+		if ( '' === $preview_path && $key === $page_key ) {
+			$current = $label . ' (' . mb_strtolower( $kind, 'UTF-8' ) . ' sayfası)';
+		}
+	}
+
+	$product_count = 0;
+
+	if ( function_exists( 'nwcs_site_products' ) && nwcs_site_supports_products( $blog_id ) ) {
+		$product_page = nwcs_product_page_key( $manifest );
+
+		switch_to_blog( $blog_id );
+		$products = nwcs_site_products();
+		restore_current_blog();
+
+		foreach ( $products as $product ) {
+			// Detay sayfasi olmayan urunun acilacak sayfasi yok.
+			if ( '' === trim( (string) $product['body'] ) || '' === (string) $product['slug'] ) {
+				continue;
+			}
+
+			$path = '/urun/' . $product['slug'] . '/';
+			$cats = array_values( (array) $product['categories'] );
+
+			$items[] = array(
+				't' => (string) $product['title'],
+				'k' => (string) ( $cats[0] ?? 'Ürün' ),
+				'g' => 'Ürünler',
+				'u' => add_query_arg( 'onizleme', rawurlencode( $path ), nwcs_panel_url( $blog_id, '' !== $product_page ? $product_page : $page_key ) ),
+			);
+			++$product_count;
+
+			if ( $path === $preview_path ) {
+				$current = $product['title'] . ' (ürün)';
+			}
+		}
+	}
+
+	$hidden_count = count( $items ) - count( nwcs_visible_pages( $manifest ) );
+
+	// Sekmelerden baska acilacak bir sey yoksa bulucu gereksiz.
+	if ( $hidden_count < 1 ) {
+		return;
+	}
+
+	$placeholder = $product_count
+		? sprintf( 'Sayfa, kategori ya da ürün bul (%d ürün)', $product_count )
+		: 'Sayfa ya da kategori bul';
+	?>
+	<div class="nwcs-finder" data-nwcs-finder>
+		<label class="nwcs-finder__label" for="nwcs-finder-input">Sayfa bul</label>
+		<div class="nwcs-finder__box">
+			<svg class="nwcs-finder__icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10.4 10.4 14 14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+			<input
+				id="nwcs-finder-input"
+				class="nwcs-finder__input"
+				type="search"
+				autocomplete="off"
+				spellcheck="false"
+				role="combobox"
+				aria-expanded="false"
+				aria-controls="nwcs-finder-list"
+				aria-autocomplete="list"
+				placeholder="<?php echo esc_attr( $placeholder ); ?>"
+				data-nwcs-finder-input
+			/>
+			<kbd class="nwcs-finder__key" title="Bu kutuya gitmek için / tuşuna basın">/</kbd>
+		</div>
+
+		<?php if ( '' !== $current ) : ?>
+			<p class="nwcs-finder__now">Önizlemede: <strong><?php echo esc_html( $current ); ?></strong></p>
+		<?php endif; ?>
+
+		<ul id="nwcs-finder-list" class="nwcs-finder__list" role="listbox" aria-label="Bulunan sayfalar" hidden data-nwcs-finder-list></ul>
+		<p class="nwcs-finder__status screen-reader-text" role="status" aria-live="polite" data-nwcs-finder-status></p>
+
+		<script type="application/json" data-nwcs-finder-data><?php echo wp_json_encode( $items, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP ); ?></script>
+
+		<noscript>
+			<details class="nwcs-finder__fallback">
+				<summary>Tüm sayfalar ve ürünler</summary>
+				<ul>
+					<?php foreach ( $items as $item ) : ?>
+						<li><a href="<?php echo esc_url( $item['u'] ); ?>"><?php echo esc_html( $item['t'] ); ?></a></li>
+					<?php endforeach; ?>
+				</ul>
+			</details>
+		</noscript>
+	</div>
+	<?php
 }
 
 /**

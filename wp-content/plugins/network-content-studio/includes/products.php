@@ -123,7 +123,8 @@ function nwcs_pool_products( bool $reset = false ): array {
 		array(
 			'post_type'      => NWCS_PRODUCT_TYPE,
 			'post_status'    => 'publish',
-			'posts_per_page' => 200,
+			// Sinirsiz: sinir asilinca fazlasi hicbir sitede gorunmuyor, secimlerden de dusuyordu.
+			'posts_per_page' => -1,
 			'orderby'        => array(
 				'menu_order' => 'ASC',
 				'title'      => 'ASC',
