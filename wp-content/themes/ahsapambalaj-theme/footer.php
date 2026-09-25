@@ -18,7 +18,7 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 				<p <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
 					<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo-ahsap-ambalaj-acik.svg' ) ); ?>"
 						alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
-						width="183" height="44" class="block h-11 w-auto" />
+						width="280" height="44" class="block h-11 w-auto" />
 				</p>
 				<p class="reading mt-4 text-base/relaxed text-bone/70" <?php nwcs_edit_attr( 'global', 'footer', 'tagline' ); ?>>
 					<?php echo esc_html( nwcs_field( 'global', 'footer', 'tagline' ) ); ?>
