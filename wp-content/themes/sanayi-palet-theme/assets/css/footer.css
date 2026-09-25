@@ -22,15 +22,8 @@
 
 .sp-footer__about { max-width: 24rem; }
 
-.sp-footer__name {
-	margin-bottom: 0.75rem;
-	color: var(--beton-acik);
-	font-family: var(--font-baslik);
-	font-stretch: var(--baslik-genislik);
-	font-size: 2rem;
-	font-weight: 800;
-	line-height: 1;
-}
+.sp-footer__name { margin-bottom: 1rem; }
+.sp-footer__name img { display: block; height: 44px; width: auto; }
 
 .sp-footer__nav ul { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 

@@ -20,7 +20,7 @@
 	min-height: 76px;
 }
 
-/* Logo: gorsel yoksa yazi. */
+/* Logo: panelde secilen gorsel, yoksa assets/img/logo.svg; alt yazi altinda. */
 .sp-logo {
 	display: grid;
 	color: var(--yanik);
@@ -28,9 +28,8 @@
 	line-height: 1;
 }
 .sp-logo:hover { color: var(--yanik); }
-.sp-logo__image { height: 48px; width: auto; }
-.sp-logo__name { font-family: var(--font-baslik); font-stretch: var(--baslik-genislik); font-size: 2rem; font-weight: 800; letter-spacing: -0.005em; }
-.sp-logo__sub { margin-top: 0.2rem; color: var(--toz); font-size: 0.8125rem; }
+.sp-logo__image { height: 40px; width: auto; }
+.sp-logo__sub { margin-top: 0.3rem; color: var(--toz); font-size: 0.8125rem; }
 
 .sp-nav ul {
 	display: flex;

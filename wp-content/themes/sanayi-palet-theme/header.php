@@ -6,6 +6,8 @@
 defined( 'ABSPATH' ) || exit;
 
 $logo = nwcs_image( 'global', 'header', 'logo_image', 'medium' );
+// Panelde logo secilmediyse temanin kendi logosu.
+$logo_url = $logo['url'] ? $logo['url'] : get_theme_file_uri( 'assets/img/logo.svg' );
 $name = nwcs_field( 'global', 'header', 'logo_text' );
 $sub  = nwcs_field( 'global', 'header', 'logo_sub' );
 ?>
@@ -26,12 +28,8 @@ $sub  = nwcs_field( 'global', 'header', 'logo_sub' );
 	<div class="sp-wrap sp-header__bar">
 
 		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="sp-logo" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
-			<?php if ( ! empty( $logo['url'] ) ) : ?>
-				<img class="sp-logo__image" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( trim( $name . ' ' . $sub ) ); ?>" />
-			<?php else : ?>
-				<span class="sp-logo__name"><?php echo esc_html( $name ); ?></span>
-				<span class="sp-logo__sub" <?php nwcs_edit_attr( 'global', 'header', 'logo_sub' ); ?>><?php echo esc_html( $sub ); ?></span>
-			<?php endif; ?>
+			<img class="sp-logo__image" src="<?php echo esc_url( $logo_url ); ?>" alt="<?php echo esc_attr( $name ); ?>" width="142" height="40" />
+			<span class="sp-logo__sub" <?php nwcs_edit_attr( 'global', 'header', 'logo_sub' ); ?>><?php echo esc_html( $sub ); ?></span>
 		</a>
 
 		<button type="button" class="sp-header__toggle" aria-expanded="false" aria-controls="sp-menu" data-sp-toggle>

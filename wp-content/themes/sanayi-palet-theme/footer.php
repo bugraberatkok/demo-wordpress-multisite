@@ -11,7 +11,9 @@ defined( 'ABSPATH' ) || exit;
 	<div class="sp-wrap">
 		<div class="sp-footer__grid">
 			<div class="sp-footer__about">
-				<p class="sp-footer__name" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></p>
+				<p class="sp-footer__name" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
+					<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo-acik.svg' ) ); ?>" alt="<?php echo esc_attr( nwcs_field( 'global', 'header', 'logo_text' ) ); ?>" width="156" height="44" />
+				</p>
 				<p <?php nwcs_edit_attr( 'global', 'footer', 'about_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'about_text' ) ); ?></p>
 			</div>
 

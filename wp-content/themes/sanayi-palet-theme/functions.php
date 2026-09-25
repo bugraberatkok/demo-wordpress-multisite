@@ -788,6 +788,21 @@ add_filter(
 );
 
 /**
+ * Logo icin SVG yukleme: panelde "Logo Gorseli" alanina SVG secilebilsin.
+ * SVG betik tasiyabildigi icin yalnizca filtresiz HTML yetkisi olanlar
+ * (agda yalnizca super yonetici) yukleyebilir.
+ */
+add_filter(
+	'upload_mimes',
+	static function ( array $mimes ): array {
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			$mimes['svg'] = 'image/svg+xml';
+		}
+		return $mimes;
+	}
+);
+
+/**
  * Favicon: SVG (modern tarayicilar), 32px PNG yedegi ve iOS icin 180px ikon.
  * Panelde (Ozellestir > Site Kimligi) site ikonu secilirse WordPress'inki
  * gecerli olur; tema kendi ikonunu basmaz.
