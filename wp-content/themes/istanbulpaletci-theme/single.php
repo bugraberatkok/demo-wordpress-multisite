@@ -1,6 +1,10 @@
 <?php
 /**
  * Tekil blog yazisi: okuma kolonu ve yaninda urunlere kisa yol.
+ *
+ * Ornek yazilarin baslik, kapak ve metni panelde de duzenlenir; onizlemede
+ * tiklaninca yazinin gizli panel sayfasi acilir (functions.php: Blog
+ * yazilari panelden).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,21 +30,21 @@ while ( have_posts() ) :
 
 			<div class="min-w-0">
 				<header>
-					<time class="tabular text-steel" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php ip_post_attr( $post_id, 'Yayın tarihi' ); ?>>
+					<time class="tabular text-steel" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
 						<?php echo esc_html( get_the_date( 'j F Y' ) ); ?>
 					</time>
-					<h1 class="mt-3 max-w-[20ch] text-[2.75rem] font-bold leading-[0.98] md:text-[4rem]" <?php ip_post_attr( $post_id, 'Yazı başlığı' ); ?>><?php the_title(); ?></h1>
+					<h1 class="mt-3 max-w-[20ch] text-[2.75rem] font-bold leading-[0.98] md:text-[4rem]" <?php ip_post_edit_attr( $post_id, 'title' ); ?>><?php the_title(); ?></h1>
 				</header>
 
 				<?php if ( has_post_thumbnail() ) : ?>
-					<figure class="sheet mt-10 p-2" <?php ip_post_attr( $post_id, 'Öne çıkan görsel' ); ?>>
+					<figure class="sheet mt-10 p-2" <?php ip_post_edit_attr( $post_id, 'image' ); ?>>
 						<div class="shot aspect-[16/9]">
 							<?php the_post_thumbnail( 'large', array( 'fetchpriority' => 'high', 'decoding' => 'async' ) ); ?>
 						</div>
 					</figure>
 				<?php endif; ?>
 
-				<div class="prose-ip mt-10" <?php ip_post_attr( $post_id, 'Yazı metni' ); ?>>
+				<div class="prose-ip mt-10" <?php ip_post_edit_attr( $post_id, 'body' ); ?>>
 					<?php the_content(); ?>
 				</div>
 			</div>

@@ -87,6 +87,47 @@ $whatsapp_url = 'https://wa.me/905323749832';
 $email        = 'info@istanbulpaletci.com';
 $address      = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 
+/*
+ * Her ornek blog yazisi icin panelde gizli bir sayfa ('yazi-<slug>'): "Sayfa
+ * bul" kutusunda cikar, onizlemede yaziyi acar. Alanlar yazinin bugunku
+ * metniyle dolu gelir; panelde degistirilen alan sitede WordPress yazisinin
+ * yerine gecer (functions.php: Blog yazilari panelden). Degistirilmeyen alan
+ * icin WordPress'teki yazi kullanilir.
+ *
+ * Yonetimden sonradan yazilan yazi burada cikmaz (manifest sabit); o yazi
+ * Yazilar ekranindan duzenlenir.
+ */
+$ip_blog_pages = array();
+
+foreach ( (array) include __DIR__ . '/content/blog-posts.php' as $ip_post ) {
+	$ip_blog_pages[ 'yazi-' . $ip_post['slug'] ] = array(
+		'label'      => 'Yazı: ' . $ip_post['title'],
+		'path'       => '/' . $ip_post['slug'] . '/',
+		'hidden'     => true,
+		'components' => array(
+			'post' => array(
+				'label'  => 'Yazı',
+				'fields' => array(
+					'title'   => array( 'label' => 'Başlık', 'type' => 'text', 'default' => $ip_post['title'] ),
+					'excerpt' => array( 'label' => 'Özet (kart ve arama sonucu)', 'type' => 'textarea', 'default' => $ip_post['excerpt'] ),
+					'body'    => array(
+						'label'   => 'Metin (boş satırla paragraf)',
+						'type'    => 'textarea',
+						'default' => $ip_post['body'],
+						'hint'    => 'Boş satır yeni paragraf açar. "## " ile başlayan satır ara başlık, "- " ile başlayan satırlar madde listesi olur. Değiştirmediğiniz alanlarda WordPress’teki yazı kullanılır.',
+					),
+					'image'   => array(
+						'label'   => 'Kapak Görseli',
+						'type'    => 'image',
+						'default' => 0,
+						'hint'    => 'Boş bırakılırsa yazının kendi kapak görseli kullanılır.',
+					),
+				),
+			),
+		),
+	);
+}
+
 return array(
 	'site_key'          => 'istanbulpaletci',
 	'site_label'        => 'Koçist · istanbulpaletci.com',
@@ -501,8 +542,8 @@ return array(
 		),
 
 		/* ---------------------------------------------------------- *
-		 * Blog: yazilarin kendisi WordPress yazilaridir; burada yalnizca
-		 * liste sayfasinin basligi yonetilir.
+		 * Blog: liste sayfasinin basligi ve yazi sayfasinin ortak metinleri.
+		 * Ornek yazilarin kendi alanlari gizli 'yazi-<slug>' sayfalarinda.
 		 * ---------------------------------------------------------- */
 		'blog' => array(
 			'label'      => 'Blog',
@@ -621,5 +662,5 @@ return array(
 				),
 			),
 		),
-	),
+	) + $ip_blog_pages,
 );
