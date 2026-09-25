@@ -116,6 +116,8 @@ a { color: inherit; }
 .k-section { padding: 68px 0; }
 .k-section--alt { background: var(--paper-2); }
 
+.k-section-more { margin-top: 28px; }
+
 /* Katalog */
 .k-catalog { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 22px; }
 .k-cat { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
@@ -216,9 +218,22 @@ a { color: inherit; }
 	.k-story { grid-template-columns: 1fr; }
 }
 
-/* Telefonda havuz urunleri iki sutun; tek sutunda liste cok uzuyordu. */
+/*
+ * Telefonda havuz urunleri iki sutun ve en fazla dort kart; kalani
+ * bolumun altindaki "Tum urunler" baglantisinda.
+ */
 @media (max-width: 600px) {
+	.k-section { padding: 48px 0; }
+	.k-section-head { margin-bottom: 24px; }
+
 	.k-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+	#urunler .k-catalog > .k-cat:nth-child(n+5) { display: none; }
+	.k-cat__text {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+	}
 	.k-cat__body { padding: 14px; gap: 6px; }
 	.k-cat__title { font-size: 16px; }
 	.k-cat__text { font-size: 14px; }

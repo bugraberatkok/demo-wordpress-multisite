@@ -239,6 +239,19 @@ a.k-post-card__cat:hover { background: var(--leaf); color: var(--forest-3); }
 	.k-post__head { padding: 30px 0 22px; }
 	.k-post__body { font-size: 17px; }
 	.k-post__cover img { aspect-ratio: 16 / 10; }
+
+	/* Ana sayfadaki son yazilar: iki kart yeter, tamami "Tum yazilar"da. */
+	.k-home-blog .k-post-grid > :nth-child(n+3) { display: none; }
+	.k-home-blog .k-post-card__media { aspect-ratio: 16 / 8; }
+	.k-home-blog .k-post-card__body { padding: 16px 18px 18px; gap: 8px; }
+	.k-home-blog .k-post-card__title { font-size: 17px; }
+	.k-home-blog .k-post-card__excerpt {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		font-size: 14px;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -397,6 +397,18 @@
 	}
 
 	.k-hero__feature::after { inset: 10px; }
+
+	/*
+	 * Telefonda iki kart ust uste; ikisi de daha basik olsun ki guven
+	 * seridi ve urun gruplari ilk kaydirmada gorunsun.
+	 */
+	.k-hero__feature { min-height: 250px; padding: 26px 20px; }
+	.k-hero__slider { min-height: 350px; border-radius: 16px; }
+	.k-hero__slide-media { flex-basis: 44%; }
+	.k-hero__arrow { top: calc(44% - 18px); }
+	.k-hero__slide-body { padding: 18px 20px 40px; gap: 8px; }
+	.k-hero__slide-title { font-size: 18px; }
+	.k-hero__slide-text { font-size: 13.5px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

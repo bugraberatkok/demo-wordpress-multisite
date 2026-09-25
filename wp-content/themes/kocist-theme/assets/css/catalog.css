@@ -232,9 +232,15 @@
 	.k-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/*
+ * Telefonda 2x2: dort tam genislik kart ekranin iki katini kapliyordu.
+ * Kucuk karede baslik ve buton da kuculur.
+ */
 @media (max-width: 599.98px) {
-	.k-groups { grid-template-columns: 1fr; }
-	.k-group { aspect-ratio: 16 / 10; }
+	.k-groups { gap: 12px; }
+	.k-group { padding: 16px 12px; border-radius: 14px; }
+	.k-group__title { font-size: 17px; }
+	.k-group__rule { margin-top: 10px; }
 }
 
 /*

@@ -189,10 +189,18 @@
 	transition: width .15s linear;
 }
 
+/*
+ * Telefonda kart daha dar ve basik: bir buyuk kart yerine bir bucuk kart
+ * gorunur, yana kaydirilabildigi belli olur.
+ */
 @media (max-width: 640px) {
-	.k-latest { --k-latest-card: 78vw; }
+	.k-latest { --k-latest-card: 64vw; }
+	.k-latest__head { margin-bottom: 22px; }
 	.k-latest__nav { display: none !important; }
-	.k-latest__track { gap: 14px; }
+	.k-latest__track { gap: 12px; }
+	.k-latest__media { aspect-ratio: 16 / 11; }
+	.k-latest__body { padding: 14px 16px 16px; }
+	.k-latest__title { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

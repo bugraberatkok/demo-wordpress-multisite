@@ -206,12 +206,15 @@
 /* ---------- Dar ekran ---------- */
 
 @media (max-width: 860px) {
-	.k-process { padding: 64px 0 60px; }
+	.k-process { padding: 48px 0 44px; }
+	.k-process__head { margin-bottom: 28px; }
+	.k-process__title { font-size: 26px; }
+	.k-process__sub { font-size: 15px; }
 
 	.k-process__steps {
 		grid-template-columns: 1fr;
-		gap: 28px;
-		padding-left: 64px;
+		gap: 22px;
+		padding-left: 50px;
 	}
 
 	/* Cizgi dikey: numaralar solda, adimlarin ustunden alta. */
@@ -229,14 +232,27 @@
 	.k-process[data-k-process="ready"] .k-process__steps::before { transform: scaleY(0); }
 	.k-process.is-in .k-process__steps::before { transform: scaleY(1); }
 
-	.k-process__steps { --k-art-h: 168px; }
+	/* Cizim kucuk bir serit: adimin metni one ciksin. */
+	.k-process__steps { --k-art-h: 96px; }
+	.k-process__art { margin-bottom: 12px; border-radius: 14px; }
+	.k-process__svg { width: auto; height: calc(var(--k-art-h) - 16px); padding: 0; }
 
 	.k-process__num {
 		position: absolute;
 		top: 0;
-		left: -64px;
+		left: -50px;
+		width: 34px;
+		height: 34px;
 		margin: 0;
+		font-size: 15px;
+		box-shadow: 0 0 0 5px var(--forest);
 	}
+
+	.k-process__steps::before { top: 17px; bottom: 17px; left: 16px; }
+
+	.k-process__step-title { font-size: 17px; margin-bottom: 4px; }
+	.k-process__step-text { font-size: 14px; }
+	.k-process__cta { margin-top: 28px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

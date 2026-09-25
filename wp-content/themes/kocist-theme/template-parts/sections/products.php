@@ -53,5 +53,17 @@ if ( ! $items && ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() )
 				<p class="k-section-sub">Bu site için henüz ürün seçilmedi.</p>
 			<?php endif; ?>
 		</div>
+
+		<?php
+		/*
+		 * Telefonda ilk dort kart gorunur (style.css); tamami kategori
+		 * sayfalarinda.
+		 */
+		if ( $items && function_exists( 'kocist_catalog_groups' ) && kocist_catalog_groups() ) :
+			?>
+			<p class="k-section-more">
+				<a class="k-btn k-btn--dark" href="<?php echo esc_url( home_url( '/kategoriler/' ) ); ?>">Tüm ürünler</a>
+			</p>
+		<?php endif; ?>
 	</div>
 </section>
