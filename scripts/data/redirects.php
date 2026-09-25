@@ -97,4 +97,10 @@ TXT,
 
 	// ithalkeresteci.com ve kavakkeresteci.com eski halde yalnizca kocist.com.tr'yi
 	// cerceve icinde gosteriyordu; kendi adresleri yok, yonlendirme gerekmez.
+
+	// kocist.com.tr: 604 eski adres (site haritasi, 25.09.2026). Liste
+	// scripts/build-kocist-redirects.php ile uretildi; yerelde 604 adresin
+	// 601'i dogru sayfaya gidiyor. Eksik: /kvkk, /gizlilik, /cerezler (yeni
+	// sitede bu sayfalar henuz yok; sayfalar acilinca ayni adreste olacak).
+	'kocist'             => (string) file_get_contents( __DIR__ . '/kocist-redirects.txt' ),
 );
