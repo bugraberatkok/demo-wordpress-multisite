@@ -30,25 +30,25 @@ $link    = 'text-paper/85 no-underline transition-colors hover:text-paper';
 			</div>
 
 			<div>
-				<h2 class="<?php echo esc_attr( $heading ); ?>">Sayfalar</h2>
+				<h2 class="<?php echo esc_attr( $heading ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'pages_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'pages_title' ) ); ?></h2>
 				<ul class="mt-4 space-y-2">
-					<?php foreach ( $menu as $item ) : ?>
-						<li><a href="<?php echo esc_url( kr_link( $item['url'] ?? '' ) ); ?>" class="<?php echo esc_attr( $link ); ?>"><?php echo esc_html( $item['label'] ?? '' ); ?></a></li>
+					<?php foreach ( $menu as $index => $item ) : ?>
+						<li><a href="<?php echo esc_url( kr_link( $item['url'] ?? '' ) ); ?>" class="<?php echo esc_attr( $link ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>><?php echo esc_html( $item['label'] ?? '' ); ?></a></li>
 					<?php endforeach; ?>
 				</ul>
 			</div>
 
 			<div>
-				<h2 class="<?php echo esc_attr( $heading ); ?>">Ürünler</h2>
+				<h2 class="<?php echo esc_attr( $heading ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'products_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'products_title' ) ); ?></h2>
 				<ul class="mt-4 space-y-2">
 					<?php foreach ( kr_products() as $product ) : ?>
-						<li><a href="<?php echo esc_url( $product['url'] ); ?>" class="<?php echo esc_attr( $link ); ?>"><?php echo esc_html( $product['name'] ); ?></a></li>
+						<li><a href="<?php echo esc_url( $product['url'] ); ?>" class="<?php echo esc_attr( $link ); ?>" <?php nwcs_edit_attr( $product['key'], 'card', 'name' ); ?>><?php echo esc_html( $product['name'] ); ?></a></li>
 					<?php endforeach; ?>
 				</ul>
 			</div>
 
 			<div>
-				<h2 class="<?php echo esc_attr( $heading ); ?>">İletişim</h2>
+				<h2 class="<?php echo esc_attr( $heading ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'contact_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'contact_title' ) ); ?></h2>
 				<ul class="mt-4 space-y-2 text-[0.9375rem]">
 					<li><a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'phone_url' ) ) ); ?>" class="tabular <?php echo esc_attr( $link ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>><?php echo esc_html( $phone ); ?></a></li>
 					<?php $mobile = trim( (string) nwcs_field( 'global', 'header', 'mobile_label' ) ); ?>
@@ -66,12 +66,12 @@ $link    = 'text-paper/85 no-underline transition-colors hover:text-paper';
 
 		<?php if ( $family ) : ?>
 			<div class="mt-14 border-t border-paper/12 pt-8" <?php nwcs_edit_attr( 'global', 'footer', 'family' ); ?>>
-				<h2 class="<?php echo esc_attr( $heading ); ?>">Kardeş sitelerimiz</h2>
+				<h2 class="<?php echo esc_attr( $heading ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'family_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'family_title' ) ); ?></h2>
 				<ul class="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
-					<?php foreach ( $family as $site ) : ?>
+					<?php foreach ( $family as $index => $site ) : ?>
 						<li>
-							<a href="<?php echo esc_url( kr_link( $site['url'] ?? '' ) ); ?>" class="font-semibold <?php echo esc_attr( $link ); ?>"><?php echo esc_html( $site['label'] ?? '' ); ?></a>
-							<span class="block text-sm text-paper/55"><?php echo esc_html( $site['note'] ?? '' ); ?></span>
+							<a href="<?php echo esc_url( kr_link( $site['url'] ?? '' ) ); ?>" class="font-semibold <?php echo esc_attr( $link ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'family', (int) $index, 'label' ); ?>><?php echo esc_html( $site['label'] ?? '' ); ?></a>
+							<span class="block text-sm text-paper/55" <?php nwcs_edit_attr( 'global', 'footer', 'family', (int) $index, 'note' ); ?>><?php echo esc_html( $site['note'] ?? '' ); ?></span>
 						</li>
 					<?php endforeach; ?>
 				</ul>

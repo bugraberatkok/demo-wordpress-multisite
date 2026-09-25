@@ -27,12 +27,12 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 	<nav class="mx-auto max-w-[80rem] px-5 pt-8 md:px-8" aria-label="Konum">
 		<ol class="flex flex-wrap items-center gap-2 text-sm text-steel">
 			<li>
-				<a href="<?php echo esc_url( ip_link( $hub['path'] ) ); ?>" class="text-steel no-underline hover:text-indigo">
+				<a href="<?php echo esc_url( ip_link( $hub['path'] ) ); ?>" class="text-steel no-underline hover:text-indigo" <?php nwcs_edit_attr( 'products', 'head', 'title' ); ?>>
 					<?php echo esc_html( nwcs_field( 'products', 'head', 'title' ) ); ?>
 				</a>
 			</li>
 			<li aria-hidden="true">/</li>
-			<li aria-current="page" class="font-medium text-ink"><?php echo esc_html( $product['name'] ); ?></li>
+			<li aria-current="page" class="font-medium text-ink" <?php nwcs_edit_attr( $key, 'card', 'name' ); ?>><?php echo esc_html( $product['name'] ); ?></li>
 		</ol>
 	</nav>
 
@@ -112,7 +112,8 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 				</a>
 
 				<?php if ( $whatsapp ) : ?>
-					<a href="<?php echo esc_url( ip_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full">
+					<a href="<?php echo esc_url( ip_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full"
+						<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 20 ); ?>
 						<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 					</a>
@@ -121,7 +122,7 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 
 			<p class="mt-5 text-steel">
 				<span <?php nwcs_edit_attr( 'products', 'shared', 'call_note' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'call_note' ) ); ?></span>
-				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="tabular font-semibold"><?php echo esc_html( $phone['label'] ); ?></a>
+				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="tabular font-semibold" <?php nwcs_edit_attr( 'contact', 'details', 'phone_label' ); ?>><?php echo esc_html( $phone['label'] ); ?></a>
 			</p>
 		</div>
 

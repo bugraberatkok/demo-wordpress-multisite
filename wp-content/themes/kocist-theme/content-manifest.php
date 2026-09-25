@@ -1370,6 +1370,8 @@ return array(
 		'notfound' => array(
 			'label'      => '404 Sayfası',
 			'path'       => '/bulunamadi-404/',
+			// Gizli: sekme listesinde yok, "Sayfa bul" ile acilir; SEO listelerine (llms.txt) girmez.
+			'hidden'     => true,
 			'components' => array(
 				'head' => array(
 					'label'  => 'Sayfa Metinleri',

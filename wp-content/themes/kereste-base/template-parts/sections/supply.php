@@ -30,12 +30,12 @@ $photos = array_values(
 
 			<?php if ( $points ) : ?>
 				<dl class="mt-10 grid gap-6 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3" <?php nwcs_edit_attr( 'home', 'supply', 'points' ); ?>>
-					<?php foreach ( $points as $point ) : ?>
+					<?php foreach ( $points as $index => $point ) : ?>
 						<div class="border-t-2 border-mark pt-3">
 							<dt class="sr-only"><?php echo esc_html( $point['label'] ?? '' ); ?></dt>
 							<dd>
-								<span class="block font-slab text-[1.75rem] font-bold leading-none"><?php echo esc_html( $point['value'] ?? '' ); ?></span>
-								<span class="mt-1.5 block text-[0.9375rem] text-paper/70"><?php echo esc_html( $point['label'] ?? '' ); ?></span>
+								<span class="block font-slab text-[1.75rem] font-bold leading-none" <?php nwcs_edit_attr( 'home', 'supply', 'points', (int) $index, 'value' ); ?>><?php echo esc_html( $point['value'] ?? '' ); ?></span>
+								<span class="mt-1.5 block text-[0.9375rem] text-paper/70" <?php nwcs_edit_attr( 'home', 'supply', 'points', (int) $index, 'label' ); ?>><?php echo esc_html( $point['label'] ?? '' ); ?></span>
 							</dd>
 						</div>
 					<?php endforeach; ?>

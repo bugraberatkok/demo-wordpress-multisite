@@ -32,15 +32,15 @@ $info = array(
 /**
  * Tek form alani: etiket, girdi, varsa hata.
  */
-$field = static function ( string $key, string $label, string $type, bool $required, string $autocomplete ) use ( $errors, $values ): void {
+$field = static function ( string $key, string $type, bool $required, string $autocomplete ) use ( $errors, $values ): void {
 	$id    = 'sp-' . $key;
 	$error = $errors[ $key ] ?? '';
 	?>
 	<div class="sp-field<?php echo 'message' === $key ? ' sp-field--wide' : ''; ?>">
-		<label class="sp-field__label" for="<?php echo esc_attr( $id ); ?>">
-			<?php echo esc_html( $label ); ?>
+		<label class="sp-field__label" for="<?php echo esc_attr( $id ); ?>" <?php nwcs_edit_attr( 'contact', 'form', $key . '_label' ); ?>>
+			<?php echo esc_html( nwcs_field( 'contact', 'form', $key . '_label' ) ); ?>
 			<?php if ( ! $required ) : ?>
-				<span class="sp-field__optional">(isteğe bağlı)</span>
+				<span class="sp-field__optional" <?php nwcs_edit_attr( 'contact', 'form', 'optional_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'optional_label' ) ); ?></span>
 			<?php endif; ?>
 		</label>
 
@@ -100,7 +100,7 @@ get_template_part( 'template-parts/page-head', null, array( 'page' => 'contact' 
 
 				<?php if ( $errors ) : ?>
 					<div class="sp-form__notice sp-form__notice--error" role="alert">
-						<p><?php echo esc_html( $errors['form'] ?? 'Mesaj gönderilmedi. İşaretli alanları düzeltip tekrar gönderin.' ); ?></p>
+						<p <?php nwcs_edit_attr( 'contact', 'form', 'error_summary' ); ?>><?php echo esc_html( $errors['form'] ?? nwcs_field( 'contact', 'form', 'error_summary' ) ); ?></p>
 					</div>
 				<?php endif; ?>
 
@@ -109,11 +109,11 @@ get_template_part( 'template-parts/page-head', null, array( 'page' => 'contact' 
 					<?php wp_nonce_field( 'sanayi_palet_message', 'sp_nonce' ); ?>
 
 					<?php
-					$field( 'name', 'Adınız soyadınız', 'text', true, 'name' );
-					$field( 'email', 'E-posta', 'email', true, 'email' );
-					$field( 'phone', 'Telefonunuz', 'tel', false, 'tel' );
-					$field( 'subject', 'Konu', 'text', false, 'off' );
-					$field( 'message', 'Mesajınız', 'textarea', true, 'off' );
+					$field( 'name', 'text', true, 'name' );
+					$field( 'email', 'email', true, 'email' );
+					$field( 'phone', 'tel', false, 'tel' );
+					$field( 'subject', 'text', false, 'off' );
+					$field( 'message', 'textarea', true, 'off' );
 					?>
 
 					<?php // Bot tuzagi: ekran okuyuculardan ve klavyeden gizli. ?>

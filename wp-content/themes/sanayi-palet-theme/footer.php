@@ -11,14 +11,14 @@ defined( 'ABSPATH' ) || exit;
 	<div class="sp-wrap">
 		<div class="sp-footer__grid">
 			<div class="sp-footer__about">
-				<p class="sp-footer__name"><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></p>
+				<p class="sp-footer__name" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></p>
 				<p <?php nwcs_edit_attr( 'global', 'footer', 'about_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'about_text' ) ); ?></p>
 			</div>
 
 			<nav class="sp-footer__nav" aria-label="Alt menü" <?php nwcs_edit_attr( 'global', 'footer', 'links' ); ?>>
 				<ul>
-					<?php foreach ( nwcs_rows( 'global', 'footer', 'links' ) as $link ) : ?>
-						<li><a href="<?php echo esc_url( sanayi_palet_link( $link['url'] ?? '' ) ); ?>"><?php echo esc_html( $link['label'] ?? '' ); ?></a></li>
+					<?php foreach ( nwcs_rows( 'global', 'footer', 'links' ) as $index => $link ) : ?>
+						<li><a href="<?php echo esc_url( sanayi_palet_link( $link['url'] ?? '' ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'links', (int) $index, 'label' ); ?>><?php echo esc_html( $link['label'] ?? '' ); ?></a></li>
 					<?php endforeach; ?>
 				</ul>
 			</nav>

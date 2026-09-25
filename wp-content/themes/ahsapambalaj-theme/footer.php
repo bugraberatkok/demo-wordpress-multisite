@@ -15,9 +15,9 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 		<div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
 
 			<div>
-				<p class="stencil-mark text-[1.5rem] text-bone">
+				<p class="stencil-mark text-[1.5rem] text-bone" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
 					<span><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></span>
-					<span class="stencil-mark__sub text-timber-soft"><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_sub' ) ); ?></span>
+					<span class="stencil-mark__sub text-timber-soft" <?php nwcs_edit_attr( 'global', 'header', 'logo_sub' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_sub' ) ); ?></span>
 				</p>
 				<p class="reading mt-4 text-base/relaxed text-bone/70" <?php nwcs_edit_attr( 'global', 'footer', 'tagline' ); ?>>
 					<?php echo esc_html( nwcs_field( 'global', 'footer', 'tagline' ) ); ?>
@@ -38,10 +38,11 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 					<?php echo esc_html( nwcs_field( 'global', 'footer', 'nav_title' ) ); ?>
 				</h2>
 				<ul class="mt-5 space-y-3">
-					<?php foreach ( $menu as $item ) : ?>
+					<?php foreach ( $menu as $index => $item ) : ?>
 						<li>
 							<a href="<?php echo esc_url( ahsapambalaj_link( $item['url'] ?? '' ) ); ?>"
-								class="font-display text-base text-bone/80 transition-colors hover:text-bone">
+								class="font-display text-base text-bone/80 transition-colors hover:text-bone"
+								<?php nwcs_edit_attr( 'global', 'header', 'menu', $index, 'label' ); ?>>
 								<?php echo esc_html( $item['label'] ?? '' ); ?>
 							</a>
 						</li>
@@ -50,7 +51,7 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 			</div>
 
 			<div>
-				<h2 class="font-display text-sm font-semibold tracking-[0.12em] text-bone/55">İletişim</h2>
+				<h2 class="font-display text-sm font-semibold tracking-[0.12em] text-bone/55" <?php nwcs_edit_attr( 'global', 'footer', 'contact_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'contact_title' ) ); ?></h2>
 				<ul class="footer-contact mt-5 space-y-3 text-base">
 					<li>
 						<a href="<?php echo esc_url( ahsapambalaj_link( nwcs_field( 'global', 'footer', 'phone_url' ) ) ); ?>"
@@ -84,9 +85,9 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 
 		<div class="mt-14 flex flex-col gap-2 border-t border-bone/12 pt-6 text-sm text-bone/50 sm:flex-row sm:items-center sm:justify-between">
 			<p <?php nwcs_edit_attr( 'global', 'footer', 'copyright' ); ?>>
-				© <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php echo esc_html( nwcs_field( 'global', 'footer', 'copyright' ) ); ?>. Tüm hakları saklıdır.
+				© <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php echo esc_html( nwcs_field( 'global', 'footer', 'copyright' ) ); ?>. <span <?php nwcs_edit_attr( 'global', 'footer', 'rights_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'rights_text' ) ); ?></span>
 			</p>
-			<p class="font-display tracking-[0.1em]">ahsapambalajsanayi.com</p>
+			<p class="font-display tracking-[0.1em]" <?php nwcs_edit_attr( 'global', 'footer', 'domain_label' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'domain_label' ) ); ?></p>
 		</div>
 	</div>
 </footer>

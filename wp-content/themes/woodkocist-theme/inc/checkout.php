@@ -49,6 +49,11 @@ function wk_register_order_cpt(): void {
 	);
 }
 
+/** Odeme formu uyarisi (Tum Sayfalar -> Odeme Sayfasi). */
+function wk_checkout_error( string $field ): string {
+	return (string) nwcs_field( 'global', 'checkout', $field );
+}
+
 function wk_provinces(): array {
 	return array( 'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Aksaray', 'Amasya', 'Ankara', 'Antalya', 'Ardahan', 'Artvin', 'Aydın', 'Balıkesir', 'Bartın', 'Batman', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Düzce', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkâri', 'Hatay', 'Iğdır', 'Isparta', 'İstanbul', 'İzmir', 'Kahramanmaraş', 'Karabük', 'Karaman', 'Kars', 'Kastamonu', 'Kayseri', 'Kilis', 'Kırıkkale', 'Kırklareli', 'Kırşehir', 'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Mardin', 'Mersin', 'Muğla', 'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Osmaniye', 'Rize', 'Sakarya', 'Samsun', 'Şanlıurfa', 'Siirt', 'Sinop', 'Sivas', 'Şırnak', 'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Uşak', 'Van', 'Yalova', 'Yozgat', 'Zonguldak' );
 }
@@ -107,7 +112,7 @@ function wk_handle_checkout(): void {
 	$errors = array();
 
 	if ( ! isset( $_POST['wk_checkout_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wk_checkout_nonce'] ), 'wk_checkout' ) ) {
-		$errors['form'] = 'Sayfa uzun süre açık kaldığı için form yenilendi. Bilgilerinizi kontrol edip “Siparişi ver”e tekrar basın.';
+		$errors['form'] = wk_checkout_error( 'err_nonce' );
 	}
 
 	$cart = wk_cart();
@@ -121,12 +126,12 @@ function wk_handle_checkout(): void {
 	$seen = (string) ( $_POST['wk_seen_total'] ?? '' );
 
 	if ( '' !== $seen && abs( (float) $seen - wk_cart_totals( $cart )['total'] ) > 0.009 ) {
-		$errors['form'] = 'Sepetinizdeki bir ürünün fiyatı az önce güncellendi. Yeni tutarı kontrol edip siparişi tekrar verin.';
+		$errors['form'] = wk_checkout_error( 'err_price' );
 	}
 
 	$required = array(
-		'first' => 'Adınızı yazın.',
-		'last'  => 'Soyadınızı yazın.',
+		'first' => wk_checkout_error( 'err_first' ),
+		'last'  => wk_checkout_error( 'err_last' ),
 	);
 
 	foreach ( $required as $key => $message ) {
@@ -136,43 +141,43 @@ function wk_handle_checkout(): void {
 	}
 
 	if ( strlen( preg_replace( '/\D/', '', $v['phone'] ) ) < 10 ) {
-		$errors['phone'] = 'Telefon numaranızı alan koduyla yazın (ör. 0532 123 45 67). Teslimat için sizi arayacağız.';
+		$errors['phone'] = wk_checkout_error( 'err_phone' );
 	}
 
 	if ( ! is_email( $v['email'] ) ) {
-		$errors['email'] = '' === $v['email'] ? 'E-posta adresinizi yazın; sipariş numaranızı buraya da göndereceğiz.' : 'E-posta adresi geçerli görünmüyor (ör. ad@alanadi.com).';
+		$errors['email'] = wk_checkout_error( '' === $v['email'] ? 'err_email' : 'err_email_bad' );
 	}
 
 	if ( 'adres' === $v['delivery'] ) {
 		if ( ! in_array( $v['city'], wk_provinces(), true ) ) {
-			$errors['city'] = 'Teslimat ilini seçin.';
+			$errors['city'] = wk_checkout_error( 'err_city' );
 		}
 		if ( '' === $v['district'] ) {
-			$errors['district'] = 'İlçeyi yazın.';
+			$errors['district'] = wk_checkout_error( 'err_district' );
 		}
 		if ( mb_strlen( trim( $v['address'] ) ) < 10 ) {
-			$errors['address'] = 'Mahalle, cadde/sokak ve kapı numarasıyla açık adresi yazın.';
+			$errors['address'] = wk_checkout_error( 'err_address' );
 		}
 	}
 
 	if ( $v['corporate'] ) {
 		if ( '' === $v['company'] ) {
-			$errors['company'] = 'Firma unvanını yazın.';
+			$errors['company'] = wk_checkout_error( 'err_company' );
 		}
 		if ( '' === $v['tax_office'] ) {
-			$errors['tax_office'] = 'Vergi dairesini yazın.';
+			$errors['tax_office'] = wk_checkout_error( 'err_tax_office' );
 		}
 		if ( ! preg_match( '/^\d{10,11}$/', preg_replace( '/\s/', '', $v['tax_no'] ) ) ) {
-			$errors['tax_no'] = 'Vergi numarası 10, TC kimlik numarası 11 hanelidir.';
+			$errors['tax_no'] = wk_checkout_error( 'err_tax_no' );
 		}
 	}
 
 	if ( ( $v['bill_diff'] || 'fabrika' === $v['delivery'] && $v['corporate'] ) && mb_strlen( trim( $v['bill_addr'] ) ) < 10 ) {
-		$errors['bill_addr'] = 'Fatura adresini yazın.';
+		$errors['bill_addr'] = wk_checkout_error( 'err_bill_addr' );
 	}
 
 	if ( ! $v['terms'] ) {
-		$errors['terms'] = 'Siparişi verebilmek için Mesafeli Satış Sözleşmesi’ni onaylayın.';
+		$errors['terms'] = wk_checkout_error( 'err_terms' );
 	}
 
 	// Ayni adresten kisa surede cok siparis: bot korumasi.
@@ -183,7 +188,7 @@ function wk_handle_checkout(): void {
 	$recent = (int) get_transient( $ip_key );
 
 	if ( ! $errors && $recent >= 5 ) {
-		$errors['form'] = 'Kısa sürede çok sayıda sipariş denendi. Birkaç dakika sonra tekrar deneyin ya da WhatsApp’tan yazın.';
+		$errors['form'] = wk_checkout_error( 'err_rate' );
 	}
 
 	if ( $errors ) {
@@ -252,7 +257,7 @@ function wk_handle_checkout(): void {
 	);
 
 	if ( is_wp_error( $post_id ) ) {
-		wk_checkout_redirect( array( 'errors' => array( 'form' => 'Sipariş kaydedilemedi. Lütfen tekrar deneyin ya da WhatsApp’tan yazın; sepetiniz duruyor.' ), 'values' => $v ) );
+		wk_checkout_redirect( array( 'errors' => array( 'form' => wk_checkout_error( 'err_save' ) ), 'values' => $v ) );
 	}
 
 	$number = wk_order_number( (int) $post_id );

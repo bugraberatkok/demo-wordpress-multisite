@@ -20,9 +20,9 @@ $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 
 			<nav aria-label="Konum">
 				<ol class="flex flex-wrap items-center gap-2 text-sm text-muted">
-					<li><a href="<?php echo esc_url( kr_link( kr_page_path( 'products', '/urunler/' ) ) ); ?>" class="text-muted no-underline hover:text-mark"><?php echo esc_html( nwcs_field( 'products', 'head', 'title' ) ); ?></a></li>
+					<li><a href="<?php echo esc_url( kr_link( kr_page_path( 'products', '/urunler/' ) ) ); ?>" class="text-muted no-underline hover:text-mark" <?php nwcs_edit_attr( 'products', 'head', 'title' ); ?>><?php echo esc_html( nwcs_field( 'products', 'head', 'title' ) ); ?></a></li>
 					<li aria-hidden="true">/</li>
-					<li aria-current="page" class="font-semibold text-ink"><?php echo esc_html( $product['name'] ); ?></li>
+					<li aria-current="page" class="font-semibold text-ink" <?php nwcs_edit_attr( $key, 'card', 'name' ); ?>><?php echo esc_html( $product['name'] ); ?></li>
 				</ol>
 			</nav>
 
@@ -33,7 +33,7 @@ $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 						<button type="button" data-kr-open="0" data-kr-main class="group shot relative block aspect-[16/9] w-full cursor-zoom-in"
 							aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $product['name'] ) ); ?>">
 							<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>" alt="<?php echo esc_attr( $gallery[0]['alt'] ); ?>" fetchpriority="high" decoding="async" data-kr-main-image />
-							<span class="absolute bottom-3 right-3 bg-ink/80 px-2.5 py-1.5 text-sm font-semibold text-paper" aria-hidden="true">Büyüt</span>
+							<span class="absolute bottom-3 right-3 bg-ink/80 px-2.5 py-1.5 text-sm font-semibold text-paper" aria-hidden="true" <?php nwcs_edit_attr( 'products', 'shared', 'zoom_label' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'zoom_label' ) ); ?></span>
 						</button>
 
 						<?php if ( count( $gallery ) > 1 ) : ?>
@@ -65,7 +65,8 @@ $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 							<?php echo esc_html( nwcs_field( 'products', 'shared', 'quote_label' ) ); ?>
 						</a>
 						<?php if ( $whatsapp ) : ?>
-							<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full">
+							<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full"
+								<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 								<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 20 ); ?>
 								<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 							</a>
@@ -87,10 +88,10 @@ $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 			<section aria-labelledby="teknik" <?php nwcs_edit_attr( $key, 'specs', 'rows' ); ?>>
 				<h2 id="teknik" class="text-[1.6rem]" <?php nwcs_edit_attr( 'products', 'shared', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'specs_title' ) ); ?></h2>
 				<dl class="mt-4 border-t-2 border-ink">
-					<?php foreach ( $specs as $row ) : ?>
+					<?php foreach ( $specs as $index => $row ) : ?>
 						<div class="spec__row">
-							<dt class="spec__key"><?php echo esc_html( $row['label'] ?? '' ); ?></dt>
-							<dd class="spec__value"><?php echo esc_html( $row['value'] ?? '' ); ?></dd>
+							<dt class="spec__key" <?php nwcs_edit_attr( $key, 'specs', 'rows', (int) $index, 'label' ); ?>><?php echo esc_html( $row['label'] ?? '' ); ?></dt>
+							<dd class="spec__value" <?php nwcs_edit_attr( $key, 'specs', 'rows', (int) $index, 'value' ); ?>><?php echo esc_html( $row['value'] ?? '' ); ?></dd>
 						</div>
 					<?php endforeach; ?>
 				</dl>

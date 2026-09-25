@@ -71,12 +71,13 @@ $map      = trim( (string) nwcs_field( 'contact', 'details', 'map_url' ) );
 		</a>
 
 		<nav class="ml-6 hidden items-center gap-7 lg:flex" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
-			<?php foreach ( $menu as $item ) :
+			<?php foreach ( $menu as $index => $item ) :
 				$url = (string) ( $item['url'] ?? '' );
 				?>
 				<a href="<?php echo esc_url( kr_link( $url ) ); ?>"
 					class="navline text-[0.9688rem] font-semibold text-paper/90 no-underline transition-colors hover:text-paper"
-					<?php echo kr_is_current( $url ) ? 'aria-current="page"' : ( kr_is_within( $url ) ? 'data-section-current' : '' ); ?>>
+					<?php echo kr_is_current( $url ) ? 'aria-current="page"' : ( kr_is_within( $url ) ? 'data-section-current' : '' ); ?>
+					<?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>>
 					<?php echo esc_html( $item['label'] ?? '' ); ?>
 				</a>
 			<?php endforeach; ?>
@@ -117,28 +118,29 @@ $map      = trim( (string) nwcs_field( 'contact', 'details', 'map_url' ) );
 	<div id="menu-mobil" data-nav-panel hidden class="border-t border-paper/10 bg-ink lg:hidden">
 		<nav class="mx-auto max-w-[78rem] px-5 pb-6 pt-2 md:px-8" aria-label="Mobil menü">
 			<ul>
-				<?php foreach ( $menu as $item ) : ?>
+				<?php foreach ( $menu as $index => $item ) : ?>
 					<li class="border-b border-paper/10">
 						<a href="<?php echo esc_url( kr_link( $item['url'] ?? '' ) ); ?>"
 							class="block py-3.5 text-lg font-semibold text-paper no-underline aria-[current=page]:text-mark-bright"
-							<?php echo kr_is_current( (string) ( $item['url'] ?? '' ) ) ? 'aria-current="page"' : ''; ?>>
+							<?php echo kr_is_current( (string) ( $item['url'] ?? '' ) ) ? 'aria-current="page"' : ''; ?>
+							<?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>>
 							<?php echo esc_html( $item['label'] ?? '' ); ?>
 						</a>
 					</li>
 				<?php endforeach; ?>
 			</ul>
 			<div class="mt-5 grid gap-3 sm:grid-cols-2">
-				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="btn btn--md btn--ghost tabular">
+				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="btn btn--md btn--ghost tabular" <?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>>
 					<?php nwcs_the_icon( 'phone', 'shrink-0', 18 ); ?>
 					<?php echo esc_html( $phone['label'] ); ?>
 				</a>
 				<?php if ( $whatsapp ) : ?>
-					<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp">
+					<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp" <?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 18 ); ?>
 						<?php echo esc_html( $wa_label ); ?>
 					</a>
 				<?php endif; ?>
-				<a href="<?php echo esc_url( kr_quote_fallback_url() ); ?>" data-kr-quote class="btn btn--md btn--mark <?php echo $whatsapp ? 'sm:col-span-2' : ''; ?>"><?php echo esc_html( $cta ); ?></a>
+				<a href="<?php echo esc_url( kr_quote_fallback_url() ); ?>" data-kr-quote class="btn btn--md btn--mark <?php echo $whatsapp ? 'sm:col-span-2' : ''; ?>" <?php nwcs_edit_attr( 'global', 'header', 'cta_label' ); ?>><?php echo esc_html( $cta ); ?></a>
 			</div>
 		</nav>
 	</div>

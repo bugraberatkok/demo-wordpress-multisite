@@ -63,8 +63,9 @@ $field = static function ( string $key, string $type, bool $required, string $au
 			<?php echo esc_html( nwcs_field( 'contact', 'form', 'success_text' ) ); ?>
 		</p>
 
-		<a href="<?php echo esc_url( remove_query_arg( array( 'ip', 'urun' ) ) . '#teklif' ); ?>" class="btn btn--md btn--outline mt-8">
-			Yeni bir istek gönderin
+		<a href="<?php echo esc_url( remove_query_arg( array( 'ip', 'urun' ) ) . '#teklif' ); ?>" class="btn btn--md btn--outline mt-8"
+			<?php nwcs_edit_attr( 'contact', 'form', 'again_label' ); ?>>
+			<?php echo esc_html( nwcs_field( 'contact', 'form', 'again_label' ) ); ?>
 		</a>
 	</div>
 
@@ -83,8 +84,8 @@ $field = static function ( string $key, string $type, bool $required, string $au
 			<?php echo esc_html( $errors['form'] ); ?>
 		</p>
 	<?php elseif ( $errors ) : ?>
-		<p class="mt-6 rounded-[3px] border border-alert bg-alert-soft px-4 py-3 text-alert" role="alert">
-			Formda eksik ya da hatalı alanlar var; işaretli alanları düzeltip tekrar gönderin.
+		<p class="mt-6 rounded-[3px] border border-alert bg-alert-soft px-4 py-3 text-alert" role="alert" <?php nwcs_edit_attr( 'contact', 'form', 'error_summary' ); ?>>
+			<?php echo esc_html( nwcs_field( 'contact', 'form', 'error_summary' ) ); ?>
 		</p>
 	<?php endif; ?>
 
@@ -109,10 +110,10 @@ $field = static function ( string $key, string $type, bool $required, string $au
 			<label for="ip_product" class="<?php echo esc_attr( $label ); ?>" <?php nwcs_edit_attr( 'contact', 'form', 'product_label' ); ?>>
 				<?php echo esc_html( nwcs_field( 'contact', 'form', 'product_label' ) ); ?>
 			</label>
-			<select id="ip_product" name="ip_product" class="<?php echo esc_attr( $ok ); ?>">
-				<option value="">Seçin</option>
+			<select id="ip_product" name="ip_product" class="<?php echo esc_attr( $ok ); ?>" <?php nwcs_edit_attr( 'contact', 'form', 'product_placeholder' ); ?>>
+				<option value=""><?php echo esc_html( nwcs_field( 'contact', 'form', 'product_placeholder' ) ); ?></option>
 				<?php foreach ( ip_products() as $product ) : ?>
-					<option value="<?php echo esc_attr( $product['name'] ); ?>" <?php selected( $picked, $product['name'] ); ?>>
+					<option value="<?php echo esc_attr( $product['name'] ); ?>" <?php selected( $picked, $product['name'] ); ?> <?php nwcs_edit_attr( $product['key'], 'card', 'name' ); ?>>
 						<?php echo esc_html( $product['name'] ); ?>
 					</option>
 				<?php endforeach; ?>

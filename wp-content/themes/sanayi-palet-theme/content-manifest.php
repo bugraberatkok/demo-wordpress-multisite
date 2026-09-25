@@ -63,6 +63,7 @@ return array(
 						'cta_label'    => array( 'label' => 'Teklif Düğmesi Metni', 'type' => 'text', 'default' => 'Teklif isteyin' ),
 						'cta_url'      => array( 'label' => 'Teklif Düğmesi Bağlantısı', 'type' => 'url', 'default' => '/iletisim/' ),
 						'whatsapp_url' => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => 'https://wa.me/905323749832' ),
+						'menu_toggle'  => array( 'label' => 'Mobil Menü Düğmesi Metni', 'type' => 'text', 'default' => 'Menü' ),
 					),
 				),
 
@@ -539,6 +540,13 @@ return array(
 						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Bize yazın' ),
 						'text'         => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Teklif istiyorsanız ürün tipini, ölçüyü ve adedi mesajınıza ekleyin.' ),
 						'button_label' => array( 'label' => 'Gönder Düğmesi', 'type' => 'text', 'default' => 'Mesajı gönderin' ),
+						'name_label'     => array( 'label' => 'Ad Soyad Etiketi', 'type' => 'text', 'default' => 'Adınız soyadınız' ),
+						'email_label'    => array( 'label' => 'E-posta Etiketi', 'type' => 'text', 'default' => 'E-posta' ),
+						'phone_label'    => array( 'label' => 'Telefon Etiketi', 'type' => 'text', 'default' => 'Telefonunuz' ),
+						'subject_label'  => array( 'label' => 'Konu Etiketi', 'type' => 'text', 'default' => 'Konu' ),
+						'message_label'  => array( 'label' => 'Mesaj Etiketi', 'type' => 'text', 'default' => 'Mesajınız' ),
+						'optional_label' => array( 'label' => 'İsteğe Bağlı Alan Notu', 'type' => 'text', 'default' => '(isteğe bağlı)' ),
+						'error_summary'  => array( 'label' => 'Hatalı Form Uyarısı', 'type' => 'textarea', 'default' => 'Mesaj gönderilmedi. İşaretli alanları düzeltip tekrar gönderin.' ),
 						'success'      => array( 'label' => 'Gönderildi Mesajı', 'type' => 'textarea', 'default' => 'Mesajınız bize ulaştı. Size e-posta ya da telefonla dönüş yapacağız.' ),
 					),
 				),
@@ -572,6 +580,31 @@ return array(
 						'read_label'  => array( 'label' => 'Yazıyı Aç Bağlantı Metni', 'type' => 'text', 'default' => 'Yazıyı okuyun' ),
 						'back_label'  => array( 'label' => 'Geri Dön Bağlantı Metni', 'type' => 'text', 'default' => 'Bütün yazılar' ),
 						'more_title'  => array( 'label' => 'Diğer Yazılar Başlığı', 'type' => 'text', 'default' => 'Diğer yazılar' ),
+						'empty_text'  => array( 'label' => 'Yazı Yokken Görünen Metin', 'type' => 'textarea', 'default' => 'Henüz yazı yok. Sorunuz varsa bize yazın; yanıtı burada paylaşalım.' ),
+						'prev_label'  => array( 'label' => 'Önceki Sayfa Bağlantısı', 'type' => 'text', 'default' => 'Önceki' ),
+						'next_label'  => array( 'label' => 'Sonraki Sayfa Bağlantısı', 'type' => 'text', 'default' => 'Sonraki' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Bulunamayan sayfa (404). Onizleme adresi bilerek olmayan bir sayfa.
+		 */
+		'notfound' => array(
+			'label'      => '404 Sayfası',
+			'path'       => '/bulunamadi-404/',
+			// Gizli: sekme listesinde yok, "Sayfa bul" ile acilir; SEO listelerine (llms.txt) girmez.
+			'hidden'     => true,
+			'components' => array(
+
+				'head' => array(
+					'label'  => 'Sayfa Metinleri',
+					'fields' => array(
+						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Aradığınız sayfa burada değil.' ),
+						'text'       => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Bağlantı eski olabilir. Ana sayfadan devam edebilirsiniz.' ),
+						'link_label' => array( 'label' => 'Bağlantı Metni', 'type' => 'text', 'default' => 'Ana sayfaya dön' ),
+						'link_url'   => array( 'label' => 'Bağlantı Adresi', 'type' => 'url', 'default' => '/' ),
 					),
 				),
 			),

@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Degeri bos satirlar gosterilmez. Gercek rakam girilmeden bolum hic basilmaz;
 // uydurma rakam yerine bos alan tercih edildi.
-$items = array_values(
+$items = (
 	array_filter(
 		nwcs_rows( 'home', 'stats', 'items' ),
 		static fn( $row ) => '' !== trim( (string) ( $row['value'] ?? '' ) )
@@ -21,14 +21,14 @@ if ( ! $items ) {
 }
 
 // Tailwind sinif adlarini kaynakta tam haliyle gormeli; birlestirilmis ad derlenmez.
-$items = array_slice( $items, 0, 3 );
+$items = array_slice( $items, 0, 3, true );
 $cols  = array( 1 => 'sm:grid-cols-1', 2 => 'sm:grid-cols-2', 3 => 'sm:grid-cols-3' )[ count( $items ) ];
 ?>
 <section class="mx-auto max-w-[76rem] px-6 pt-16 md:pt-20">
 
 	<ul class="card mx-auto grid max-w-[66rem] divide-y divide-line sm:divide-x sm:divide-y-0 <?php echo esc_attr( $cols ); ?>"
 		data-reveal <?php nwcs_edit_attr( 'home', 'stats', 'items' ); ?>>
-		<?php foreach ( $items as $item ) :
+		<?php foreach ( $items as $item_index => $item ) :
 			$value  = trim( (string) ( $item['value'] ?? '' ) );
 			$prefix = (string) ( $item['prefix'] ?? '' );
 			$suffix = (string) ( $item['suffix'] ?? '' );
@@ -37,14 +37,14 @@ $cols  = array( 1 => 'sm:grid-cols-1', 2 => 'sm:grid-cols-2', 3 => 'sm:grid-cols
 			<li class="px-6 py-8 text-center md:py-10">
 				<span class="tick-draw mx-auto block h-[18px] w-px bg-timber" aria-hidden="true"></span>
 
-				<p class="mt-4 font-display text-4xl font-semibold leading-none text-ink md:text-5xl">
+				<p class="mt-4 font-display text-4xl font-semibold leading-none text-ink md:text-5xl" <?php nwcs_edit_attr( 'home', 'stats', 'items', $item_index, 'value' ); ?>>
 					<?php echo esc_html( $prefix ); ?><span class="tally"
 						<?php if ( null !== $number ) : ?>data-count="<?php echo esc_attr( (string) $number ); ?>"<?php endif; ?>><?php
 						echo esc_html( null !== $number ? number_format( $number, 0, ',', '.' ) : $value );
 					?></span><?php if ( '' !== $suffix ) : ?><span class="ml-1.5 text-xl font-medium text-moss md:text-2xl"><?php echo esc_html( $suffix ); ?></span><?php endif; ?>
 				</p>
 
-				<p class="mt-3 text-sm leading-relaxed text-moss">
+				<p class="mt-3 text-sm leading-relaxed text-moss" <?php nwcs_edit_attr( 'home', 'stats', 'items', $item_index, 'label' ); ?>>
 					<?php echo esc_html( $item['label'] ?? '' ); ?>
 				</p>
 			</li>

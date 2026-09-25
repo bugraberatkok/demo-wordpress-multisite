@@ -22,8 +22,8 @@ if ( $product_key ) {
 		while ( have_posts() ) :
 			the_post();
 			?>
-			<h1 class="text-[3rem] font-bold leading-[0.95] md:text-[4.5rem]"><?php the_title(); ?></h1>
-			<div class="prose-ip mt-8"><?php the_content(); ?></div>
+			<h1 class="text-[3rem] font-bold leading-[0.95] md:text-[4.5rem]" <?php ip_post_attr( (int) get_the_ID(), 'Sayfa metni' ); ?>><?php the_title(); ?></h1>
+			<div class="prose-ip mt-8" <?php ip_post_attr( (int) get_the_ID(), 'Sayfa metni' ); ?>><?php the_content(); ?></div>
 		<?php endwhile; ?>
 	</article>
 	<?php

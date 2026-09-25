@@ -507,6 +507,31 @@ function sanayi_palet_section( string $key ): void {
 }
 
 /**
+ * nwcs_edit_attr() ciktisini metin olarak dondurur (dizi icinde kurulan
+ * HTML icin). Onizleme disinda bos metindir.
+ */
+function sanayi_palet_edit_attr( string $page, string $component, string $field = '', ?int $row = null, string $sub = '' ): string {
+	if ( ! function_exists( 'nwcs_edit_attr' ) ) {
+		return '';
+	}
+
+	ob_start();
+	nwcs_edit_attr( $page, $component, $field, $row, $sub );
+
+	return (string) ob_get_clean();
+}
+
+/**
+ * Blog yazisinin (ya da WordPress sayfasinin) basligi, tarihi, ozeti, metni:
+ * onizlemede tiklaninca yazinin duzenleme ekrani acilir.
+ */
+function sanayi_palet_post_attr( int $post_id, string $label = 'Yazı başlığı' ): void {
+	if ( function_exists( 'nwcs_post_attr' ) ) {
+		nwcs_post_attr( $post_id, $label );
+	}
+}
+
+/**
  * Panelden gelen baglantiyi adrese cevirir; cikti her zaman esc_url ile basilir.
  *
  * Bos deger '#' olur. '/urunler/' gibi kok-goreli yollar sitenin kendi

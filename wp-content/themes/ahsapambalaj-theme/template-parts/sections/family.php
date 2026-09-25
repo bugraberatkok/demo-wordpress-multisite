@@ -37,10 +37,10 @@ $items = nwcs_rows( 'home', 'family', 'items' );
 					</span>
 
 					<span class="flex flex-col justify-center px-5 py-5">
-						<span class="title-condensed block font-display text-[1.6rem] leading-[1.05] text-ink transition-colors duration-200 group-hover:text-signal">
+						<span class="title-condensed block font-display text-[1.6rem] leading-[1.05] text-ink transition-colors duration-200 group-hover:text-signal" <?php nwcs_edit_attr( 'home', 'family', 'items', $item_index, 'label' ); ?>>
 							<?php echo esc_html( $item['label'] ?? '' ); ?>
 						</span>
-						<span class="mt-2 block text-sm leading-relaxed text-moss">
+						<span class="mt-2 block text-sm leading-relaxed text-moss" <?php nwcs_edit_attr( 'home', 'family', 'items', $item_index, 'note' ); ?>>
 							<?php echo esc_html( $item['note'] ?? '' ); ?>
 						</span>
 					</span>

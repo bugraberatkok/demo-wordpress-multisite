@@ -11,9 +11,9 @@ get_header();
 $title = is_home() ? single_post_title( '', false ) : get_the_title();
 ?>
 <section class="sp-wrap sp-section">
-	<h1 class="sp-page__title"><?php echo esc_html( $title ?: get_bloginfo( 'name' ) ); ?></h1>
+	<h1 class="sp-page__title" <?php is_singular() && sanayi_palet_post_attr( (int) get_queried_object_id(), 'Sayfa metni' ); ?>><?php echo esc_html( $title ?: get_bloginfo( 'name' ) ); ?></h1>
 
-	<div class="sp-page__body">
+	<div class="sp-page__body" <?php is_singular() && sanayi_palet_post_attr( (int) get_queried_object_id(), 'Sayfa metni' ); ?>>
 		<?php
 		while ( have_posts() ) :
 			the_post();

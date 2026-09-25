@@ -26,7 +26,7 @@ $link    = 'text-sheet/85 no-underline transition-colors hover:text-sheet';
 						<img src="<?php echo esc_url( $logo['url'] ); ?>" width="160" height="51" loading="lazy"
 							alt="<?php echo esc_attr( nwcs_field( 'global', 'header', 'logo_text' ) ); ?>" class="h-10 w-auto" />
 					<?php else : ?>
-						<span class="font-display text-2xl font-bold text-sheet"><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></span>
+						<span class="font-display text-2xl font-bold text-sheet" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></span>
 					<?php endif; ?>
 				</a>
 
@@ -40,9 +40,10 @@ $link    = 'text-sheet/85 no-underline transition-colors hover:text-sheet';
 					<?php echo esc_html( nwcs_field( 'global', 'footer', 'pages_title' ) ); ?>
 				</h2>
 				<ul class="mt-5 space-y-2.5">
-					<?php foreach ( $menu as $item ) : ?>
+					<?php foreach ( $menu as $index => $item ) : ?>
 						<li>
-							<a href="<?php echo esc_url( ip_link( $item['url'] ?? '' ) ); ?>" class="<?php echo esc_attr( $link ); ?>">
+							<a href="<?php echo esc_url( ip_link( $item['url'] ?? '' ) ); ?>" class="<?php echo esc_attr( $link ); ?>"
+								<?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>>
 								<?php echo esc_html( $item['label'] ?? '' ); ?>
 							</a>
 						</li>
@@ -57,7 +58,8 @@ $link    = 'text-sheet/85 no-underline transition-colors hover:text-sheet';
 				<ul class="mt-5 space-y-2.5">
 					<?php foreach ( ip_products() as $product ) : ?>
 						<li>
-							<a href="<?php echo esc_url( $product['url'] ); ?>" class="<?php echo esc_attr( $link ); ?>">
+							<a href="<?php echo esc_url( $product['url'] ); ?>" class="<?php echo esc_attr( $link ); ?>"
+								<?php nwcs_edit_attr( $product['key'], 'card', 'name' ); ?>>
 								<?php echo esc_html( $product['name'] ); ?>
 							</a>
 						</li>

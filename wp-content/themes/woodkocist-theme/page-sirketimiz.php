@@ -24,8 +24,8 @@ $items = nwcs_rows( 'about', 'story', 'items' );
 
 		<?php if ( $items ) : ?>
 			<ul class="wk-ticks wk-ticks--row" <?php nwcs_edit_attr( 'about', 'story', 'items' ); ?>>
-				<?php foreach ( $items as $item ) : ?>
-					<li><?php echo wk_icon( 'check' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><?php echo esc_html( $item['text'] ?? '' ); ?></li>
+				<?php foreach ( $items as $index => $item ) : ?>
+					<li <?php nwcs_edit_attr( 'about', 'story', 'items', (int) $index, 'text' ); ?>><?php echo wk_icon( 'check' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><?php echo esc_html( $item['text'] ?? '' ); ?></li>
 				<?php endforeach; ?>
 			</ul>
 		<?php endif; ?>
@@ -36,8 +36,8 @@ $items = nwcs_rows( 'about', 'story', 'items' );
 		</div>
 
 		<div class="wk-cta">
-			<a class="wk-btn wk-btn--primary wk-btn--lg" href="<?php echo esc_url( wk_shop_url() ); ?>">Koleksiyonu keşfet</a>
-			<a class="wk-btn wk-btn--line wk-btn--lg" href="<?php echo esc_url( wk_page_url( 'ozel-uretim-talep-formu' ) ); ?>">Özel üretim isteyin</a>
+			<a class="wk-btn wk-btn--primary wk-btn--lg" href="<?php echo esc_url( wk_shop_url() ); ?>" <?php nwcs_edit_attr( 'about', 'cta', 'shop_button' ); ?>><?php echo esc_html( nwcs_field( 'about', 'cta', 'shop_button' ) ); ?></a>
+			<a class="wk-btn wk-btn--line wk-btn--lg" href="<?php echo esc_url( wk_page_url( 'ozel-uretim-talep-formu' ) ); ?>" <?php nwcs_edit_attr( 'about', 'cta', 'custom_button' ); ?>><?php echo esc_html( nwcs_field( 'about', 'cta', 'custom_button' ) ); ?></a>
 		</div>
 	</div>
 	<?php wk_part( 'doc-nav' ); ?>

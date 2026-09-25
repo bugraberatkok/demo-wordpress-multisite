@@ -93,6 +93,7 @@ function wk_category_tree(): array {
 		}
 
 		$tree[] = array(
+			'row'      => $line['row'],
 			'slug'     => $line['slug'],
 			'label'    => $line['label'],
 			'text'     => $line['text'],
@@ -139,6 +140,29 @@ function wk_category_page_key( string $slug ): string {
 	$key = 'kat-' . $slug;
 
 	return function_exists( 'nwcs_manifest' ) && isset( nwcs_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Seri sayfasinin panel sayfasi (manifestte 'seri-<kisaltma>', gizli); yoksa bos.
+ */
+function wk_serie_page_key( string $slug ): string {
+	$key = 'seri-' . $slug;
+
+	return function_exists( 'nwcs_manifest' ) && isset( nwcs_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Siralama seceneginin panel alani (onizlemede tiklaninca acilir).
+ */
+function wk_sort_field( string $value ): string {
+	$fields = array(
+		''             => 'sort_default',
+		'fiyat-artan'  => 'sort_price_asc',
+		'fiyat-azalan' => 'sort_price_desc',
+		'ad'           => 'sort_name',
+	);
+
+	return $fields[ $value ] ?? 'sort_default';
 }
 
 function wk_shop_url(): string {
@@ -216,10 +240,10 @@ function wk_filter_products( string $category = '', string $search = '', string 
 
 function wk_sort_options(): array {
 	return array(
-		''             => 'Önerilen sıra',
-		'fiyat-artan'  => 'Fiyat: düşükten yükseğe',
-		'fiyat-azalan' => 'Fiyat: yüksekten düşüğe',
-		'ad'           => 'Ürün adına göre',
+		''             => (string) nwcs_field( 'shop', 'list', 'sort_default' ),
+		'fiyat-artan'  => (string) nwcs_field( 'shop', 'list', 'sort_price_asc' ),
+		'fiyat-azalan' => (string) nwcs_field( 'shop', 'list', 'sort_price_desc' ),
+		'ad'           => (string) nwcs_field( 'shop', 'list', 'sort_name' ),
 	);
 }
 

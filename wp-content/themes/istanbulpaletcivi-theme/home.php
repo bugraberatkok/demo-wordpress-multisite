@@ -28,9 +28,9 @@ pc_part(
 				endwhile;
 				?>
 			</div>
-			<?php the_posts_pagination( array( 'mid_size' => 1, 'prev_text' => 'Önceki', 'next_text' => 'Sonraki' ) ); ?>
+			<?php pc_posts_pagination(); ?>
 		<?php else : ?>
-			<p>Henüz yazı yok.</p>
+			<p<?php nwcs_edit_attr( 'blog', 'list', 'empty' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'list', 'empty' ) ); ?></p>
 		<?php endif; ?>
 	</div>
 </section>

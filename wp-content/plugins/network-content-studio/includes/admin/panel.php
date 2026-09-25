@@ -400,6 +400,21 @@ function nwcs_product_page_key( array $manifest ): string {
 }
 
 /**
+ * Sayfa bulucu bu sitede acik mi? Manifestte 'page_finder' => false ile ya da
+ * asagidaki listeyle kapatilir. İstanbul Keresteci'nin paneli ayri elden
+ * duzenleniyor (Emirhan); orada bulucu yok.
+ */
+const NWCS_PAGE_FINDER_OFF = array( 'istanbulkeresteci', 'istanbul-keresteci' );
+
+function nwcs_page_finder_enabled( array $manifest ): bool {
+	if ( false === ( $manifest['page_finder'] ?? true ) ) {
+		return false;
+	}
+
+	return ! in_array( (string) ( $manifest['site_key'] ?? '' ), NWCS_PAGE_FINDER_OFF, true );
+}
+
+/**
  * Sayfa bulucu: sitenin panelden acilabilen her yeri tek arama kutusunda.
  * Sekmeli sayfalar, sekmesi olmayan sayfalar (kategori sayfalari) ve bu
  * sitede gosterilen her urunun sayfasi. Secilince panel o sayfayla acilir;
@@ -410,6 +425,10 @@ function nwcs_product_page_key( array $manifest ): string {
  * JavaScript kapaliysa kutu yerine duz bir baglanti listesi kalir.
  */
 function nwcs_render_page_picker( int $blog_id, array $manifest, string $page_key, string $preview_path ): void {
+	if ( ! nwcs_page_finder_enabled( $manifest ) ) {
+		return;
+	}
+
 	$items   = array();
 	$current = '';
 
@@ -476,16 +495,63 @@ function nwcs_render_page_picker( int $blog_id, array $manifest, string $page_ke
 		}
 	}
 
-	$hidden_count = count( $items ) - count( nwcs_visible_pages( $manifest ) );
+	// Blog yazilari ve manifestte sayfasi olmayan WordPress sayfalari (yasal
+	// metinler, sepet...): onizleme o adreste acilir; metinleri tiklaninca
+	// WordPress duzenleyicisine ya da panel alanina gider.
+	$manifest_paths = array();
+	foreach ( $manifest['pages'] ?? array() as $page ) {
+		$manifest_paths[ (string) ( $page['path'] ?? '' ) ] = true;
+	}
 
-	// Sekmelerden baska acilacak bir sey yoksa bulucu gereksiz.
-	if ( $hidden_count < 1 ) {
-		return;
+	switch_to_blog( $blog_id );
+
+	$home_path = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+	$skip      = array_filter( array( (int) get_option( 'page_on_front' ), (int) get_option( 'page_for_posts' ) ) );
+	$wp_items  = array();
+
+	foreach ( get_posts( array( 'post_type' => array( 'page', 'post' ), 'post_status' => 'publish', 'numberposts' => 300, 'orderby' => 'title', 'order' => 'ASC' ) ) as $post ) {
+		if ( in_array( (int) $post->ID, $skip, true ) ) {
+			continue;
+		}
+
+		$path = (string) wp_parse_url( (string) get_permalink( $post ), PHP_URL_PATH );
+		$path = '/' . ltrim( '' !== $home_path && str_starts_with( $path, $home_path ) ? substr( $path, strlen( $home_path ) ) : $path, '/' );
+
+		if ( isset( $manifest_paths[ $path ] ) || '' === nwcs_clean_preview_path( $path ) ) {
+			continue;
+		}
+
+		$is_post    = 'post' === $post->post_type;
+		$wp_items[] = array(
+			't'    => get_the_title( $post ) ?: $path,
+			'k'    => $is_post ? 'Blog yazısı' : 'Sayfa',
+			'g'    => $is_post ? 'Blog yazıları' : 'Diğer sayfalar',
+			'path' => $path,
+		);
+	}
+
+	restore_current_blog();
+
+	// Yazi ve sayfalar panelde en yakin sekmeyle acilir: blog ya da site geneli.
+	$post_page  = isset( $manifest['pages']['blog'] ) ? 'blog' : ( isset( $manifest['pages']['global'] ) ? 'global' : $page_key );
+	$other_page = isset( $manifest['pages']['global'] ) ? 'global' : $page_key;
+
+	foreach ( $wp_items as $item ) {
+		$items[] = array(
+			't' => $item['t'],
+			'k' => $item['k'],
+			'g' => $item['g'],
+			'u' => add_query_arg( 'onizleme', rawurlencode( $item['path'] ), nwcs_panel_url( $blog_id, 'Blog yazısı' === $item['k'] ? $post_page : $other_page ) ),
+		);
+
+		if ( $item['path'] === $preview_path ) {
+			$current = $item['t'] . ( 'Blog yazısı' === $item['k'] ? ' (blog yazısı)' : ' (sayfa)' );
+		}
 	}
 
 	$placeholder = $product_count
-		? sprintf( 'Sayfa, kategori ya da ürün bul (%d ürün)', $product_count )
-		: 'Sayfa ya da kategori bul';
+		? sprintf( 'Sayfa, yazı ya da ürün bul (%d ürün)', $product_count )
+		: 'Sayfa ya da yazı bul';
 	?>
 	<div class="nwcs-finder" data-nwcs-finder>
 		<label class="nwcs-finder__label" for="nwcs-finder-input">Sayfa bul</label>

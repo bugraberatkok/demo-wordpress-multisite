@@ -11,6 +11,7 @@ $blog_page = (int) get_option( 'page_for_posts' );
 
 while ( have_posts() ) :
 	the_post();
+	$post_id = (int) get_the_ID();
 	?>
 	<article class="mx-auto max-w-[80rem] px-5 pt-10 md:px-8 md:pt-14">
 
@@ -25,21 +26,21 @@ while ( have_posts() ) :
 
 			<div class="min-w-0">
 				<header>
-					<time class="tabular text-steel" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
+					<time class="tabular text-steel" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php ip_post_attr( $post_id, 'Yayın tarihi' ); ?>>
 						<?php echo esc_html( get_the_date( 'j F Y' ) ); ?>
 					</time>
-					<h1 class="mt-3 max-w-[20ch] text-[2.75rem] font-bold leading-[0.98] md:text-[4rem]"><?php the_title(); ?></h1>
+					<h1 class="mt-3 max-w-[20ch] text-[2.75rem] font-bold leading-[0.98] md:text-[4rem]" <?php ip_post_attr( $post_id, 'Yazı başlığı' ); ?>><?php the_title(); ?></h1>
 				</header>
 
 				<?php if ( has_post_thumbnail() ) : ?>
-					<figure class="sheet mt-10 p-2">
+					<figure class="sheet mt-10 p-2" <?php ip_post_attr( $post_id, 'Öne çıkan görsel' ); ?>>
 						<div class="shot aspect-[16/9]">
 							<?php the_post_thumbnail( 'large', array( 'fetchpriority' => 'high', 'decoding' => 'async' ) ); ?>
 						</div>
 					</figure>
 				<?php endif; ?>
 
-				<div class="prose-ip mt-10">
+				<div class="prose-ip mt-10" <?php ip_post_attr( $post_id, 'Yazı metni' ); ?>>
 					<?php the_content(); ?>
 				</div>
 			</div>
@@ -53,7 +54,8 @@ while ( have_posts() ) :
 					<ul class="mt-4 divide-y divide-line">
 						<?php foreach ( ip_products() as $product ) : ?>
 							<li>
-								<a href="<?php echo esc_url( $product['url'] ); ?>" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-indigo">
+								<a href="<?php echo esc_url( $product['url'] ); ?>" class="flex items-center gap-3 py-3 text-ink no-underline hover:text-indigo"
+									<?php nwcs_edit_attr( $product['key'], 'card', 'name' ); ?>>
 									<span class="shot aspect-[4/3] w-16 shrink-0 border border-line">
 										<?php echo ip_image_tag( $product['image'], '', $product['name'] ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 									</span>

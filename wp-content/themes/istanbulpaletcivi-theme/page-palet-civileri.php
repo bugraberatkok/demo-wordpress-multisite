@@ -36,9 +36,9 @@ pc_part(
 		<div>
 			<p class="pc-group__text" <?php nwcs_edit_attr( 'products', 'help', 'text' ); ?>><?php echo esc_html( nwcs_field( 'products', 'help', 'text' ) ); ?></p>
 			<div class="pc-hero__actions">
-				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="pc-btn pc-btn--yellow"><?php echo pc_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><span class="pc-num"><?php echo esc_html( $phone['label'] ); ?></span></a>
+				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="pc-btn pc-btn--yellow"<?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>><?php echo pc_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><span class="pc-num"><?php echo esc_html( $phone['label'] ); ?></span></a>
 				<?php if ( $whatsapp ) : ?>
-					<a href="<?php echo esc_url( $whatsapp ); ?>" target="_blank" rel="noopener" class="pc-btn pc-btn--ghost"><?php echo pc_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>WhatsApp</a>
+					<a href="<?php echo esc_url( $whatsapp ); ?>" target="_blank" rel="noopener" class="pc-btn pc-btn--ghost"<?php nwcs_edit_attr( 'products', 'help', 'wa_label' ); ?>><?php echo pc_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><?php echo esc_html( nwcs_field( 'products', 'help', 'wa_label' ) ); ?></a>
 				<?php endif; ?>
 			</div>
 		</div>

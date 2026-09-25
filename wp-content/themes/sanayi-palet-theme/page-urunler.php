@@ -12,9 +12,9 @@ defined( 'ABSPATH' ) || exit;
 get_header();
 
 $groups = array(
-	'paletler'  => nwcs_field( 'products', 'pallets', 'title' ),
-	'sandiklar' => nwcs_field( 'products', 'crates', 'title' ),
-	'kafesler'  => nwcs_field( 'products', 'cages', 'title' ),
+	'paletler'  => 'pallets',
+	'sandiklar' => 'crates',
+	'kafesler'  => 'cages',
 );
 ?>
 
@@ -25,8 +25,8 @@ $groups = array(
 
 		<nav class="sp-jump" aria-label="Ürün grupları">
 			<ul>
-				<?php foreach ( $groups as $anchor => $label ) : ?>
-					<li><a href="#<?php echo esc_attr( $anchor ); ?>"><?php echo esc_html( $label ); ?></a></li>
+				<?php foreach ( $groups as $anchor => $group ) : ?>
+					<li><a href="#<?php echo esc_attr( $anchor ); ?>" <?php nwcs_edit_attr( 'products', $group, 'title' ); ?>><?php echo esc_html( nwcs_field( 'products', $group, 'title' ) ); ?></a></li>
 				<?php endforeach; ?>
 			</ul>
 		</nav>
@@ -75,12 +75,12 @@ $groups = array(
 
 					<?php if ( ! empty( $type['text'] ) ) : ?>
 						<details class="sp-pallet__more">
-							<summary><?php echo esc_html( nwcs_field( 'products', 'pallets', 'more_label' ) ); ?></summary>
+							<summary <?php nwcs_edit_attr( 'products', 'pallets', 'more_label' ); ?>><?php echo esc_html( nwcs_field( 'products', 'pallets', 'more_label' ) ); ?></summary>
 							<p <?php nwcs_edit_attr( 'products', 'pallets', 'types', $index, 'text' ); ?>><?php echo esc_html( $type['text'] ); ?></p>
 						</details>
 					<?php endif; ?>
 
-					<a class="btn btn--sm btn--outline sp-pallet__quote" href="<?php echo esc_url( sanayi_palet_quote_url( $name ) ); ?>">
+					<a class="btn btn--sm btn--outline sp-pallet__quote" href="<?php echo esc_url( sanayi_palet_quote_url( $name ) ); ?>" <?php nwcs_edit_attr( 'products', 'pallets', 'quote_label' ); ?>>
 						<?php echo esc_html( nwcs_field( 'products', 'pallets', 'quote_label' ) ); ?><span class="screen-reader-text">: <?php echo esc_html( $name ); ?></span>
 					</a>
 				</li>

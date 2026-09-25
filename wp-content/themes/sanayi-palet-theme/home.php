@@ -16,7 +16,7 @@ $posts = $wp_query->posts;
 <section class="sp-section sp-bloglist">
 	<div class="sp-wrap">
 		<?php if ( ! $posts ) : ?>
-			<p class="sp-lead">Henüz yazı yok. Sorunuz varsa bize yazın; yanıtı burada paylaşalım.</p>
+			<p class="sp-lead" <?php nwcs_edit_attr( 'blog', 'post', 'empty_text' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'post', 'empty_text' ) ); ?></p>
 		<?php else : ?>
 			<?php
 			$first = array_shift( $posts );
@@ -39,8 +39,8 @@ $posts = $wp_query->posts;
 			<?php
 			the_posts_pagination(
 				array(
-					'prev_text' => 'Önceki',
-					'next_text' => 'Sonraki',
+					'prev_text' => '<span' . sanayi_palet_edit_attr( 'blog', 'post', 'prev_label' ) . '>' . esc_html( nwcs_field( 'blog', 'post', 'prev_label' ) ) . '</span>',
+					'next_text' => '<span' . sanayi_palet_edit_attr( 'blog', 'post', 'next_label' ) . '>' . esc_html( nwcs_field( 'blog', 'post', 'next_label' ) ) . '</span>',
 					'class'     => 'sp-pagination',
 				)
 			);

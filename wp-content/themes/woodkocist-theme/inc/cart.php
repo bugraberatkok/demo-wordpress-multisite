@@ -159,7 +159,12 @@ function wk_vat_mode(): string {
 
 /** Fiyatin yaninda gorunen kisa not ("+ KDV" / "KDV dahil"). */
 function wk_price_note(): string {
-	return 'haric' === wk_vat_mode() ? '+ KDV' : 'KDV dahil';
+	return (string) nwcs_field( 'global', 'card', 'haric' === wk_vat_mode() ? 'vat_excluded' : 'vat_included' );
+}
+
+/** Onizlemede fiyat notunun panel alani. */
+function wk_price_note_attr(): void {
+	nwcs_edit_attr( 'global', 'card', 'haric' === wk_vat_mode() ? 'vat_excluded' : 'vat_included' );
 }
 
 /* ---------------------------------------------------------------------- */
@@ -277,9 +282,9 @@ function wk_add_to_cart_form( array $product, bool $with_qty = false, string $cl
 		<?php else : ?>
 			<input type="hidden" name="wk_qty" value="1" />
 		<?php endif; ?>
-		<button type="submit" class="wk-btn wk-btn--primary<?php echo $with_qty ? ' wk-btn--lg' : ''; ?>">
+		<button type="submit" class="wk-btn wk-btn--primary<?php echo $with_qty ? ' wk-btn--lg' : ''; ?>" <?php nwcs_edit_attr( 'global', 'card', 'add_button' ); ?>>
 			<?php echo wk_icon( 'cart' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
-			Sepete ekle
+			<?php echo esc_html( nwcs_field( 'global', 'card', 'add_button' ) ); ?>
 		</button>
 	</form>
 	<?php

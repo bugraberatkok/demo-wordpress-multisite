@@ -32,10 +32,10 @@ $values = nwcs_rows( 'about', 'values', 'rows' );
 
 	<?php if ( $values ) : ?>
 		<ul class="mx-auto mt-16 grid max-w-[78rem] gap-8 px-5 md:mt-20 md:grid-cols-3 md:px-8" <?php nwcs_edit_attr( 'about', 'values', 'rows' ); ?>>
-			<?php foreach ( $values as $value ) : ?>
+			<?php foreach ( $values as $index => $value ) : ?>
 				<li class="border-t-4 border-mark pt-4">
-					<h2 class="text-[1.6rem]"><?php echo esc_html( $value['title'] ?? '' ); ?></h2>
-					<p class="mt-2 text-muted"><?php echo esc_html( $value['text'] ?? '' ); ?></p>
+					<h2 class="text-[1.6rem]" <?php nwcs_edit_attr( 'about', 'values', 'rows', (int) $index, 'title' ); ?>><?php echo esc_html( $value['title'] ?? '' ); ?></h2>
+					<p class="mt-2 text-muted" <?php nwcs_edit_attr( 'about', 'values', 'rows', (int) $index, 'text' ); ?>><?php echo esc_html( $value['text'] ?? '' ); ?></p>
 				</li>
 			<?php endforeach; ?>
 		</ul>

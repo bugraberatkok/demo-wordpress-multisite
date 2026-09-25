@@ -27,28 +27,28 @@ while ( have_posts() ) :
 				<a class="sp-article__back" href="<?php echo esc_url( sanayi_palet_link( '/blog/' ) ); ?>" <?php nwcs_edit_attr( 'blog', 'post', 'back_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'blog', 'post', 'back_label' ) ); ?>
 				</a>
-				<h1 class="sp-article__title"><?php the_title(); ?></h1>
-				<time class="sp-post__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( sanayi_palet_date( $current ) ); ?></time>
+				<h1 class="sp-article__title" <?php sanayi_palet_post_attr( $current->ID, 'Yazı başlığı' ); ?>><?php the_title(); ?></h1>
+				<time class="sp-post__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php sanayi_palet_post_attr( $current->ID, 'Yayın tarihi' ); ?>><?php echo esc_html( sanayi_palet_date( $current ) ); ?></time>
 			</div>
 		</header>
 
 		<?php if ( $image ) : ?>
 			<div class="sp-wrap">
-				<img class="sp-article__cover" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+				<img class="sp-article__cover" <?php sanayi_palet_post_attr( $current->ID, 'Öne çıkan görsel' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
 			</div>
 		<?php endif; ?>
 
 		<div class="sp-wrap sp-article__grid">
-			<div class="sp-article__content">
+			<div class="sp-article__content" <?php sanayi_palet_post_attr( $current->ID, 'Yazı metni' ); ?>>
 				<?php the_content(); ?>
 			</div>
 
 			<aside class="sp-checklist sp-article__aside" aria-labelledby="sp-aside-title">
-				<h2 class="sp-checklist__title" id="sp-aside-title"><?php echo esc_html( nwcs_field( 'home', 'ctaband', 'title' ) ); ?></h2>
-				<p class="sp-article__aside-text"><?php echo esc_html( nwcs_field( 'home', 'ctaband', 'text' ) ); ?></p>
+				<h2 class="sp-checklist__title" id="sp-aside-title" <?php nwcs_edit_attr( 'home', 'ctaband', 'title' ); ?>><?php echo esc_html( nwcs_field( 'home', 'ctaband', 'title' ) ); ?></h2>
+				<p class="sp-article__aside-text" <?php nwcs_edit_attr( 'home', 'ctaband', 'text' ); ?>><?php echo esc_html( nwcs_field( 'home', 'ctaband', 'text' ) ); ?></p>
 				<div class="sp-checklist__actions">
-					<a class="btn btn--solid" href="<?php echo esc_url( sanayi_palet_link( nwcs_field( 'home', 'ctaband', 'primary_url' ) ) ); ?>"><?php echo esc_html( nwcs_field( 'home', 'ctaband', 'primary_label' ) ); ?></a>
-					<a class="btn btn--outline sp-checklist__whatsapp" href="<?php echo esc_url( sanayi_palet_link( nwcs_field( 'home', 'ctaband', 'secondary_url' ) ) ); ?>">
+					<a class="btn btn--solid" href="<?php echo esc_url( sanayi_palet_link( nwcs_field( 'home', 'ctaband', 'primary_url' ) ) ); ?>" <?php nwcs_edit_attr( 'home', 'ctaband', 'primary_label' ); ?>><?php echo esc_html( nwcs_field( 'home', 'ctaband', 'primary_label' ) ); ?></a>
+					<a class="btn btn--outline sp-checklist__whatsapp" href="<?php echo esc_url( sanayi_palet_link( nwcs_field( 'home', 'ctaband', 'secondary_url' ) ) ); ?>" <?php nwcs_edit_attr( 'home', 'ctaband', 'secondary_label' ); ?>>
 						<?php sanayi_palet_icon( 'whatsapp', 18 ); ?><?php echo esc_html( nwcs_field( 'home', 'ctaband', 'secondary_label' ) ); ?>
 					</a>
 				</div>

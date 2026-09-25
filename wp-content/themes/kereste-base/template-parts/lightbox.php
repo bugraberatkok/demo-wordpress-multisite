@@ -35,9 +35,9 @@ $control = 'flex items-center justify-center bg-ink/80 text-paper transition-col
 			<button type="button" data-kr-zoom-out aria-label="Uzaklaştır" class="<?php echo esc_attr( $control ); ?> h-10 w-10 text-xl leading-none">&minus;</button>
 			<span data-kr-zoom-level class="tabular flex h-10 min-w-[3.75rem] items-center justify-center bg-ink/80 px-2 text-sm font-semibold text-paper" aria-live="polite">%100</span>
 			<button type="button" data-kr-zoom-in aria-label="Yakınlaştır" class="<?php echo esc_attr( $control ); ?> h-10 w-10 text-xl leading-none">+</button>
-			<button type="button" data-kr-zoom-reset class="<?php echo esc_attr( $control ); ?> h-10 px-3 text-sm font-semibold">Sığdır</button>
+			<button type="button" data-kr-zoom-reset class="<?php echo esc_attr( $control ); ?> h-10 px-3 text-sm font-semibold"><span <?php nwcs_edit_attr( 'products', 'shared', 'zoom_fit' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'zoom_fit' ) ); ?></span></button>
 		</div>
 	</div>
 	<p data-kr-lightbox-caption class="mt-3 text-center text-sm text-paper/85"></p>
-	<p class="mt-1 text-center text-xs text-paper/60">Yakınlaştırmak için görsele tıklayın ya da tekerleği kullanın; yakınken sürükleyerek gezinin.</p>
+	<p class="mt-1 text-center text-xs text-paper/60" <?php nwcs_edit_attr( 'products', 'shared', 'zoom_hint' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'zoom_hint' ) ); ?></p>
 </dialog>

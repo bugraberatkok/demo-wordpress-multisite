@@ -30,25 +30,25 @@ $sub  = nwcs_field( 'global', 'header', 'logo_sub' );
 				<img class="sp-logo__image" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( trim( $name . ' ' . $sub ) ); ?>" />
 			<?php else : ?>
 				<span class="sp-logo__name"><?php echo esc_html( $name ); ?></span>
-				<span class="sp-logo__sub"><?php echo esc_html( $sub ); ?></span>
+				<span class="sp-logo__sub" <?php nwcs_edit_attr( 'global', 'header', 'logo_sub' ); ?>><?php echo esc_html( $sub ); ?></span>
 			<?php endif; ?>
 		</a>
 
 		<button type="button" class="sp-header__toggle" aria-expanded="false" aria-controls="sp-menu" data-sp-toggle>
 			<span class="sp-header__toggle-bars" aria-hidden="true"></span>
-			<span class="sp-header__toggle-label">Menü</span>
+			<span class="sp-header__toggle-label" <?php nwcs_edit_attr( 'global', 'header', 'menu_toggle' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'menu_toggle' ) ); ?></span>
 		</button>
 
 		<div class="sp-header__panel" id="sp-menu">
 			<nav class="sp-nav" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
 				<ul>
-					<?php foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $item ) : ?>
+					<?php foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $index => $item ) : ?>
 						<?php
 						$url     = (string) ( $item['url'] ?? '' );
 						$current = sanayi_palet_is_current( $url );
 						?>
 						<li>
-							<a href="<?php echo esc_url( sanayi_palet_link( $url ) ); ?>"<?php echo $current ? ' aria-current="page"' : ''; ?>>
+							<a href="<?php echo esc_url( sanayi_palet_link( $url ) ); ?>"<?php echo $current ? ' aria-current="page"' : ''; ?> <?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>>
 								<?php echo esc_html( $item['label'] ?? '' ); ?>
 							</a>
 						</li>

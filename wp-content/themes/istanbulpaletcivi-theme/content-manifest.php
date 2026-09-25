@@ -129,6 +129,7 @@ return array(
 						'whatsapp_label' => array( 'label' => 'WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp' ),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => $whatsapp_url ),
 						'email'          => array( 'label' => 'E-posta', 'type' => 'text', 'default' => $email ),
+						'menu_toggle'    => array( 'label' => 'Mobil Menü Düğmesi', 'type' => 'text', 'default' => 'Menü' ),
 					),
 				),
 
@@ -142,6 +143,19 @@ return array(
 						'copyright'      => array( 'label' => 'Telif Satırı', 'type' => 'text', 'default' => 'İstanbul Palet Çivi · Koçist Grup' ),
 						'external_label' => array( 'label' => 'Grup Bağlantısı Metni', 'type' => 'text', 'default' => 'kocist.com.tr' ),
 						'external_url'   => array( 'label' => 'Grup Bağlantısı', 'type' => 'url', 'default' => 'https://kocist.com.tr' ),
+						'pages_title'    => array( 'label' => 'Sayfalar Sütunu Başlığı', 'type' => 'text', 'default' => 'Sayfalar' ),
+						'products_title' => array( 'label' => 'Çiviler Sütunu Başlığı', 'type' => 'text', 'default' => 'Çiviler' ),
+						'contact_title'  => array( 'label' => 'İletişim Sütunu Başlığı', 'type' => 'text', 'default' => 'İletişim' ),
+						'call_label'     => array( 'label' => 'Mobil Alt Çubuk: Arama Düğmesi', 'type' => 'text', 'default' => 'Ara' ),
+						'wa_label'       => array( 'label' => 'Mobil Alt Çubuk: WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp' ),
+					),
+				),
+
+				'common' => array(
+					'label'  => 'Ortak Metinler',
+					'fields' => array(
+						'crumb_home'  => array( 'label' => 'Konum Yolu: Ana Sayfa', 'type' => 'text', 'default' => 'Anasayfa' ),
+						'sample_note' => array( 'label' => 'Örnek Görsel Notu', 'type' => 'text', 'default' => 'Örnek görsel' ),
 					),
 				),
 			),
@@ -263,6 +277,7 @@ return array(
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Size nasıl yardımcı olabiliriz?' ),
 						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Hangi çivinin size uyduğundan emin değilseniz arayın; tabancanızın modelini ve yaptığınız işi söyleyin, doğru çiviyi birlikte seçelim.' ),
+						'wa_label' => array( 'label' => 'WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp' ),
 					),
 				),
 				'shared' => array(
@@ -270,6 +285,17 @@ return array(
 					'fields' => array(
 						'price_note' => array( 'label' => 'Fiyat ve Ölçü Notu', 'type' => 'textarea', 'default' => $price_note ),
 						'others'     => array( 'label' => 'Diğer Ürünler Başlığı', 'type' => 'text', 'default' => 'Diğer çivi tipleri' ),
+						'uses_title'  => array( 'label' => 'Kullanıldığı İşler Başlığı', 'type' => 'text', 'default' => 'Kullanıldığı işler' ),
+						'order_title' => array( 'label' => 'Sipariş Kutusu Başlığı', 'type' => 'text', 'default' => 'Ölçü ve fiyat' ),
+						'wa_label'    => array( 'label' => 'Sipariş Kutusu: WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp’tan fiyat sorun' ),
+						'form_label'  => array( 'label' => 'Sipariş Kutusu: Form Bağlantısı', 'type' => 'text', 'default' => 'Formla sipariş isteği gönderin' ),
+					),
+				),
+				'list' => array(
+					'label'  => 'Ürün Satırı Düğmeleri',
+					'fields' => array(
+						'more' => array( 'label' => 'Ürün Bağlantısı Metni', 'type' => 'text', 'default' => 'Ürünü inceleyin' ),
+						'ask'  => array( 'label' => 'Fiyat Sorma Düğmesi (WhatsApp)', 'type' => 'text', 'default' => 'Fiyat sorun' ),
 					),
 				),
 			),
@@ -394,6 +420,24 @@ return array(
 						'lead'  => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Palet çivisi, rulo çivi, tele dizili çivi ve dökme çivi hakkında bilmeniz gerekenler.' ),
 					),
 				),
+				'list' => array(
+					'label'  => 'Yazı Listesi',
+					'fields' => array(
+						'prev'          => array( 'label' => 'Önceki Sayfa Bağlantısı', 'type' => 'text', 'default' => 'Önceki' ),
+						'next'          => array( 'label' => 'Sonraki Sayfa Bağlantısı', 'type' => 'text', 'default' => 'Sonraki' ),
+						'empty'         => array( 'label' => 'Yazı Yokken Görünen Metin', 'type' => 'text', 'default' => 'Henüz yazı yok.' ),
+						'archive_empty' => array( 'label' => 'Boş Arşiv Metni', 'type' => 'text', 'default' => 'Bu sayfada içerik yok.' ),
+						'search_title'  => array( 'label' => 'Arama Sonuçları Başlığı', 'type' => 'text', 'default' => 'Arşivler' ),
+					),
+				),
+				'post' => array(
+					'label'  => 'Yazı Sayfası',
+					'fields' => array(
+						'cta'      => array( 'label' => 'Sipariş Çağrısı', 'type' => 'textarea', 'default' => 'Palet çivisi siparişi ve fiyat için arayın ya da WhatsApp’tan yazın.' ),
+						'wa_label' => array( 'label' => 'WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp' ),
+						'others'   => array( 'label' => 'Diğer Yazılar Başlığı', 'type' => 'text', 'default' => 'Diğer yazılar' ),
+					),
+				),
 			),
 		),
 
@@ -421,12 +465,53 @@ return array(
 						'address'   => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => $address ),
 						'map_query' => array( 'label' => 'Haritada Aranacak Adres', 'type' => 'text', 'default' => $address_line ),
 						'hours'     => array( 'label' => 'Çalışma Saatleri (boşsa gizlenir)', 'type' => 'text', 'default' => '' ),
+						'phone_title'   => array( 'label' => 'Telefon Satırı Başlığı', 'type' => 'text', 'default' => 'Telefon' ),
+						'mobile_title'  => array( 'label' => 'Cep Satırı Başlığı', 'type' => 'text', 'default' => 'Cep ve WhatsApp' ),
+						'wa_label'      => array( 'label' => 'WhatsApp Bağlantısı Metni', 'type' => 'text', 'default' => 'WhatsApp’tan yazın' ),
+						'email_title'   => array( 'label' => 'E-posta Satırı Başlığı', 'type' => 'text', 'default' => 'E-posta' ),
+						'address_title' => array( 'label' => 'Adres Satırı Başlığı', 'type' => 'text', 'default' => 'Adres' ),
+						'hours_title'   => array( 'label' => 'Çalışma Saatleri Satırı Başlığı', 'type' => 'text', 'default' => 'Çalışma saatleri' ),
 					),
 				),
 				'form' => array(
 					'label'  => 'Form',
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'İletişim formu' ),
+						'name_label'       => array( 'label' => 'Ad Alanı Etiketi', 'type' => 'text', 'default' => 'Ad soyad' ),
+						'company_label'    => array( 'label' => 'Firma Alanı Etiketi', 'type' => 'text', 'default' => 'Firma (isteğe bağlı)' ),
+						'phone_label'      => array( 'label' => 'Telefon Alanı Etiketi', 'type' => 'text', 'default' => 'Telefon' ),
+						'email_label'      => array( 'label' => 'E-posta Alanı Etiketi', 'type' => 'text', 'default' => 'E-posta' ),
+						'product_label'    => array( 'label' => 'Çivi Tipi Alanı Etiketi', 'type' => 'text', 'default' => 'Çivi tipi' ),
+						'product_none'     => array( 'label' => 'Çivi Tipi: Seçilmemiş Seçenek', 'type' => 'text', 'default' => 'Emin değilim' ),
+						'size_label'       => array( 'label' => 'Ölçü Alanı Etiketi', 'type' => 'text', 'default' => 'Ölçü ve adet' ),
+						'size_placeholder' => array( 'label' => 'Ölçü Alanı İpucu', 'type' => 'text', 'default' => 'Örneğin: boy, kalınlık, kaç kutu ya da kilo; tabancanızın modeli' ),
+						'message_label'    => array( 'label' => 'Mesaj Alanı Etiketi', 'type' => 'text', 'default' => 'Mesajınız (isteğe bağlı)' ),
+						'form_note'        => array( 'label' => 'Form Notu', 'type' => 'text', 'default' => 'Telefon ya da e-postadan birini yazmanız yeterli.' ),
+						'submit'           => array( 'label' => 'Gönder Düğmesi', 'type' => 'text', 'default' => 'İsteği gönder' ),
+						'success_title'    => array( 'label' => 'Gönderildi: Başlık', 'type' => 'text', 'default' => 'İsteğiniz bize ulaştı.' ),
+						'success_text'     => array( 'label' => 'Gönderildi: Metin', 'type' => 'textarea', 'default' => 'En kısa sürede sizi arayacağız ya da e-postayla dönüş yapacağız. Acil siparişte telefonla ulaşın.' ),
+						'error_note'       => array( 'label' => 'Hatalı Form Uyarısı', 'type' => 'text', 'default' => 'Formda eksik ya da hatalı alanlar var; aşağıda işaretli.' ),
+					),
+				),
+			),
+		),
+
+		/* ---------------------------------------------------------- *
+		 * Bulunamayan sayfa (404). Onizleme adresi bilerek olmayan bir
+		 * sayfa. Gizli: "Sayfa bul" kutusunda listelenir, site
+		 * haritasina ve llms.txt'ye girmez.
+		 * ---------------------------------------------------------- */
+		'notfound' => array(
+			'label'      => '404 Sayfası',
+			'path'       => '/bulunamadi-404/',
+			'hidden'     => true,
+			'components' => array(
+				'head' => array(
+					'label'  => 'Sayfa Metinleri',
+					'fields' => array(
+						'title'  => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Bu sayfa bulunamadı' ),
+						'lead'   => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Aradığınız adres taşınmış ya da kaldırılmış olabilir. Çivi tiplerine göz atın ya da bizi arayın.' ),
+						'button' => array( 'label' => 'Düğme Metni', 'type' => 'text', 'default' => 'Palet çivileri' ),
 					),
 				),
 			),

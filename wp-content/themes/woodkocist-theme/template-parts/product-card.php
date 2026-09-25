@@ -46,11 +46,11 @@ $buy     = wk_can_buy( $product );
 		<?php endif; ?>
 		<div class="wk-card__foot">
 			<?php if ( $buy ) : ?>
-				<p class="wk-card__price"><span class="wk-num"><?php echo esc_html( $product['price'] ); ?></span> <small><?php echo esc_html( wk_price_note() ); ?></small></p>
+				<p class="wk-card__price"><span class="wk-num"><?php echo esc_html( $product['price'] ); ?></span> <small <?php wk_price_note_attr(); ?>><?php echo esc_html( wk_price_note() ); ?></small></p>
 				<?php wk_add_to_cart_form( $product ); ?>
 			<?php else : ?>
-				<p class="wk-card__price wk-card__price--ask">Fiyat için sorun</p>
-				<a class="wk-btn wk-btn--line" href="<?php echo esc_url( $product['url'] ); ?>">Fiyat sor</a>
+				<p class="wk-card__price wk-card__price--ask" <?php nwcs_edit_attr( 'global', 'card', 'price_ask' ); ?>><?php echo esc_html( nwcs_field( 'global', 'card', 'price_ask' ) ); ?></p>
+				<a class="wk-btn wk-btn--line" href="<?php echo esc_url( $product['url'] ); ?>" <?php nwcs_edit_attr( 'global', 'card', 'ask_button' ); ?>><?php echo esc_html( nwcs_field( 'global', 'card', 'ask_button' ) ); ?></a>
 			<?php endif; ?>
 		</div>
 	</div>

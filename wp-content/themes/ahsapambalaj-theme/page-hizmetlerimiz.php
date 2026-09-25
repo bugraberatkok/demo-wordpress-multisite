@@ -54,11 +54,11 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 				<div class="card flex flex-col-reverse overflow-hidden sm:flex-row" data-reveal data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
 
 					<div class="flex min-w-0 flex-1 flex-col p-6 md:p-7">
-						<h2 class="font-display text-2xl font-semibold md:text-[1.75rem]">
+						<h2 class="font-display text-2xl font-semibold md:text-[1.75rem]" <?php nwcs_edit_attr( 'services', 'grid', 'items', $item_index, 'title' ); ?>>
 							<?php echo esc_html( $item['title'] ?? '' ); ?>
 						</h2>
 
-						<p class="mt-3 text-[0.9375rem] leading-[1.6] text-ink/70">
+						<p class="mt-3 text-[0.9375rem] leading-[1.6] text-ink/70" <?php nwcs_edit_attr( 'services', 'grid', 'items', $item_index, 'text' ); ?>>
 							<?php echo esc_html( $item['text'] ?? '' ); ?>
 						</p>
 
@@ -70,8 +70,8 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 										aria-label="<?php echo esc_attr( sprintf( '%d. görseli büyüt', $position + 1 ) ); ?>"></button>
 								<?php endforeach; ?>
 
-								<span class="ml-1 font-display text-xs tabular-nums text-moss">
-									<?php echo esc_html( sprintf( '%d görsel', count( $gallery ) ) ); ?>
+								<span class="ml-1 font-display text-xs tabular-nums text-moss" <?php nwcs_edit_attr( 'services', 'grid', 'gallery_count' ); ?>>
+									<?php echo esc_html( ahsapambalaj_text( 'services', 'grid', 'gallery_count', array( 'sayi' => count( $gallery ) ) ) ); ?>
 								</span>
 							</div>
 						<?php endif; ?>

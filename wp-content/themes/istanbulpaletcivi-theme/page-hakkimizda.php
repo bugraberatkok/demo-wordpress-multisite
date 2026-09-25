@@ -30,7 +30,7 @@ pc_part(
 		</div>
 		<figure class="pc-split__figure">
 			<?php echo pc_img_tag( $image, 'pc-split__img' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
-			<span class="pc-sample">Örnek görsel</span>
+			<span class="pc-sample"<?php nwcs_edit_attr( 'global', 'common', 'sample_note' ); ?>><?php echo esc_html( nwcs_field( 'global', 'common', 'sample_note' ) ); ?></span>
 		</figure>
 	</div>
 </section>
@@ -42,8 +42,8 @@ pc_part(
 				<h2 id="pc-quality" <?php nwcs_edit_attr( 'about', 'quality', 'title' ); ?>><?php echo esc_html( nwcs_field( 'about', 'quality', 'title' ) ); ?></h2>
 			</header>
 			<ul class="pc-ticks pc-ticks--wide" <?php nwcs_edit_attr( 'about', 'quality', 'items' ); ?>>
-				<?php foreach ( $quality as $item ) : ?>
-					<li><?php echo esc_html( $item['text'] ?? '' ); ?></li>
+				<?php foreach ( $quality as $index => $item ) : ?>
+					<li<?php nwcs_edit_attr( 'about', 'quality', 'items', (int) $index, 'text' ); ?>><?php echo esc_html( $item['text'] ?? '' ); ?></li>
 				<?php endforeach; ?>
 			</ul>
 		</div>

@@ -7,12 +7,13 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 
+// Satir basligi (panel alani), deger alani, baglanti alani.
 $rows = array(
-	array( 'Telefon', 'phone_label', 'phone_url' ),
-	array( 'Cep ve WhatsApp', 'mobile_label', 'mobile_url' ),
-	array( 'E-posta', 'email', 'mailto' ),
-	array( 'Adres', 'address', '' ),
-	array( 'Çalışma saatleri', 'hours', '' ),
+	array( 'phone_title', 'phone_label', 'phone_url' ),
+	array( 'mobile_title', 'mobile_label', 'mobile_url' ),
+	array( 'email_title', 'email', 'mailto' ),
+	array( 'address_title', 'address', '' ),
+	array( 'hours_title', 'hours', '' ),
 );
 $map      = trim( (string) nwcs_field( 'contact', 'details', 'map_url' ) );
 $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
@@ -36,7 +37,7 @@ $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 					$href = 'mailto' === $row[2] ? 'mailto:' . $value : ( $row[2] ? kr_link( nwcs_field( 'contact', 'details', $row[2] ) ) : '' );
 					?>
 					<div>
-						<dt class="text-sm font-bold text-muted"><?php echo esc_html( $row[0] ); ?></dt>
+						<dt class="text-sm font-bold text-muted" <?php nwcs_edit_attr( 'contact', 'details', $row[0] ); ?>><?php echo esc_html( nwcs_field( 'contact', 'details', $row[0] ) ); ?></dt>
 						<dd class="mt-1 text-lg" <?php nwcs_edit_attr( 'contact', 'details', $row[1] ); ?>>
 							<?php if ( $href ) : ?>
 								<a href="<?php echo esc_url( $href ); ?>" class="tabular font-semibold text-ink no-underline hover:text-mark"><?php echo esc_html( $value ); ?></a>
@@ -51,7 +52,8 @@ $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 			<?php if ( $whatsapp || $map ) : ?>
 				<div class="mt-7 flex flex-wrap gap-3">
 					<?php if ( $whatsapp ) : ?>
-						<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp">
+						<a href="<?php echo esc_url( kr_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp"
+							<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 							<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 18 ); ?>
 							<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 						</a>

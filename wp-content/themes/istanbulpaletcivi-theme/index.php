@@ -8,7 +8,25 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-pc_part( 'page-head', array( 'title' => wp_strip_all_tags( get_the_archive_title() ?: get_bloginfo( 'name' ) ) ) );
+$term       = get_queried_object();
+$title_edit = $term instanceof WP_Term
+	? array( 'source', 'admin', admin_url( 'term.php?taxonomy=' . $term->taxonomy . '&tag_ID=' . $term->term_id ), 'category' === $term->taxonomy ? 'Blog kategorisi' : 'Etiket' )
+	: null;
+$title      = wp_strip_all_tags( get_the_archive_title() ?: get_bloginfo( 'name' ) );
+
+// Arama sonuclari: WordPress'in genel arsiv basligi yerine paneldeki metin.
+if ( is_search() ) {
+	$title      = (string) nwcs_field( 'blog', 'list', 'search_title' );
+	$title_edit = array( 'blog', 'list', 'search_title' );
+}
+
+pc_part(
+	'page-head',
+	array(
+		'title'      => $title,
+		'title_edit' => $title_edit,
+	)
+);
 ?>
 
 <section class="pc-section">
@@ -22,9 +40,9 @@ pc_part( 'page-head', array( 'title' => wp_strip_all_tags( get_the_archive_title
 				endwhile;
 				?>
 			</div>
-			<?php the_posts_pagination( array( 'mid_size' => 1, 'prev_text' => 'Önceki', 'next_text' => 'Sonraki' ) ); ?>
+			<?php pc_posts_pagination(); ?>
 		<?php else : ?>
-			<p>Bu sayfada içerik yok.</p>
+			<p<?php nwcs_edit_attr( 'blog', 'list', 'archive_empty' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'list', 'archive_empty' ) ); ?></p>
 		<?php endif; ?>
 	</div>
 </section>

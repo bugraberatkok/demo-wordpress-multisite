@@ -135,6 +135,59 @@ function wk_product_src( array $product, string $label ): void {
 	}
 }
 
+/**
+ * Panelde duzenlenen, icinde {degisken} gecen metin (orn. "{sayi} ürün").
+ * Degiskenler sablondan gelir; panelde metnin yalnizca kalani degisir.
+ *
+ * @param array<string, string|int> $vars Degisken adi => deger.
+ */
+function wk_text( string $page, string $component, string $field, array $vars = array() ): string {
+	$map = array();
+
+	foreach ( $vars as $key => $value ) {
+		$map[ '{' . $key . '}' ] = (string) $value;
+	}
+
+	return strtr( (string) nwcs_field( $page, $component, $field ), $map );
+}
+
+/**
+ * Panel metni icine HTML parca (baglanti, kalin sayi) yerlestirir: metin
+ * kacirilir, {degisken}ler verilen hazir HTML ile degisir.
+ *
+ * @param array<string, string> $html Degisken adi => kacirilmis HTML.
+ */
+function wk_text_html( string $page, string $component, string $field, array $html ): string {
+	$map = array();
+
+	foreach ( $html as $key => $value ) {
+		$map[ '{' . $key . '}' ] = $value;
+	}
+
+	return strtr( esc_html( (string) nwcs_field( $page, $component, $field ) ), $map );
+}
+
+/**
+ * nwcs_edit_attr ciktisi metin olarak (bastan bosluklu; onizleme disinda bos):
+ * PHP icinde kurulan HTML parcalari (metin icindeki baglanti) icin.
+ */
+function wk_attr_string( string $page, string $component, string $field = '', ?int $row = null, string $sub = '' ): string {
+	ob_start();
+	nwcs_edit_attr( $page, $component, $field, $row, $sub );
+
+	return (string) ob_get_clean();
+}
+
+/**
+ * Onizlemede WordPress sayfasinin/yazisinin basligi ve metni: tiklaninca
+ * yazinin duzenleme ekrani acilir (eklenti yoksa hicbir sey basmaz).
+ */
+function wk_post_src( int $post_id, string $label = 'Sayfa metni' ): void {
+	if ( function_exists( 'nwcs_post_attr' ) ) {
+		nwcs_post_attr( $post_id, $label );
+	}
+}
+
 function wk_icon( string $name ): string {
 	$paths = array(
 		'whatsapp' => '<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.8 8.5c.3-.6.6-.6.9-.6h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.5.6c-.1.2-.2.3 0 .6a7 7 0 0 0 3 2.6c.3.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.4.4 0 .6-.2 1.3-.9 1.7-.7.4-1.6.5-3.2-.1a10 10 0 0 1-4.5-4c-.8-1.3-.9-2.6-.4-3.4z" fill="currentColor"/>',
@@ -197,7 +250,7 @@ function wk_products(): array {
 function wk_lines(): array {
 	$lines = array();
 
-	foreach ( nwcs_rows( 'home', 'catalog', 'lines' ) as $row ) {
+	foreach ( nwcs_rows( 'home', 'catalog', 'lines' ) as $index => $row ) {
 		$category = trim( (string) ( $row['category'] ?? '' ) );
 
 		if ( '' === $category ) {
@@ -218,6 +271,7 @@ function wk_lines(): array {
 		}
 
 		$lines[] = array(
+			'row'      => (int) $index, // Panel onizlemesinde Ana Sayfa -> Seriler'in bu satiri.
 			'label'    => (string) ( $row['label'] ?? $category ),
 			'category' => $category,
 			'text'     => (string) ( $row['text'] ?? '' ),

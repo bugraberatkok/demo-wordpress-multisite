@@ -75,17 +75,36 @@ function wk_corporate_pages(): array {
  * Alt bilgideki yasal sayfalar.
  */
 function wk_legal_pages(): array {
-	return wk_existing_pages(
-		array(
-			'odeme-teslimat'            => 'Ödeme ve Teslimat',
-			'iptal-iade-kosullari'      => 'İptal ve İade Koşulları',
-			'mesafeli-satis-sozlesmesi' => 'Mesafeli Satış Sözleşmesi',
-			'kvkk'                      => 'KVKK Aydınlatma Metni',
-			'gizlilik-politikasi'       => 'Gizlilik Politikası',
-			'cookies'                   => 'Çerez Politikası',
-			'kullanim-kosullari'        => 'Koşullar ve Fikri Mülkiyet',
-		)
+	// Kisaltma => panel alani (Tum Sayfalar -> Yasal Sayfa Adlari).
+	$fields = array(
+		'odeme-teslimat'            => 'odeme_teslimat',
+		'iptal-iade-kosullari'      => 'iptal_iade',
+		'mesafeli-satis-sozlesmesi' => 'mesafeli',
+		'kvkk'                      => 'kvkk',
+		'gizlilik-politikasi'       => 'gizlilik',
+		'cookies'                   => 'cookies',
+		'kullanim-kosullari'        => 'kullanim',
 	);
+
+	$pages = wk_existing_pages( array_map( static fn( string $field ): string => (string) nwcs_field( 'global', 'legal', $field ), $fields ) );
+
+	foreach ( $pages as $i => $page ) {
+		$pages[ $i ]['field'] = $fields[ $page['slug'] ];
+	}
+
+	return $pages;
+}
+
+/**
+ * Onizlemede menu ogesinin panel alani: kurumsal sayfalar Hakkimizda acilir
+ * menusunun satiri, yasal sayfalar Yasal Sayfa Adlari'ndaki alan.
+ */
+function wk_page_link_attr( array $page ): void {
+	if ( isset( $page['row'] ) ) {
+		nwcs_edit_attr( 'global', 'header', 'about_menu', (int) $page['row'], 'label' );
+	} elseif ( isset( $page['field'] ) ) {
+		nwcs_edit_attr( 'global', 'legal', $page['field'] );
+	}
 }
 
 function wk_existing_pages( array $wanted ): array {

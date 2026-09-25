@@ -40,7 +40,8 @@ $srcset   = $image['id'] ? (string) wp_get_attachment_image_srcset( $image['id']
 				<?php echo esc_html( nwcs_field( 'home', 'hero', 'lead' ) ); ?>
 			</p>
 			<div class="mt-8 flex flex-wrap gap-3">
-				<a href="<?php echo esc_url( kr_quote_fallback_url() ); ?>" data-kr-quote class="btn btn--lg btn--mark max-sm:w-full">
+				<a href="<?php echo esc_url( kr_quote_fallback_url() ); ?>" data-kr-quote class="btn btn--lg btn--mark max-sm:w-full"
+					<?php nwcs_edit_attr( 'global', 'header', 'cta_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'global', 'header', 'cta_label' ) ); ?>
 				</a>
 				<a href="<?php echo esc_url( kr_link( kr_page_path( 'products', '/urunler/' ) ) ); ?>" class="btn btn--lg btn--ghost max-sm:w-full"
@@ -60,8 +61,8 @@ $srcset   = $image['id'] ? (string) wp_get_attachment_image_srcset( $image['id']
 					<?php foreach ( $products as $product ) : ?>
 						<li class="border-b border-line last:border-b-0">
 							<a href="<?php echo esc_url( $product['url'] ); ?>" class="group/row block py-3 text-ink no-underline">
-								<span class="stencil block text-[1.15rem]"><?php echo esc_html( $product['mark'] ); ?></span>
-								<span class="mt-1 block font-semibold leading-snug group-hover/row:text-mark"><?php echo esc_html( $product['name'] ); ?></span>
+								<span class="stencil block text-[1.15rem]" <?php nwcs_edit_attr( $product['key'], 'card', 'mark' ); ?>><?php echo esc_html( $product['mark'] ); ?></span>
+								<span class="mt-1 block font-semibold leading-snug group-hover/row:text-mark" <?php nwcs_edit_attr( $product['key'], 'card', 'name' ); ?>><?php echo esc_html( $product['name'] ); ?></span>
 							</a>
 						</li>
 					<?php endforeach; ?>

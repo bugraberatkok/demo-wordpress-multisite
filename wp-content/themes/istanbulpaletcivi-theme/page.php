@@ -10,10 +10,16 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 
-	pc_part( 'page-head', array( 'title' => get_the_title() ) );
+	pc_part(
+		'page-head',
+		array(
+			'title'      => get_the_title(),
+			'title_edit' => array( 'post', (int) get_the_ID(), 'Sayfa başlığı' ),
+		)
+	);
 	?>
 	<section class="pc-section">
-		<div class="pc-wrap pc-narrow pc-prose pc-prose--article">
+		<div class="pc-wrap pc-narrow pc-prose pc-prose--article"<?php pc_post_attr( (int) get_the_ID(), 'Sayfa metni' ); ?>>
 			<?php the_content(); ?>
 		</div>
 	</section>

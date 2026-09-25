@@ -48,29 +48,59 @@ add_filter(
 );
 
 /**
- * Form turleri: alanlar, secenekler ve dugme metni.
+ * Form turleri: alanlar, secenekler ve dugme metni. Gorunen yazilar panelden:
+ * Cozum Merkezi -> Form Alanlari (contact.request), Ozel Uretim -> Form
+ * Alanlari (custom.request); ortak alanlar Tum Sayfalar -> Talep Formlari.
  */
 function wk_request_kinds(): array {
+	$field   = static fn( string $page, string $name ): string => (string) nwcs_field( $page, 'request', $name );
+	$options = static fn( string $page ): array => array_values( array_filter( array_map( 'trim', preg_split( '/\R/u', $field( $page, 'options' ) ) ?: array() ), 'strlen' ) );
+
 	return array(
 		'iletisim' => array(
 			'label'    => 'Çözüm Merkezi',
-			'select'   => array( 'department', 'İlgili departman', array( 'Genel Bilgi ve Destek', 'Özel Ölçü ve Mimari Proje Talebi', 'Kurumsal Satış ve Bayilik', 'Satış Sonrası Hizmetler' ) ),
-			'message'  => array( 'Mesajınız (isteğe bağlı)', false, 'Ürün kodu, adet, özel ölçü ya da merak ettiğiniz diğer detaylar…' ),
+			'page'     => 'contact',
+			'select'   => array( 'department', $field( 'contact', 'select_label' ), $options( 'contact' ) ),
+			'message'  => array( $field( 'contact', 'message_label' ), false, $field( 'contact', 'message_hint' ) ),
 			'company'  => true,
 			'file'     => false,
-			'button'   => 'Talebi ilet',
-			'success'  => 'Talebiniz ilgili departmana iletildi. En kısa sürede size dönüş yapacağız.',
+			'button'   => $field( 'contact', 'button' ),
+			'success'  => $field( 'contact', 'success' ),
 		),
 		'ozel'     => array(
 			'label'    => 'Özel Üretim',
-			'select'   => array( 'department', 'Proje kategorisi', array( 'Kamelya & Çardak', 'Ahşap Ev & Kabin', 'Oturma Grubu', 'Evcil Hayvan Yuvası', 'Diğer Mimari Projeler' ) ),
-			'message'  => array( 'Proje detayları ve beklentileriniz', true, 'Mekânın yaklaşık ölçüleri, malzeme tercihleriniz ve projenize dair teknik beklentileriniz…' ),
+			'page'     => 'custom',
+			'select'   => array( 'department', $field( 'custom', 'select_label' ), $options( 'custom' ) ),
+			'message'  => array( $field( 'custom', 'message_label' ), true, $field( 'custom', 'message_hint' ) ),
 			'company'  => false,
 			'file'     => true,
-			'button'   => 'Talebi gönder',
-			'success'  => 'Proje talebiniz bize ulaştı. Ekibimiz ölçü ve detaylar için sizinle iletişime geçecek.',
+			'button'   => $field( 'custom', 'button' ),
+			'success'  => $field( 'custom', 'success' ),
 		),
 	);
+}
+
+/**
+ * Onizlemede uyari metninin panel alani: metin, bilesendeki "err_" ile
+ * baslayan alanlardan birinin degeriyse o alan (orn. global.forms.err_name).
+ */
+function wk_error_attr( string $component, string $message ): string {
+	if ( ! function_exists( 'nwcs_manifest' ) || ! function_exists( 'nwcs_is_preview' ) || ! nwcs_is_preview() ) {
+		return '';
+	}
+
+	foreach ( array_keys( nwcs_manifest()['pages']['global']['components'][ $component ]['fields'] ?? array() ) as $name ) {
+		if ( str_starts_with( (string) $name, 'err_' ) && (string) nwcs_field( 'global', $component, $name ) === $message ) {
+			return wk_attr_string( 'global', $component, (string) $name );
+		}
+	}
+
+	return '';
+}
+
+/** Talep formu uyarisi (Tum Sayfalar -> Talep Formlari). */
+function wk_form_error( string $field ): string {
+	return (string) nwcs_field( 'global', 'forms', $field );
 }
 
 const WK_UPLOAD_MAX = 5 * MB_IN_BYTES;
@@ -124,31 +154,31 @@ function wk_handle_request(): void {
 	$errors = array();
 
 	if ( ! isset( $_POST['wk_request_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['wk_request_nonce'] ), 'wk_request' ) ) {
-		$errors['form'] = 'Form oturumu zaman aşımına uğradı. Lütfen tekrar gönderin.';
+		$errors['form'] = wk_form_error( 'err_nonce' );
 	}
 
 	if ( '' === $values['name'] ) {
-		$errors['name'] = 'Adınızı ve soyadınızı yazın.';
+		$errors['name'] = wk_form_error( 'err_name' );
 	}
 
 	if ( ! is_email( $values['email'] ) ) {
-		$errors['email'] = '' === $values['email'] ? 'E-posta adresinizi yazın.' : 'E-posta adresi geçerli görünmüyor (ör. ad@alanadi.com).';
+		$errors['email'] = wk_form_error( '' === $values['email'] ? 'err_email' : 'err_email_bad' );
 	}
 
 	if ( strlen( preg_replace( '/\D/', '', $values['phone'] ) ) < 10 ) {
-		$errors['phone'] = 'Telefon numaranızı alan koduyla yazın (ör. 0532 123 45 67).';
+		$errors['phone'] = wk_form_error( 'err_phone' );
 	}
 
 	if ( ! in_array( $values['department'], $def['select'][2], true ) ) {
-		$errors['department'] = 'ozel' === $kind ? 'Proje kategorisini seçin.' : 'Talebinizin ilgili olduğu departmanı seçin.';
+		$errors['department'] = wk_form_error( 'ozel' === $kind ? 'err_category' : 'err_department' );
 	}
 
 	if ( $def['message'][1] && '' === trim( $values['message'] ) ) {
-		$errors['message'] = 'Projenizi birkaç cümleyle anlatın: yaklaşık ölçü, malzeme, kullanım yeri.';
+		$errors['message'] = wk_form_error( 'err_message' );
 	}
 
 	if ( ! $values['consent'] ) {
-		$errors['consent'] = 'Devam etmek için KVKK Aydınlatma Metni’ni onaylayın.';
+		$errors['consent'] = wk_form_error( 'err_consent' );
 	}
 
 	// Urun: yalnizca sitede gosterilen urunlerden biri ("KOD Ad").
@@ -211,7 +241,7 @@ function wk_handle_request(): void {
 	);
 
 	if ( is_wp_error( $post_id ) ) {
-		wk_request_redirect( $redirect, array( 'errors' => array( 'form' => 'Kayıt sırasında bir sorun oldu. Lütfen WhatsApp’tan ulaşın.' ), 'values' => $values ) );
+		wk_request_redirect( $redirect, array( 'errors' => array( 'form' => wk_form_error( 'err_save' ) ), 'values' => $values ) );
 	}
 
 	wk_request_redirect( $redirect, array( 'success' => true, 'kind' => $kind ) );
@@ -228,12 +258,12 @@ function wk_request_upload() {
 
 	if ( ! empty( $file['error'] ) ) {
 		return in_array( (int) $file['error'], array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true )
-			? 'Dosya 5 MB’tan büyük. Daha küçük bir dosya seçin ya da WhatsApp’tan gönderin.'
-			: 'Dosya yüklenemedi. Tekrar deneyin ya da WhatsApp’tan gönderin.';
+			? wk_form_error( 'err_file_size' )
+			: wk_form_error( 'err_file_upload' );
 	}
 
 	if ( (int) $file['size'] > WK_UPLOAD_MAX ) {
-		return 'Dosya 5 MB’tan büyük. Daha küçük bir dosya seçin ya da WhatsApp’tan gönderin.';
+		return wk_form_error( 'err_file_size' );
 	}
 
 	$check = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'], wk_upload_mimes() );
@@ -243,7 +273,7 @@ function wk_request_upload() {
 		$ext = strtolower( pathinfo( (string) $file['name'], PATHINFO_EXTENSION ) );
 
 		if ( 'dwg' !== $ext ) {
-			return 'Yalnızca PDF, JPG, PNG ya da DWG dosyası yükleyebilirsiniz.';
+			return wk_form_error( 'err_file_type' );
 		}
 	}
 
@@ -271,7 +301,7 @@ function wk_request_upload() {
 	remove_filter( 'upload_dir', $dir_filter );
 
 	if ( empty( $result['url'] ) ) {
-		return 'Dosya kaydedilemedi. Tekrar deneyin ya da WhatsApp’tan gönderin.';
+		return wk_form_error( 'err_file_save' );
 	}
 
 	$index = dirname( $result['file'] ) . '/index.php';

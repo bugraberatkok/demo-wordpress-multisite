@@ -27,15 +27,15 @@ get_header();
 			the_posts_pagination(
 				array(
 					'mid_size'           => 1,
-					'prev_text'          => 'Önceki',
-					'next_text'          => 'Sonraki',
+					'prev_text'          => '<span' . ip_edit_attr( 'blog', 'head', 'prev_label' ) . '>' . esc_html( nwcs_field( 'blog', 'head', 'prev_label' ) ) . '</span>',
+					'next_text'          => '<span' . ip_edit_attr( 'blog', 'head', 'next_label' ) . '>' . esc_html( nwcs_field( 'blog', 'head', 'next_label' ) ) . '</span>',
 					'screen_reader_text' => 'Sayfalar',
 					'class'              => 'ip-pagination mt-12',
 				)
 			);
 			?>
 		<?php else : ?>
-			<p class="text-lg text-steel">Henüz yazı yok.</p>
+			<p class="text-lg text-steel" <?php nwcs_edit_attr( 'blog', 'head', 'empty_text' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'head', 'empty_text' ) ); ?></p>
 		<?php endif; ?>
 	</div>
 </article>

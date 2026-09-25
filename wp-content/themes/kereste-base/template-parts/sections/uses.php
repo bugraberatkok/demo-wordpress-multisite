@@ -26,17 +26,17 @@ if ( ! $items ) {
 		</div>
 
 		<ul class="grid gap-x-8 gap-y-9 sm:grid-cols-2" <?php nwcs_edit_attr( 'home', 'uses', 'items' ); ?>>
-			<?php foreach ( $items as $item ) :
+			<?php foreach ( $items as $index => $item ) :
 				$photo = nwcs_image_by_id( (int) ( $item['image'] ?? 0 ), 'medium_large' );
 				?>
 				<li class="border-t-2 border-mark pt-4">
 					<?php if ( $photo['url'] ) : ?>
-						<div class="shot mb-4 aspect-[4/3]">
+						<div class="shot mb-4 aspect-[4/3]" <?php nwcs_edit_attr( 'home', 'uses', 'items', (int) $index, 'image' ); ?>>
 							<?php echo kr_image_tag( $photo, '', (string) ( $item['title'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 						</div>
 					<?php endif; ?>
-					<h3 class="text-[1.5rem]"><?php echo esc_html( $item['title'] ?? '' ); ?></h3>
-					<p class="mt-1.5 text-muted"><?php echo esc_html( $item['text'] ?? '' ); ?></p>
+					<h3 class="text-[1.5rem]" <?php nwcs_edit_attr( 'home', 'uses', 'items', (int) $index, 'title' ); ?>><?php echo esc_html( $item['title'] ?? '' ); ?></h3>
+					<p class="mt-1.5 text-muted" <?php nwcs_edit_attr( 'home', 'uses', 'items', (int) $index, 'text' ); ?>><?php echo esc_html( $item['text'] ?? '' ); ?></p>
 				</li>
 			<?php endforeach; ?>
 		</ul>

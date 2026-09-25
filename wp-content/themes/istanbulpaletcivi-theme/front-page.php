@@ -43,7 +43,7 @@ $posts    = new WP_Query(
 				</a>
 			<?php endif; ?>
 		</div>
-		<p class="pc-hero__num pc-num"><?php echo esc_html( $phone['label'] ); ?></p>
+		<p class="pc-hero__num pc-num"<?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>><?php echo esc_html( $phone['label'] ); ?></p>
 	</div>
 	<?php if ( $note && $hero['sample'] ) : ?>
 		<span class="pc-sample" <?php nwcs_edit_attr( 'home', 'hero', 'image_note' ); ?>><?php echo esc_html( $note ); ?></span>
@@ -71,7 +71,7 @@ pc_part(
 		</header>
 		<div class="pc-prows">
 			<?php foreach ( pc_products() as $product ) : ?>
-				<?php pc_part( 'product-row', array( 'product' => $product, 'more' => (string) nwcs_field( 'home', 'products', 'more' ) ) ); ?>
+				<?php pc_part( 'product-row', array( 'product' => $product, 'more' => (string) nwcs_field( 'home', 'products', 'more' ), 'more_edit' => array( 'home', 'products', 'more' ) ) ); ?>
 			<?php endforeach; ?>
 		</div>
 	</div>
@@ -85,10 +85,10 @@ pc_part(
 				<p <?php nwcs_edit_attr( 'home', 'uses', 'lead' ); ?>><?php echo esc_html( nwcs_field( 'home', 'uses', 'lead' ) ); ?></p>
 			</header>
 			<dl class="pc-uses__list" <?php nwcs_edit_attr( 'home', 'uses', 'items' ); ?>>
-				<?php foreach ( $uses as $use ) : ?>
+				<?php foreach ( $uses as $index => $use ) : ?>
 					<div>
-						<dt><?php echo esc_html( $use['title'] ?? '' ); ?></dt>
-						<dd><?php echo esc_html( $use['text'] ?? '' ); ?></dd>
+						<dt<?php nwcs_edit_attr( 'home', 'uses', 'items', (int) $index, 'title' ); ?>><?php echo esc_html( $use['title'] ?? '' ); ?></dt>
+						<dd<?php nwcs_edit_attr( 'home', 'uses', 'items', (int) $index, 'text' ); ?>><?php echo esc_html( $use['text'] ?? '' ); ?></dd>
 					</div>
 				<?php endforeach; ?>
 			</dl>
@@ -101,7 +101,7 @@ pc_part(
 		<p class="pc-group__title" <?php nwcs_edit_attr( 'home', 'group', 'title' ); ?>><?php echo esc_html( nwcs_field( 'home', 'group', 'title' ) ); ?></p>
 		<div>
 			<p class="pc-group__text" <?php nwcs_edit_attr( 'home', 'group', 'text' ); ?>><?php echo esc_html( nwcs_field( 'home', 'group', 'text' ) ); ?></p>
-			<p class="pc-group__address"><?php echo pc_icon( 'pin' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><?php echo esc_html( nwcs_field( 'global', 'header', 'address' ) ); ?></p>
+			<p class="pc-group__address"<?php nwcs_edit_attr( 'global', 'header', 'address' ); ?>><?php echo pc_icon( 'pin' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><?php echo esc_html( nwcs_field( 'global', 'header', 'address' ) ); ?></p>
 		</div>
 	</div>
 </section>

@@ -161,6 +161,10 @@ return static function ( array $s ): array {
 							$s['family']
 						),
 						'copyright' => $text( 'Telif Satırı', 'Koçist Orman Ürünleri' ),
+						'pages_title'    => $text( 'Sütun Başlığı: Sayfalar', 'Sayfalar' ),
+						'products_title' => $text( 'Sütun Başlığı: Ürünler', 'Ürünler' ),
+						'contact_title'  => $text( 'Sütun Başlığı: İletişim', 'İletişim' ),
+						'family_title'   => $text( 'Kardeş Siteler Başlığı', 'Kardeş sitelerimiz' ),
 					),
 				),
 			),
@@ -269,6 +273,9 @@ return static function ( array $s ): array {
 						'quote_label'   => $text( 'Teklif Düğmesi', 'Bu ürün için teklif al' ),
 						'specs_title'   => $text( 'Şartname Başlığı', 'Teknik bilgiler' ),
 						'related_title' => $text( 'Diğer Ürünler Başlığı', 'Diğer kereste çeşitleri' ),
+						'zoom_label'    => $text( 'Galeri: Büyüt Etiketi', 'Büyüt' ),
+						'zoom_fit'      => $text( 'Büyütme Penceresi: Sığdır Düğmesi', 'Sığdır' ),
+						'zoom_hint'     => $text( 'Büyütme Penceresi: Kullanım Notu', 'Yakınlaştırmak için görsele tıklayın ya da tekerleği kullanın; yakınken sürükleyerek gezinin.', 'textarea' ),
 					),
 				),
 			),
@@ -300,6 +307,15 @@ return static function ( array $s ): array {
 							),
 							$s['faq']
 						),
+					),
+				),
+				'more'  => array(
+					'label'  => 'Alt Satır (Sorunuz burada yok mu?)',
+					'fields' => array(
+						'lead' => $text( 'Soru', 'Sorunuz burada yok mu?' ),
+						'link' => $text( 'Yazın Bağlantısı', 'Bize yazın' ),
+						'or'   => $text( 'Bağlaç', 'ya da' ),
+						'call' => $text( 'Telefondan Sonraki Metin', 'numarasını arayın.' ),
 					),
 				),
 			),
@@ -352,6 +368,11 @@ return static function ( array $s ): array {
 						'hours'       => $text( 'Çalışma Saatleri', $c['hours'] ),
 						'map_label'   => $text( 'Yol Tarifi Metni', 'Yol tarifi al' ),
 						'map_url'     => array( 'label' => 'Harita Bağlantısı', 'type' => 'url', 'default' => $c['map_url'] ),
+						'phone_title'   => $text( 'Satır Başlığı: Telefon', 'Telefon' ),
+						'mobile_title'  => $text( 'Satır Başlığı: Cep', 'Cep ve WhatsApp' ),
+						'email_title'   => $text( 'Satır Başlığı: E-posta', 'E-posta' ),
+						'address_title' => $text( 'Satır Başlığı: Adres', 'Adres' ),
+						'hours_title'   => $text( 'Satır Başlığı: Çalışma Saatleri', 'Çalışma saatleri' ),
 					),
 				),
 				'form'    => array(
@@ -364,6 +385,43 @@ return static function ( array $s ): array {
 						'privacy_note'  => $text( 'Gizlilik Notu', 'Bilgileriniz yalnızca teklifinizi hazırlamak için kullanılır.' ),
 						'success_title' => $text( 'Başarı Başlığı', 'Teklif isteğiniz bize ulaştı.' ),
 						'success_text'  => $text( 'Başarı Metni', 'En kısa sürede dönüş yapacağız. Acele bir iş için telefonla da ulaşabilirsiniz.', 'textarea' ),
+						'label_name'    => $text( 'Alan Adı: Ad Soyad', 'Ad soyad' ),
+						'label_company' => $text( 'Alan Adı: Firma', 'Firma' ),
+						'label_phone'   => $text( 'Alan Adı: Telefon', 'Telefon' ),
+						'label_email'   => $text( 'Alan Adı: E-posta', 'E-posta' ),
+						'label_product' => $text( 'Alan Adı: Ürün', 'Ürün' ),
+						'product_empty' => $text( 'Ürün Listesi: Boş Seçenek', 'Seçin' ),
+						'label_size'    => $text( 'Alan Adı: Ölçü ve Adet', 'Ölçü ve adet' ),
+						'label_message' => $text( 'Alan Adı: Mesaj', 'Eklemek istedikleriniz' ),
+						'error_summary' => $text( 'Hata: Genel Uyarı', 'Eksik ya da hatalı alanlar var; işaretli alanları düzeltip tekrar gönderin.', 'textarea' ),
+						'error_name'    => $text( 'Hata: Ad Eksik', 'Adınızı yazın.' ),
+						'error_email'   => $text( 'Hata: E-posta Geçersiz', 'E-posta adresi geçerli görünmüyor.' ),
+						'error_contact' => $text( 'Hata: Telefon ya da E-posta Eksik', 'Size dönebilmemiz için telefon ya da e-posta yazın.' ),
+						'error_size'    => $text( 'Hata: Ölçü Eksik', 'Ölçü ve adet bilgisini yazın.' ),
+						'error_session' => $text( 'Hata: Oturum Zaman Aşımı', 'Form oturumu zaman aşımına uğradı. Lütfen tekrar gönderin.' ),
+						'error_save'    => $text( 'Hata: Kayıt Sorunu', 'Kayıt sırasında bir sorun oldu. Lütfen telefonla ulaşın.' ),
+					),
+				),
+			),
+		),
+
+		/* ------------------------------------------------------------ *
+		 * Bulunamayan sayfa (404). Onizleme adresi bilerek olmayan bir
+		 * sayfa. Gizli: sekme degil, panelde "Sayfa bul" ile acilir;
+		 * llms.txt ve SEO sayfa listesine girmez.
+		 * ------------------------------------------------------------ */
+		'notfound' => array(
+			'label'      => '404 Sayfası',
+			'path'       => '/bulunamadi-404/',
+			'hidden'     => true,
+			'components' => array(
+				'head' => array(
+					'label'  => 'Sayfa Metinleri',
+					'fields' => array(
+						'title'           => $text( 'Başlık', $s['notfound_title'] ?? 'Aradığınız sayfa burada değil.' ),
+						'text'            => $text( 'Açıklama', $s['notfound_text'] ?? 'Bağlantı eskimiş olabilir. Kereste çeşitlerine ürünler sayfasından, fiyat için teklif formundan ulaşabilirsiniz.', 'textarea' ),
+						'products_button' => $text( 'Ürünler Düğmesi', 'Ürünler' ),
+						'quote_button'    => $text( 'Teklif Düğmesi', 'Teklif al' ),
 					),
 				),
 			),

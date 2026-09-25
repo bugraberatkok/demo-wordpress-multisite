@@ -14,11 +14,11 @@ get_header();
 		<?php get_template_part( 'template-parts/faq-list' ); ?>
 
 		<p class="mt-10 text-lg text-muted">
-			Sorunuz burada yok mu?
-			<a href="<?php echo esc_url( kr_quote_fallback_url() ); ?>" data-kr-quote class="font-semibold">Bize yazın</a>
-			ya da
-			<a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'phone_url' ) ) ); ?>" class="tabular font-semibold"><?php echo esc_html( nwcs_field( 'global', 'header', 'phone_label' ) ); ?></a>
-			numarasını arayın.
+			<span <?php nwcs_edit_attr( 'faq', 'more', 'lead' ); ?>><?php echo esc_html( nwcs_field( 'faq', 'more', 'lead' ) ); ?></span>
+			<a href="<?php echo esc_url( kr_quote_fallback_url() ); ?>" data-kr-quote class="font-semibold" <?php nwcs_edit_attr( 'faq', 'more', 'link' ); ?>><?php echo esc_html( nwcs_field( 'faq', 'more', 'link' ) ); ?></a>
+			<span <?php nwcs_edit_attr( 'faq', 'more', 'or' ); ?>><?php echo esc_html( nwcs_field( 'faq', 'more', 'or' ) ); ?></span>
+			<a href="<?php echo esc_url( kr_link( nwcs_field( 'global', 'header', 'phone_url' ) ) ); ?>" class="tabular font-semibold" <?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'phone_label' ) ); ?></a>
+			<span <?php nwcs_edit_attr( 'faq', 'more', 'call' ); ?>><?php echo esc_html( nwcs_field( 'faq', 'more', 'call' ) ); ?></span>
 		</p>
 	</div>
 </article>

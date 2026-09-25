@@ -159,8 +159,8 @@ function kr_logo( string $tone = 'dark', string $class = '' ): void {
 				<path d="M16 33v5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
 			</svg>
 			<span class="kr-logo__text">
-				<span class="kr-logo__top"><?php echo esc_html( $top ); ?></span>
-				<span class="kr-logo__bottom"><?php echo esc_html( $rest ); ?></span>
+				<span class="kr-logo__top" <?php nwcs_edit_attr( 'global', 'header', 'logo_word' ); ?>><?php echo esc_html( $top ); ?></span>
+				<span class="kr-logo__bottom" <?php nwcs_edit_attr( 'global', 'header', 'logo_rest' ); ?>><?php echo esc_html( $rest ); ?></span>
 			</span>
 		<?php endif; ?>
 	</span>
@@ -378,21 +378,21 @@ function kr_handle_quote(): void {
 	$errors = array();
 
 	if ( ! isset( $_POST['kr_quote_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['kr_quote_nonce'] ), 'kr_quote' ) ) {
-		$errors['form'] = 'Form oturumu zaman aşımına uğradı. Lütfen tekrar gönderin.';
+		$errors['form'] = 'error_session';
 	}
 
 	if ( '' === $values['name'] ) {
-		$errors['name'] = 'Adınızı yazın.';
+		$errors['name'] = 'error_name';
 	}
 
 	if ( '' !== $values['email'] && ! is_email( $values['email'] ) ) {
-		$errors['email'] = 'E-posta adresi geçerli görünmüyor.';
+		$errors['email'] = 'error_email';
 	} elseif ( '' === $values['email'] && '' === $values['phone'] ) {
-		$errors['phone'] = 'Size dönebilmemiz için telefon ya da e-posta yazın.';
+		$errors['phone'] = 'error_contact';
 	}
 
 	if ( '' === $values['size'] ) {
-		$errors['size'] = 'Ölçü ve adet bilgisini yazın.';
+		$errors['size'] = 'error_size';
 	}
 
 	if ( $errors ) {
@@ -434,13 +434,45 @@ function kr_handle_quote(): void {
 		kr_quote_redirect(
 			$redirect,
 			array(
-				'errors' => array( 'form' => 'Kayıt sırasında bir sorun oldu. Lütfen telefonla ulaşın.' ),
+				'errors' => array( 'form' => 'error_save' ),
 				'values' => $values,
 			)
 		);
 	}
 
 	kr_quote_redirect( $redirect, array( 'success' => true ) );
+}
+
+/**
+ * Hata iletisi: gonderimde hatanin panel alani (contact.form.error_*) saklanir,
+ * metin gosterilirken panelden okunur. Eski kayitlarda duz metin olabilir.
+ *
+ * @return array{0:string,1:string} metin ve alan anahtari (duz metinde bos).
+ */
+function kr_quote_error( string $code ): array {
+	if ( str_starts_with( $code, 'error_' ) ) {
+		return array( (string) nwcs_field( 'contact', 'form', $code ), $code );
+	}
+
+	return array( $code, '' );
+}
+
+/**
+ * Teklif formu alaninin onizleme isareti; alan anahtari bossa bir sey basmaz.
+ */
+function kr_form_attr( string $field ): void {
+	if ( '' !== $field ) {
+		nwcs_edit_attr( 'contact', 'form', $field );
+	}
+}
+
+/**
+ * WordPress yazisi/sayfasi metni: onizlemede yazinin duzenleme ekranini acar.
+ */
+function kr_post_attr( int $post_id, string $label = 'Sayfa metni' ): void {
+	if ( $post_id && function_exists( 'nwcs_post_attr' ) ) {
+		nwcs_post_attr( $post_id, $label );
+	}
 }
 
 function kr_quote_state(): array {

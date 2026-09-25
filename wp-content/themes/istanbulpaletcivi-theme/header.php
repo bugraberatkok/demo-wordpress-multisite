@@ -49,12 +49,12 @@ $email    = trim( (string) nwcs_field( 'global', 'header', 'email' ) );
 
 		<nav class="pc-nav" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
 			<ul>
-				<?php foreach ( $menu as $item ) :
+				<?php foreach ( $menu as $index => $item ) :
 					$url = (string) ( $item['url'] ?? '' );
 					?>
 					<li>
 						<a href="<?php echo esc_url( pc_link( $url ) ); ?>"
-							<?php echo pc_is_current( $url ) ? 'aria-current="page"' : ( pc_is_within( $url ) ? 'data-within' : '' ); ?>>
+							<?php echo pc_is_current( $url ) ? 'aria-current="page"' : ( pc_is_within( $url ) ? 'data-within' : '' ); ?><?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>>
 							<?php echo esc_html( $item['label'] ?? '' ); ?>
 						</a>
 					</li>
@@ -76,18 +76,18 @@ $email    = trim( (string) nwcs_field( 'global', 'header', 'email' ) );
 
 			<button type="button" class="pc-menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="pc-mobile-nav">
 				<span class="pc-menu-toggle__bars" aria-hidden="true"></span>
-				<span class="pc-menu-toggle__text">Menü</span>
+				<span class="pc-menu-toggle__text"<?php nwcs_edit_attr( 'global', 'header', 'menu_toggle' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'menu_toggle' ) ); ?></span>
 			</button>
 		</div>
 	</div>
 
 	<nav id="pc-mobile-nav" class="pc-mobile-nav" aria-label="Mobil menü" hidden>
 		<ul class="pc-wrap">
-			<?php foreach ( $menu as $item ) :
+			<?php foreach ( $menu as $index => $item ) :
 				$url = (string) ( $item['url'] ?? '' );
 				?>
 				<li>
-					<a href="<?php echo esc_url( pc_link( $url ) ); ?>" <?php echo pc_is_current( $url ) ? 'aria-current="page"' : ''; ?>>
+					<a href="<?php echo esc_url( pc_link( $url ) ); ?>" <?php echo pc_is_current( $url ) ? 'aria-current="page"' : ''; ?><?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>>
 						<?php echo esc_html( $item['label'] ?? '' ); ?>
 					</a>
 				</li>

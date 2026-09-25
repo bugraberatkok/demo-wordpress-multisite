@@ -79,6 +79,9 @@ return array(
 						'external_label' => array( 'label' => 'Diğer Ürünler Bağlantı Metni', 'type' => 'text', 'default' => 'www.kocist.com.tr' ),
 						'external_url'   => array( 'label' => 'Diğer Ürünler Adresi', 'type' => 'url', 'default' => 'https://kocist.com.tr' ),
 						'copyright'      => array( 'label' => 'Telif Satırı', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri' ),
+						'contact_title'  => array( 'label' => 'İletişim Başlığı', 'type' => 'text', 'default' => 'İletişim' ),
+						'rights_text'    => array( 'label' => 'Telif Satırı Sonu', 'type' => 'text', 'default' => 'Tüm hakları saklıdır.' ),
+						'domain_label'   => array( 'label' => 'Alt Satırdaki Alan Adı', 'type' => 'text', 'default' => 'ahsapambalajsanayi.com' ),
 					),
 				),
 			),
@@ -249,6 +252,7 @@ return array(
 					'fields' => array(
 						'cta_label'    => array( 'label' => 'Ürün Düğmesi Metni', 'type' => 'text', 'default' => 'Bu ürün için teklif al' ),
 						'cta_url'      => array( 'label' => 'Ürün Düğmesi Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
+						'gallery_count' => array( 'label' => 'Görsel Sayısı Yazısı ({sayi} = görsel sayısı)', 'type' => 'text', 'default' => '{sayi} görsel' ),
 						'items'        => array(
 							'label'   => 'Ürünler',
 							'type'    => 'repeater',
@@ -338,6 +342,30 @@ return array(
 						'privacy_note'  => array( 'label' => 'Gizlilik Notu', 'type' => 'text', 'default' => 'Bilgileriniz yalnızca teklifinizi hazırlamak için kullanılır.' ),
 						'success_title' => array( 'label' => 'Başarı Başlığı', 'type' => 'text', 'default' => 'Teklif isteğiniz bize ulaştı.' ),
 						'success_text'  => array( 'label' => 'Başarı Metni', 'type' => 'textarea', 'default' => 'Yükün bilgilerini aldık; ambalaj önerimizle size döneceğiz. Acele bir iş için 0 212 648 10 90’ı arayabilirsiniz.' ),
+						'product_placeholder' => array( 'label' => 'Ürün Seçimi Boş Seçenek', 'type' => 'text', 'default' => 'Seçin' ),
+						'new_request_label'   => array( 'label' => 'Yeni İstek Düğmesi Metni', 'type' => 'text', 'default' => 'Yeni bir istek gönderin' ),
+					),
+				),
+			),
+		),
+
+		/* ---------------------------------------------------------- *
+		 * Bulunamayan sayfa (404). Onizleme adresi bilerek olmayan bir sayfa.
+		 * ---------------------------------------------------------- */
+		'notfound' => array(
+			'label'      => '404 Sayfası',
+			'path'       => '/bulunamadi-404/',
+			// Gizli: sekme listesinde yok, "Sayfa bul" ile acilir; SEO listelerine (llms.txt) girmez.
+			'hidden'     => true,
+			'components' => array(
+				'head' => array(
+					'label'  => 'Sayfa Metinleri',
+					'fields' => array(
+						'code'       => array( 'label' => 'Üst Etiket', 'type' => 'text', 'default' => '404' ),
+						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Aradığınız sayfa burada değil.' ),
+						'text'       => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Bağlantı eski olabilir. Ürünlerimize hizmetlerimiz sayfasından, teklif için iletişim sayfasından ulaşabilirsiniz.' ),
+						'home_label' => array( 'label' => 'Ana Sayfa Düğmesi Metni', 'type' => 'text', 'default' => 'Ana sayfaya dön' ),
+						'cta_label'  => array( 'label' => 'Teklif Düğmesi Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
 					),
 				),
 			),

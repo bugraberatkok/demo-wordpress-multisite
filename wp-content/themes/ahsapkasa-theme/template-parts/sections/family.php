@@ -19,7 +19,7 @@ $items = nwcs_rows( 'home', 'family', 'items' );
 	</div>
 
 	<ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" <?php nwcs_edit_attr( 'home', 'family', 'items' ); ?>>
-		<?php foreach ( $items as $item ) :
+		<?php foreach ( $items as $item_index => $item ) :
 			$thumb = nwcs_image_by_id( $item['image'] ?? 0, 'medium_large' );
 			?>
 			<li>
@@ -36,10 +36,10 @@ $items = nwcs_rows( 'home', 'family', 'items' );
 					</span>
 
 					<span class="block px-5 py-6 text-center">
-						<span class="block font-display text-xl font-semibold text-ink transition-colors duration-200 group-hover:text-forest">
+						<span class="block font-display text-xl font-semibold text-ink transition-colors duration-200 group-hover:text-forest" <?php nwcs_edit_attr( 'home', 'family', 'items', $item_index, 'label' ); ?>>
 							<?php echo esc_html( $item['label'] ?? '' ); ?>
 						</span>
-						<span class="mt-2 block text-sm leading-relaxed text-moss">
+						<span class="mt-2 block text-sm leading-relaxed text-moss" <?php nwcs_edit_attr( 'home', 'family', 'items', $item_index, 'note' ); ?>>
 							<?php echo esc_html( $item['note'] ?? '' ); ?>
 						</span>
 					</span>

@@ -153,6 +153,31 @@ function ip_multiline( string $value ): string {
 }
 
 /**
+ * nwcs_edit_attr() ciktisini metin olarak dondurur (sprintf ile kurulan
+ * baglantilar icin). Onizleme disinda bos metindir.
+ */
+function ip_edit_attr( string $page, string $component, string $field = '', ?int $row = null, string $sub = '' ): string {
+	if ( ! function_exists( 'nwcs_edit_attr' ) ) {
+		return '';
+	}
+
+	ob_start();
+	nwcs_edit_attr( $page, $component, $field, $row, $sub );
+
+	return (string) ob_get_clean();
+}
+
+/**
+ * Blog yazisinin basligi, tarihi, ozeti, metni: onizlemede tiklaninca
+ * yazinin duzenleme ekrani acilir.
+ */
+function ip_post_attr( int $post_id, string $label = 'Yazı başlığı' ): void {
+	if ( function_exists( 'nwcs_post_attr' ) ) {
+		nwcs_post_attr( $post_id, $label );
+	}
+}
+
+/**
  * Bos satirla ayrilmis metni paragraflara boler.
  */
 function ip_paragraphs( string $value, string $class = '' ): string {

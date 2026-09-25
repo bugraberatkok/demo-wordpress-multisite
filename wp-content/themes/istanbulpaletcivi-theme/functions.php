@@ -137,6 +137,73 @@ function pc_paragraphs( string $value, string $class = '' ): string {
 	return $html;
 }
 
+/**
+ * Blog yazisi ya da WordPress sayfasi metni: onizlemede yazinin duzenleme
+ * ekrani acilir. Eklenti kapaliyken hicbir sey basmaz.
+ */
+function pc_post_attr( int $post_id, string $label = 'Blog yazısı' ): void {
+	if ( function_exists( 'nwcs_post_attr' ) && $post_id ) {
+		nwcs_post_attr( $post_id, $label );
+	}
+}
+
+/**
+ * Isaret tanimi: array( sayfa, bilesen, alan[, satir, alt alan] ) ya da
+ * array( 'post', yazi_id, etiket ) ya da array( 'source', tur, adres, etiket ).
+ * Sayfa basi ve konum yolu gibi ortak parcalar bu tanimi arguman olarak alir.
+ */
+function pc_edit( $spec ): void {
+	if ( ! is_array( $spec ) || ! $spec ) {
+		return;
+	}
+
+	if ( 'post' === $spec[0] ) {
+		pc_post_attr( (int) ( $spec[1] ?? 0 ), (string) ( $spec[2] ?? 'Blog yazısı' ) );
+		return;
+	}
+
+	if ( 'source' === $spec[0] ) {
+		if ( function_exists( 'nwcs_source_attr' ) ) {
+			nwcs_source_attr( (string) ( $spec[1] ?? 'admin' ), (string) ( $spec[2] ?? '' ), (string) ( $spec[3] ?? '' ) );
+		}
+		return;
+	}
+
+	nwcs_edit_attr( (string) $spec[0], (string) ( $spec[1] ?? '' ), (string) ( $spec[2] ?? '' ), isset( $spec[3] ) ? (int) $spec[3] : null, (string) ( $spec[4] ?? '' ) );
+}
+
+/**
+ * pc_edit() ciktisi metin olarak (the_posts_pagination gibi HTML alan
+ * argumanlara isaret koymak icin).
+ */
+function pc_edit_string( $spec ): string {
+	ob_start();
+	pc_edit( $spec );
+
+	return (string) ob_get_clean();
+}
+
+/**
+ * Yazi listesi sayfalama; Onceki / Sonraki metinleri panelden. Isaret
+ * yalnizca onizlemede basilir, ziyaretcinin gordugu HTML degismez.
+ */
+function pc_posts_pagination(): void {
+	$label = static function ( string $field ): string {
+		$text = esc_html( nwcs_field( 'blog', 'list', $field ) );
+		$attr = pc_edit_string( array( 'blog', 'list', $field ) );
+
+		return '' !== $attr ? '<span' . $attr . '>' . $text . '</span>' : $text;
+	};
+
+	the_posts_pagination(
+		array(
+			'mid_size'  => 1,
+			'prev_text' => $label( 'prev' ),
+			'next_text' => $label( 'next' ),
+		)
+	);
+}
+
 function pc_part( string $name, array $args = array() ): void {
 	get_template_part( 'template-parts/' . $name, null, $args );
 }
@@ -326,7 +393,17 @@ function pc_product_template( string $template ): string {
 add_action( 'template_redirect', 'pc_redirect_product_parent' );
 function pc_redirect_product_parent(): void {
 	if ( is_page( 'civiler' ) ) {
-		wp_safe_redirect( pc_link( pc_manifest()['pages']['products']['path'] ?? '/' ), 301 );
+		$target = pc_link( pc_manifest()['pages']['products']['path'] ?? '/' );
+		$status = 301;
+
+		// Panel onizlemesi yonlendirmeden sonra da onizlemede kalsin (alan
+		// isaretleri); ziyaretcinin adresi degismez.
+		if ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() && isset( $_GET['nwcs_preview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$target = add_query_arg( 'nwcs_preview', rawurlencode( sanitize_text_field( wp_unslash( $_GET['nwcs_preview'] ) ) ), $target ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$status = 302;
+		}
+
+		wp_safe_redirect( $target, $status );
 		exit;
 	}
 }

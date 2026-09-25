@@ -53,7 +53,8 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 				?>
 				<a href="<?php echo esc_url( $url ); ?>"
 					class="navtick relative font-display text-sm font-medium text-ink/85 transition-colors duration-200 hover:text-signal"
-					<?php echo ahsapambalaj_is_current( $item['url'] ?? '' ) ? 'aria-current="page"' : ''; ?>>
+					<?php echo ahsapambalaj_is_current( $item['url'] ?? '' ) ? 'aria-current="page"' : ''; ?>
+					<?php nwcs_edit_attr( 'global', 'header', 'menu', $index, 'label' ); ?>>
 					<?php echo esc_html( $item['label'] ?? '' ); ?>
 				</a>
 			<?php endforeach; ?>
@@ -65,7 +66,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 			<?php $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) ); ?>
 			<a href="<?php echo $whatsapp ? esc_url( ahsapambalaj_link( $whatsapp ) ) : '#'; ?>"
 				<?php echo $whatsapp ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1" title="WhatsApp bağlantısı henüz girilmedi"'; ?>
-				class="btn btn--sm btn--outline hidden md:inline-flex<?php echo $whatsapp ? '' : ' pointer-events-none opacity-55'; ?>"
+				class="btn btn--sm btn--outline hidden md:inline-flex<?php echo $whatsapp ? '' : ( ahsapambalaj_is_preview() ? ' opacity-55' : ' pointer-events-none opacity-55' ); ?>"
 				<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 				<span class="text-signal" aria-hidden="true"><?php nwcs_the_icon( 'whatsapp', '', 18 ); ?></span>
 				<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
@@ -93,20 +94,23 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 			<?php foreach ( $menu as $index => $item ) : ?>
 				<a href="<?php echo esc_url( ahsapambalaj_link( $item['url'] ?? '' ) ); ?>"
 					class="translate-y-2 border-b border-dust/70 py-3 font-display text-base font-medium text-ink opacity-0 transition duration-300 ease-out last:border-0 aria-[current=page]:text-signal group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 <?php echo esc_attr( $delays[ $index ] ?? 'delay-[290ms]' ); ?>"
-					<?php echo ahsapambalaj_is_current( $item['url'] ?? '' ) ? 'aria-current="page"' : ''; ?>>
+					<?php echo ahsapambalaj_is_current( $item['url'] ?? '' ) ? 'aria-current="page"' : ''; ?>
+					<?php nwcs_edit_attr( 'global', 'header', 'menu', $index, 'label' ); ?>>
 					<?php echo esc_html( $item['label'] ?? '' ); ?>
 				</a>
 			<?php endforeach; ?>
 
 			<a href="<?php echo $whatsapp ? esc_url( ahsapambalaj_link( $whatsapp ) ) : '#'; ?>"
 				<?php echo $whatsapp ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1"'; ?>
-				class="btn btn--sm btn--outline mt-4 w-full translate-y-2 opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[240ms]<?php echo $whatsapp ? '' : ' pointer-events-none opacity-55'; ?>">
+				class="btn btn--sm btn--outline mt-4 w-full translate-y-2 opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[240ms]<?php echo $whatsapp ? '' : ( ahsapambalaj_is_preview() ? ' opacity-55' : ' pointer-events-none opacity-55' ); ?>"
+				<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 				<span class="text-signal" aria-hidden="true"><?php nwcs_the_icon( 'whatsapp', '', 18 ); ?></span>
 				<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 			</a>
 
 			<a href="<?php echo esc_url( ahsapambalaj_link( nwcs_field( 'global', 'header', 'cta_url' ) ) ); ?>"
-				class="btn btn--sm btn--solid mt-3 w-full translate-y-2 opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[290ms]">
+				class="btn btn--sm btn--solid mt-3 w-full translate-y-2 opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[290ms]"
+				<?php nwcs_edit_attr( 'global', 'header', 'cta_label' ); ?>>
 				<?php echo esc_html( nwcs_field( 'global', 'header', 'cta_label' ) ); ?>
 			</a>
 		</nav>

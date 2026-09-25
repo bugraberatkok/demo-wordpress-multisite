@@ -127,6 +127,27 @@ function ahsapkasa_multiline( string $value ): string {
 }
 
 /**
+ * Icinde degisken olan panel metni: {sayi} gibi yer tutucular doldurulur.
+ * Ornek: ahsapkasa_text( 'services', 'grid', 'gallery_count', array( 'sayi' => 3 ) ).
+ */
+function ahsapkasa_text( string $page, string $component, string $field, array $vars = array() ): string {
+	$map = array();
+
+	foreach ( $vars as $key => $value ) {
+		$map[ '{' . $key . '}' ] = (string) $value;
+	}
+
+	return trim( strtr( (string) nwcs_field( $page, $component, $field ), $map ) );
+}
+
+/**
+ * Panel onizlemesi mi? Eklenti kapaliyken tema yine calisir.
+ */
+function ahsapkasa_is_preview(): bool {
+	return function_exists( 'nwcs_is_preview' ) && nwcs_is_preview();
+}
+
+/**
  * Bolum dosyasini basar.
  */
 function ahsapkasa_section( string $key, array $args = array() ): void {

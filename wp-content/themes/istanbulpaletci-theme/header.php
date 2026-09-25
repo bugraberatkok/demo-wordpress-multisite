@@ -46,21 +46,22 @@ $whatsapp  = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 					width="160" height="51"
 					class="h-10 w-auto transition-[height] duration-300 ease-out group-data-[stuck=true]:h-8" />
 			<?php else : ?>
-				<span class="font-display text-2xl font-bold text-ink"><?php echo esc_html( $logo_text ); ?></span>
+				<span class="font-display text-2xl font-bold text-ink" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>><?php echo esc_html( $logo_text ); ?></span>
 			<?php endif; ?>
 		</a>
 
 		<nav class="ml-4 hidden items-center gap-8 lg:flex" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
-			<?php foreach ( $menu as $item ) :
+			<?php foreach ( $menu as $index => $item ) :
 				$url     = (string) ( $item['url'] ?? '' );
 				$current = ip_is_current( $url );
 				$within  = ! $current && ip_is_within( $url );
 				$is_hub  = $products && ip_link_path( $url ) === $hub_path;
 				$link    = sprintf(
-					'<a href="%1$s" class="navline text-[0.9375rem] font-medium text-ink no-underline transition-colors hover:text-indigo" %2$s>%3$s</a>',
+					'<a href="%1$s" class="navline text-[0.9375rem] font-medium text-ink no-underline transition-colors hover:text-indigo" %2$s%4$s>%3$s</a>',
 					esc_url( ip_link( $url ) ),
 					$current ? 'aria-current="page"' : ( $within ? 'data-section-current' : '' ),
-					esc_html( $item['label'] ?? '' )
+					esc_html( $item['label'] ?? '' ),
+					ip_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' )
 				);
 
 				if ( ! $is_hub ) {
@@ -158,6 +159,7 @@ $whatsapp  = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 						<div class="flex items-center justify-between">
 							<a href="<?php echo esc_url( ip_link( $url ) ); ?>"
 								class="block flex-1 py-3.5 text-lg font-medium text-ink no-underline aria-[current=page]:text-indigo"
+								<?php nwcs_edit_attr( 'global', 'header', 'menu', (int) $index, 'label' ); ?>
 								<?php echo ip_is_current( $url ) ? 'aria-current="page"' : ''; ?>>
 								<?php echo esc_html( $item['label'] ?? '' ); ?>
 							</a>
@@ -196,13 +198,13 @@ $whatsapp  = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 			</ul>
 
 			<div class="mt-6 grid gap-3 sm:grid-cols-2">
-				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="btn btn--md btn--outline">
+				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="btn btn--md btn--outline" <?php nwcs_edit_attr( 'global', 'header', 'phone_label' ); ?>>
 					<?php nwcs_the_icon( 'phone', 'shrink-0', 18 ); ?>
 					<span class="tabular"><?php echo esc_html( $phone['label'] ); ?></span>
 				</a>
 
 				<?php if ( $whatsapp ) : ?>
-					<a href="<?php echo esc_url( ip_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp">
+					<a href="<?php echo esc_url( ip_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp" <?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 18 ); ?>
 						<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 					</a>

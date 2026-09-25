@@ -516,6 +516,9 @@ return array(
 						'lead'       => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'Ahşap palet çeşitleri, palet fiyatları ve kullanım alanları üzerine yazılar.' ),
 						'read_label' => array( 'label' => 'Devamını Oku Metni', 'type' => 'text', 'default' => 'Yazıyı okuyun' ),
 						'back_label' => array( 'label' => 'Bloga Dön Metni', 'type' => 'text', 'default' => 'Tüm yazılar' ),
+						'empty_text' => array( 'label' => 'Yazı Yokken Görünen Metin', 'type' => 'text', 'default' => 'Henüz yazı yok.' ),
+						'prev_label' => array( 'label' => 'Önceki Sayfa Bağlantısı', 'type' => 'text', 'default' => 'Önceki' ),
+						'next_label' => array( 'label' => 'Sonraki Sayfa Bağlantısı', 'type' => 'text', 'default' => 'Sonraki' ),
 					),
 				),
 
@@ -580,6 +583,7 @@ return array(
 						'email_label'   => array( 'label' => 'E-posta Etiketi', 'type' => 'text', 'default' => 'E-posta' ),
 						'phone_label'   => array( 'label' => 'Telefon Etiketi', 'type' => 'text', 'default' => 'Telefon' ),
 						'product_label' => array( 'label' => 'Ürün Etiketi', 'type' => 'text', 'default' => 'Hangi ürün' ),
+						'product_placeholder' => array( 'label' => 'Ürün Seçimi İlk Satırı', 'type' => 'text', 'default' => 'Seçin' ),
 						'size_label'    => array( 'label' => 'Ölçü Etiketi', 'type' => 'text', 'default' => 'Ölçüler ve adet' ),
 						'size_hint'     => array( 'label' => 'Ölçü Alanı İpucu', 'type' => 'text', 'default' => 'Örn. 80 × 120 cm, 200 adet' ),
 						'message_label' => array( 'label' => 'Mesaj Etiketi', 'type' => 'text', 'default' => 'Eklemek istedikleriniz' ),
@@ -587,6 +591,32 @@ return array(
 						'privacy_note'  => array( 'label' => 'Gizlilik Notu', 'type' => 'text', 'default' => 'Bilgileriniz yalnızca teklifinizi hazırlamak için kullanılır.' ),
 						'success_title' => array( 'label' => 'Başarı Başlığı', 'type' => 'text', 'default' => 'Teklif isteğiniz bize ulaştı.' ),
 						'success_text'  => array( 'label' => 'Başarı Metni', 'type' => 'textarea', 'default' => 'En kısa sürede dönüş yapacağız. Acele bir iş için +90 212 648 10 90 numarasından da ulaşabilirsiniz.' ),
+						'again_label'   => array( 'label' => 'Yeni İstek Düğmesi Metni', 'type' => 'text', 'default' => 'Yeni bir istek gönderin' ),
+						'error_summary' => array( 'label' => 'Hatalı Form Uyarısı', 'type' => 'textarea', 'default' => 'Formda eksik ya da hatalı alanlar var; işaretli alanları düzeltip tekrar gönderin.' ),
+					),
+				),
+			),
+		),
+
+		/* ---------------------------------------------------------- *
+		 * Bulunamayan sayfa (404). Onizleme adresi bilerek olmayan bir sayfa.
+		 * ---------------------------------------------------------- */
+		'notfound' => array(
+			'label'      => '404 Sayfası',
+			'path'       => '/bulunamadi-404/',
+			// Gizli: sekme listesinde yok, "Sayfa bul" ile acilir; SEO listelerine (llms.txt) girmez.
+			'hidden'     => true,
+			'components' => array(
+
+				'head' => array(
+					'label'  => 'Sayfa Metinleri',
+					'fields' => array(
+						'title'           => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Aradığınız sayfa burada değil.' ),
+						'text'            => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Bağlantı eskimiş olabilir. Ürünlere ürünlerimiz sayfasından, teklif için iletişim sayfasından ulaşabilirsiniz.' ),
+						'primary_label'   => array( 'label' => 'Birinci Düğme Metni', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
+						'primary_url'     => array( 'label' => 'Birinci Düğme Adresi', 'type' => 'url', 'default' => '/urunlerimiz/' ),
+						'secondary_label' => array( 'label' => 'İkinci Düğme Metni', 'type' => 'text', 'default' => 'İletişim' ),
+						'secondary_url'   => array( 'label' => 'İkinci Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
 					),
 				),
 			),

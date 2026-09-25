@@ -64,8 +64,9 @@ $details = array(
 					</p>
 
 					<a href="<?php echo esc_url( home_url( '/iletisim/' ) ); ?>"
-						class="btn btn--sm btn--outline mt-7">
-						Yeni bir istek gönderin
+						class="btn btn--sm btn--outline mt-7"
+						<?php nwcs_edit_attr( 'contact', 'form', 'new_request_label' ); ?>>
+						<?php echo esc_html( nwcs_field( 'contact', 'form', 'new_request_label' ) ); ?>
 					</a>
 				</div>
 
@@ -143,12 +144,12 @@ $details = array(
 						<label for="ak_product" class="<?php echo esc_attr( $label ); ?>" <?php nwcs_edit_attr( 'contact', 'form', 'product_label' ); ?>>
 							<?php echo esc_html( nwcs_field( 'contact', 'form', 'product_label' ) ); ?>
 						</label>
-						<select id="ak_product" name="ak_product" class="<?php echo esc_attr( $field ); ?>">
-							<option value="">Seçin</option>
-							<?php foreach ( $products as $product ) :
+						<select id="ak_product" name="ak_product" class="<?php echo esc_attr( $field ); ?>" <?php nwcs_edit_attr( 'contact', 'form', 'product_placeholder' ); ?>>
+							<option value="" <?php nwcs_edit_attr( 'contact', 'form', 'product_placeholder' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'product_placeholder' ) ); ?></option>
+							<?php foreach ( $products as $product_index => $product ) :
 								$title = $product['title'] ?? '';
 								?>
-								<option value="<?php echo esc_attr( $title ); ?>" <?php selected( $picked, $title ); ?>>
+								<option value="<?php echo esc_attr( $title ); ?>" <?php selected( $picked, $title ); ?> <?php nwcs_edit_attr( 'services', 'grid', 'items', $product_index, 'title' ); ?>>
 									<?php echo esc_html( $title ); ?>
 								</option>
 							<?php endforeach; ?>
