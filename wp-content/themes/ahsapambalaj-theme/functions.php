@@ -466,3 +466,25 @@ add_filter(
 	'nwcs_seo_default_image',
 	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/hero-1.jpg', 'Ahşap sandık ve kafes üretimi' ) : 0
 );
+
+/**
+ * Favicon: SVG (modern tarayicilar), 32px PNG yedegi ve iOS icin 180px ikon.
+ * Panelde (Ozellestir > Site Kimligi) site ikonu secilirse WordPress'inki
+ * gecerli olur; tema kendi ikonunu basmaz.
+ */
+add_action( 'wp_head', 'ahsapambalaj_favicon', 2 );
+add_action( 'login_head', 'ahsapambalaj_favicon' );
+function ahsapambalaj_favicon(): void {
+	if ( has_site_icon() ) {
+		return;
+	}
+
+	printf(
+		'<link rel="icon" type="image/png" sizes="32x32" href="%s" />' . "\n" .
+		'<link rel="icon" type="image/svg+xml" href="%s" />' . "\n" .
+		'<link rel="apple-touch-icon" href="%s" />' . "\n",
+		esc_url( get_theme_file_uri( 'assets/favicon-32.png' ) ),
+		esc_url( get_theme_file_uri( 'assets/favicon.svg' ) ),
+		esc_url( get_theme_file_uri( 'assets/apple-touch-icon.png' ) )
+	);
+}

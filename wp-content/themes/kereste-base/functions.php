@@ -464,3 +464,27 @@ function kr_quote_state(): array {
 		'active'  => true,
 	);
 }
+
+/**
+ * Favicon: SVG (modern tarayicilar), 32px PNG yedegi ve iOS icin 180px ikon.
+ * Cocuk tema (ithalkeresteci, kavakkeresteci) kendi assets/ klasorundeki
+ * ikonlari verir; get_theme_file_uri once cocuk temaya bakar.
+ * Panelde (Ozellestir > Site Kimligi) site ikonu secilirse WordPress'inki
+ * gecerli olur; tema kendi ikonunu basmaz.
+ */
+add_action( 'wp_head', 'kr_favicon', 2 );
+add_action( 'login_head', 'kr_favicon' );
+function kr_favicon(): void {
+	if ( has_site_icon() ) {
+		return;
+	}
+
+	printf(
+		'<link rel="icon" type="image/png" sizes="32x32" href="%s" />' . "\n" .
+		'<link rel="icon" type="image/svg+xml" href="%s" />' . "\n" .
+		'<link rel="apple-touch-icon" href="%s" />' . "\n",
+		esc_url( get_theme_file_uri( 'assets/favicon-32.png' ) ),
+		esc_url( get_theme_file_uri( 'assets/favicon.svg' ) ),
+		esc_url( get_theme_file_uri( 'assets/apple-touch-icon.png' ) )
+	);
+}
