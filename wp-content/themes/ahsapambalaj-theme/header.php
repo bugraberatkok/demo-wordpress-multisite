@@ -5,8 +5,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// Yalnizca panelden yuklenen logo; yoksa sablon etiketi yazi logosu.
+// Panelden yuklenen logo; yoksa temanin logosu (assets/img/logo-ahsap-ambalaj.svg).
 $logo    = nwcs_image( 'global', 'header', 'logo_image', 'medium' );
+if ( empty( $logo['url'] ) ) {
+	$logo['url'] = get_theme_file_uri( 'assets/img/logo-ahsap-ambalaj.svg' );
+}
 $menu    = nwcs_rows( 'global', 'header', 'menu' );
 $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms]', 'delay-[240ms]', 'delay-[290ms]' );
 ?>
@@ -33,18 +36,11 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 	<div class="mx-auto flex h-[88px] max-w-[76rem] items-center justify-between gap-8 px-6 transition-[height] duration-300 ease-out group-data-[stuck=true]:h-[64px]">
 
 		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center gap-3" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
-			<?php if ( ! empty( $logo['url'] ) ) : ?>
-				<?php // Logo gorseli zaten firma adini tasiyor; yazi tekrarlanmaz. ?>
-				<img src="<?php echo esc_url( $logo['url'] ); ?>"
-					alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
-					class="h-11 w-auto transition-all duration-300 ease-out group-data-[stuck=true]:h-8" />
-			<?php else : ?>
-				<?php // Sablon etiketi: sandik yuzundeki marka yazisi gibi cerceveli. ?>
-				<span class="stencil-mark text-[1.35rem] text-ink transition-all duration-300 ease-out group-data-[stuck=true]:text-[1.1rem]">
-					<span><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_text' ) ); ?></span>
-					<span class="stencil-mark__sub" <?php nwcs_edit_attr( 'global', 'header', 'logo_sub' ); ?>><?php echo esc_html( nwcs_field( 'global', 'header', 'logo_sub' ) ); ?></span>
-				</span>
-			<?php endif; ?>
+			<?php // Logo gorseli zaten firma adini tasiyor; yazi tekrarlanmaz. ?>
+			<img src="<?php echo esc_url( $logo['url'] ); ?>"
+				alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
+				width="183" height="44"
+				class="h-11 w-auto transition-all duration-300 ease-out group-data-[stuck=true]:h-8" />
 		</a>
 
 		<nav class="hidden items-center gap-9 md:flex" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
