@@ -1,0 +1,251 @@
+/*
+ * Siparis sureci.
+ *
+ * Koyu yesil bant: ust ustte gelen urun bolumlerini boler. Tek hareket ani
+ * bolum gorunume girince: adimlari baglayan cizgi soldan saga cizilir, her
+ * adimin cizimi cizgi oraya vardiginda kendini cizer.
+ *
+ * Gizleme yalnizca betik bolumu hazirladiginda (data-k-process="ready")
+ * uygulanir; betik yoksa her sey son haliyle gorunur.
+ */
+
+.k-process {
+	--k-process-stroke: rgba(255, 255, 255, .88);
+	--k-process-step: .55s;
+	position: relative;
+	padding: 84px 0 76px;
+	background: var(--forest);
+	color: #fff;
+	overflow: hidden;
+}
+
+.k-process__head {
+	max-width: 620px;
+	margin-bottom: 44px;
+}
+
+.k-process__title {
+	margin: 0 0 10px;
+	font-size: clamp(28px, 3.6vw, 42px);
+	line-height: 1.1;
+	color: #fff;
+}
+
+.k-process__sub {
+	margin: 0;
+	color: rgba(255, 255, 255, .74);
+	font-size: 17px;
+}
+
+/* ---------- Adimlar ---------- */
+
+.k-process__steps {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(var(--count, 3), minmax(0, 1fr));
+	gap: 32px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	--k-art-h: 188px;
+}
+
+/*
+ * Baglanti cizgisi numaralarin hizasinda, ilk numaranin ortasindan son
+ * numaranin ortasina. Numara 44px; cizim alani yuksekligi --k-art-h.
+ */
+.k-process__steps::before {
+	content: "";
+	position: absolute;
+	top: calc(var(--k-art-h) + 22px + 22px);
+	left: 22px;
+	right: calc((100% - (var(--count, 3) - 1) * 32px) / var(--count, 3) - 22px);
+	height: 2px;
+	background: repeating-linear-gradient(90deg, var(--leaf) 0 10px, transparent 10px 18px);
+	transform-origin: left center;
+}
+
+.k-process__step { position: relative; }
+
+.k-process__art {
+	display: grid;
+	place-items: center;
+	height: var(--k-art-h);
+	margin-bottom: 22px;
+	border: 1px solid rgba(255, 255, 255, .12);
+	border-radius: 18px;
+	background: rgba(255, 255, 255, .045);
+}
+
+.k-process__svg {
+	width: min(100%, 220px);
+	height: 100%;
+	padding: 22px 0;
+	overflow: visible;
+}
+
+.k-process__num {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	margin-bottom: 18px;
+	border-radius: 50%;
+	background: var(--leaf);
+	color: var(--forest-3);
+	font-weight: 800;
+	font-size: 18px;
+	box-shadow: 0 0 0 6px var(--forest);
+}
+
+.k-process__step-title {
+	margin: 0 0 8px;
+	font-size: 20px;
+	line-height: 1.25;
+	color: #fff;
+}
+
+.k-process__step-text {
+	margin: 0;
+	max-width: 36ch;
+	color: rgba(255, 255, 255, .74);
+	font-size: 15px;
+}
+
+.k-process__cta {
+	margin-top: 44px;
+}
+
+.k-process__cta .k-btn--primary:hover {
+	background: #fff;
+}
+
+.k-process .k-btn:focus-visible {
+	outline: 3px solid #fff;
+	outline-offset: 3px;
+}
+
+/* ---------- Cizimler ---------- */
+
+.k-process__svg .d {
+	fill: none;
+	stroke: var(--k-process-stroke);
+	stroke-width: 2.4;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.k-process__svg .d--accent { stroke: var(--leaf); }
+.k-process__svg .k-process__road { stroke-dasharray: .04 .025; }
+
+.k-process__label {
+	fill: var(--leaf);
+	font-family: var(--font-sans);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.k-process__stamp { fill: rgba(122, 182, 72, .18); }
+
+/* ---------- Hareket ---------- */
+
+/* Baslangic durumu: betik hazirladi, bolum henuz gorunmedi. */
+.k-process[data-k-process="ready"] .k-process__steps::before { transform: scaleX(0); }
+.k-process[data-k-process="ready"] .d { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.k-process[data-k-process="ready"] .f { opacity: 0; }
+.k-process[data-k-process="ready"] .k-process__num { transform: scale(.4); opacity: 0; }
+.k-process[data-k-process="ready"] .k-process__truck { transform: translateX(-14px); }
+
+/* Gorunume girdi: cizgi ~1.4 sn'de ilerler, her adim cizgi vardiginda baslar. */
+.k-process.is-in .k-process__steps::before {
+	transform: scaleX(1);
+	transition: transform calc(var(--k-process-step) * (var(--count, 3) - 1) + .3s) cubic-bezier(.45, 0, .25, 1);
+}
+
+.k-process.is-in .d {
+	stroke-dashoffset: 0;
+	transition: stroke-dashoffset .8s cubic-bezier(.65, 0, .35, 1) calc(var(--i) * var(--k-process-step) + .15s + var(--d, 0s));
+}
+
+/*
+ * Yol cizgisi kesikli: dasharray cizim hilesiyle birlikte calismaz, bu yuzden
+ * yol cizilmez, kamyondan sonra belirir.
+ */
+.k-process[data-k-process="ready"] .k-process__road {
+	stroke-dasharray: .04 .025;
+	stroke-dashoffset: 0;
+	opacity: 0;
+}
+
+.k-process.is-in .k-process__road {
+	opacity: 1;
+	transition: opacity .5s ease calc(var(--i) * var(--k-process-step) + .15s + var(--d, 0s));
+}
+
+.k-process.is-in .f {
+	opacity: 1;
+	transition: opacity .4s ease calc(var(--i) * var(--k-process-step) + .15s + var(--d, 0s));
+}
+
+.k-process.is-in .k-process__num {
+	transform: none;
+	opacity: 1;
+	transition:
+		transform .45s cubic-bezier(.34, 1.56, .64, 1) calc(var(--i) * var(--k-process-step)),
+		opacity .2s ease calc(var(--i) * var(--k-process-step));
+}
+
+/* Kamyon cizimi bitince yola bir kez yanasir. */
+.k-process.is-in .k-process__truck {
+	transform: none;
+	transition: transform 1s cubic-bezier(.22, 1, .36, 1) calc(var(--i) * var(--k-process-step) + 1.2s);
+}
+
+/* ---------- Dar ekran ---------- */
+
+@media (max-width: 860px) {
+	.k-process { padding: 64px 0 60px; }
+
+	.k-process__steps {
+		grid-template-columns: 1fr;
+		gap: 28px;
+		padding-left: 64px;
+	}
+
+	/* Cizgi dikey: numaralar solda, adimlarin ustunden alta. */
+	.k-process__steps::before {
+		top: 22px;
+		bottom: 22px;
+		left: 21px;
+		right: auto;
+		width: 2px;
+		height: auto;
+		background: repeating-linear-gradient(180deg, var(--leaf) 0 10px, transparent 10px 18px);
+		transform-origin: center top;
+	}
+
+	.k-process[data-k-process="ready"] .k-process__steps::before { transform: scaleY(0); }
+	.k-process.is-in .k-process__steps::before { transform: scaleY(1); }
+
+	.k-process__steps { --k-art-h: 168px; }
+
+	.k-process__num {
+		position: absolute;
+		top: 0;
+		left: -64px;
+		margin: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.k-process .k-process__steps::before,
+	.k-process .d,
+	.k-process .f,
+	.k-process .k-process__num,
+	.k-process .k-process__road,
+	.k-process .k-process__truck {
+		transition: none !important;
+	}
+}

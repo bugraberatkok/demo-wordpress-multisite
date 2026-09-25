@@ -369,7 +369,7 @@ return array(
 		'home' => array(
 			'label'             => 'Ana Sayfa',
 			'path'              => '/',
-			'sortable_sections' => array( 'catalog', 'latest', 'products', 'capabilities', 'references', 'blog' ),
+			'sortable_sections' => array( 'catalog', 'latest', 'process', 'products', 'blog' ),
 			'components'        => array(
 
 				/*
@@ -457,30 +457,6 @@ return array(
 					),
 				),
 
-				'capabilities' => array(
-					'label'  => 'Yetkinlik Kartları',
-					'fields' => array(
-						'title'    => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Neden Koçist' ),
-						'subtitle' => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Tedarik, üretim ve sevkiyatı aynı çatı altında yürütüyoruz.' ),
-						'items'    => array(
-							'label'   => 'Kartlar',
-							'type'    => 'repeater',
-							'max'     => 6,
-							'fields'  => array(
-								'icon'  => array( 'label' => 'İkon', 'type' => 'icon' ),
-								'title' => array( 'label' => 'Kart Başlığı', 'type' => 'text' ),
-								'text'  => array( 'label' => 'Kart Metni', 'type' => 'textarea' ),
-							),
-							'default' => array(
-								array( 'icon' => 'factory', 'title' => 'Kendi tesisimizde üretim', 'text' => 'Kesim, ölçülendirme ve ambalaj hattı Çatalca tesisinde.' ),
-								array( 'icon' => 'shield', 'title' => 'İhracata uygun işlem', 'text' => 'ISPM-15 ısıl işlem gerektiren gönderiler için uygun ambalaj.' ),
-								array( 'icon' => 'ruler', 'title' => 'Özel ölçü', 'text' => 'Proje bazlı palet, kafes ve sandık ölçüleri.' ),
-								array( 'icon' => 'truck', 'title' => 'Planlı sevkiyat', 'text' => 'Hafta içi günlük çıkış, İstanbul ve çevre iller.' ),
-							),
-						),
-					),
-				),
-
 				/*
 				 * Ana urun gamlari: dort kart yan yana. Her kart tam kaplama
 				 * gorsel + ustune ortalanmis baslik, alt baslik ve Kesfet
@@ -552,6 +528,34 @@ return array(
 				),
 
 				/*
+				 * Siparis sureci: uc adim. Her adimin cizimi sabittir (olcu, teklif,
+				 * sevkiyat); panelden yalnizca metinler degisir.
+				 */
+				'process' => array(
+					'label'  => 'Sipariş Süreci',
+					'fields' => array(
+						'title'     => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Siparişiniz nasıl ilerler' ),
+						'subtitle'  => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Ölçüyü siz verin; üretimi ve sevkiyatı biz planlayalım.' ),
+						'items'     => array(
+							'label'   => 'Adımlar',
+							'type'    => 'repeater',
+							'max'     => 3,
+							'fields'  => array(
+								'title' => array( 'label' => 'Adım Başlığı', 'type' => 'text' ),
+								'text'  => array( 'label' => 'Adım Metni', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'title' => 'Ölçü ve adedi iletin', 'text' => 'Ürünü, ölçüyü, adedi ve teslim adresini telefonla, e-postayla ya da iletişim formundan gönderin.' ),
+								array( 'title' => 'Yazılı teklifinizi alın', 'text' => 'Fiyatı ve teslim tarihini yazılı olarak iletiyoruz. Onayınızla sipariş üretime girer.' ),
+								array( 'title' => 'Üretim ve sevkiyat', 'text' => 'Siparişiniz Çatalca tesisinde hazırlanır, hafta içi planlı sevkiyatla İstanbul ve çevre illere teslim edilir.' ),
+							),
+						),
+						'cta_label' => array( 'label' => 'Buton Metni', 'type' => 'text', 'default' => 'Teklif isteyin' ),
+						'cta_url'   => array( 'label' => 'Buton Bağlantısı', 'type' => 'url', 'default' => '/iletisim/' ),
+					),
+				),
+
+				/*
 				 * Merkezi urun havuzundan gelen urunler. Kategori kartlarindan
 				 * (catalog) ayri bir bolum: orada elle girilen dort grup var,
 				 * burada panelden bu site icin secilen tekil urunler.
@@ -567,29 +571,6 @@ return array(
 							'type'  => 'products',
 						),
 						'cta_label' => array( 'label' => 'Kart Bağlantı Metni', 'type' => 'text', 'default' => 'Teklif Al' ),
-					),
-				),
-
-				'references' => array(
-					'label'  => 'Kullanım Alanları',
-					'fields' => array(
-						'title'    => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Kullanım Alanları' ),
-						'subtitle' => array( 'label' => 'Bölüm Alt Başlığı', 'type' => 'textarea', 'default' => 'Ürünlerimizin sahada karşılık bulduğu başlıca alanlar.' ),
-						'items'    => array(
-							'label'   => 'Satırlar',
-							'type'    => 'repeater',
-							'max'     => 6,
-							'fields'  => array(
-								'icon'  => array( 'label' => 'İkon', 'type' => 'icon' ),
-								'title' => array( 'label' => 'Başlık', 'type' => 'text' ),
-								'text'  => array( 'label' => 'Metin', 'type' => 'textarea' ),
-							),
-							'default' => array(
-								array( 'icon' => 'box', 'title' => 'İhracat ambalajı', 'text' => 'Yurt dışı sevkiyatlarda ısıl işlemli palet ve sandık.' ),
-								array( 'icon' => 'truck', 'title' => 'Lojistik ve depolama', 'text' => 'Depo içi taşıma ve raf düzeni için standart palet.' ),
-								array( 'icon' => 'tree', 'title' => 'Şantiye keresteci', 'text' => 'Kalıp ve iskele işlerinde kereste tedariki.' ),
-							),
-						),
 					),
 				),
 

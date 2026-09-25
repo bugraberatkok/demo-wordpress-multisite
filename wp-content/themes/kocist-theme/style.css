@@ -116,19 +116,6 @@ a { color: inherit; }
 .k-section { padding: 68px 0; }
 .k-section--alt { background: var(--paper-2); }
 
-.k-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
-.k-card {
-	background: #fff;
-	border: 1px solid var(--line);
-	border-radius: 16px;
-	padding: 26px 22px;
-	transition: border-color .15s;
-}
-.k-card:hover { border-color: var(--leaf); }
-.k-card__icon { color: var(--amber-dark); margin-bottom: 14px; }
-.k-card__title { font-size: 17px; font-weight: 700; margin: 0 0 8px; }
-.k-card__text { color: var(--muted); font-size: 15px; margin: 0; }
-
 /* Katalog */
 .k-catalog { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 22px; }
 .k-cat { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
@@ -149,14 +136,6 @@ a { color: inherit; }
 	padding-top: 12px;
 }
 .k-cat__link:hover { color: var(--amber-dark); }
-
-/* Kullanim alanlari */
-.k-refs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; }
-.k-ref { padding: 26px 24px; border-right: 1px solid var(--line); display: flex; gap: 16px; }
-.k-ref:last-child { border-right: 0; }
-.k-ref__icon { color: var(--ink); flex: none; }
-.k-ref__title { font-weight: 700; margin: 0 0 6px; }
-.k-ref__text { color: var(--muted); font-size: 15px; margin: 0; }
 
 /* ---------- Ic sayfa ---------- */
 
@@ -244,24 +223,108 @@ a { color: inherit; }
 	.k-cat__title { font-size: 16px; }
 	.k-cat__text { font-size: 14px; }
 	.k-cat__link { min-height: 36px; }
-	.k-ref { border-right: 0; border-bottom: 1px solid var(--line); }
 }
 
-/* ---------- Yer tutucu gorsel ---------- */
+/* ---------- Yer tutucu gorsel ----------
+ * Gercek fotograf gelene kadar: ahsap kesiti gibi yillik halkalar, kamera
+ * rozeti ve kisa not. Renkler degiskenlerle; koyu kartlar asagida ezer.
+ */
 .k-placeholder {
+	--ph-bg: #edf3ea;
+	--ph-glow: #f9fbf7;
+	--ph-ring: rgba(23, 84, 47, .15);
+	--ph-badge-bg: #fff;
+	--ph-badge: var(--forest);
+	--ph-halo: rgba(255, 255, 255, .55);
+	--ph-text: var(--forest-3);
+	--ph-pill: rgba(255, 255, 255, .78);
+
+	position: relative;
+	overflow: hidden;
+	container-type: inline-size;
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	gap: 12px;
 	min-height: 180px;
 	height: 100%;
-	background: repeating-linear-gradient(45deg, #dfe3e8, #dfe3e8 12px, #d6dae0 12px, #d6dae0 24px);
-	color: #6b7785;
-	font-size: 13px;
-	font-weight: 600;
-	letter-spacing: .06em;
-	text-transform: uppercase;
-	text-align: center;
 	padding: 16px;
+	background:
+		radial-gradient(ellipse 60% 55% at 50% 50%, var(--ph-glow) 0%, transparent 100%),
+		var(--ph-bg);
+	text-align: center;
+}
+
+.k-placeholder__rings {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	fill: none;
+	stroke: var(--ph-ring);
+}
+
+.k-placeholder__rings polygon {
+	stroke-width: 1.2px;
+	vector-effect: non-scaling-stroke;
+}
+
+.k-placeholder__badge {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	background: var(--ph-badge-bg);
+	color: var(--ph-badge);
+	box-shadow:
+		0 0 0 8px var(--ph-halo),
+		0 10px 24px rgba(15, 61, 33, .14);
+}
+
+.k-placeholder__text {
+	position: relative;
+	padding: 5px 14px;
+	border-radius: 999px;
+	background: var(--ph-pill);
+	color: var(--ph-text);
+	font-size: 13.5px;
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+/* Kucuk alanlarda (kucuk kart, kucuk gorsel) yalnizca rozet kalir. */
+@container (max-width: 170px) {
+	.k-placeholder__text { display: none; }
+	.k-placeholder__badge { width: 44px; height: 44px; box-shadow: 0 0 0 5px var(--ph-halo); }
+	.k-placeholder__badge svg { width: 20px; height: 20px; }
+}
+
+/* Koyu yesil kartlarin icinde: hero slaydi ve ana sayfa urun gruplari. */
+.k-hero__slide-media .k-placeholder,
+.k-group > .k-placeholder {
+	--ph-bg: var(--forest-2);
+	--ph-glow: rgba(122, 182, 72, .22);
+	--ph-ring: rgba(158, 212, 112, .24);
+	--ph-badge-bg: rgba(234, 245, 225, .12);
+	--ph-badge: #cfe8b8;
+	--ph-halo: rgba(122, 182, 72, .14);
+	--ph-text: #fff;
+	--ph-pill: transparent;
+}
+
+.k-hero__slide-media .k-placeholder__badge,
+.k-group > .k-placeholder .k-placeholder__badge {
+	box-shadow: 0 0 0 8px var(--ph-halo);
+	backdrop-filter: blur(2px);
+}
+
+/* Grup kartinda baslik altta; rozet ustte dursun ki ust uste binmesin. */
+.k-group > .k-placeholder {
+	justify-content: flex-start;
+	padding-top: 20%;
 }
 
 /* ---------- Ürün fiyatı (havuzdan) ---------- */

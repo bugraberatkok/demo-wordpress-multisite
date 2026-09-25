@@ -25,7 +25,7 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 	function nwcs_the_icon( $key, $class = '', $size = 24 ) {}
 	function nwcs_edit_attr( $page, $component, $field = '', $row = null, $sub = '' ) {}
 	function nwcs_section_order( $page = 'home' ) {
-		return array( 'catalog', 'latest', 'products', 'capabilities', 'references', 'blog' );
+		return array( 'catalog', 'latest', 'process', 'products', 'blog' );
 	}
 }
 
@@ -167,7 +167,8 @@ function kocist_assets(): void {
 		null
 	);
 
-	wp_enqueue_style( 'kocist-style', get_stylesheet_uri(), array( 'kocist-fonts' ), wp_get_theme()->get( 'Version' ) );
+	// Surum dosyanin degisim zamani: stil degisince tarayici eski kopyayi tutmasin.
+	wp_enqueue_style( 'kocist-style', get_stylesheet_uri(), array( 'kocist-fonts' ), (string) filemtime( get_stylesheet_directory() . '/style.css' ) );
 
 	// Header kendi dosyasinda: style.css bolum bolum Tailwind'e tasinirken
 	// kucultulecek, header kurallari onunla birlikte dagilmasin.
@@ -201,7 +202,7 @@ function kocist_assets(): void {
 			'kocist-hero',
 			get_theme_file_uri( 'assets/css/hero.css' ),
 			array( 'kocist-style' ),
-			wp_get_theme()->get( 'Version' )
+			(string) filemtime( get_theme_file_path( 'assets/css/hero.css' ) )
 		);
 
 		wp_enqueue_style(
@@ -224,6 +225,22 @@ function kocist_assets(): void {
 			get_theme_file_uri( 'assets/js/catalog.js' ),
 			array(),
 			wp_get_theme()->get( 'Version' ),
+			true
+		);
+
+		// Siparis sureci: cizgi animasyonu bolum gorunume girince baslar.
+		wp_enqueue_style(
+			'kocist-process',
+			get_theme_file_uri( 'assets/css/process.css' ),
+			array( 'kocist-style' ),
+			(string) filemtime( get_theme_file_path( 'assets/css/process.css' ) )
+		);
+
+		wp_enqueue_script(
+			'kocist-process',
+			get_theme_file_uri( 'assets/js/process.js' ),
+			array(),
+			(string) filemtime( get_theme_file_path( 'assets/js/process.js' ) ),
 			true
 		);
 
@@ -440,23 +457,50 @@ function kocist_product_title_parts( array $parts ): array {
 }
 
 /**
+ * Favicon: kocist.com.tr'nin kendi yaprak ikonu (42x42, canli siteden).
+ * Panelde (Ozellestir > Site Kimligi) site ikonu secilirse WordPress'inki
+ * gecerli olur; tema kendi ikonunu basmaz.
+ */
+add_action( 'wp_head', 'kocist_favicon', 2 );
+add_action( 'login_head', 'kocist_favicon' );
+function kocist_favicon(): void {
+	if ( has_site_icon() ) {
+		return;
+	}
+
+	printf(
+		'<link rel="icon" type="image/png" href="%s" />' . "
+",
+		esc_url( get_theme_file_uri( 'assets/img/favicon.png' ) )
+	);
+}
+
+/**
  * Ana sayfa bolum sirasi.
  *
- * Panel, kayitli siraya sonradan eklenen bolumu en sona koyuyor. Son eklenen
- * urunler serit kayitli sirada yoksa (kullanici henuz yerini secmemis) urun
- * gruplarinin hemen altina alinir; panelde sira kaydedildiyse o gecerlidir.
+ * Panel, kayitli siraya sonradan eklenen bolumu en sona koyuyor. Sonradan
+ * eklenen bolum kayitli sirada yoksa (kullanici henuz yerini secmemis)
+ * tasarlandigi yere alinir; panelde sira kaydedildiyse o gecerlidir:
+ * son eklenen urunler urun gruplarinin, siparis sureci son eklenenlerin altina.
  */
 function kocist_home_sections(): array {
 	$order  = nwcs_section_order( 'home' );
 	$stored = get_option( 'nwcs_section_order', array() );
 	$saved  = is_array( $stored ) && isset( $stored['home'] ) && is_array( $stored['home'] ) ? $stored['home'] : array();
 
-	if ( in_array( 'latest', $saved, true ) || ! in_array( 'latest', $order, true ) || ! in_array( 'catalog', $order, true ) ) {
-		return $order;
-	}
+	$placements = array(
+		'latest'  => 'catalog',
+		'process' => 'latest',
+	);
 
-	$order = array_values( array_diff( $order, array( 'latest' ) ) );
-	array_splice( $order, (int) array_search( 'catalog', $order, true ) + 1, 0, array( 'latest' ) );
+	foreach ( $placements as $key => $after ) {
+		if ( in_array( $key, $saved, true ) || ! in_array( $key, $order, true ) || ! in_array( $after, $order, true ) ) {
+			continue;
+		}
+
+		$order = array_values( array_diff( $order, array( $key ) ) );
+		array_splice( $order, (int) array_search( $after, $order, true ) + 1, 0, array( $key ) );
+	}
 
 	return $order;
 }
@@ -675,9 +719,19 @@ function kocist_social_icon( string $key, string $label = '', string $class = 'k
  * Ortak seed betigi medyaya "demo yer tutucusu" alt metinli uretilmis
  * gorseller koyuyor; bunlar da bos sayilir ki gercek fotograf gorunsun.
  */
-function kocist_image_or_default( array $image, string $file, string $alt = '' ): array {
+function kocist_image_or_default( array $image, string $file, string $alt = '', bool $theme_fallback = false ): array {
 	if ( kocist_is_placeholder_image( $image ) ) {
 		$image = array( 'id' => 0, 'url' => '', 'alt' => '' );
+	}
+
+	/*
+	 * Tema fotograflari simdilik kullanilmiyor: gercek fotograflar gelene
+	 * kadar her gorsel alaninda "gorsel yakinda" alani gorunur. Yalnizca
+	 * logo ile acikca istenen yerler (ana sayfa hero'sunun sol karti)
+	 * temadaki dosyaya duser.
+	 */
+	if ( ! $theme_fallback && 'logo.png' !== $file ) {
+		$file = '';
 	}
 
 	if ( ! empty( $image['url'] ) || '' === $file || ! file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
@@ -697,7 +751,24 @@ function kocist_image_or_default( array $image, string $file, string $alt = '' )
 function kocist_is_placeholder_image( array $image ): bool {
 	$alt = (string) ( $image['alt'] ?? '' );
 
-	return false !== mb_stripos( $alt, 'yer tutucu' ) || false !== mb_stripos( $alt, 'örnek' );
+	if ( false !== mb_stripos( $alt, 'yer tutucu' ) || false !== mb_stripos( $alt, 'örnek' ) ) {
+		return true;
+	}
+
+	/*
+	 * Temadaki demo fotograflarin medyaya yuklenmis kopyalari da yer tutucu
+	 * sayilir (ornek: uploads/.../playwood-300x200.webp). Ayni adli dosya
+	 * assets/img icinde varsa gercek urun fotografi degildir.
+	 */
+	$path = (string) wp_parse_url( (string) ( $image['url'] ?? '' ), PHP_URL_PATH );
+
+	if ( '' === $path || ! str_contains( $path, '/uploads/' ) ) {
+		return false;
+	}
+
+	$name = preg_replace( '/-\d+x\d+(?=\.\w+$)/', '', basename( $path ) );
+
+	return file_exists( get_theme_file_path( 'assets/img/' . $name ) );
 }
 
 /**
@@ -757,7 +828,7 @@ function kocist_paragraphs( $text, string $class = '' ): string {
  * Gorsel alani icin img etiketi; deger yoksa isaretli yer tutucu.
  */
 function kocist_image_tag( array $image, string $class = '', string $placeholder = 'Örnek görsel' ): string {
-	if ( ! empty( $image['url'] ) ) {
+	if ( ! empty( $image['url'] ) && ! kocist_is_placeholder_image( $image ) ) {
 		return sprintf(
 			'<img src="%1$s" alt="%2$s" class="%3$s" loading="lazy" decoding="async" />',
 			esc_url( $image['url'] ),
@@ -766,10 +837,54 @@ function kocist_image_tag( array $image, string $class = '', string $placeholder
 		);
 	}
 
+	return kocist_placeholder( $class, $placeholder );
+}
+
+/**
+ * Gorseli henuz gelmemis alan: ahsap kesitini andiran yillik halkalar,
+ * ortada kamera rozeti ve "Gorsel yakinda" notu.
+ *
+ * Halkalarin merkezi her alanda biraz kayar; yan yana dizilen kartlar
+ * birbirinin kopyasi gibi durmasin. Renkler bulundugu yere gore CSS'ten
+ * gelir (acik kartlarda acik, koyu kartlarda koyu zemin).
+ */
+function kocist_placeholder( string $class = '', string $label = '' ): string {
+	static $count = 0;
+
+	$centers = array( array( 12, 108 ), array( 96, -14 ), array( 30, -22 ), array( 104, 92 ) );
+	list( $cx, $cy ) = $centers[ $count++ % count( $centers ) ];
+
+	$rings = '';
+
+	// Duz daire yerine hafif dalgali halkalar: gercek kesitteki gibi.
+	for ( $r = 9; $r <= 150; $r += 7 + ( $r % 5 ) ) {
+		$points = array();
+
+		for ( $a = 0; $a < 360; $a += 12 ) {
+			$rad      = deg2rad( $a );
+			$wobble   = 1 + 0.035 * sin( 3 * $rad + $r ) + 0.02 * sin( 7 * $rad );
+			$points[] = round( $cx + cos( $rad ) * $r * 1.25 * $wobble, 1 ) . ',' . round( $cy + sin( $rad ) * $r * $wobble, 1 );
+		}
+
+		$rings .= '<polygon points="' . implode( ' ', $points ) . '" />';
+	}
+
+	$label = '' !== trim( $label ) && ! kocist_is_placeholder_image( array( 'alt' => $label ) ) ? 'Görsel yakında: ' . $label : 'Görsel yakında';
+
 	return sprintf(
-		'<div class="k-placeholder %1$s" role="img" aria-label="%2$s">%2$s</div>',
+		'<div class="k-placeholder %1$s" role="img" aria-label="%2$s">'
+			. '<svg class="k-placeholder__rings" viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true">%3$s</svg>'
+			. '<span class="k-placeholder__badge" aria-hidden="true">'
+				. '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'
+					. '<path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.5-2.2h5.6L16.3 7h2.2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z" />'
+					. '<circle cx="12" cy="12.8" r="3.3" />'
+				. '</svg>'
+			. '</span>'
+			. '<span class="k-placeholder__text" aria-hidden="true">Görsel yakında</span>'
+		. '</div>',
 		esc_attr( $class ),
-		esc_html( $placeholder )
+		esc_attr( $label ),
+		$rings
 	);
 }
 

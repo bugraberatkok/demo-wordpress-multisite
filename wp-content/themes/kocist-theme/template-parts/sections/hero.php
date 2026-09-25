@@ -9,10 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$image  = kocist_image_or_default( nwcs_image( 'home', 'hero', 'image', 'full' ), 'atolye.jpg', 'Ahşap atölyesinde el aletleri ve talaş' );
+$image  = kocist_image_or_default( nwcs_image( 'home', 'hero', 'image', 'full' ), 'atolye.jpg', 'Ahşap atölyesinde el aletleri ve talaş', true );
 
-// Slayt gorseli panelde secilmemisse sirayla temadaki urun fotograflari.
-$slide_defaults = array( 'ahsap-kamelya-3x3-zeminli.webp', 'playwood.webp', 'ahsap-salincak-4-kisilik-oval-golgelikli.webp' );
 $slides = nwcs_rows( 'home', 'hero', 'slides' );
 $trust  = nwcs_rows( 'home', 'hero', 'trust' );
 
@@ -77,7 +75,7 @@ if ( kocist_is_catalog_placeholder( $cta_url ) && kocist_catalog_groups() ) {
 				<article class="k-hero__slider" data-k-slider aria-roledescription="carousel" aria-label="Öne çıkan ürünler">
 					<div class="k-hero__track" data-k-slider-track>
 						<?php foreach ( $slides as $slide_index => $slide ) : ?>
-							<?php $slide_image = kocist_image_or_default( nwcs_image_by_id( (int) ( $slide['image'] ?? 0 ), 'large' ), $slide_defaults[ $slide_index ] ?? '', (string) ( $slide['title'] ?? '' ) ); ?>
+							<?php $slide_image = kocist_image_or_default( nwcs_image_by_id( (int) ( $slide['image'] ?? 0 ), 'large' ), '' ); ?>
 							<div
 								class="k-hero__slide<?php echo 0 === $slide_index ? ' is-active' : ''; ?>"
 								data-k-slide
@@ -87,7 +85,7 @@ if ( kocist_is_catalog_placeholder( $cta_url ) && kocist_catalog_groups() ) {
 								<?php echo 0 === $slide_index ? '' : 'aria-hidden="true"'; ?>
 							>
 								<div class="k-hero__slide-media" <?php nwcs_edit_attr( 'home', 'hero', 'slides', $slide_index, 'image' ); ?>>
-									<?php echo kocist_image_tag( $slide_image, 'k-hero__slide-img', 'Örnek görsel — slayt' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+									<?php echo kocist_image_tag( $slide_image, 'k-hero__slide-img', (string) ( $slide['title'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 								</div>
 
 								<div class="k-hero__slide-body">
