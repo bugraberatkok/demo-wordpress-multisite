@@ -10,16 +10,27 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! function_exists( 'nwcs_field' ) ) {
-	function sanayi_palet_manifest_default( $page, $component, $field ) {
-		static $manifest = null;
+/**
+ * Manifest dizisi (content-manifest.php), istek basina bir kez okunur.
+ */
+function sanayi_palet_manifest(): array {
+	static $manifest = null;
 
-		if ( null === $manifest ) {
-			$manifest = include get_theme_file_path( 'content-manifest.php' );
-		}
-
-		return $manifest['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? '';
+	if ( null === $manifest ) {
+		$manifest = (array) include get_theme_file_path( 'content-manifest.php' );
 	}
+
+	return $manifest;
+}
+
+/**
+ * Alanin manifestteki varsayilan degeri.
+ */
+function sanayi_palet_manifest_default( string $page, string $component, string $field ) {
+	return sanayi_palet_manifest()['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? '';
+}
+
+if ( ! function_exists( 'nwcs_field' ) ) {
 	function nwcs_field( $page, $component, $field, $fallback = null ) {
 		return null === $fallback ? sanayi_palet_manifest_default( $page, $component, $field ) : $fallback;
 	}
@@ -37,9 +48,7 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 	function nwcs_the_icon( $key, $class = '', $size = 24 ) {}
 	function nwcs_edit_attr( $page, $component, $field = '', $row = null, $sub = '' ) {}
 	function nwcs_section_order( $page = 'home' ) {
-		$manifest = include get_theme_file_path( 'content-manifest.php' );
-
-		return $manifest['pages'][ $page ]['sortable_sections'] ?? array();
+		return sanayi_palet_manifest()['pages'][ $page ]['sortable_sections'] ?? array();
 	}
 }
 
@@ -522,13 +531,163 @@ function sanayi_palet_edit_attr( string $page, string $component, string $field 
 }
 
 /**
- * Blog yazisinin (ya da WordPress sayfasinin) basligi, tarihi, ozeti, metni:
- * onizlemede tiklaninca yazinin duzenleme ekrani acilir.
+ * Manifestte olmayan WordPress sayfasinin (yasal metin gibi) basligi ve
+ * metni: onizlemede tiklaninca sayfanin duzenleme ekrani acilir. Ornek blog
+ * yazilari panelde duzenlenir (sanayi_palet_post_edit_attr).
  */
-function sanayi_palet_post_attr( int $post_id, string $label = 'Yazı başlığı' ): void {
+function sanayi_palet_post_attr( int $post_id, string $label = 'Sayfa metni' ): void {
 	if ( function_exists( 'nwcs_post_attr' ) ) {
 		nwcs_post_attr( $post_id, $label );
 	}
+}
+
+/* ======================================================================
+ * Blog yazilari panelden
+ *
+ * Ornek yazilarin panelde gizli bir sayfasi var ('yazi-<slug>', manifest).
+ * Panelde degistirilip kaydedilen alan sitede WordPress yazisinin yerine
+ * gecer: yazi sayfasi, blog listesi, ana sayfa kartlari ve arama bilgisi.
+ * Degistirilmeyen alan icin WordPress'teki yazi aynen kullanilir; yazi
+ * Yazilar ekranindan duzenlenmeye devam edebilir.
+ * ====================================================================== */
+
+/**
+ * Yazinin paneldeki gizli sayfasi; yoksa bos (sonradan yazilan yazilar).
+ */
+function sanayi_palet_post_page_key( $post ): string {
+	$post = get_post( $post );
+
+	if ( ! $post || 'post' !== $post->post_type || '' === $post->post_name ) {
+		return '';
+	}
+
+	$key = 'yazi-' . $post->post_name;
+
+	return isset( sanayi_palet_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Panelde degistirilmis deger; alan varsayilanindaysa (yazinin ilk metni) null.
+ *
+ * @return string|int|null
+ */
+function sanayi_palet_post_override( $post, string $field ) {
+	$key = sanayi_palet_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return null;
+	}
+
+	$value = nwcs_field( $key, 'post', $field );
+
+	if ( 'image' === $field ) {
+		return (int) $value ? (int) $value : null;
+	}
+
+	$clean   = static fn( $text ): string => trim( str_replace( "\r\n", "\n", (string) $text ) );
+	$value   = $clean( $value );
+	$default = $clean( sanayi_palet_manifest_default( $key, 'post', $field ) );
+
+	return '' === $value || $value === $default ? null : $value;
+}
+
+/**
+ * Onizlemede tiklaninca yazinin paneldeki alanini acar.
+ */
+function sanayi_palet_post_edit_attr( $post, string $field ): void {
+	$key = sanayi_palet_post_page_key( $post );
+
+	if ( '' !== $key ) {
+		nwcs_edit_attr( $key, 'post', $field );
+	}
+}
+
+/*
+ * SEO: eklenti yazi bilgisini 'wp' aksiyonunda (10) hesaplayip sakliyor.
+ * Hemen once, gizli sayfanin "Arama ve Paylasim" alanlari (yoksa paneldeki
+ * baslik, ozet ve kapak) gecerliyken hesaplatilir.
+ */
+add_action( 'wp', 'sanayi_palet_post_seo', 9 );
+function sanayi_palet_post_seo(): void {
+	if ( ! is_singular( 'post' ) || ! function_exists( 'nwcs_seo_context' ) ) {
+		return;
+	}
+
+	$post = get_queried_object();
+	$key  = sanayi_palet_post_page_key( $post );
+
+	if ( '' === $key ) {
+		return;
+	}
+
+	$description = trim( (string) nwcs_field( $key, 'seo', 'description' ) );
+	$description = '' !== $description ? $description : (string) sanayi_palet_post_override( $post, 'excerpt' );
+	$original    = $post->post_excerpt;
+
+	if ( '' !== $description ) {
+		$post->post_excerpt = $description;
+	}
+
+	$GLOBALS['sanayi_palet_post_seo_key'] = $key;
+	nwcs_seo_context();
+	unset( $GLOBALS['sanayi_palet_post_seo_key'] );
+
+	$post->post_excerpt = $original;
+}
+
+/**
+ * Arama bilgisi hesaplanirken gecerli olan SEO alani; diger zamanlarda bos.
+ */
+function sanayi_palet_post_seo_field( $post, string $field ): string {
+	$key = $GLOBALS['sanayi_palet_post_seo_key'] ?? '';
+
+	return '' !== $key && sanayi_palet_post_page_key( $post ) === $key ? trim( (string) nwcs_field( $key, 'seo', $field ) ) : '';
+}
+
+add_filter( 'the_title', 'sanayi_palet_post_title', 10, 2 );
+function sanayi_palet_post_title( $title, $post_id = 0 ) {
+	if ( is_admin() || ! $post_id ) {
+		return $title;
+	}
+
+	$seo = sanayi_palet_post_seo_field( $post_id, 'title' );
+
+	return '' !== $seo ? $seo : ( sanayi_palet_post_override( $post_id, 'title' ) ?? $title );
+}
+
+add_filter( 'get_the_excerpt', 'sanayi_palet_post_excerpt', 10, 2 );
+function sanayi_palet_post_excerpt( $excerpt, $post = null ) {
+	return is_admin() ? $excerpt : ( sanayi_palet_post_override( $post, 'excerpt' ) ?? $excerpt );
+}
+
+// wpautop'tan sonra: panel metni kendi paragraflariyla gelir.
+add_filter( 'the_content', 'sanayi_palet_post_content', 99 );
+function sanayi_palet_post_content( $content ) {
+	if ( is_admin() || ! in_the_loop() ) {
+		return $content;
+	}
+
+	$body = sanayi_palet_post_override( get_the_ID(), 'body' );
+
+	if ( null === $body ) {
+		return $content;
+	}
+
+	ob_start();
+	sanayi_palet_paragraphs( $body );
+
+	return (string) ob_get_clean();
+}
+
+add_filter( 'post_thumbnail_id', 'sanayi_palet_post_thumbnail', 10, 2 );
+function sanayi_palet_post_thumbnail( $thumbnail_id, $post = null ) {
+	if ( is_admin() ) {
+		return $thumbnail_id;
+	}
+
+	$seo = (int) sanayi_palet_post_seo_field( $post, 'image' );
+
+	return $seo ? $seo : ( sanayi_palet_post_override( $post, 'image' ) ?? $thumbnail_id );
 }
 
 /**

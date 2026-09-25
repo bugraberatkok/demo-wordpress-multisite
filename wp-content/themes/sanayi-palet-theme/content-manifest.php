@@ -9,7 +9,51 @@
  * bu tasarim icin yazildi (DECISIONS.md).
  *
  * Alan turleri: text, textarea, url, image, icon, repeater
+ *
+ * Her ornek blog yazisinin panelde gizli bir sayfasi vardir ('yazi-<slug>'):
+ * "Sayfa bul" kutusundan acilir.
  */
+
+/*
+ * Her ornek blog yazisi icin panelde gizli bir sayfa ('yazi-<slug>'): "Sayfa
+ * bul" kutusunda cikar, onizlemede yaziyi acar. Alanlar yazinin bugunku
+ * metniyle dolu gelir; panelde degistirilen alan sitede WordPress yazisinin
+ * yerine gecer (functions.php: Blog yazilari panelden). Degistirilmeyen alan
+ * icin WordPress'teki yazi kullanilir.
+ *
+ * Yonetimden sonradan yazilan yazi burada cikmaz (manifest sabit); o yazi
+ * Yazilar ekranindan duzenlenir.
+ */
+$sp_blog_pages = array();
+
+foreach ( (array) include __DIR__ . '/content/blog-posts.php' as $sp_post ) {
+	$sp_blog_pages[ 'yazi-' . $sp_post['slug'] ] = array(
+		'label'      => 'Yazı: ' . $sp_post['title'],
+		'path'       => '/' . $sp_post['slug'] . '/',
+		'hidden'     => true,
+		'components' => array(
+			'post' => array(
+				'label'  => 'Yazı',
+				'fields' => array(
+					'title'   => array( 'label' => 'Başlık', 'type' => 'text', 'default' => $sp_post['title'] ),
+					'excerpt' => array( 'label' => 'Özet (kart ve arama sonucu)', 'type' => 'textarea', 'default' => $sp_post['excerpt'] ),
+					'body'    => array(
+						'label'   => 'Metin (boş satırla paragraf)',
+						'type'    => 'textarea',
+						'default' => $sp_post['body'],
+						'hint'    => 'Burada değiştirdiğiniz metin sitede görünür. Değiştirmediğiniz alanlarda WordPress’teki yazı kullanılır.',
+					),
+					'image'   => array(
+						'label'   => 'Kapak Görseli',
+						'type'    => 'image',
+						'default' => 0,
+						'hint'    => 'Boş bırakılırsa yazının kendi kapak görseli kullanılır.',
+					),
+				),
+			),
+		),
+	);
+}
 
 return array(
 	'site_key'   => 'sanayi-palet',
@@ -609,5 +653,5 @@ return array(
 				),
 			),
 		),
-	),
+	) + $sp_blog_pages,
 );

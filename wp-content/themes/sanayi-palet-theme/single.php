@@ -1,6 +1,10 @@
 <?php
 /**
  * Blog yazisi: genis kapak, okuma sutunu, yaninda teklif kutusu, altta diger yazilar.
+ *
+ * Ornek yazilarin baslik, kapak ve metni panelde de duzenlenir; onizlemede
+ * tiklaninca yazinin gizli panel sayfasi acilir (functions.php: Blog
+ * yazilari panelden).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,19 +31,19 @@ while ( have_posts() ) :
 				<a class="sp-article__back" href="<?php echo esc_url( sanayi_palet_link( '/blog/' ) ); ?>" <?php nwcs_edit_attr( 'blog', 'post', 'back_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'blog', 'post', 'back_label' ) ); ?>
 				</a>
-				<h1 class="sp-article__title" <?php sanayi_palet_post_attr( $current->ID, 'Yazı başlığı' ); ?>><?php the_title(); ?></h1>
-				<time class="sp-post__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php sanayi_palet_post_attr( $current->ID, 'Yayın tarihi' ); ?>><?php echo esc_html( sanayi_palet_date( $current ) ); ?></time>
+				<h1 class="sp-article__title" <?php sanayi_palet_post_edit_attr( $current, 'title' ); ?>><?php the_title(); ?></h1>
+				<time class="sp-post__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( sanayi_palet_date( $current ) ); ?></time>
 			</div>
 		</header>
 
 		<?php if ( $image ) : ?>
 			<div class="sp-wrap">
-				<img class="sp-article__cover" <?php sanayi_palet_post_attr( $current->ID, 'Öne çıkan görsel' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+				<img class="sp-article__cover" <?php sanayi_palet_post_edit_attr( $current, 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
 			</div>
 		<?php endif; ?>
 
 		<div class="sp-wrap sp-article__grid">
-			<div class="sp-article__content" <?php sanayi_palet_post_attr( $current->ID, 'Yazı metni' ); ?>>
+			<div class="sp-article__content" <?php sanayi_palet_post_edit_attr( $current, 'body' ); ?>>
 				<?php the_content(); ?>
 			</div>
 

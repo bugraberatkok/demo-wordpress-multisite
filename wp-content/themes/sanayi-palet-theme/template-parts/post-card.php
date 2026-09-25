@@ -5,6 +5,8 @@
  * Beklenen $args: post (WP_Post), featured (bool) — blog listesinin ilk
  * yazisi yatay ve buyuk basilir. Kartin tamami baslik baglantisiyla
  * tiklanir (baglanti ::after ile karti kaplar); icinde baska baglanti yok.
+ * Bu yuzden panel isareti yalnizca baslikta: onizlemede kart yazinin panel
+ * sayfasini acar, ozet ve kapak da orada.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,7 +22,7 @@ $image    = sanayi_palet_post_image( $post_item, $featured ? 'large' : 'medium_l
 $heading  = $featured ? 'h2' : 'h3';
 ?>
 <article class="sp-post<?php echo $featured ? ' sp-post--featured' : ''; ?>">
-	<div class="sp-post__media" <?php sanayi_palet_post_attr( $post_item->ID, 'Öne çıkan görsel' ); ?>>
+	<div class="sp-post__media">
 		<?php if ( $image ) : ?>
 			<img class="sp-post__image" src="<?php echo esc_url( $image['url'] ); ?>" alt="" loading="lazy" decoding="async" />
 		<?php else : ?>
@@ -29,11 +31,11 @@ $heading  = $featured ? 'h2' : 'h3';
 	</div>
 
 	<div class="sp-post__body">
-		<time class="sp-post__date" datetime="<?php echo esc_attr( get_the_date( 'c', $post_item ) ); ?>" <?php sanayi_palet_post_attr( $post_item->ID, 'Yayın tarihi' ); ?>><?php echo esc_html( sanayi_palet_date( $post_item ) ); ?></time>
-		<<?php echo esc_html( $heading ); ?> class="sp-post__title">
-			<a class="sp-post__link" href="<?php echo esc_url( get_permalink( $post_item ) ); ?>" <?php sanayi_palet_post_attr( $post_item->ID, 'Yazı başlığı' ); ?>><?php echo esc_html( get_the_title( $post_item ) ); ?></a>
+		<time class="sp-post__date" datetime="<?php echo esc_attr( get_the_date( 'c', $post_item ) ); ?>"><?php echo esc_html( sanayi_palet_date( $post_item ) ); ?></time>
+		<<?php echo esc_html( $heading ); ?> class="sp-post__title" <?php sanayi_palet_post_edit_attr( $post_item, 'title' ); ?>>
+			<a class="sp-post__link" href="<?php echo esc_url( get_permalink( $post_item ) ); ?>"><?php echo esc_html( get_the_title( $post_item ) ); ?></a>
 		</<?php echo esc_html( $heading ); ?>>
-		<p class="sp-post__excerpt" <?php sanayi_palet_post_attr( $post_item->ID, 'Yazı özeti' ); ?>><?php echo esc_html( wp_trim_words( get_the_excerpt( $post_item ), $featured ? 40 : 22 ) ); ?></p>
+		<p class="sp-post__excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt( $post_item ), $featured ? 40 : 22 ) ); ?></p>
 		<span class="sp-post__more" aria-hidden="true" <?php nwcs_edit_attr( 'blog', 'post', 'read_label' ); ?>><?php echo esc_html( nwcs_field( 'blog', 'post', 'read_label' ) ); ?></span>
 	</div>
 </article>
