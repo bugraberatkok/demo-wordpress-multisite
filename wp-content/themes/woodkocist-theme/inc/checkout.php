@@ -243,12 +243,14 @@ function wk_handle_checkout(): void {
 			'post_title'   => sprintf( 'Yeni sipariş — %s — %s', $name, wk_money( $totals['total'] ) ),
 			'post_content' => "Telefon: {$v['phone']}\nE-posta: {$v['email']}\n\n" . $summary,
 			'meta_input'   => array(
-				'_wko_items'    => wp_json_encode( $items, JSON_UNESCAPED_UNICODE ),
+				// meta_input kayittan once wp_unslash uygular: JSON'daki kacis
+				// isaretleri (tirnak, satir sonu) bozulmasin diye wp_slash.
+				'_wko_items'    => wp_slash( wp_json_encode( $items, JSON_UNESCAPED_UNICODE ) ),
 				'_wko_total'    => $totals['total'],
 				'_wko_subtotal' => $totals['subtotal'],
 				'_wko_vat'      => $totals['vat'],
 				'_wko_delivery' => $v['delivery'],
-				'_wko_address'  => wp_json_encode( array_intersect_key( $v, array_flip( array( 'city', 'district', 'address', 'postcode', 'corporate', 'company', 'tax_office', 'tax_no', 'bill_diff', 'bill_addr' ) ) ), JSON_UNESCAPED_UNICODE ),
+				'_wko_address'  => wp_slash( wp_json_encode( array_intersect_key( $v, array_flip( array( 'city', 'district', 'address', 'postcode', 'corporate', 'company', 'tax_office', 'tax_no', 'bill_diff', 'bill_addr' ) ) ), JSON_UNESCAPED_UNICODE ) ),
 				'_wko_status'   => 'odeme-bekleniyor',
 				'_wko_key'      => bin2hex( random_bytes( 12 ) ),
 			),
@@ -357,7 +359,15 @@ function wk_order_mail_customer( int $post_id ): void {
 				. "\n\nSiparişinizin durumu: " . wk_order_url( $post_id )
 				. "\n\n" . wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ' — ' . home_url( '/' );
 
-			wp_mail( $email, sprintf( 'Siparişiniz alındı: %s', $number ), $body );
+			// Musteri "Yanitla" deyince magazaya yazsin (varsayilan gonderen adresi okunmaz).
+			$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+			$shop    = function_exists( 'nwcs_field' ) && defined( 'NWCS_SEO_SITE_PAGE' ) ? sanitize_email( (string) nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'email' ) ) : '';
+
+			if ( $shop ) {
+				$headers[] = 'Reply-To: ' . $shop;
+			}
+
+			wp_mail( $email, sprintf( 'Siparişiniz alındı: %s', $number ), $body, $headers );
 		},
 		30
 	);

@@ -257,6 +257,24 @@ function nwcs_form_fields( WP_Post $post, string $prefix ): array {
 }
 
 /**
+ * E-posta konusunun basi: kaydin turune gore. Siparis numarasi kayit
+ * basligindan ("WK260925-37 — Ad — Tutar") alinir.
+ */
+function nwcs_form_kind( WP_Post $post ): string {
+	if ( 'wk_order' === $post->post_type ) {
+		$number = (string) strtok( (string) $post->post_title, ' ' );
+
+		return preg_match( '/^[A-Z]{2}\d/', $number ) ? 'Yeni sipariş ' . $number : 'Yeni sipariş';
+	}
+
+	if ( str_ends_with( $post->post_type, '_request' ) ) {
+		return 'Yeni talep';
+	}
+
+	return str_ends_with( $post->post_type, '_quote' ) ? 'Yeni teklif isteği' : 'Yeni iletişim mesajı';
+}
+
+/**
  * Tek kaydin bildirimini gonderir. Sonuc _nwcs_notified metasina yazilir.
  */
 function nwcs_form_send_notification( int $post_id ): bool {
@@ -282,13 +300,18 @@ function nwcs_form_send_notification( int $post_id ): bool {
 
 	$fields    = nwcs_form_fields( $post, $types[ $post->post_type ] );
 	$site_name = nwcs_form_single_line( wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
-	$kind      = str_ends_with( $post->post_type, '_quote' ) ? 'Yeni teklif isteği' : 'Yeni iletişim mesajı';
+	$kind      = nwcs_form_kind( $post );
 	$subject   = sprintf( '%s: %s', $kind, '' !== $site_name ? $site_name : wp_parse_url( home_url(), PHP_URL_HOST ) );
 
 	$lines = array( $subject, '' );
 
 	foreach ( $fields as $field ) {
-		$value = '' !== $field[1] ? $field[1] : '—';
+		// Formda olmayan ya da bos birakilan alan yazilmaz ("Firma: —" gibi).
+		if ( '' === $field[1] ) {
+			continue;
+		}
+
+		$value = $field[1];
 
 		if ( str_contains( $value, "\n" ) ) {
 			$lines[] = $field[0] . ':';
@@ -302,7 +325,24 @@ function nwcs_form_send_notification( int $post_id ): bool {
 	// Mesaj metasi olmayan turlerde (ik_message, sp_message) mesaj yalnizca
 	// kayit metninde durur; metnin tamami eklenir.
 	if ( ! isset( $fields['message'] ) ) {
-		$content = trim( sanitize_textarea_field( $post->post_content ) );
+		// Kayit metni kses'ten gecmis (&amp;): duz metne cevrilir; alan satirlarinda
+		// zaten yazilan satirlar ("Telefon: ...") tekrar edilmez.
+		$content = html_entity_decode( wp_strip_all_tags( $post->post_content ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$written = array();
+
+		foreach ( $fields as $field ) {
+			$written[] = mb_strtolower( trim( $field[0] . ': ' . $field[1] ), 'UTF-8' );
+			$written[] = mb_strtolower( trim( $field[1] ), 'UTF-8' );
+		}
+
+		$content = implode(
+			"\n",
+			array_filter(
+				preg_split( '/\R/u', $content ),
+				static fn( string $line ): bool => ! in_array( mb_strtolower( trim( $line ), 'UTF-8' ), array_filter( $written ), true )
+			)
+		);
+		$content = trim( (string) preg_replace( "/\n{3,}/", "\n\n", $content ) );
 
 		if ( '' !== $content ) {
 			$lines[] = '';
@@ -351,3 +391,43 @@ function nwcs_form_send_notification( int $post_id ): bool {
 
 	return $sent;
 }
+
+/*
+ * Gonderen adi: WordPress'in varsayilani "WordPress"; alici hangi sitenin
+ * yazdigini gorsun diye site adi. Baska bir eklenti (SMTP) ad verdiyse dokunulmaz.
+ */
+add_filter(
+	'wp_mail_from_name',
+	static function ( $name ) {
+		if ( 'WordPress' !== $name ) {
+			return $name;
+		}
+
+		$site = trim( wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) );
+
+		return '' !== $site ? nwcs_form_single_line( $site ) : $name;
+	}
+);
+
+/*
+ * Saat dilimi secilmemis site (ayar bos, UTC+0): e-postalardaki saat ve siparis
+ * numarasindaki tarih Turkiye saatiyle yazilsin. Panelde bir dilim secilirse o gecerli.
+ */
+function nwcs_default_timezone( $value ) {
+	static $busy = false;
+
+	// get_option( 'gmt_offset' ) cekirdekte tekrar timezone_string'i okur
+	// (wp_timezone_override_offset): kendi icinden cagrilinca dokunma.
+	if ( $busy || '' !== (string) $value ) {
+		return $value;
+	}
+
+	$busy   = true;
+	$offset = (float) get_option( 'gmt_offset', 0 );
+	$busy   = false;
+
+	return 0.0 === $offset ? 'Europe/Istanbul' : $value;
+}
+// Ayar kayitli ama bos / hic kayitli degil: ikisi ayri kanca.
+add_filter( 'option_timezone_string', 'nwcs_default_timezone' );
+add_filter( 'default_option_timezone_string', 'nwcs_default_timezone' );
