@@ -174,9 +174,14 @@ function ik_product( string $slug ): array {
 }
 
 /**
- * Su anki sayfa bir urun detayi mi? /urunlerimiz/ altindaki alt sayfalar.
+ * Su anki sayfa bir urun detayi mi? /urunlerimiz/ altindaki alt sayfalar ya
+ * da alt sayfasi olmayan urun icin yedek cizim (ik_product_fallback).
  */
 function ik_current_product(): array {
+	if ( ik_fallback_product() ) {
+		return ik_fallback_product();
+	}
+
 	if ( ! is_page() ) {
 		return array();
 	}
@@ -189,6 +194,106 @@ function ik_current_product(): array {
 	}
 
 	return ik_product( $page->post_name );
+}
+
+/**
+ * Alt sayfasi olmayan urun icin yedek cizimde gosterilen urun.
+ *
+ * Panelden sonradan eklenen urunun WordPress alt sayfasi yoktur; adresi
+ * (/urunlerimiz/<slug>/) 404 verirdi. Istek 404 olup yol bir urune denk
+ * geliyorsa sayfa urun detayi olarak 200 ile cizilir. Gercek alt sayfalar
+ * her zaman once gelir; rewrite kurali ve flush gerekmez.
+ */
+function ik_fallback_product( ?array $set = null ): array {
+	static $product = array();
+
+	if ( null !== $set ) {
+		$product = $set;
+	}
+
+	return $product;
+}
+
+/*
+ * Tespit 'wp' aksiyonunun basinda: SEO eklentisi sayfa bilgisini (baslik,
+ * aciklama, canonical, Product verisi) bu aksiyonda hesaplayip sakliyor;
+ * istek o anda 404 sayilirsa urun sayfasi SEO'suz kalirdi.
+ */
+add_action( 'wp', 'ik_product_detect', 0 );
+function ik_product_detect(): void {
+	if ( ! is_404() ) {
+		return;
+	}
+
+	$home = trim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
+	$path = trim( (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ), '/' );
+
+	if ( '' !== $home && str_starts_with( $path, $home . '/' ) ) {
+		$path = substr( $path, strlen( $home ) + 1 );
+	}
+
+	if ( ! preg_match( '#^urunlerimiz/([^/]+)$#', $path, $match ) ) {
+		return;
+	}
+
+	$product = ik_product( sanitize_title( rawurldecode( $match[1] ) ) );
+
+	if ( ! $product ) {
+		return;
+	}
+
+	global $wp_query;
+	$wp_query->is_404 = false;
+	status_header( 200 );
+	ik_fallback_product( $product );
+}
+
+// redirect_canonical (10) benzer sayfaya yonlendirmeden once cizilir.
+add_action( 'template_redirect', 'ik_product_fallback', 1 );
+function ik_product_fallback(): void {
+	$product = ik_fallback_product();
+
+	if ( ! $product ) {
+		return;
+	}
+
+	get_header();
+	get_template_part( 'template-parts/product-detail', null, array( 'product' => $product ) );
+	get_footer();
+	exit;
+}
+
+/**
+ * Yedek cizimde tarayici sekmesi "Sayfa bulunamadi" demesin.
+ */
+add_filter( 'document_title_parts', 'ik_fallback_title' );
+function ik_fallback_title( array $parts ): array {
+	$product = ik_fallback_product();
+
+	if ( $product ) {
+		$parts['title'] = $product['title'];
+	}
+
+	return $parts;
+}
+
+/**
+ * Urunun paneldeki gizli sayfasi ('urun-<slug>'); panelden sonradan eklenen
+ * urunun gizli sayfasi yoktur, bos dondurur.
+ */
+function ik_product_page_key( array $product ): string {
+	$key = 'urun-' . $product['slug'];
+
+	return isset( ik_manifest()['pages'][ $key ] ) ? $key : '';
+}
+
+/**
+ * Gizli sayfadaki alan; sayfa yoksa bos.
+ */
+function ik_product_page_field( array $product, string $component, string $field ): string {
+	$key = ik_product_page_key( $product );
+
+	return '' === $key ? '' : trim( (string) nwcs_field( $key, $component, $field ) );
 }
 
 /**
@@ -212,11 +317,16 @@ function ik_seo_product_pages( array $pages ): array {
 			) : 0;
 		}
 
+		// Panelde gizli urun sayfasinin "Arama ve Paylasim" alanlari doluysa onlar.
+		$seo_title       = ik_product_page_field( $product, 'seo', 'title' );
+		$seo_description = ik_product_page_field( $product, 'seo', 'description' );
+		$seo_image       = '' !== ik_product_page_key( $product ) ? (int) nwcs_field( ik_product_page_key( $product ), 'seo', 'image' ) : 0;
+
 		$pages[] = array(
 			'url'         => $product['url'],
-			'name'        => $product['title'],
-			'description' => '' !== trim( $product['short'] ) ? $product['short'] : $product['body'],
-			'image'       => $image,
+			'name'        => '' !== $seo_title ? $seo_title : $product['title'],
+			'description' => '' !== $seo_description ? $seo_description : ( '' !== trim( $product['short'] ) ? $product['short'] : $product['body'] ),
+			'image'       => $seo_image ? $seo_image : $image,
 			'type'        => 'Product',
 			'properties'  => array_map(
 				static fn( array $pair ): array => array( 'name' => $pair[0], 'value' => $pair[1] ),
@@ -252,21 +362,46 @@ function ik_specs( string $text ): array {
 /**
  * Menu satirlari ve acilir listeleri.
  *
- * Paneldeki "submenu" alani "urunler" ise alt ogeler urun listesinden
- * uretilir; menu ayrica bakim istemez.
+ * Paneldeki "submenu" alani "urunler" ise alt ogeler 'global.menu_urunler'
+ * satirlarindan gelir; o bos birakildiysa urun listesinden uretilir, menu
+ * ayrica bakim istemez.
+ *
+ * Her alt ogenin 'edit' anahtari onizlemede tiklaninca acilacak alani verir:
+ * panel satiri ya da urunun Urun Listesi satiri.
  */
 function ik_menu(): array {
 	$items = array();
 
 	foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $index => $row ) {
 		$children = array();
+		$submenu  = sanitize_key( (string) ( $row['submenu'] ?? '' ) );
+		$rows     = 'urunler' === $submenu ? nwcs_rows( 'global', 'menu_urunler', 'items' ) : array();
 
-		if ( 'urunler' === sanitize_key( (string) ( $row['submenu'] ?? '' ) ) ) {
+		foreach ( $rows as $row_index => $child ) {
+			$url = (string) ( $child['url'] ?? '' );
+
+			if ( '' === trim( (string) ( $child['label'] ?? '' ) ) ) {
+				continue;
+			}
+
+			// Baglanti bir urune gidiyorsa kucuk gorsel o urunun.
+			$slug = preg_match( '#/urunlerimiz/([^/]+)/?$#', $url, $match ) ? sanitize_title( $match[1] ) : '';
+
+			$children[] = array(
+				'label'   => (string) $child['label'],
+				'url'     => ik_link( $url ),
+				'product' => '' !== $slug ? ik_product( $slug ) : array(),
+				'edit'    => array( 'global', 'menu_urunler', 'items', (int) $row_index, 'label' ),
+			);
+		}
+
+		if ( 'urunler' === $submenu && ! $children ) {
 			foreach ( ik_products() as $product ) {
 				$children[] = array(
 					'label'   => $product['title'],
 					'url'     => $product['url'],
 					'product' => $product,
+					'edit'    => array( 'products', 'catalog', 'items', (int) $product['index'], 'title' ),
 				);
 			}
 		}

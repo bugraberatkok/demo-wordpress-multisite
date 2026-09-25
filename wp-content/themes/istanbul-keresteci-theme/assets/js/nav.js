@@ -84,7 +84,7 @@
 	} );
 
 	// Masaustune gecilince acik kalan panel durumunu sifirla.
-	window.matchMedia( '(min-width: 1120px)' ).addEventListener( 'change', function ( mq ) {
+	window.matchMedia( '(min-width: 900px)' ).addEventListener( 'change', function ( mq ) {
 		if ( mq.matches ) {
 			setPanel( false );
 		}

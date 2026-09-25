@@ -1,6 +1,8 @@
 /*
  * Ust bilgi seridi, logo, ana menu, acilir urun listesi, telefon.
- * Masaustu 1120px ve uzeri; altinda menu panel olarak acilir.
+ * Masaustu 900px ve uzeri (900-1119 arasi sikisik duzen); altinda menu
+ * panel olarak acilir. Panel onizlemesi ~1000px genislikte de masaustu
+ * menusunu gostersin diye esik dusuk tutuldu.
  */
 
 /* Ust bilgi seridi --------------------------------------------------------- */
@@ -241,7 +243,7 @@
 
 /* Dar ekran: panel ------------------------------------------------------------ */
 
-@media (max-width: 1119px) {
+@media (max-width: 899px) {
 	.ik-header__panel {
 		display: none;
 		position: absolute;
@@ -281,7 +283,7 @@
 
 /* Masaustu ------------------------------------------------------------------ */
 
-@media (min-width: 1120px) {
+@media (min-width: 900px) {
 	.ik-header__toggle { display: none; }
 
 	.ik-header__panel {
@@ -348,4 +350,34 @@
 	}
 
 	.ik-drop__all { margin-left: 0.5rem; }
+}
+
+/*
+ * Sikisik masaustu (900-1119px): bosluklar daralir, telefon ust yazisi
+ * gizlenir. Logo, bes menu ogesi ve telefon tek satira sigar.
+ */
+@media (min-width: 900px) and (max-width: 1119px) {
+	.ik-header__bar { gap: 1.25rem; }
+	.ik-header__panel { gap: 1.25rem; }
+	.ik-nav__list { gap: 0.25rem 1.1rem; }
+	.ik-nav__caret { width: 1.5rem; }
+
+	.ik-call { padding-left: 1.25rem; gap: 0.6rem; }
+	.ik-call__note { display: none; }
+	.ik-call__number { font-size: 1.125rem; }
+
+	/* Liste sag kenardan tasmasin: Urunlerimiz ogesinin sagina hizali acilir. */
+	.ik-drop { left: auto; right: -1rem; width: 28rem; }
+}
+
+/* En dar masaustunde numara da sigmiyor: yalnizca ikon, numara ekran okuyucuda. */
+@media (min-width: 900px) and (max-width: 1019px) {
+	.ik-call__text {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+	}
 }

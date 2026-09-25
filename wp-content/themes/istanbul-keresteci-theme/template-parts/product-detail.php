@@ -16,14 +16,21 @@ if ( ! $product ) {
 
 $image = ik_product_image( $product, 'large' );
 $specs = ik_specs( $product['specs'] );
+$row   = array( 'products', 'catalog', 'items', (int) $product['index'] );
+
+// Alt metin: urunun gizli panel sayfasinda yazildiysa o, yoksa kisa aciklama.
+$lead      = ik_product_page_field( $product, 'head', 'lead' );
+$lead_edit = '' !== $lead ? array( ik_product_page_key( $product ), 'head', 'lead' ) : array( ...$row, 'short' );
 
 get_template_part(
 	'template-parts/page-head',
 	null,
 	array(
-		'title'  => $product['title'],
-		'text'   => $product['short'],
-		'crumbs' => array(
+		'title'      => $product['title'],
+		'text'       => '' !== $lead ? $lead : $product['short'],
+		'title_edit' => array( ...$row, 'title' ),
+		'text_edit'  => $lead_edit,
+		'crumbs'     => array(
 			array( nwcs_field( 'products', 'detail', 'back_label' ), home_url( '/urunlerimiz/' ) ),
 		),
 	)
@@ -32,7 +39,7 @@ get_template_part(
 <section class="ik-section ik-product">
 	<div class="ik-wrap ik-product__grid">
 		<article class="ik-product__main">
-			<figure class="ik-product__media">
+			<figure class="ik-product__media" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'image' ); ?>>
 				<?php if ( ! empty( $image['url'] ) ) : ?>
 					<?php // Buyutme: tam boy gorsel pencerede, icinde ikinci kademe yakinlastirma (assets/js/product-zoom.js). ?>
 					<button type="button" class="ik-zoom-open" data-ik-zoom-open
@@ -74,7 +81,7 @@ get_template_part(
 
 			<?php if ( $specs ) : ?>
 				<h2 class="ik-product__subtitle" <?php nwcs_edit_attr( 'products', 'detail', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'products', 'detail', 'specs_title' ) ); ?></h2>
-				<dl class="ik-specs">
+				<dl class="ik-specs" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'specs' ); ?>>
 					<?php foreach ( $specs as $spec ) : ?>
 						<div class="ik-specs__row">
 							<dt><?php echo esc_html( $spec[0] ); ?></dt>
@@ -101,7 +108,7 @@ get_template_part(
 				<ul>
 					<?php foreach ( ik_products() as $item ) : ?>
 						<li>
-							<a class="ik-sidelist__link" href="<?php echo esc_url( $item['url'] ); ?>"<?php echo $item['slug'] === $product['slug'] ? ' aria-current="page"' : ''; ?>>
+							<a class="ik-sidelist__link" href="<?php echo esc_url( $item['url'] ); ?>"<?php echo $item['slug'] === $product['slug'] ? ' aria-current="page"' : ''; ?> <?php nwcs_edit_attr( 'products', 'catalog', 'items', (int) $item['index'], 'title' ); ?>>
 								<?php echo esc_html( $item['title'] ); ?>
 								<?php ik_icon( 'arrow', 16 ); ?>
 							</a>

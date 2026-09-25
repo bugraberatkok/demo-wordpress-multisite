@@ -2,9 +2,12 @@
 /**
  * Ust bilgi seridi, logo, ana menu ve telefon. Degerler 'global' sayfasindan.
  *
- * Urunlerimiz acilir listesi urun satirlarindan uretilir (ik_menu). Masaustunde
- * imlec ya da klavye odagiyla, dar ekranda ok dugmesiyle acilir; davranis
- * assets/js/nav.js icinde.
+ * Urunlerimiz acilir listesi panel satirlarindan ya da urun listesinden
+ * uretilir (ik_menu). Masaustunde imlec ya da klavye odagiyla, dar ekranda ok
+ * dugmesiyle acilir; davranis assets/js/nav.js icinde.
+ *
+ * Panel onizlemesi icin isaretler tekil ogelerde: tum menuyu saran bir isaret
+ * ok dugmesinin tiklamasini yutuyor, liste acilmiyordu.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -60,7 +63,7 @@ $menu = ik_menu();
 		</button>
 
 		<div class="ik-header__panel" id="ik-menu">
-			<nav class="ik-nav" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
+			<nav class="ik-nav" aria-label="Ana menü">
 				<ul class="ik-nav__list">
 					<?php foreach ( $menu as $item ) : ?>
 						<?php
@@ -82,9 +85,9 @@ $menu = ik_menu();
 								<div class="ik-drop" id="<?php echo esc_attr( $drop_id ); ?>">
 									<ul class="ik-drop__list">
 										<?php foreach ( $item['children'] as $child ) : ?>
-											<?php $thumb = ik_product_image( $child['product'], 'thumbnail' ); ?>
+											<?php $thumb = $child['product'] ? ik_product_image( $child['product'], 'thumbnail' ) : array(); ?>
 											<li>
-												<a class="ik-drop__link" href="<?php echo esc_url( $child['url'] ); ?>"<?php echo ik_is_current( $child['url'] ) ? ' aria-current="page"' : ''; ?> <?php nwcs_edit_attr( 'products', 'catalog', 'items', (int) $child['product']['index'], 'title' ); ?>>
+												<a class="ik-drop__link" href="<?php echo esc_url( $child['url'] ); ?>"<?php echo ik_is_current( $child['url'] ) ? ' aria-current="page"' : ''; ?> <?php nwcs_edit_attr( ...$child['edit'] ); ?>>
 													<?php echo ik_image_tag( $thumb, 'ik-drop__thumb', '' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 													<span><?php echo esc_html( $child['label'] ); ?></span>
 												</a>
