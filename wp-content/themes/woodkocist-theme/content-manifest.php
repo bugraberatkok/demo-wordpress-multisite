@@ -1,18 +1,32 @@
 <?php
 /**
- * woodkocist temasi alan manifesti (YEREL DENEME).
+ * woodkocist temasi alan manifesti.
  *
  * Urunler burada tanimlanmaz: merkezi Urun Havuzu'ndan gelir. Hangi urunun
  * sitede gorunecegi Icerik Studyosu -> Ana Sayfa -> Urunler alanindan secilir
  * (urun ekle / cikar / sirala / siteye ozel ad-fiyat). Kod gerekmez.
  *
- * Iletisim: woodkocist.com.tr'nin kendi sayfasinda gorunen WhatsApp numarasi
- * (0549 648 19 19). Adres grubun ortak adresi (Kestanelik / Catalca). Sitenin
- * kendi sayfasinda telefon ve e-posta gorunmedigi icin bos; panelden girilince
- * gorunur.
+ * Metinler woodkocist.com.tr'nin kendi sayfalarindan (25 Eylul 2026): ana sayfa,
+ * Sirketimiz, Cozum Merkezi (/iletisim/), Ozel Uretim, SSS ve odeme adimi.
+ * Iletisim: sitenin kendi /iletisim/ sayfasi (WhatsApp 0549 648 19 19, kurumsal
+ * hat 0212 648 19 19, info@woodkocist.com.tr). Adres ve "50 yil" butun
+ * sitelerde ayni (kullanici karari, 25 Eylul 2026): Kestanelik ... 2125/1.
+ *
+ * Yasal ve kurumsal metinler (KVKK, mesafeli satis...) WordPress sayfasidir:
+ * content/pages.php ilk metni verir, sonrasi WordPress duzenleyicisinden.
  */
 
 $address = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
+
+$head = static function ( string $title, string $lead ): array {
+	return array(
+		'label'  => 'Sayfa Başı',
+		'fields' => array(
+			'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => $title ),
+			'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => $lead ),
+		),
+	);
+};
 
 return array(
 	'site_key'          => 'woodkocist',
@@ -21,9 +35,9 @@ return array(
 	'seo_site_defaults' => array(
 		'name'        => 'WOOD KOCIST',
 		'legal_name'  => '',
-		'description' => 'Ahşap bahçe mobilyası, ev ürünleri ve evcil hayvan yuvaları: Adirondack sandalye, çardak, kamelya, piknik masası, şezlong, kedi yuvası ve köpek kulübesi. Koçist Grup kuruluşu.',
-		'phone'       => '+90 549 648 19 19',
-		'email'       => '',
+		'description' => 'Ahşap bahçe mobilyası, ev ürünleri ve evcil hayvan yuvaları: Adirondack sandalye, çardak, kamelya, piknik masası, şezlong, kedi yuvası ve köpek kulübesi. Koçist Orman Ürünleri markası.',
+		'phone'       => '+90 212 648 19 19',
+		'email'       => 'info@woodkocist.com.tr',
 		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
 		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',
@@ -37,7 +51,7 @@ return array(
 	'pages'             => array(
 
 		'global' => array(
-			'label'      => 'Tüm Sayfalar (Üst Menü, Alt Bilgi)',
+			'label'      => 'Tüm Sayfalar (Üst Menü, Alt Bilgi, Mağaza Ayarları)',
 			'path'       => '/',
 			'components' => array(
 				'header' => array(
@@ -45,7 +59,7 @@ return array(
 					'fields' => array(
 						'logo_text'      => array( 'label' => 'Marka', 'type' => 'text', 'default' => 'WOOD KOCIST' ),
 						'menu'           => array(
-							'label'   => 'Menü Öğeleri',
+							'label'   => 'Menü Öğeleri (Mağaza ve Hakkımızda açılır menüsü kendiliğinden eklenir)',
 							'type'    => 'repeater',
 							'max'     => 6,
 							'fields'  => array(
@@ -53,25 +67,39 @@ return array(
 								'url'   => array( 'label' => 'Bağlantı Adresi', 'type' => 'url' ),
 							),
 							'default' => array(
-								array( 'label' => 'Ürünler', 'url' => '/#urunler' ),
-								array( 'label' => 'Nasıl sipariş verilir', 'url' => '/#siparis-adimlari' ),
-								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
-								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
+								array( 'label' => 'Anasayfa', 'url' => '/' ),
+								array( 'label' => 'Mağaza', 'url' => '/magaza/' ),
+								array( 'label' => 'Hakkımızda', 'url' => '/sirketimiz/' ),
+								array( 'label' => 'Çözüm Merkezi', 'url' => '/iletisim/' ),
 							),
 						),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => 'https://wa.me/905496481919' ),
 						'whatsapp_label' => array( 'label' => 'WhatsApp Numarası (görünen)', 'type' => 'text', 'default' => '0549 648 19 19' ),
-						'phone_label'    => array( 'label' => 'Telefon (boşsa gizlenir)', 'type' => 'text', 'default' => '' ),
-						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => '' ),
-						'email'          => array( 'label' => 'E-posta (boşsa gizlenir)', 'type' => 'text', 'default' => '' ),
+						'phone_label'    => array( 'label' => 'Kurumsal Telefon (boşsa gizlenir)', 'type' => 'text', 'default' => '0212 648 19 19' ),
+						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+902126481919' ),
+						'email'          => array( 'label' => 'E-posta (boşsa gizlenir)', 'type' => 'text', 'default' => 'info@woodkocist.com.tr' ),
 					),
 				),
 				'footer' => array(
 					'label'  => 'Alt Bilgi',
 					'fields' => array(
-						'tagline'   => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'Ahşap bahçe mobilyası, ev ürünleri ve evcil hayvan yuvaları. Koçist Grup kuruluşudur.' ),
+						'band'      => array( 'label' => 'Marka Şeridi', 'type' => 'text', 'default' => 'WOOD Koçist bir Koçist Orman Ürünleri markasıdır.' ),
+						'tagline'   => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'Sadece kendi evlerimizde ve bahçelerimizde görmek isteyeceğimiz, zanaatına ve kalitesine bizzat güvendiğimiz özel tasarımları üretiyoruz.' ),
 						'address'   => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => $address ),
-						'copyright' => array( 'label' => 'Telif Satırı', 'type' => 'text', 'default' => 'WOOD KOCIST · Koçist Grup' ),
+						'copyright' => array( 'label' => 'Telif Satırı', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri' ),
+					),
+				),
+				'shop'   => array(
+					'label'  => 'Mağaza Ayarları (sepet ve ödeme)',
+					'fields' => array(
+						'vat_mode'       => array( 'label' => 'Fiyatlar KDV: "dahil" ya da "haric"', 'type' => 'text', 'default' => 'dahil', 'hint' => 'Ürün Havuzu’ndaki fiyatlar KDV’yi içeriyorsa "dahil" (woodkocist.com.tr’de fiyatlar KDV dahil). "haric" yazılırsa sepette KDV ayrıca eklenir.' ),
+						'vat_rate'       => array( 'label' => 'KDV Oranı (%)', 'type' => 'text', 'default' => '20' ),
+						'shipping_label' => array( 'label' => 'Kargo Satırında Yazan', 'type' => 'text', 'default' => 'Ücretsiz' ),
+						'shipping_note'  => array( 'label' => 'Teslimat Notu (ürün sayfası ve sepet)', 'type' => 'text', 'default' => 'Küçük ürünler anlaşmalı lojistikle, büyük ve kurulum gerektiren ürünler saha ekibimizle gelir.' ),
+						'lead_time'      => array( 'label' => 'Üretim ve Teslim Süresi', 'type' => 'text', 'default' => 'Standart modellerde üretim ve kalite kontrol ortalama 7–14 iş günü sürer.' ),
+						'pickup_address' => array( 'label' => 'Fabrikadan Teslim Adresi', 'type' => 'textarea', 'default' => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
+						'payment_text'   => array( 'label' => 'Havale / EFT Açıklaması', 'type' => 'textarea', 'default' => 'Ödemenizi doğrudan şirketimizin banka hesabına yapın. Lütfen ilgili sipariş numarasını ödeme açıklamanızda belirtin. Siparişiniz, ödemeniz onaylandıktan sonra üretim programına alınacaktır.' ),
+						'bank_accounts'  => array( 'label' => 'Banka Hesapları (sipariş onayında görünür)', 'type' => 'textarea', 'default' => '', 'hint' => 'Her satıra bir bilgi: Banka adı, hesap sahibi, IBAN. Boşsa onay sayfası "hesap bilgilerini size ileteceğiz" der.' ),
 					),
 				),
 			),
@@ -88,21 +116,21 @@ return array(
 				'hero' => array(
 					'label'  => 'Giriş',
 					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Bahçeye, eve ve dostlarınıza ahşap' ),
-						'lead'  => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Adirondack sandalye, çardak, kamelya, piknik masası ve şezlong; kedi yuvası ve köpek kulübesi. Beğendiğiniz ürünü WhatsApp’tan ya da formla sorun, fiyat ve teslim bilgisiyle dönelim.' ),
+						'title'     => array( 'label' => 'Başlık (iki satır: satır sonuyla ayırın)', 'type' => 'textarea', 'default' => "Doğanın Estetiği\nMühendisliğin Kusursuzluğu" ),
+						'lead'      => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Yarım asırlık Koçist® tecrübesiyle, yaşam alanlarınızı zamansız tasarımlarla buluşturuyoruz. Koleksiyonumuzu keşfedin veya mimari projeleriniz için bizimle tasarım sürecini başlatın.' ),
+						'cta'       => array( 'label' => 'Ana Düğme', 'type' => 'text', 'default' => 'Koleksiyonu keşfet' ),
+						'cta_alt'   => array( 'label' => 'İkinci Düğme (Özel Üretim)', 'type' => 'text', 'default' => 'Özel üretim isteyin' ),
 					),
 				),
 				'catalog' => array(
-					'label'  => 'Ürünler',
+					'label'  => 'Ürünler ve Seriler',
 					'fields' => array(
-						'title'     => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Ürünler' ),
-						'all_label' => array( 'label' => '"Tümü" Düğmesi', 'type' => 'text', 'default' => 'Tümü' ),
-						'pool'      => array(
+						'pool'  => array(
 							'label' => 'Sitede görünen ürünler (Ürün Havuzu’ndan seçin, sıralayın)',
 							'type'  => 'products',
 						),
-						'lines'     => array(
-							'label'   => 'Seriler (üstteki büyük seçici)',
+						'lines' => array(
+							'label'   => 'Seriler (menü, ana sayfa kutuları, mağaza)',
 							'type'    => 'repeater',
 							'max'     => 6,
 							'fields'  => array(
@@ -111,12 +139,40 @@ return array(
 								'text'     => array( 'label' => 'Kısa Açıklama', 'type' => 'text' ),
 							),
 							'default' => array(
-								array( 'label' => 'WOODGarden', 'category' => 'WOODGarden', 'text' => 'Bahçe ve teras' ),
-								array( 'label' => 'WOODLiving', 'category' => 'WOODLiving', 'text' => 'Ev ve balkon' ),
-								array( 'label' => 'WOODPets', 'category' => 'WOODPets', 'text' => 'Kedi ve köpek yuvaları' ),
+								array( 'label' => 'WOODPets', 'category' => 'WOODPets', 'text' => 'Köpek kulübeleri ve kedi yuvaları' ),
+								array( 'label' => 'WOODGarden', 'category' => 'WOODGarden', 'text' => 'Kamelyalar, çardaklar, piknik masaları ve şezlonglar' ),
+								array( 'label' => 'WOODLiving', 'category' => 'WOODLiving', 'text' => 'Adirondack sandalyeler' ),
 							),
 						),
-						'empty'     => array( 'label' => 'Ürün Yokken Görünen Metin', 'type' => 'text', 'default' => 'Bu seride şu an gösterilen ürün yok. Aradığınızı WhatsApp’tan sorun.' ),
+					),
+				),
+				'rows' => array(
+					'label'  => 'Ürün Satırları',
+					'fields' => array(
+						'items' => array(
+							'label'   => 'Satırlar (kategori adı havuzdakiyle birebir)',
+							'type'    => 'repeater',
+							'max'     => 8,
+							'fields'  => array(
+								'title'    => array( 'label' => 'Başlık', 'type' => 'text' ),
+								'category' => array( 'label' => 'Havuzdaki Kategori Adı', 'type' => 'text' ),
+							),
+							'default' => array(
+								array( 'title' => 'Ahşap Kamelyalar', 'category' => 'Kamelyalar' ),
+								array( 'title' => 'Adirondack Sandalyeler', 'category' => 'Adirondack' ),
+								array( 'title' => 'Ahşap Köpek Kulübeleri', 'category' => 'Köpek Kulübeleri' ),
+								array( 'title' => 'Ahşap Çardaklar', 'category' => 'Çardaklar' ),
+								array( 'title' => 'Ahşap Kedi Yuvaları', 'category' => 'Kedi Yuvaları' ),
+							),
+						),
+					),
+				),
+				'banner' => array(
+					'label'  => 'Tanıtım Bandı',
+					'fields' => array(
+						'title'    => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Bahçenize değer katan, her mevsim koşuluna dayanıklı el işçiliği lüks ahşap kamelya ve çardak tasarımları.' ),
+						'button'   => array( 'label' => 'Düğme', 'type' => 'text', 'default' => 'Kamelyaları inceleyin' ),
+						'category' => array( 'label' => 'Düğmenin Açtığı Kategori (havuzdaki ad)', 'type' => 'text', 'default' => 'Kamelyalar' ),
 					),
 				),
 				'steps' => array(
@@ -132,66 +188,155 @@ return array(
 								'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea' ),
 							),
 							'default' => array(
-								array( 'title' => 'Ürünü seçin', 'text' => 'Ürün kodunu not edin ya da ürün sayfasındaki düğmeye basın; kod mesaja kendiliğinden eklenir.' ),
-								array( 'title' => 'Bize yazın', 'text' => 'WhatsApp’tan ya da sipariş formundan adedi ve teslim adresinin ilini yazın.' ),
-								array( 'title' => 'Fiyat ve teslim bilgisi', 'text' => 'Ürünün güncel fiyatı ve teslim seçenekleriyle size dönüş yapalım.' ),
+								array( 'title' => 'Ürünü sepete ekleyin', 'text' => 'Ürün sayfasında adedi seçip “Sepete ekle”ye basın. Fiyatı yazmayan ürünleri WhatsApp’tan sorun.' ),
+								array( 'title' => 'Teslimat bilgilerinizi girin', 'text' => 'Üyelik gerekmez: ad, telefon, e-posta ve adres yeterli. İsterseniz fabrikadan teslim alın.' ),
+								array( 'title' => 'Havale / EFT ile ödeyin', 'text' => 'Sipariş numaranızı açıklamaya yazın. Ödeme onaylanınca siparişiniz üretim programına alınır.' ),
 							),
 						),
 					),
 				),
-				'contact' => array(
-					'label'  => 'Sipariş Bölümü',
+				'about' => array(
+					'label'  => 'Marka Bölümü',
 					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sipariş ve soru' ),
-						'lead'  => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Ürün kodunu, adedi ve teslim ilini yazın; size dönelim.' ),
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'WOOD Koçist Orman Ürünleri' ),
+						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Sadece kendi evlerimizde ve bahçelerimizde görmek isteyeceğimiz, zanaatına ve kalitesine bizzat güvendiğimiz özel tasarımları üretiyoruz. Değerli ahşap yapıların taşımacılığında derin bir tecrübeye sahibiz; ürünlerimizi her yere korumalı ve güvenli nakliye standartlarıyla ulaştırıyoruz.' ),
+						'items' => array(
+							'label'   => 'Öne Çıkanlar',
+							'type'    => 'repeater',
+							'max'     => 4,
+							'fields'  => array(
+								'text' => array( 'label' => 'Metin', 'type' => 'text' ),
+							),
+							'default' => array(
+								array( 'text' => '50 Yıllık Tecrübe' ),
+								array( 'text' => 'Birinci Sınıf İşçilik' ),
+								array( 'text' => 'Yüksek Kalite' ),
+							),
+						),
 					),
 				),
 			),
 		),
 
-		'about' => array(
-			'label'      => 'Hakkımızda',
-			'path'       => '/hakkimizda/',
+		'shop' => array(
+			'label'      => 'Mağaza',
+			'path'       => '/magaza/',
 			'seo_source' => array(
 				'title'       => 'head.title',
 				'description' => 'head.lead',
 			),
 			'components' => array(
-				'head' => array(
-					'label'  => 'Sayfa Başı',
+				'head' => $head( 'Mağaza', 'Kamelya, çardak, Adirondack sandalye, piknik masası, şezlong, köpek kulübesi ve kedi yuvası. Fiyatlar KDV dahil; üyelik gerekmeden sipariş verin.' ),
+			),
+		),
+
+		'about' => array(
+			'label'      => 'Hakkımızda (Şirketimiz)',
+			'path'       => '/sirketimiz/',
+			'seo_source' => array(
+				'title'       => 'head.title',
+				'description' => 'story.intro',
+			),
+			'components' => array(
+				'head'  => $head( 'Doğanın dokusunu 50 yıllık tecrübeyle şekillendiriyoruz', 'Yarım asırlık Koçist® güvencesine hoş geldiniz.' ),
+				'story' => array(
+					'label'  => 'Hikayemiz',
 					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Hakkımızda' ),
-						'lead'  => array( 'label' => 'Öne Çıkan Cümle', 'type' => 'textarea', 'default' => 'WOOD KOCIST, Koçist Grup’un bahçe, ev ve evcil hayvan ürünleri markasıdır.' ),
+						'intro' => array( 'label' => 'Giriş', 'type' => 'textarea', 'default' => 'Koçist Grup olarak, orman ürünleri sektöründeki 50 yıllık köklü geçmişimizle, doğanın bize sunduğu değeri yaşam alanlarınızı güzelleştiren estetik dokunuşlara dönüştürüyoruz.' ),
+						'items' => array(
+							'label'   => 'Öne Çıkanlar',
+							'type'    => 'repeater',
+							'max'     => 4,
+							'fields'  => array(
+								'text' => array( 'label' => 'Metin', 'type' => 'text' ),
+							),
+							'default' => array(
+								array( 'text' => '50 Yıllık Tecrübe' ),
+								array( 'text' => 'Yüksek Standartlar' ),
+								array( 'text' => 'Birinci Sınıf İşçilik' ),
+							),
+						),
+						'title' => array( 'label' => 'İkinci Başlık', 'type' => 'text', 'default' => 'İhtiyacınıza özel uçtan uca üretim süreci' ),
+						'text'  => array( 'label' => 'Metin (paragrafları boş satırla ayırın)', 'type' => 'textarea', 'default' => "Endüstriyel ahşap uzmanlığımızı bir adım öteye taşıyarak; ahşabın sıcaklığını yansıtan modern dekorasyon ürünleri ve sadık dostlarımız için köpek kulübeleri gibi özel tasarım ahşap yapılar üretiyoruz.\n\nAmacımız, yarım asırlık tecrübemiz ve işçiliğimizle, ilkelerimizden taviz vermeden ahşabın en doğal ve şık halini sizlere sunmaktır.\n\nKereste ve endüstriyel ambalaj çözümlerimizin yanı sıra; evinize, bahçenize ve evcil hayvanlarınıza özel ahşap projeleri hayata geçiriyoruz. Standart ölçülerin dışına çıkarak, tamamen sizin taleplerinize ve alanınıza uygun dekoratif ahşap yapılar dizayn ediyor, uzman ekibimizle en hızlı şekilde üreterek güvenle adresinize sevk ediyoruz." ),
 					),
 				),
-				'story' => array(
-					'label'  => 'Metin',
+			),
+		),
+
+		'faq' => array(
+			'label'      => 'Sıkça Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'head.title',
+				'description' => 'head.lead',
+			),
+			'components' => array(
+				'head'  => $head( 'Sıkça sorulan sorular', 'Üretim ve malzeme, özel üretim, nakliye ve kurulum, sipariş ve ödeme, iade ve garanti hakkında en çok sorulanlar.' ),
+				'items' => array(
+					'label'  => 'Sorular',
 					'fields' => array(
-						'text' => array( 'label' => 'Metin (paragrafları boş satırla ayırın)', 'type' => 'textarea', 'default' => "Koçist Grup 50 yıldır orman ürünleri alanında çalışıyor. WOOD KOCIST bu deneyimi bahçeye, eve ve evcil hayvanlara taşıyor: Adirondack sandalyeden çardağa, kamelyadan köpek kulübesine ahşap ürünler.\n\nÜrünlerin ahşap cinsi, boyutu, taşıma kapasitesi ve kurulum bilgisi her ürün sayfasında yazıyor. Aradığınızı bulamazsanız bize yazın." ),
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar (aynı grup adı bir başlık altında toplanır)',
+							'type'    => 'repeater',
+							'max'     => 40,
+							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
+								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
+								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
+							),
+							'default' => require __DIR__ . '/content/faq.php',
+						),
 					),
 				),
 			),
 		),
 
 		'contact' => array(
-			'label'      => 'İletişim',
+			'label'      => 'Çözüm Merkezi (İletişim)',
 			'path'       => '/iletisim/',
 			'seo_source' => array(
 				'title'       => 'head.title',
 				'description' => 'head.lead',
 			),
 			'components' => array(
-				'head' => array(
-					'label'  => 'Sayfa Başı',
-					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'İletişim' ),
-						'lead'  => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Ürün kodunu ve adedi yazın ya da WhatsApp’tan ulaşın; size dönelim.' ),
-					),
-				),
+				'head'    => $head( 'Çözüm Merkezi', 'Sorularınız, özel üretim talepleriniz veya kurumsal iş birlikleri için bize ulaşın; talebiniz ilgili departmana iletilir ve en kısa sürede dönüş yapılır.' ),
 				'details' => array(
 					'label'  => 'Bilgiler',
 					'fields' => array(
-						'address' => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => $address ),
+						'lines'   => array(
+							'label'   => 'Adresler',
+							'type'    => 'repeater',
+							'max'     => 5,
+							'fields'  => array(
+								'label' => array( 'label' => 'Başlık', 'type' => 'text' ),
+								'value' => array( 'label' => 'Adres', 'type' => 'text' ),
+							),
+							'default' => array(
+								array( 'label' => 'Adres (fabrika ve showroom)', 'value' => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
+							),
+						),
+						'map'     => array( 'label' => 'Harita Araması (boşsa harita yok)', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri' ),
+					),
+				),
+			),
+		),
+
+		'custom' => array(
+			'label'      => 'Özel Üretim',
+			'path'       => '/ozel-uretim-talep-formu/',
+			'seo_source' => array(
+				'title'       => 'head.title',
+				'description' => 'head.lead',
+			),
+			'components' => array(
+				'head' => $head( 'Mekânlarınıza özel mimari ustalık ve mühendislik çözümleri', 'Koçist Grup’un yarım asırlık orman ürünleri tecrübesiyle, hayallerinizdeki yapıyı projelendiriyor, doğanın estetiğini mühendislik hassasiyetiyle birleştiriyoruz.' ),
+				'form' => array(
+					'label'  => 'Form',
+					'fields' => array(
+						'title' => array( 'label' => 'Form Başlığı', 'type' => 'text', 'default' => 'Özel proje talep formu' ),
+						'lead'  => array( 'label' => 'Form Açıklaması', 'type' => 'textarea', 'default' => 'Mekânınızın teknik gereksinimlerini ve mimari beklentilerinizi bizimle paylaşın; uzman mühendislik ekibimiz projenizi hayata geçirmek üzere sizinle iletişime geçsin.' ),
 					),
 				),
 			),

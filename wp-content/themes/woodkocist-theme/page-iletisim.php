@@ -1,6 +1,7 @@
 <?php
 /**
- * Iletisim: WhatsApp, (girildiyse) telefon ve e-posta, adres, siparis formu.
+ * Cozum Merkezi (/iletisim/): destek hatlari, e-posta, adresler, harita ve
+ * talep formu (inc/requests.php).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,32 +11,68 @@ get_header();
 $wa    = wk_whatsapp();
 $phone = trim( (string) nwcs_field( 'global', 'header', 'phone_label' ) );
 $email = trim( (string) nwcs_field( 'global', 'header', 'email' ) );
+$lines = nwcs_rows( 'contact', 'details', 'lines' );
+$map   = trim( (string) nwcs_field( 'contact', 'details', 'map' ) );
 ?>
 
-<section class="wk-pagehead">
+<section class="wk-pagehead wk-pagehead--compact">
 	<div class="wk-wrap">
 		<h1 class="wk-hero__title" <?php nwcs_edit_attr( 'contact', 'head', 'title' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'head', 'title' ) ); ?></h1>
 		<p class="wk-hero__lead" <?php nwcs_edit_attr( 'contact', 'head', 'lead' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'head', 'lead' ) ); ?></p>
 	</div>
 </section>
 
-<section class="wk-order">
-	<div class="wk-wrap wk-order__grid">
-		<dl class="wk-lines-info">
+<div class="wk-wrap wk-section wk-contact">
+	<div class="wk-contact__info">
+		<ul class="wk-lines-cards">
 			<?php if ( $wa ) : ?>
-				<div><dt>WhatsApp</dt><dd><a class="wk-num" href="<?php echo esc_url( $wa ); ?>" target="_blank" rel="noopener"><?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?></a></dd></div>
+				<li>
+					<span class="wk-lines-cards__label">Müşteri destek hattı ve WhatsApp</span>
+					<a class="wk-num" href="<?php echo esc_url( $wa ); ?>" target="_blank" rel="noopener"><?php echo wk_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?></a>
+				</li>
 			<?php endif; ?>
 			<?php if ( $phone ) : ?>
-				<div><dt>Telefon</dt><dd><a class="wk-num" href="<?php echo esc_url( wk_link( nwcs_field( 'global', 'header', 'phone_url' ) ) ); ?>"><?php echo esc_html( $phone ); ?></a></dd></div>
+				<li>
+					<span class="wk-lines-cards__label">Kurumsal iletişim hattı</span>
+					<a class="wk-num" href="<?php echo esc_url( wk_link( nwcs_field( 'global', 'header', 'phone_url' ) ) ); ?>"><?php echo wk_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapingOutput ?><?php echo esc_html( $phone ); ?></a>
+				</li>
 			<?php endif; ?>
 			<?php if ( $email ) : ?>
-				<div><dt>E-posta</dt><dd><a href="<?php echo esc_url( 'mailto:' . $email ); ?>"><?php echo esc_html( $email ); ?></a></dd></div>
+				<li>
+					<span class="wk-lines-cards__label">E-posta</span>
+					<a href="<?php echo esc_url( 'mailto:' . $email ); ?>"><?php echo esc_html( $email ); ?></a>
+				</li>
 			<?php endif; ?>
-			<div><dt>Adres</dt><dd <?php nwcs_edit_attr( 'contact', 'details', 'address' ); ?>><?php echo wk_multiline( (string) nwcs_field( 'contact', 'details', 'address' ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?></dd></div>
-		</dl>
-		<?php wk_part( 'order-form' ); ?>
+		</ul>
+
+		<?php if ( $lines ) : ?>
+			<dl class="wk-lines-info" <?php nwcs_edit_attr( 'contact', 'details', 'lines' ); ?>>
+				<?php foreach ( $lines as $line ) : ?>
+					<div><dt><?php echo esc_html( $line['label'] ?? '' ); ?></dt><dd><?php echo esc_html( $line['value'] ?? '' ); ?></dd></div>
+				<?php endforeach; ?>
+			</dl>
+		<?php endif; ?>
+
+		<ul class="wk-quicklinks">
+			<li><a href="<?php echo esc_url( wk_page_url( 'sss' ) ); ?>">Sıkça sorulan sorular</a></li>
+			<li><a href="<?php echo esc_url( wk_page_url( 'iptal-iade-kosullari' ) ); ?>">Kargo, iptal ve iade</a></li>
+			<li><a href="<?php echo esc_url( wk_page_url( 'odeme-teslimat' ) ); ?>">Ödeme ve teslimat</a></li>
+			<li><a href="<?php echo esc_url( wk_page_url( 'ozel-uretim-talep-formu' ) ); ?>">Özel üretim talep formu</a></li>
+		</ul>
 	</div>
-</section>
+
+	<div class="wk-contact__form">
+		<h2 class="wk-h3">Talebinizi yazın</h2>
+		<p class="wk-lead">Talebiniz ilgili departmana iletilir; en kısa sürede dönüş yapılır.</p>
+		<?php wk_part( 'request-form', array( 'kind' => 'iletisim' ) ); ?>
+	</div>
+</div>
+
+<?php if ( '' !== $map ) : ?>
+	<div class="wk-map">
+		<iframe title="<?php echo esc_attr( $map ); ?> haritada" src="<?php echo esc_url( 'https://maps.google.com/maps?q=' . rawurlencode( $map ) . '&t=m&z=15&output=embed' ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+	</div>
+<?php endif; ?>
 
 <?php
 get_footer();

@@ -21,12 +21,18 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 }
 
 require_once get_theme_file_path( 'inc/setup.php' );
-require_once get_theme_file_path( 'inc/order.php' );
+require_once get_theme_file_path( 'inc/requests.php' );
+require_once get_theme_file_path( 'inc/checkout.php' );
+require_once get_theme_file_path( 'inc/catalog.php' );
+require_once get_theme_file_path( 'inc/cart.php' );
+require_once get_theme_file_path( 'inc/nav.php' );
 
 add_action( 'after_setup_theme', 'wk_setup' );
 function wk_setup(): void {
 	add_theme_support( 'title-tag' );
 	add_theme_support( 'html5', array( 'style', 'script', 'search-form', 'gallery', 'caption' ) );
+	// Kurumsal sayfalarin ozeti sayfa basinda ve arama aciklamasinda kullanilir.
+	add_post_type_support( 'page', 'excerpt' );
 }
 
 add_action( 'wp_enqueue_scripts', 'wk_assets' );
@@ -91,10 +97,50 @@ function wk_whatsapp( string $text = '' ): string {
 	return ( '' === $url || '' === $text ) ? $url : add_query_arg( 'text', rawurlencode( $text ), $url );
 }
 
+/**
+ * Marka: gercek sitedeki logo gibi harf karolari ("WOOD" buyuk, "KOCIST"
+ * kucuk). Yazi paneldeki logo_text'ten; tek kelimeyse duz yazi kalir.
+ * Karolar gorsel; ekran okuyucu tam adi okur.
+ */
+function wk_brand_mark(): string {
+	$text  = trim( (string) nwcs_field( 'global', 'header', 'logo_text' ) );
+	$words = preg_split( '/\s+/u', $text, 2 ) ?: array();
+
+	if ( count( $words ) < 2 ) {
+		return esc_html( $text );
+	}
+
+	$tiles = static function ( string $word, string $class ): string {
+		$html = '';
+
+		foreach ( mb_str_split( $word ) as $char ) {
+			$html .= '<span>' . esc_html( $char ) . '</span>';
+		}
+
+		return '<span class="' . $class . '" aria-hidden="true">' . $html . '</span>';
+	};
+
+	return '<span class="wk-sr">' . esc_html( $text ) . '</span>'
+		. $tiles( $words[0], 'wk-mark__top' )
+		. $tiles( $words[1], 'wk-mark__sub' );
+}
+
 function wk_icon( string $name ): string {
 	$paths = array(
 		'whatsapp' => '<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.8 8.5c.3-.6.6-.6.9-.6h.6c.2 0 .4 0 .6.5l.8 1.9c.1.2 0 .4-.1.6l-.5.6c-.1.2-.2.3 0 .6a7 7 0 0 0 3 2.6c.3.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.2.4.4 0 .6-.2 1.3-.9 1.7-.7.4-1.6.5-3.2-.1a10 10 0 0 1-4.5-4c-.8-1.3-.9-2.6-.4-3.4z" fill="currentColor"/>',
 		'phone'    => '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+		'cart'     => '<path d="M3 4h2.2l2.1 10.2a1.5 1.5 0 0 0 1.5 1.2h8.4a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19.5" r="1.5" fill="currentColor"/><circle cx="17" cy="19.5" r="1.5" fill="currentColor"/>',
+		'search'   => '<circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+		'menu'     => '<path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+		'close'    => '<path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+		'chevron'  => '<path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+		'prev'     => '<path d="m14 6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+		'next'     => '<path d="m10 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+		'check'    => '<path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+		'truck'    => '<path d="M3 6h11v9H3zM14 9h4l3 3.5V15h-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="17.5" r="1.8" fill="none" stroke="currentColor" stroke-width="2"/>',
+		'shield'   => '<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 12 2.2 2.2L15.5 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+		'ruler'    => '<path d="M3 16 16 3l5 5L8 21z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m7 12 2 2M10 9l2 2M13 6l2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+		'trash'    => '<path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
 	);
 
 	return isset( $paths[ $name ] ) ? '<svg class="wk-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' . $paths[ $name ] . '</svg>' : '';
