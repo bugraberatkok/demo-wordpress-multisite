@@ -12,11 +12,17 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! function_exists( 'nwcs_field' ) ) {
+	// Eklenti kapaliyken sayfa bos kalmasin: manifestteki varsayilan metin.
 	function nwcs_field( $page, $component, $field, $fallback = null ) {
-		return null === $fallback ? '' : $fallback;
+		if ( null !== $fallback ) {
+			return $fallback;
+		}
+		$default = kr_manifest()['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? '';
+		return null === $default ? '' : $default;
 	}
 	function nwcs_rows( $page, $component, $field ) {
-		return array();
+		$rows = nwcs_field( $page, $component, $field );
+		return is_array( $rows ) ? array_values( $rows ) : array();
 	}
 	function nwcs_image( $page, $component, $field, $size = 'large' ) {
 		return array( 'id' => 0, 'url' => '', 'alt' => '' );
@@ -27,7 +33,8 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 	function nwcs_the_icon( $key, $class = '', $size = 24 ) {}
 	function nwcs_edit_attr( $page, $component, $field = '', $row = null, $sub = '' ) {}
 	function nwcs_section_order( $page = 'home' ) {
-		return array( 'products', 'cousin', 'faq', 'quote' );
+		$sections = kr_manifest()['pages'][ $page ]['sortable_sections'] ?? null;
+		return is_array( $sections ) ? $sections : array( 'products', 'cousin', 'faq', 'quote' );
 	}
 }
 
@@ -71,6 +78,18 @@ function kr_preconnect(): void {
 /* ====================================================================== *
  * Genel yardimcilar
  * ====================================================================== */
+
+/**
+ * WhatsApp baglantisi. Panelde "boşsa düğme gizlenir" yaziyor: alan
+ * bilerek bosaltilip kaydedildiyse bos doner (dugmeler gizlenir). Hic
+ * kaydedilmediyse manifest varsayilani. nwcs_field() bos degeri
+ * varsayilanla doldurdugu icin burada ham deger okunur.
+ */
+function kr_whatsapp_url(): string {
+	$raw = function_exists( 'nwcs_raw' ) ? nwcs_raw( 'global', 'header', 'whatsapp_url' ) : null;
+
+	return trim( (string) ( null === $raw ? nwcs_field( 'global', 'header', 'whatsapp_url' ) : $raw ) );
+}
 
 /**
  * Koke gore yazilmis yolu site adresine baglar; bos baglanti '#'.
@@ -150,9 +169,10 @@ function kr_logo( string $tone = 'dark', string $class = '' ): void {
 	$top   = (string) nwcs_field( 'global', 'header', 'logo_word' );
 	$rest  = (string) nwcs_field( 'global', 'header', 'logo_rest' );
 	?>
-	<span class="kr-logo kr-logo--<?php echo esc_attr( $tone ); ?> <?php echo esc_attr( $class ); ?>">
+	<?php // Logo gorseline ya da isaretine tiklaninca logo gorseli alani; yazilara tiklaninca kendi alanlari. ?>
+	<span class="kr-logo kr-logo--<?php echo esc_attr( $tone ); ?> <?php echo esc_attr( $class ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?>>
 		<?php if ( $image['url'] ) : ?>
-			<img class="kr-logo__image" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( trim( $top . ' ' . $rest ) ); ?>" />
+			<img class="kr-logo__image" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( trim( $top . ' ' . $rest ) ); ?>"<?php echo preg_match( '/\.svg(\?|$)/i', $image['url'] ) ? ' height="48"' : ''; ?> decoding="async" />
 		<?php else : ?>
 			<svg class="kr-logo__mark" viewBox="0 0 32 40" width="32" height="40" aria-hidden="true" focusable="false">
 				<path d="M16 2 7 13h5l-8 10h6L3 33h26l-7-10h6l-8-10h5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" />
@@ -495,6 +515,20 @@ function kr_quote_state(): array {
 		'success' => ! empty( $state['success'] ),
 		'active'  => true,
 	);
+}
+
+/**
+ * Logo icin SVG yukleme: panelde "Logo gorseli" alanina SVG secilebilsin
+ * (sanayi-palet-theme ile ayni kural). SVG betik tasiyabildigi icin yalnizca
+ * filtresiz HTML yetkisi olanlar (agda yalnizca super yonetici) yukleyebilir.
+ */
+add_filter( 'upload_mimes', 'kr_upload_mimes' );
+function kr_upload_mimes( array $mimes ): array {
+	if ( current_user_can( 'unfiltered_html' ) ) {
+		$mimes['svg'] = 'image/svg+xml';
+	}
+
+	return $mimes;
 }
 
 /**

@@ -18,7 +18,7 @@ $phone    = array(
 	'url'   => kr_link( nwcs_field( 'global', 'header', 'phone_url' ) ),
 );
 $cta      = (string) nwcs_field( 'global', 'header', 'cta_label' );
-$whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
+$whatsapp = kr_whatsapp_url();
 $wa_label = (string) nwcs_field( 'global', 'header', 'whatsapp_label' );
 $address  = trim( (string) nwcs_field( 'global', 'footer', 'address' ) );
 $email    = trim( (string) nwcs_field( 'global', 'footer', 'email' ) );

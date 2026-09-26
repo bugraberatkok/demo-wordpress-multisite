@@ -12,7 +12,7 @@ $gallery  = kr_product_gallery( $key );
 $specs    = nwcs_rows( $key, 'specs', 'rows' );
 $body     = (string) nwcs_field( $key, 'detail', 'body' );
 $others   = array_diff_key( kr_products(), array( $key => true ) );
-$whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
+$whatsapp = kr_whatsapp_url();
 ?>
 <article>
 	<div class="bg-stone">

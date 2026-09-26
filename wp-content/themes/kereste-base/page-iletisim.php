@@ -16,7 +16,7 @@ $rows = array(
 	array( 'hours_title', 'hours', '' ),
 );
 $map      = trim( (string) nwcs_field( 'contact', 'details', 'map_url' ) );
-$whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
+$whatsapp = kr_whatsapp_url();
 ?>
 <article>
 	<?php get_template_part( 'template-parts/page-head', null, array( 'page' => 'contact' ) ); ?>

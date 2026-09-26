@@ -428,12 +428,26 @@ return static function ( array $s ): array {
 		),
 	);
 
-	return array(
+	$manifest = array(
 		'site_key'          => $s['key'],
 		'site_label'        => $s['label'],
 		// Panelde gorunen kisa ad: logodaki ad ("İthal Keresteci"), alan adi olmadan.
 		'panel_label'       => $s['panel_label'] ?? implode( ' ', (array) ( $s['logo'] ?? array() ) ),
 		'seo_site_defaults' => $s['seo'],
 		'pages'             => $pages,
+	);
+
+	// Ayni bilgi hem her sayfada (ust menu, alt bilgi) hem Iletisim sayfasinda ayri alan.
+	$hints = require __DIR__ . '/content-manifest-hints.php';
+
+	return $hints(
+		$manifest,
+		array(
+			'Bu telefon numarası'    => array( 'global.header.phone_label', 'contact.details.phone_label' ),
+			'Bu cep numarası'        => array( 'global.header.mobile_label', 'contact.details.mobile_label' ),
+			'Bu e-posta adresi'      => array( 'global.footer.email', 'contact.details.email' ),
+			'Bu adres'               => array( 'global.footer.address', 'contact.details.address' ),
+			'Çalışma saatleri'       => array( 'global.footer.hours', 'contact.details.hours' ),
+		)
 	);
 };
