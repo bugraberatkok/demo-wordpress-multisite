@@ -34,12 +34,17 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 				$gallery = array();
 
 				foreach ( array( 'image', 'image_2', 'image_3', 'image_4' ) as $key_index => $key ) {
-					$picture = ahsapambalaj_image( nwcs_image_by_id( (int) ( $item[ $key ] ?? 0 ), 'large' ), 'services', $item_index, $key_index );
+					$image_id = (int) ( $item[ $key ] ?? 0 );
+					$picture  = ahsapambalaj_image( nwcs_image_by_id( $image_id, 'large' ), 'services', $item_index, $key_index );
 
 					if ( ! empty( $picture['url'] ) ) {
+						// Buyutmede tam boy (yakinlastirma netligi); yedek tema gorselinde ayni dosya.
+						$full = $image_id ? (string) ( nwcs_image_by_id( $image_id, 'full' )['url'] ?? '' ) : '';
+
 						$gallery[] = array(
-							'url' => $picture['url'],
-							'alt' => $picture['alt'] ?: ( $item['title'] ?? '' ),
+							'url'  => $picture['url'],
+							'full' => '' !== $full ? $full : $picture['url'],
+							'alt'  => $picture['alt'] ?: ( $item['title'] ?? '' ),
 						);
 					}
 				}

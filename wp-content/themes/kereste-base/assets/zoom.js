@@ -1,7 +1,8 @@
 /**
  * Buyutme penceresinde ikinci kademe yakinlastirma ("zoom'un zoom'u").
  *
- *   var zoom = woodZoom( stage, image, { in, out, reset, level } );
+ *   var zoom = woodZoom( stage, image, { in, out, reset, level, swipe } );
+ *   // swipe( 1 | -1 ): istege bagli; sigdirilmisken yatay kaydirmada cagrilir.
  *   zoom.reset();   // gorsel degisince
  *   zoom.key( event ); // + - 0 tuslari; islendiyse true
  *
@@ -136,6 +137,18 @@
 		} );
 
 		var release = function ( event ) {
+			// Sigdirilmisken yatay kaydirma: galeride onceki / sonraki gorsel
+			// (ui.swipe verildiyse). Ardindan gelen tiklama yakinlastirmaz.
+			if ( ui.swipe && drag && ! moved && ! pinch && state.scale <= MIN && 'pointerup' === event.type ) {
+				var sx = event.clientX - drag.x;
+				var sy = event.clientY - drag.y;
+
+				if ( Math.abs( sx ) > 50 && Math.abs( sx ) > Math.abs( sy ) * 1.5 ) {
+					moved = true;
+					ui.swipe( sx < 0 ? 1 : -1 );
+				}
+			}
+
 			pointers.delete( event.pointerId );
 
 			if ( pointers.size < 2 ) {

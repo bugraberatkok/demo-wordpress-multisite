@@ -93,9 +93,14 @@
 	( function () {
 		var dialog = document.querySelector( '[data-lightbox]' );
 
-		if ( ! dialog || 'function' !== typeof dialog.showModal ) {
+		// Panel onizlemesinde gorsele tiklamak alan duzenleyicisini acar;
+		// buyutme penceresi araya girmesin.
+		if ( ! dialog || 'function' !== typeof dialog.showModal || document.body.classList.contains( 'nwcs-preview-mode' ) ) {
 			return;
 		}
+
+		var root     = document.documentElement;
+		var returnTo = null;
 
 		var image   = dialog.querySelector( '[data-lightbox-image]' );
 		var stage   = dialog.querySelector( '[data-lightbox-stage]' );
@@ -168,7 +173,8 @@
 
 		// Tiklayinca 1x <-> 2x.
 		stage.addEventListener( 'click', function ( event ) {
-			if ( dragged ) {
+			if ( dragged || swiped ) {
+				swiped = false;
 				return;
 			}
 
@@ -180,6 +186,30 @@
 		var dragging = false;
 		var dragged  = false;
 		var origin   = { x: 0, y: 0 };
+
+		/* --- Sigdirilmisken yana kaydirma: onceki / sonraki gorsel --- */
+		var swipe = null;
+		var swiped = false;
+
+		stage.addEventListener( 'pointerdown', function ( event ) {
+			swiped = false;
+			swipe = zoom.scale <= 1 && event.isPrimary ? { x: event.clientX, y: event.clientY } : null;
+		} );
+
+		stage.addEventListener( 'pointerup', function ( event ) {
+			if ( ! swipe || gallery.length < 2 ) {
+				return;
+			}
+
+			var dx = event.clientX - swipe.x;
+			var dy = event.clientY - swipe.y;
+			swipe = null;
+
+			if ( Math.abs( dx ) > 50 && Math.abs( dx ) > Math.abs( dy ) * 1.5 ) {
+				swiped = true;
+				step( dx < 0 ? 1 : -1 );
+			}
+		} );
 
 		stage.addEventListener( 'pointerdown', function ( event ) {
 			if ( zoom.scale <= 1 ) {
@@ -229,7 +259,7 @@
 				return;
 			}
 
-			image.src = item.url;
+			image.src = item.full || item.url;
 			image.alt = item.alt || '';
 			caption.textContent = item.alt || '';
 			counter.textContent = ( index + 1 ) + ' / ' + gallery.length;
@@ -271,6 +301,12 @@
 
 			index = parseInt( trigger.getAttribute( 'data-lightbox-open' ), 10 ) || 0;
 			render();
+			returnTo = trigger;
+
+			// Arkadaki sayfa kaymasin; kaybolan kaydirma cubugunun yeri korunur.
+			root.style.paddingRight = ( window.innerWidth - root.clientWidth ) + 'px';
+			root.style.overflow = 'hidden';
+
 			dialog.showModal();
 		} );
 
@@ -278,10 +314,10 @@
 		next.addEventListener( 'click', function () { step( 1 ); } );
 
 		dialog.addEventListener( 'keydown', function ( event ) {
-			if ( 'ArrowRight' === event.key ) {
+			if ( 'ArrowRight' === event.key && gallery.length > 1 ) {
 				event.preventDefault();
 				step( 1 );
-			} else if ( 'ArrowLeft' === event.key ) {
+			} else if ( 'ArrowLeft' === event.key && gallery.length > 1 ) {
 				event.preventDefault();
 				step( -1 );
 			} else if ( '+' === event.key || '=' === event.key ) {
@@ -296,7 +332,16 @@
 			}
 		} );
 
-		dialog.addEventListener( 'close', resetZoom );
+		// Kapaninca sayfa serbest, odak acan dugmeye geri doner.
+		dialog.addEventListener( 'close', function () {
+			resetZoom();
+			root.style.overflow = '';
+			root.style.paddingRight = '';
+
+			if ( returnTo && returnTo.isConnected ) {
+				returnTo.focus();
+			}
+		} );
 
 		// Gorselin disina tiklayinca kapansin.
 		dialog.addEventListener( 'click', function ( event ) {

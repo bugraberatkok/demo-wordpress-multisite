@@ -85,7 +85,12 @@ $link    = 'text-paper/85 no-underline transition-colors hover:text-paper';
 </footer>
 
 <?php get_template_part( 'template-parts/quote-dialog' ); ?>
-<?php get_template_part( 'template-parts/lightbox' ); ?>
+<?php
+// Buyutme penceresi yalnizca urun sayfalarinda (galeri orada).
+if ( kr_current_product_key() ) {
+	get_template_part( 'template-parts/lightbox' );
+}
+?>
 
 <?php wp_footer(); ?>
 </body>

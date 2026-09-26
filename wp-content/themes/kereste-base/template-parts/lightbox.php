@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 $control = 'flex items-center justify-center bg-ink/80 text-paper transition-colors hover:bg-mark disabled:opacity-40 disabled:hover:bg-ink/80';
 ?>
-<dialog data-kr-lightbox class="kr-dialog m-auto w-fit max-w-[94vw] bg-transparent p-0">
+<dialog data-kr-lightbox class="kr-dialog kr-lightbox m-auto w-fit max-w-[94vw] bg-transparent p-0">
 	<div class="relative mx-auto w-fit max-w-full bg-paper">
 		<div data-kr-zoom-stage class="relative mx-auto flex max-h-[82vh] w-fit max-w-full items-center justify-center overflow-hidden">
 			<img data-kr-lightbox-image src="" alt="" class="block max-h-[82vh] w-auto max-w-full select-none object-contain" />

@@ -65,8 +65,18 @@ function kr_assets(): void {
 	wp_enqueue_style( 'kr-tailwind', get_template_directory_uri() . '/assets/tailwind.css', array( 'kr-fonts' ), $ver( 'assets/tailwind.css' ) );
 	wp_enqueue_style( 'kr-site', get_stylesheet_uri(), array( 'kr-tailwind' ), $child );
 
-	wp_enqueue_script( 'kr-zoom', get_template_directory_uri() . '/assets/zoom.js', array(), $ver( 'assets/zoom.js' ), true );
-	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', array( 'kr-zoom' ), $ver( 'assets/site.js' ), true );
+	// Yakinlastirma motoru yalnizca urun sayfalarinda (buyutulen galeri orada).
+	$site_deps = array();
+
+	if ( kr_current_product_key() ) {
+		wp_enqueue_script( 'kr-zoom', get_template_directory_uri() . '/assets/zoom.js', array(), $ver( 'assets/zoom.js' ), true );
+		$site_deps[] = 'kr-zoom';
+
+		// Buyutulen gorselin altindaki yazi sayfanin ustunde okunsun: perde koyu.
+		wp_add_inline_style( 'kr-tailwind', '.kr-lightbox::backdrop{background:color-mix(in srgb,var(--color-ink) 92%,transparent)}' );
+	}
+
+	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', $site_deps, $ver( 'assets/site.js' ), true );
 }
 
 add_action( 'wp_head', 'kr_preconnect', 1 );

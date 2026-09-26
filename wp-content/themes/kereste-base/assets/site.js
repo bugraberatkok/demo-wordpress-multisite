@@ -107,14 +107,19 @@
 			} );
 		} );
 
-		if ( ! main || ! lightbox || 'function' !== typeof lightbox.showModal ) {
+		// Panel onizlemesinde gorsele tiklamak alan duzenleyicisini acar;
+		// buyutme penceresi araya girmesin.
+		if ( ! main || ! lightbox || 'function' !== typeof lightbox.showModal || document.body.classList.contains( 'nwcs-preview-mode' ) ) {
 			return;
 		}
 
 		var image = lightbox.querySelector( '[data-kr-lightbox-image]' );
 		var caption = lightbox.querySelector( '[data-kr-lightbox-caption]' );
 		var nav = lightbox.querySelector( '[data-kr-lightbox-nav]' );
+		var root = document.documentElement;
 		var at = 0;
+		var returnTo = null;
+		var show;
 
 		// Pencere icinde ikinci kademe yakinlastirma (assets/zoom.js).
 		var zoom = 'function' === typeof window.woodZoom
@@ -123,10 +128,16 @@
 				out: lightbox.querySelector( '[data-kr-zoom-out]' ),
 				reset: lightbox.querySelector( '[data-kr-zoom-reset]' ),
 				level: lightbox.querySelector( '[data-kr-zoom-level]' ),
+				// Telefonda parmakla yana kaydirinca onceki / sonraki gorsel.
+				swipe: function ( direction ) {
+					if ( gallery.length > 1 ) {
+						show( at + direction );
+					}
+				},
 			} )
 			: null;
 
-		var show = function ( index ) {
+		show = function ( index ) {
 			at = ( index + gallery.length ) % gallery.length;
 			if ( zoom ) {
 				zoom.reset();
@@ -139,7 +150,22 @@
 
 		main.addEventListener( 'click', function () {
 			show( parseInt( main.getAttribute( 'data-kr-open' ), 10 ) || 0 );
+			returnTo = document.activeElement;
+
+			// Arkadaki sayfa kaymasin; kaybolan kaydirma cubugunun yeri korunur.
+			root.style.paddingRight = ( window.innerWidth - root.clientWidth ) + 'px';
+			root.style.overflow = 'hidden';
+
 			lightbox.showModal();
+		} );
+
+		lightbox.addEventListener( 'close', function () {
+			root.style.overflow = '';
+			root.style.paddingRight = '';
+
+			if ( returnTo && returnTo.isConnected ) {
+				returnTo.focus();
+			}
 		} );
 
 		lightbox.querySelector( '[data-kr-lightbox-prev]' ).addEventListener( 'click', function () { show( at - 1 ); } );
@@ -150,9 +176,15 @@
 				return;
 			}
 
+			if ( gallery.length < 2 ) {
+				return;
+			}
+
 			if ( 'ArrowRight' === event.key ) {
+				event.preventDefault();
 				show( at + 1 );
 			} else if ( 'ArrowLeft' === event.key ) {
+				event.preventDefault();
 				show( at - 1 );
 			}
 		} );
