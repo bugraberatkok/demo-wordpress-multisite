@@ -197,7 +197,7 @@ foreach ( (array) include __DIR__ . '/content/blog-posts.php' as $kocist_post ) 
 	);
 }
 
-return array(
+$manifest_data = array(
 	'site_key'   => 'kocist',
 	'site_label' => 'Koçist',
 	// Havuz urun sayfalarinin (/urun/<urun>/) ortak metinleri bu panel sayfasinda.
@@ -219,7 +219,7 @@ return array(
 	'pages'      => array(
 
 		'global' => array(
-			'label'      => 'Tüm Sayfalar (Üst Bilgi, Menü, Footer)',
+			'label'      => 'Tüm Sayfalar (Üst Bilgi, Menü, Sayfa Altı)',
 			'path'       => '/',
 			'components' => array(
 
@@ -271,6 +271,13 @@ return array(
 						 * listeye sigmadigi gibi, 60 satirlik tek form panelde
 						 * duzenlenemez hale gelirdi. Her acilir menu kendi karti
 						 * olarak duruyor.
+						 *
+						 * 'key': urun grubunun sabit anahtari (kereste, ambalaj...).
+						 * Grup sayfasinin adresi (/kategoriler/<anahtar>/), urunlerin
+						 * gruba eslenmesi ve grubun paneldeki gizli sayfasi
+						 * (grp-<anahtar>) buna baglidir; menu metni degisse de
+						 * bunlar degismez. Bossa eski kural: menu metninden
+						 * (bkz. inc/catalog.php kocist_catalog_group_key()).
 						 */
 						'menu'       => array(
 							'label'   => 'Menü Öğeleri',
@@ -280,16 +287,21 @@ return array(
 								'label'   => array( 'label' => 'Menü Metni', 'type' => 'text' ),
 								'url'     => array( 'label' => 'Bağlantı', 'type' => 'url' ),
 								'submenu' => array( 'label' => 'Alt Menü Anahtarı (boşsa açılır menü yok)', 'type' => 'text' ),
+								'key'     => array(
+									'label' => 'Grup anahtarı (değiştirmeyin)',
+									'type'  => 'text',
+									'hint'  => 'Ürün grubunun sabit adı: kereste, ambalaj, dekorasyon, hirdavat. Menü metnini istediğiniz gibi değiştirebilirsiniz; ürünler, grup sayfasının adresi ve metinleri bu anahtara bağlı kalır. Grup olmayan satırlarda boş kalır.',
+								),
 							),
 							'default' => array(
-								array( 'label' => 'Ana Sayfa', 'url' => '/', 'submenu' => '' ),
-								array( 'label' => 'Kereste', 'url' => '/#katalog', 'submenu' => 'menu_kereste' ),
-								array( 'label' => 'Ambalaj', 'url' => '/#katalog', 'submenu' => 'menu_ambalaj' ),
-								array( 'label' => 'Dekorasyon', 'url' => '/#katalog', 'submenu' => 'menu_dekorasyon' ),
-								array( 'label' => 'Hırdavat', 'url' => '/#katalog', 'submenu' => 'menu_hirdavat' ),
-								array( 'label' => 'Kurumsal', 'url' => '/kurumsal/', 'submenu' => 'menu_kurumsal' ),
-								array( 'label' => 'Katalog', 'url' => '/katalog/', 'submenu' => '' ),
-								array( 'label' => 'İletişim', 'url' => '/iletisim/', 'submenu' => '' ),
+								array( 'label' => 'Ana Sayfa', 'url' => '/', 'submenu' => '', 'key' => '' ),
+								array( 'label' => 'Kereste', 'url' => '/#katalog', 'submenu' => 'menu_kereste', 'key' => 'kereste' ),
+								array( 'label' => 'Ambalaj', 'url' => '/#katalog', 'submenu' => 'menu_ambalaj', 'key' => 'ambalaj' ),
+								array( 'label' => 'Dekorasyon', 'url' => '/#katalog', 'submenu' => 'menu_dekorasyon', 'key' => 'dekorasyon' ),
+								array( 'label' => 'Hırdavat', 'url' => '/#katalog', 'submenu' => 'menu_hirdavat', 'key' => 'hirdavat' ),
+								array( 'label' => 'Kurumsal', 'url' => '/kurumsal/', 'submenu' => 'menu_kurumsal', 'key' => '' ),
+								array( 'label' => 'Katalog', 'url' => '/katalog/', 'submenu' => '', 'key' => '' ),
+								array( 'label' => 'İletişim', 'url' => '/iletisim/', 'submenu' => '', 'key' => '' ),
 							),
 						),
 					),
@@ -459,7 +471,7 @@ return array(
 				 * panelden keyfi SVG girilemez.
 				 */
 				'footer' => array(
-					'label'  => 'Footer',
+					'label'  => 'Sayfa Altı (Footer)',
 					'fields' => array(
 
 						// Ustteki hareketli serit
@@ -1429,4 +1441,19 @@ return array(
 			),
 		),
 	) + $kocist_category_pages + $kocist_blog_pages,
+);
+
+// Panel ipuclari: ayni bilginin sitede yazili oldugu diger yerler, baglanti yazimi.
+$manifest_hints = require __DIR__ . '/content-manifest-hints.php';
+
+return $manifest_hints(
+	$manifest_data,
+	array(
+		'Bu telefon numarası' => array( 'global.topbar.phone_label', 'global.footer.phone_label', 'contact.info.phone_label' ),
+		'Bu cep numarası' => array( 'global.topbar.mobile_label', 'global.footer.mobile_label' ),
+		'Bu e-posta adresi' => array( 'global.topbar.email_label', 'global.footer.email_label', 'contact.info.email_label', 'hr.apply.email' ),
+		'Bu adres' => array( 'global.footer.address', 'contact.info.address' ),
+		'Çalışma saatleri' => array( 'global.topbar.hours', 'contact.info.hours' ),
+		'Bu WhatsApp bağlantısı' => array( 'contact.info.whatsapp_url', 'banka.empty.wa_url' ),
+	)
 );

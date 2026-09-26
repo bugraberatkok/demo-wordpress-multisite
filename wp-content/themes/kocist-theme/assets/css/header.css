@@ -391,6 +391,26 @@ html { scroll-padding-top: 88px; }
 	border: 0;
 }
 
+/* Klavyeyle gelen ziyaretci icin "Icerige gec" baglantisi odakta gorunur. */
+.k-skip:focus {
+	position: fixed !important;
+	top: 12px;
+	left: 12px;
+	z-index: 100;
+	width: auto;
+	height: auto;
+	margin: 0;
+	padding: 10px 16px;
+	clip: auto;
+	overflow: visible;
+	white-space: normal;
+	background: #17542f;
+	color: #fff;
+	border-radius: 6px;
+	text-decoration: none;
+	font-weight: 600;
+}
+
 /*
  * Dar ekranda akordiyon. Alt menu isaretlemesi iki kez basilir: masaustu icin
  * ortak panodaki kopya, dar ekran icin ogenin altindaki kopya. Her an yalnizca

@@ -31,14 +31,16 @@ if ( ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
 	);
 }
 ?>
+</main>
+
 <?php if ( $ticker ) : ?>
 	<div class="k-ticker" data-k-ticker>
 		<div class="k-ticker__track">
 			<?php for ( $copy = 0; $copy < 2; $copy++ ) : ?>
 				<ul class="k-ticker__list" <?php echo 0 === $copy ? '' : 'aria-hidden="true"'; ?>>
 					<?php foreach ( $ticker as $ticker_index => $entry ) : ?>
-						<?php // Duzenleme isareti yalnizca ilk kopyada; ikincisi gorsel tekrar. ?>
-						<li class="k-ticker__item" <?php if ( 0 === $copy ) { nwcs_edit_attr( 'global', 'footer', 'ticker', $ticker_index, 'text' ); } ?>>
+						<?php // Iki kopya da isaretli: kayan seritte ikinci kopya da ekranda durur, tiklaninca ayni satir acilir. ?>
+						<li class="k-ticker__item" <?php nwcs_edit_attr( 'global', 'footer', 'ticker', $ticker_index, 'text' ); ?>>
 							<span class="k-ticker__mark" aria-hidden="true">◆</span>
 							<?php echo esc_html( $entry['text'] ?? '' ); ?>
 						</li>
@@ -55,7 +57,7 @@ if ( ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
 
 			<div class="k-footer__brand">
 				<?php if ( ! empty( $logo['url'] ) ) : ?>
-					<img class="k-footer__logo" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( $logo['alt'] ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?> />
+					<img class="k-footer__logo" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( $logo['alt'] ?: get_bloginfo( 'name' ) ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?> />
 				<?php endif; ?>
 
 				<p class="k-footer__about" <?php nwcs_edit_attr( 'global', 'footer', 'about_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'about_text' ) ); ?></p>

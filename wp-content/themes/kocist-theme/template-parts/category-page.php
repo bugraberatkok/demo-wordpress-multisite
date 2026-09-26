@@ -43,9 +43,13 @@ if ( ! $group ) :
 		<div class="k-wrap">
 			<div class="k-shelf">
 				<?php foreach ( $groups as $item ) : ?>
-					<?php $item_count = (int) ( $counts[ $item['slug'] ][''] ?? 0 ); ?>
+					<?php
+					$item_count = (int) ( $counts[ $item['slug'] ][''] ?? 0 );
+					$image_row  = kocist_catalog_group_image_row( $item['slug'] );
+					?>
 					<article class="k-shelf__row">
-						<a class="k-shelf__media" href="<?php echo esc_url( $item['url'] ); ?>" tabindex="-1" aria-hidden="true">
+						<?php // Grup fotografi ana sayfadaki "Urun gruplari" kartindan gelir; tiklaninca o satir acilir. ?>
+						<a class="k-shelf__media" href="<?php echo esc_url( $item['url'] ); ?>" tabindex="-1" aria-hidden="true" <?php if ( $image_row >= 0 ) { nwcs_edit_attr( 'home', 'catalog', 'items', $image_row, 'image' ); } ?>>
 							<?php echo kocist_image_tag( $item['image'], 'k-shelf__img', $item['name'] ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 						</a>
 

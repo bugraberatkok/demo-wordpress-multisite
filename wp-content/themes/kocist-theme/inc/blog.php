@@ -212,7 +212,7 @@ function kocist_post_card( string $heading = 'h2' ): void {
 				<?php if ( $term ) : ?>
 					<span class="k-post-card__cat" <?php kocist_term_attr( $term ); ?>><?php echo esc_html( $term->name ); ?></span>
 				<?php endif; ?>
-				<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( kocist_post_date() ); ?></time>
+				<time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php nwcs_post_attr( (int) get_the_ID(), 'Yayın tarihi' ); ?>><?php echo esc_html( kocist_post_date() ); ?></time>
 			</p>
 			<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit liste. ?> class="k-post-card__title" <?php kocist_post_edit_attr( get_the_ID(), 'title' ); ?>>
 				<a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>

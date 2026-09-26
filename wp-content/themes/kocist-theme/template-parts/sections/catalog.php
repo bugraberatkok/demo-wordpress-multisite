@@ -43,12 +43,13 @@ $item_defaults = array( 's2-kereste.jpg', 's2-ambalaj.jpg', 's2-dekorasyon.jpg',
 					href="<?php echo esc_url( kocist_link( $item_url, '/#katalog' ) ); ?>"
 					data-k-group
 					style="--i: <?php echo (int) $index; ?>"
-					<?php nwcs_edit_attr( 'home', 'catalog', 'items', $index, 'title' ); ?>
+					<?php // Kartin zemini (fotograf) gorsel alanini, baslik yazisi baslik alanini acar. ?>
+					<?php nwcs_edit_attr( 'home', 'catalog', 'items', $index, 'image' ); ?>
 				>
 					<?php echo kocist_image_tag( $image, 'k-group__img', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 
 					<span class="k-group__body">
-						<span class="k-group__title"><?php echo esc_html( $item['title'] ?? '' ); ?></span>
+						<span class="k-group__title" <?php nwcs_edit_attr( 'home', 'catalog', 'items', $index, 'title' ); ?>><?php echo esc_html( $item['title'] ?? '' ); ?></span>
 						<span class="k-group__rule" aria-hidden="true"></span>
 
 						<?php if ( ! empty( $item['link_label'] ) ) : ?>

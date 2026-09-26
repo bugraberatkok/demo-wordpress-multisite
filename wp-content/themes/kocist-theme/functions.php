@@ -23,7 +23,9 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 		return is_scalar( $default ) ? $default : ( null === $fallback ? '' : $fallback );
 	}
 	function nwcs_rows( $page, $component, $field ) {
-		return array();
+		// Menu, alt bilgi ve listeler de manifestteki varsayilan satirlarla gelsin.
+		$rows = kocist_manifest()['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? array();
+		return is_array( $rows ) ? array_values( $rows ) : array();
 	}
 	function nwcs_image( $page, $component, $field, $size = 'large' ) {
 		return array( 'id' => 0, 'url' => '', 'alt' => '' );
@@ -405,10 +407,9 @@ function kocist_assets(): void {
  * @return array Her oge: array{ label: string, url: string, children: array }
  */
 function kocist_menu_items(): array {
-	$menu   = array();
-	$groups = kocist_catalog_groups();
+	$menu = array();
 
-	foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $row ) {
+	foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $row_index => $row ) {
 		$label = trim( (string) ( $row['label'] ?? '' ) );
 
 		if ( '' === $label ) {
@@ -421,8 +422,9 @@ function kocist_menu_items(): array {
 
 		// Urun grubuysa (inc/catalog.php) alt ogeler kategori sayfalarina,
 		// ust oge de panelde hala varsayilan katalog capasi yaziyorsa grup
-		// sayfasina gider.
-		$group = $groups[ sanitize_title( $label ) ] ?? null;
+		// sayfasina gider. Grup menu metninden degil satirdan bulunur (grup
+		// anahtari, bkz. kocist_catalog_group_key): ad degisse de bag kopmaz.
+		$group = kocist_catalog_group_for_row( (int) $row_index );
 
 		if ( $group && kocist_is_catalog_placeholder( $url ) ) {
 			$url = $group['url'];
@@ -506,6 +508,20 @@ function kocist_product_title_parts( array $parts ): array {
 	unset( $parts['tagline'] );
 
 	return $parts;
+}
+
+/**
+ * Logo icin SVG yukleme: panelde "Logo Gorseli" alanina SVG secilebilsin
+ * (sanayi-palet-theme ile ayni kural). SVG betik tasiyabildigi icin yalnizca
+ * filtresiz HTML yetkisi olanlar (agda yalnizca super yonetici) yukleyebilir.
+ */
+add_filter( 'upload_mimes', 'kocist_upload_mimes' );
+function kocist_upload_mimes( array $mimes ): array {
+	if ( current_user_can( 'unfiltered_html' ) ) {
+		$mimes['svg'] = 'image/svg+xml';
+	}
+
+	return $mimes;
 }
 
 /**

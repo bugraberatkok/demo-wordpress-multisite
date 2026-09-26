@@ -50,6 +50,9 @@ foreach ( $menu as $menu_index => $menu_item ) {
 	</style>
 </head>
 <body <?php body_class(); ?>>
+<?php wp_body_open(); ?>
+
+<a class="screen-reader-text k-skip" href="#icerik">İçeriğe geç</a>
 
 <div class="k-topbar" data-nwcs-section="topbar">
 	<div class="k-wrap k-topbar__inner">
@@ -90,7 +93,7 @@ foreach ( $menu as $menu_index => $menu_item ) {
 
 		<a class="k-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
 			<?php if ( ! empty( $logo['url'] ) ) : ?>
-				<img class="k-logo__img" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( $logo['alt'] ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?> />
+				<img class="k-logo__img" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( $logo['alt'] ?: get_bloginfo( 'name' ) ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?> />
 			<?php else : ?>
 				<span class="k-logo__mark" aria-hidden="true"></span>
 			<?php endif; ?>
@@ -223,3 +226,5 @@ foreach ( $menu as $menu_index => $menu_item ) {
 		</nav>
 	</div>
 </header>
+
+<main id="icerik">

@@ -99,7 +99,13 @@ function kocist_catalog_groups(): array {
 			continue;
 		}
 
-		$slug = sanitize_title( $label );
+		$slug = kocist_catalog_group_key( $row, $label, $submenu );
+
+		// Iki satir ayni gruba cikarsa ilki gecerli.
+		if ( '' === $slug || isset( $groups[ $slug ] ) ) {
+			continue;
+		}
+
 		$subs = array();
 
 		foreach ( $children as $child_index => $child ) {
@@ -145,6 +151,54 @@ function kocist_catalog_groups(): array {
 }
 
 /**
+ * Menu satirinin urun grubu anahtari (adres, urun eslemesi ve grp-<anahtar>
+ * panel sayfasi buna baglidir).
+ *
+ * Sirasiyla:
+ *   1. panelde yazilan "Grup anahtari" (menu satirinin 'key' alani);
+ *   2. menu metninden turetilen ad, manifestte boyle bir grup varsa
+ *      (anahtar alani eklenmeden once kaydedilmis menuler: eski davranis);
+ *   3. alt menu anahtarindan (menu_kereste -> kereste), manifestte boyle bir
+ *      grup varsa: anahtar bos ama menu metni degistirilmisse grup kaybolmaz;
+ *   4. menu metninden turetilen ad (manifestte olmayan yeni bir grup).
+ */
+function kocist_catalog_group_key( array $row, string $label, string $submenu ): string {
+	$key = sanitize_title( (string) ( $row['key'] ?? '' ) );
+
+	if ( '' !== $key ) {
+		return $key;
+	}
+
+	$pages = function_exists( 'nwcs_manifest' ) ? ( nwcs_manifest()['pages'] ?? array() ) : array();
+	$slug  = sanitize_title( $label );
+
+	if ( isset( $pages[ 'grp-' . $slug ] ) ) {
+		return $slug;
+	}
+
+	$from_submenu = sanitize_title( (string) preg_replace( '/^menu_/', '', $submenu ) );
+
+	if ( '' !== $from_submenu && isset( $pages[ 'grp-' . $from_submenu ] ) ) {
+		return $from_submenu;
+	}
+
+	return $slug;
+}
+
+/**
+ * Menunun satir sirasindaki urun grubu; grup degilse null.
+ */
+function kocist_catalog_group_for_row( int $row_index ): ?array {
+	foreach ( kocist_catalog_groups() as $group ) {
+		if ( $group['menu_row'] === $row_index ) {
+			return $group;
+		}
+	}
+
+	return null;
+}
+
+/**
  * Grubun fotografi: ana sayfadaki urun grubu kartinda secilen gorsel, yoksa
  * temadaki grup fotografi.
  */
@@ -165,6 +219,20 @@ function kocist_catalog_group_image( string $slug, string $label ): array {
 	}
 
 	return kocist_image_or_default( array(), $file, $label );
+}
+
+/**
+ * Grup fotografinin panelde duzenlendigi satir (home.catalog.items); yoksa -1.
+ * Onizlemede kategori sayfasindaki grup gorseline tiklaninca bu satir acilir.
+ */
+function kocist_catalog_group_image_row( string $slug ): int {
+	foreach ( nwcs_rows( 'home', 'catalog', 'items' ) as $index => $item ) {
+		if ( str_contains( sanitize_title( (string) ( $item['title'] ?? '' ) ), $slug ) ) {
+			return (int) $index;
+		}
+	}
+
+	return -1;
 }
 
 /**
@@ -532,6 +600,109 @@ function kocist_catalog_title_parts( array $parts ): array {
 }
 
 /**
+ * Grup ya da kategorinin panelde girilen "Arama ve Paylasim" degerleri
+ * (grp-<grup> / kat-<kategori> gizli sayfasinin 'seo' bileseni). Bos alan bos
+ * doner; o zaman temanin urettigi deger gecerli kalir.
+ *
+ * Eklenti gizli sayfalarin SEO alanlarini kendisi okumuyor (nwcs_seo_pages
+ * gizlileri atlar); bu sayfalar ona ek sayfa olarak bildirildigi icin
+ * degerleri tema aktarir.
+ *
+ * @return array{title:string, description:string, image:int}
+ */
+function kocist_catalog_seo_custom( string $group, string $sub = '' ): array {
+	$key    = kocist_catalog_page_key( $group, $sub );
+	$clean  = static fn( $text ): string => function_exists( 'nwcs_seo_clean' ) ? nwcs_seo_clean( $text ) : trim( wp_strip_all_tags( (string) $text ) );
+	$custom = array( 'title' => '', 'description' => '', 'image' => 0 );
+
+	if ( '' === $key ) {
+		return $custom;
+	}
+
+	$custom['title']       = $clean( nwcs_field( $key, 'seo', 'title', '' ) );
+	$custom['description'] = $clean( nwcs_field( $key, 'seo', 'description', '' ) );
+	$image                 = (int) nwcs_field( $key, 'seo', 'image', 0 );
+	$custom['image']       = $image > 0 && wp_attachment_is_image( $image ) ? $image : 0;
+
+	return $custom;
+}
+
+/**
+ * Goruntulenen grup ya da kategori sayfasinin paneldeki arama basligi; yoksa bos.
+ */
+function kocist_catalog_current_seo_title(): string {
+	if ( ! kocist_is_catalog_request() ) {
+		return '';
+	}
+
+	$current = kocist_catalog_current();
+
+	if ( empty( $current['group'] ) ) {
+		return '';
+	}
+
+	return kocist_catalog_seo_custom( $current['group']['slug'], $current['sub']['slug'] ?? '' )['title'];
+}
+
+/*
+ * Paneldeki arama basligi, eklentinin normal sayfalarda yaptigi gibi oldugu
+ * gibi kullanilir (site adi eklenmez). Eklenti ek sayfalarin basligini addan
+ * kendisi uretiyor ve bunun icin suzgec vermiyor; bu yuzden:
+ *   - sekme basligi: eklentinin suzgecinden (20) sonra,
+ *   - og:title ve JSON-LD WebPage adi: eklentinin wp_head ciktisinda (1)
+ *     yalnizca o iki deger degistirilir. Yeni etiket eklenmez, tekrar olmaz.
+ * Panelde baslik bossa hicbiri calismaz; cikti eskisiyle aynidir.
+ */
+add_filter( 'pre_get_document_title', 'kocist_catalog_document_title', 30 );
+function kocist_catalog_document_title( $title ) {
+	$custom = kocist_catalog_current_seo_title();
+
+	// WordPress bu suzgecten gelen basligi kacirmadan basar.
+	return '' !== $custom ? esc_html( $custom ) : $title;
+}
+
+add_action( 'wp_head', 'kocist_catalog_seo_head_start', 0 );
+function kocist_catalog_seo_head_start(): void {
+	if ( '' !== kocist_catalog_current_seo_title() && has_action( 'wp_head', 'nwcs_seo_head' ) ) {
+		$GLOBALS['kocist_catalog_seo_buffer'] = ob_start();
+	}
+}
+
+add_action( 'wp_head', 'kocist_catalog_seo_head_end', 2 );
+function kocist_catalog_seo_head_end(): void {
+	if ( empty( $GLOBALS['kocist_catalog_seo_buffer'] ) ) {
+		return;
+	}
+
+	unset( $GLOBALS['kocist_catalog_seo_buffer'] );
+
+	$html    = (string) ob_get_clean();
+	$custom  = kocist_catalog_current_seo_title();
+	$context = function_exists( 'nwcs_seo_context' ) ? nwcs_seo_context() : array();
+	$old     = (string) ( $context['title'] ?? '' );
+
+	if ( '' !== $old && $old !== $custom ) {
+		$html = str_replace(
+			sprintf( '<meta property="og:title" content="%s" />', esc_attr( $old ) ),
+			sprintf( '<meta property="og:title" content="%s" />', esc_attr( $custom ) ),
+			$html
+		);
+
+		// JSON-LD: yalnizca WebPage dugumunun adi (konum yolu adlari ayni kalir).
+		$flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG;
+		$start = strpos( $html, '"@type":"WebPage"' );
+		$find  = '"name":' . wp_json_encode( $old, $flags );
+		$at    = false !== $start ? strpos( $html, $find, $start ) : false;
+
+		if ( false !== $at ) {
+			$html = substr_replace( $html, '"name":' . wp_json_encode( $custom, $flags ), $at, strlen( $find ) );
+		}
+	}
+
+	echo $html; // phpcs:ignore WordPress.Security.EscapingOutput -- eklentinin kacirilmis ciktisi.
+}
+
+/**
  * SEO eklentisine kategori ve urun sayfalarini bildirir: baslik, aciklama,
  * canonical, paylasim gorseli ve llms.txt bunlardan uretilir.
  */
@@ -554,26 +725,36 @@ function kocist_catalog_seo_pages( array $pages ): array {
 	);
 
 	foreach ( $groups as $group ) {
+		$custom  = kocist_catalog_seo_custom( $group['slug'] );
 		$pages[] = array(
 			'url'         => $group['url'],
 			'name'        => $group['name'],
-			'description' => sprintf(
+			'description' => '' !== $custom['description'] ? $custom['description'] : sprintf(
 				'%s grubundaki ürünler: %s.',
 				$group['name'],
 				implode( ', ', array_slice( wp_list_pluck( $group['subs'], 'name' ), 0, 8 ) )
 			),
-			'image'       => $group['image']['url'] ? array( 'url' => $group['image']['url'], 'alt' => $group['image']['alt'] ) : 0,
+			'image'       => $custom['image'] ? $custom['image'] : ( $group['image']['url'] ? array( 'url' => $group['image']['url'], 'alt' => $group['image']['alt'] ) : 0 ),
 		);
 
 		foreach ( $group['subs'] as $sub ) {
-			$count   = (int) ( $counts[ $group['slug'] ][ $sub['slug'] ] ?? 0 );
-			$pages[] = array(
+			$count  = (int) ( $counts[ $group['slug'] ][ $sub['slug'] ] ?? 0 );
+			$custom = kocist_catalog_seo_custom( $group['slug'], $sub['slug'] );
+			$page   = array(
 				'url'         => $sub['url'],
 				'name'        => $sub['name'],
-				'description' => $count
-					? sprintf( '%s kategorisinde %d ürün. Ölçü ve adede göre fiyat için bize ulaşın.', $sub['name'], $count )
-					: sprintf( '%s için ölçü ve adede göre fiyat teklifi alın.', $sub['name'] ),
+				'description' => '' !== $custom['description'] ? $custom['description'] : (
+					$count
+						? sprintf( '%s kategorisinde %d ürün. Ölçü ve adede göre fiyat için bize ulaşın.', $sub['name'], $count )
+						: sprintf( '%s için ölçü ve adede göre fiyat teklifi alın.', $sub['name'] )
+				),
 			);
+
+			if ( $custom['image'] ) {
+				$page['image'] = $custom['image'];
+			}
+
+			$pages[] = $page;
 		}
 	}
 
