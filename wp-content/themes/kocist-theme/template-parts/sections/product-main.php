@@ -23,6 +23,8 @@ $features   = nwcs_rows( 'product', 'main', 'features' );
 			<div class="k-product__stage" <?php nwcs_edit_attr( 'product', 'main', 'image' ); ?>>
 				<?php echo kocist_image_tag( $main_image, 'k-product__photo', 'Örnek görsel — ürün' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 
+				<?php kocist_zoom_button( $main_image ); ?>
+
 				<?php if ( count( $gallery ) > 1 ) : ?>
 					<button type="button" class="k-product__arrow k-product__arrow--prev" data-k-gallery-prev>
 						<span class="screen-reader-text">Önceki görsel</span>

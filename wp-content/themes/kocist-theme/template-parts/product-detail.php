@@ -76,6 +76,8 @@ get_header();
 			<div class="k-product__stage" <?php kocist_product_attr( $product, 'Görseller' ); ?>>
 				<?php echo kocist_image_tag( $main, 'k-product__photo', 'Örnek görsel — ürün' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 
+				<?php kocist_zoom_button( $main ); ?>
+
 				<?php if ( count( $images ) > 1 ) : ?>
 					<button type="button" class="k-product__arrow k-product__arrow--prev" data-k-gallery-prev>
 						<span class="screen-reader-text">Önceki görsel</span>
@@ -133,8 +135,6 @@ get_header();
 				<?php endif; ?>
 			</div>
 
-			<div class="k-product__desc k-product__desc--rich" <?php kocist_product_attr( $product, 'Detay metni' ); ?>><?php echo wp_kses_post( wpautop( $product['body'] ) ); ?></div>
-
 			<div class="k-product__actions">
 				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'cta_url' ) ?: '#teklif' ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'cta_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'cta_label' ) ?: 'Teklif Alın' ); ?>
@@ -152,6 +152,46 @@ get_header();
 		</div>
 	</div>
 </section>
+
+<?php
+/*
+ * Detay metni ve urun tablolari: ust bolumun altinda, tam genislikte. Uzun
+ * metin bilgi sutununu uzatip butonlari asagi itmesin diye buraya alindi.
+ */
+$body_html = trim( (string) $product['body'] ) !== '' ? wp_kses_post( wpautop( $product['body'] ) ) : '';
+$tables    = kocist_product_tables( $product );
+$preview   = function_exists( 'nwcs_is_preview' ) && nwcs_is_preview();
+
+if ( '' !== $body_html || $tables || $preview ) :
+	?>
+	<section class="k-pdetail<?php echo ( '' !== $body_html && ( $tables || $preview ) ) ? ' k-pdetail--split' : ''; ?>" aria-labelledby="k-pdetail-title">
+		<div class="k-wrap">
+			<h2 class="k-pdetail__title" id="k-pdetail-title" <?php nwcs_edit_attr( 'product', 'detail', 'body_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'detail', 'body_title' ) ?: 'Ürün Detayı' ); ?></h2>
+
+			<div class="k-pdetail__grid">
+				<?php if ( '' !== $body_html ) : ?>
+					<div class="k-pdetail__text k-product__desc--rich" <?php kocist_product_attr( $product, 'Detay metni' ); ?>><?php echo $body_html; // phpcs:ignore WordPress.Security.EscapingOutput -- wp_kses_post ile temizlendi. ?></div>
+				<?php endif; ?>
+
+				<?php if ( $tables || $preview ) : ?>
+					<div class="k-pdetail__tables">
+						<?php foreach ( $tables as $table ) : ?>
+							<?php kocist_render_product_table( $table ); ?>
+						<?php endforeach; ?>
+
+						<?php if ( ! $tables ) : ?>
+							<?php // Yalnizca panel onizlemesinde: tiklaninca tablo alanlari acilir. ?>
+							<div class="k-ptable k-ptable--empty" <?php nwcs_edit_attr( 'product', 'tables', 'items' ); ?>>
+								<p class="k-ptable__empty-title">Bu ürüne tablo ekleyin</p>
+								<p class="k-ptable__empty-text">Tıklayın, “Satır ekle” ile yeni tablo açın ve Ürün alanına <strong><?php echo esc_html( $product['title'] ); ?></strong> yazın. Bu kutu yalnızca panelde görünür.</p>
+							</div>
+						<?php endif; ?>
+					</div>
+				<?php endif; ?>
+			</div>
+		</div>
+	</section>
+<?php endif; ?>
 
 <?php if ( $related ) : ?>
 	<section class="k-section k-related">

@@ -365,7 +365,7 @@ function kocist_assets(): void {
 			'kocist-product',
 			get_theme_file_uri( 'assets/css/product.css' ),
 			array( 'kocist-style' ),
-			wp_get_theme()->get( 'Version' )
+			(string) filemtime( get_theme_file_path( 'assets/css/product.css' ) )
 		);
 	}
 
@@ -375,16 +375,35 @@ function kocist_assets(): void {
 			'kocist-product',
 			get_theme_file_uri( 'assets/css/product.css' ),
 			array( 'kocist-style' ),
-			wp_get_theme()->get( 'Version' )
+			(string) filemtime( get_theme_file_path( 'assets/css/product.css' ) )
 		);
 
 		wp_enqueue_script(
 			'kocist-product',
 			get_theme_file_uri( 'assets/js/product.js' ),
 			array(),
-			wp_get_theme()->get( 'Version' ),
+			(string) filemtime( get_theme_file_path( 'assets/js/product.js' ) ),
 			true
 		);
+
+		// Gorsel buyutme penceresi. Panel onizlemesinde yuklenmez: orada
+		// gorsele tiklamak alanini duzenlemeye acar.
+		if ( ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
+			wp_enqueue_style(
+				'kocist-lightbox',
+				get_theme_file_uri( 'assets/css/lightbox.css' ),
+				array( 'kocist-product' ),
+				(string) filemtime( get_theme_file_path( 'assets/css/lightbox.css' ) )
+			);
+
+			wp_enqueue_script(
+				'kocist-lightbox',
+				get_theme_file_uri( 'assets/js/lightbox.js' ),
+				array(),
+				(string) filemtime( get_theme_file_path( 'assets/js/lightbox.js' ) ),
+				true
+			);
+		}
 	}
 }
 
@@ -919,6 +938,154 @@ function kocist_product_attr( array $product, string $label ): void {
 	if ( function_exists( 'nwcs_product_attr' ) && ! empty( $product['id'] ) ) {
 		nwcs_product_attr( (int) $product['id'], $label );
 	}
+}
+
+/**
+ * Tablo metninin tek satirini hucrelere boler: "|" ile; "|" yoksa ve satirda
+ * sekme varsa Excel'den yapistirilmis sayilir, sekmeyle bolunur.
+ *
+ * @return string[]
+ */
+function kocist_table_cells( string $line ): array {
+	$separator = ( ! str_contains( $line, '|' ) && str_contains( $line, "\t" ) ) ? "\t" : '|';
+
+	return array_map( 'trim', explode( $separator, $line ) );
+}
+
+/**
+ * Urune ozel tablolar (panel: Ürün Sayfaları -> Ürün Tabloları).
+ *
+ * Her repeater satiri bir tablodur; "Ürün" alanina yazilan ad ya da kisa ad
+ * (virgulle birden fazla) bu urunle eslesirse gosterilir. Karsilastirma
+ * sanitize_title ile yapilir: "Çam Kalas 5×10 cm" ile "cam-kalas-5x10-cm"
+ * ayni urunu bulur. Sutun sayisi en uzun satira (ya da basliklara) gore
+ * belirlenir; eksik hucreler bos kalir. Satiri olmayan tablo atlanir; sutun
+ * basliklari istege baglidir.
+ *
+ * @return array<int, array{index:int, title:string, head:string[], rows:array<int, string[]>, cols:int}>
+ */
+function kocist_product_tables( array $product ): array {
+	if ( ! function_exists( 'nwcs_rows' ) ) {
+		return array();
+	}
+
+	$keys = array_filter(
+		array(
+			sanitize_title( (string) ( $product['slug'] ?? '' ) ),
+			sanitize_title( (string) ( $product['title'] ?? '' ) ),
+		)
+	);
+
+	$tables = array();
+
+	foreach ( nwcs_rows( 'product', 'tables', 'items' ) as $index => $row ) {
+		$targets = array_filter( array_map( 'sanitize_title', explode( ',', (string) ( $row['product'] ?? '' ) ) ) );
+
+		if ( ! $keys || ! array_intersect( $targets, $keys ) ) {
+			continue;
+		}
+
+		$columns = trim( (string) ( $row['columns'] ?? '' ) );
+		$head    = '' === $columns ? array() : kocist_table_cells( $columns );
+		$lines   = preg_split( '/\r\n|\r|\n/', (string) ( $row['rows'] ?? '' ) );
+		$body    = array();
+
+		foreach ( (array) $lines as $line ) {
+			if ( '' === trim( $line ) ) {
+				continue;
+			}
+
+			$body[] = kocist_table_cells( $line );
+		}
+
+		// Yalnizca "|" isaretlerinden olusan bos basliklar da bos sayilir.
+		if ( '' === implode( '', $head ) ) {
+			$head = array();
+		}
+
+		// Satiri olmayan tablo (yalnizca baslik yazilmis) henuz hazir degildir.
+		if ( ! $body ) {
+			continue;
+		}
+
+		$cols = max( array_merge( array( count( $head ) ), array_map( 'count', $body ) ) );
+
+		$tables[] = array(
+			'index' => (int) $index,
+			'title' => trim( (string) ( $row['title'] ?? '' ) ),
+			'head'  => $head ? array_pad( $head, $cols, '' ) : array(),
+			'rows'  => array_map( static fn( array $cells ): array => array_pad( $cells, $cols, '' ), $body ),
+			'cols'  => $cols,
+		);
+	}
+
+	return $tables;
+}
+
+/**
+ * Tek urun tablosu (kocist_product_tables() ogesi). Genis tablo kartin
+ * icinde yatay kayar; sayfa tasmaz.
+ */
+function kocist_render_product_table( array $table ): void {
+	$index = (int) $table['index'];
+	$label = '' !== $table['title'] ? $table['title'] : 'Ürün tablosu';
+	?>
+	<div class="k-ptable" style="--k-cols: <?php echo (int) $table['cols']; ?>">
+		<?php if ( '' !== $table['title'] ) : ?>
+			<h3 class="k-ptable__title" <?php nwcs_edit_attr( 'product', 'tables', 'items', $index, 'title' ); ?>><?php echo esc_html( $table['title'] ); ?></h3>
+		<?php endif; ?>
+
+		<div class="k-ptable__scroll" role="region" aria-label="<?php echo esc_attr( $label ); ?>" tabindex="0">
+			<table class="k-ptable__table">
+				<?php if ( $table['head'] ) : ?>
+					<thead <?php nwcs_edit_attr( 'product', 'tables', 'items', $index, 'columns' ); ?>>
+						<tr>
+							<?php foreach ( $table['head'] as $cell ) : ?>
+								<th scope="col"><?php echo esc_html( $cell ); ?></th>
+							<?php endforeach; ?>
+						</tr>
+					</thead>
+				<?php endif; ?>
+				<tbody <?php nwcs_edit_attr( 'product', 'tables', 'items', $index, 'rows' ); ?>>
+					<?php foreach ( $table['rows'] as $cells ) : ?>
+						<tr>
+							<?php foreach ( $cells as $cell ) : ?>
+								<td><?php echo esc_html( $cell ); ?></td>
+							<?php endforeach; ?>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * Urun galerisindeki "buyut" dugmesi: gorselin tamamini kaplar, tiklaninca
+ * assets/js/lightbox.js gorseli tam boyutta acar. Gorsel yoksa (yer tutucu)
+ * ya da panel onizlemesindeyse cizilmez: onizlemede gorsele tiklamak alani
+ * duzenlemeye acar.
+ */
+function kocist_zoom_button( array $image ): void {
+	if ( empty( $image['url'] ) || kocist_is_placeholder_image( $image ) ) {
+		return;
+	}
+
+	if ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) {
+		return;
+	}
+	?>
+	<button type="button" class="k-zoom" data-k-zoom data-full="<?php echo esc_url( $image['url'] ); ?>" data-alt="<?php echo esc_attr( $image['alt'] ?? '' ); ?>">
+		<span class="screen-reader-text">Görseli büyüt</span>
+		<span class="k-zoom__badge" aria-hidden="true">
+			<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+				<circle cx="8.5" cy="8.5" r="5.5" />
+				<path d="m12.6 12.6 4.4 4.4M8.5 6v5M6 8.5h5" />
+			</svg>
+		</span>
+	</button>
+	<?php
 }
 
 /**

@@ -1,0 +1,149 @@
+/*
+ * Urun gorseli buyutme penceresi (assets/js/lightbox.js).
+ *
+ * Koyu orman yesili perde; gorsel ekranin ortasinda, oranini koruyarak
+ * sigar. Ustte sayac ve kapat, yanlarda onceki/sonraki, altta gorsel
+ * aciklamasi. Acilis tek bir yumusak gecis; hareket azaltma tercihinde yok.
+ */
+
+html.k-lb-lock {
+	overflow: hidden;
+	padding-right: var(--k-lb-gap, 0);
+}
+
+.k-lb {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+	max-width: none;
+	height: 100%;
+	max-height: none;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: rgba(9, 36, 20, .95);
+	color: #fff;
+	overflow: hidden;
+}
+
+.k-lb[open] {
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr);
+	animation: k-lb-in .24s cubic-bezier(.22, 1, .36, 1);
+}
+
+.k-lb::backdrop { background: transparent; }
+
+.k-lb__bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 16px 0 22px;
+}
+
+.k-lb__count {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: .06em;
+	color: rgba(255, 255, 255, .78);
+	font-variant-numeric: tabular-nums;
+}
+
+.k-lb__figure {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	min-height: 0;
+	margin: 0;
+	padding: 10px 84px 26px;
+}
+
+.k-lb__img {
+	display: block;
+	max-width: 100%;
+	max-height: calc(100% - 44px);
+	min-height: 0;
+	object-fit: contain;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, .04);
+	box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+	transition: opacity .2s ease;
+}
+
+.k-lb.is-loading .k-lb__img { opacity: .35; }
+
+.k-lb__caption {
+	max-width: 70ch;
+	font-size: 14px;
+	line-height: 1.5;
+	text-align: center;
+	color: rgba(255, 255, 255, .84);
+}
+
+.k-lb__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 46px;
+	height: 46px;
+	padding: 0;
+	border: 1px solid rgba(255, 255, 255, .22);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, .08);
+	color: #fff;
+	cursor: pointer;
+	transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.k-lb__btn:hover {
+	background: var(--leaf, #7ab648);
+	border-color: var(--leaf, #7ab648);
+	color: var(--forest-3, #0f3d21);
+}
+
+.k-lb__btn:focus-visible {
+	outline: 3px solid var(--leaf, #7ab648);
+	outline-offset: 3px;
+}
+
+.k-lb__btn[hidden] { display: none; }
+
+.k-lb__nav {
+	position: absolute;
+	top: 50%;
+	width: 52px;
+	height: 52px;
+	margin-top: -26px;
+}
+
+.k-lb__nav--prev { left: 18px; }
+.k-lb__nav--next { right: 18px; }
+
+@keyframes k-lb-in {
+	from { opacity: 0; transform: scale(.985); }
+	to { opacity: 1; transform: none; }
+}
+
+/* Telefonda oklar gorselin altinda, alt koselerde; gorsel tam genislik. */
+@media (max-width: 699.98px) {
+	.k-lb__bar { padding: 10px 10px 0 16px; }
+	.k-lb__figure { padding: 8px 12px 86px; }
+	.k-lb__nav {
+		top: auto;
+		bottom: 20px;
+		width: 48px;
+		height: 48px;
+		margin-top: 0;
+	}
+	.k-lb__nav--prev { left: 16px; }
+	.k-lb__nav--next { right: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.k-lb[open] { animation: none; }
+	.k-lb__img,
+	.k-lb__btn { transition-duration: .01ms !important; }
+}

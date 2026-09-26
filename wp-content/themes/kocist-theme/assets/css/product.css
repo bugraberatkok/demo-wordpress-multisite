@@ -214,6 +214,190 @@
 	color: var(--muted);
 }
 
+/* ---------- Buyut dugmesi (assets/js/lightbox.js) ---------- */
+/* Gorselin tamamini kaplar; oklar ve sayac (z-index 2) ustunde kalir. */
+.k-zoom {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	border-radius: inherit;
+	background: none;
+	cursor: zoom-in;
+}
+
+.k-zoom__badge {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, .92);
+	color: var(--forest);
+	box-shadow: 0 6px 16px rgba(15, 61, 33, .16);
+	transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.k-zoom:hover .k-zoom__badge {
+	background: var(--leaf);
+	color: #fff;
+	transform: scale(1.06);
+}
+
+.k-zoom:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: -3px;
+}
+
+/* Betik yuklenmediyse (onizleme ya da hata) dugme hic gorunmesin. */
+html:not(.k-lb-ready) .k-zoom { display: none; }
+
+/* ---------- Detay metni ve urun tablolari ---------- */
+/*
+ * Ust bolumun (galeri + bilgiler) altinda tam genislik. Metin ve tablo
+ * birlikteyse masaustunde yan yana: metin okuma genisliginde, tablo genis
+ * sutunda. Tek basina olan tam genislige yayilir, metin 70ch ile sinirli.
+ */
+.k-pdetail {
+	margin-top: 34px;
+	padding: 40px 0 44px;
+	background: var(--paper-2);
+	border-top: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+}
+
+.k-pdetail__title {
+	margin: 0 0 20px;
+	font-size: clamp(21px, 2.1vw, 26px);
+	color: var(--forest);
+}
+
+.k-pdetail__grid {
+	display: grid;
+	gap: 28px;
+	align-items: start;
+}
+
+/* Metin ustte, tablolar altinda tam genislikte: cok sutunlu tablo da sigar. */
+.k-pdetail--split .k-pdetail__grid {
+	grid-template-columns: minmax(0, 1fr);
+	gap: 32px;
+}
+
+.k-pdetail__text {
+	max-width: 70ch;
+	font-size: 15.5px;
+	line-height: 1.75;
+	color: var(--text);
+}
+
+.k-pdetail__tables {
+	display: grid;
+	gap: 20px;
+	min-width: 0;
+}
+
+.k-ptable {
+	min-width: 0;
+	padding: 22px 24px 8px;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.k-ptable__title {
+	margin: 0 0 12px;
+	font-size: 18px;
+	line-height: 1.3;
+	letter-spacing: -.01em;
+	color: var(--leaf-dark);
+}
+
+/*
+ * Genis tablo kartin icinde yana kayar. Kenar golgeleri yalnizca kayacak
+ * icerik varken gorunur (background-attachment: local hilesi).
+ */
+.k-ptable__scroll {
+	overflow-x: auto;
+	margin: 0 -24px;
+	padding: 0 24px;
+	background:
+		linear-gradient(90deg, #fff 30%, rgba(255, 255, 255, 0)) left / 28px 100% no-repeat local,
+		linear-gradient(270deg, #fff 30%, rgba(255, 255, 255, 0)) right / 28px 100% no-repeat local,
+		radial-gradient(farthest-side at 0 50%, rgba(15, 61, 33, .14), transparent) left / 12px 100% no-repeat scroll,
+		radial-gradient(farthest-side at 100% 50%, rgba(15, 61, 33, .14), transparent) right / 12px 100% no-repeat scroll;
+	-webkit-overflow-scrolling: touch;
+}
+
+.k-ptable__scroll:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
+.k-ptable__table {
+	width: 100%;
+	min-width: calc(var(--k-cols, 3) * 104px);
+	border-collapse: collapse;
+	font-size: 15px;
+	line-height: 1.45;
+	font-variant-numeric: tabular-nums;
+}
+
+.k-ptable__table th,
+.k-ptable__table td {
+	padding: 13px 18px 13px 0;
+	text-align: left;
+	vertical-align: top;
+}
+
+.k-ptable__table th:last-child,
+.k-ptable__table td:last-child { padding-right: 0; }
+
+.k-ptable__table th {
+	border-bottom: 1.5px solid var(--line);
+	font-weight: 800;
+	color: var(--forest-3);
+	white-space: nowrap;
+}
+
+.k-ptable__table td {
+	border-top: 1px solid var(--line);
+	color: var(--text);
+}
+
+.k-ptable__table thead + tbody tr:first-child td,
+.k-ptable__table tbody:first-child tr:first-child td { border-top: 0; }
+
+/* Yalnizca panel onizlemesinde: tablosu olmayan urune tablo ekleme cagrisi. */
+.k-ptable--empty {
+	padding: 22px 24px;
+	border: 1.5px dashed var(--leaf);
+	background: var(--leaf-soft);
+	cursor: pointer;
+}
+
+.k-ptable__empty-title {
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 800;
+	color: var(--forest);
+}
+
+.k-ptable__empty-text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.55;
+	color: var(--muted);
+}
+
 /* ---------- Teknik ozellikler ---------- */
 .k-specs { padding: 34px 0 10px; }
 
@@ -344,8 +528,16 @@
 	color: var(--muted);
 }
 
+@media (max-width: 1023.98px) {
+	.k-pdetail--split .k-pdetail__grid { gap: 28px; }
+}
+
 @media (max-width: 899.98px) {
 	.k-product__grid { grid-template-columns: 1fr; gap: 28px; }
+	.k-pdetail { margin-top: 26px; padding: 30px 0 34px; }
+	.k-ptable { padding: 18px 18px 6px; }
+	.k-ptable__scroll { margin: 0 -18px; padding: 0 18px; }
+	.k-ptable__table { font-size: 14.5px; }
 	.k-specs__card { padding: 20px 18px 6px; }
 	.k-faq__question { padding: 16px 18px; }
 	.k-faq__answer p { padding: 0 18px 18px; }
@@ -355,6 +547,7 @@
 	.k-product__photo,
 	.k-product__thumb,
 	.k-product__arrow,
+	.k-zoom__badge,
 	.k-product__btn,
 	.k-faq__question,
 	.k-faq__chevron,
