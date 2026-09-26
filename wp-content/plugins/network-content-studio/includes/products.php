@@ -263,6 +263,7 @@ function nwcs_pool_product_data( WP_Post $post ): array {
 		'gallery_ids' => $gallery,
 		'images'      => $images,
 		'categories'  => $categories,
+		'tables'      => nwcs_sanitize_product_tables( (array) get_post_meta( $post->ID, '_nwcs_tables', true ) ),
 		'order'       => (int) $post->menu_order,
 	);
 }
@@ -558,6 +559,81 @@ function nwcs_merge_scoped_products( array $current, array $posted, string $cate
 /* ------------------------------------------------------------------ */
 
 /**
+ * Sitenin temasi urun tablolarini gosteriyor mu (manifestte 'product_tables').
+ * Urun Havuzu'ndaki "Ürün Tabloları" bolumu yalnizca bu sitelerde gorunen
+ * urunler icin acilir.
+ */
+function nwcs_site_supports_product_tables( int $blog_id ): bool {
+	return ! empty( nwcs_manifest_for_blog( $blog_id )['product_tables'] );
+}
+
+/**
+ * Urun tablolarini temizler (kayit ve okuma icin ayni kural).
+ *
+ * Her tablo: title, head (sutun basliklari), rows (hucre dizileri). Tamamen
+ * bos satirlar ve basligi da hucreleri de bos sutunlar atilir; hicbir
+ * icerigi kalmayan tablo dusurulur. Sinirlar asiri buyuk girisi keser.
+ *
+ * @return array<int, array{title:string, head:string[], rows:array<int, string[]>}>
+ */
+function nwcs_sanitize_product_tables( array $raw ): array {
+	$clean = static fn( $cell ): string => is_scalar( $cell ) ? trim( sanitize_text_field( (string) $cell ) ) : '';
+	$out   = array();
+
+	foreach ( array_slice( $raw, 0, 20 ) as $table ) {
+		if ( ! is_array( $table ) ) {
+			continue;
+		}
+
+		$title = $clean( $table['title'] ?? '' );
+		$head  = array_map( $clean, array_slice( array_values( (array) ( $table['head'] ?? array() ) ), 0, 30 ) );
+		$rows  = array();
+
+		foreach ( array_slice( (array) ( $table['rows'] ?? array() ), 0, 500 ) as $row ) {
+			$cells = array_map( $clean, array_slice( array_values( (array) $row ), 0, 30 ) );
+
+			if ( '' !== implode( '', $cells ) ) {
+				$rows[] = $cells;
+			}
+		}
+
+		$cols = max( array_merge( array( count( $head ) ), array_map( 'count', $rows ) ) );
+		$head = array_pad( $head, $cols, '' );
+		$rows = array_map( static fn( array $cells ): array => array_pad( $cells, $cols, '' ), $rows );
+
+		// Bos sutunlari sagdan sola atar (indeksler kaymasin).
+		for ( $col = $cols - 1; $col >= 0; $col-- ) {
+			$used = '' !== $head[ $col ];
+
+			foreach ( $rows as $cells ) {
+				$used = $used || '' !== $cells[ $col ];
+			}
+
+			if ( ! $used ) {
+				array_splice( $head, $col, 1 );
+
+				foreach ( $rows as &$cells ) {
+					array_splice( $cells, $col, 1 );
+				}
+				unset( $cells );
+			}
+		}
+
+		if ( '' === $title && ! $rows && '' === implode( '', $head ) ) {
+			continue;
+		}
+
+		$out[] = array(
+			'title' => $title,
+			'head'  => $head,
+			'rows'  => $rows,
+		);
+	}
+
+	return $out;
+}
+
+/**
  * Sitenin gosterecegi urunler: kip + secim sirasi + site istisnalari uygulanmis.
  *
  * Her satir: id, title, short, price, price_label, has_price, spec, image, url
@@ -628,6 +704,7 @@ function nwcs_site_products( ?int $blog_id = null ): array {
 			'images'      => $images,
 			'url'         => nwcs_product_url( $product['slug'], $blog_id ),
 			'categories'  => $product['categories'],
+			'tables'      => $product['tables'] ?? array(),
 		);
 	}
 

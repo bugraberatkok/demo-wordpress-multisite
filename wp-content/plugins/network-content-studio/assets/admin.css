@@ -1597,3 +1597,246 @@ button.nwcs-linkout[data-nwcs-csv-open]:hover { background: #0d9488; }
 	font-size: 12.5px;
 }
 
+
+/* ---------- Ürün tabloları (Ürün Havuzu formu) ---------- */
+/* Formda özet + "Tabloları düzenle"; düzenleme geniş pencerede, tek tablo,
+   altta Excel'deki gibi sayfa sekmeleri. */
+.nwcs-ptables { min-width: 0; }
+.nwcs-ptables__summary { margin: 8px 0 10px; padding: 0; list-style: none; display: grid; gap: 6px; }
+.nwcs-ptables__summary li { margin: 0; }
+.nwcs-ptables__summary .nwcs-ptables__none { color: var(--nwcs-muted); font-size: 12.5px; }
+.nwcs-ptables__item {
+	display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 10px;
+	width: 100%; padding: 9px 12px;
+	background: var(--nwcs-soft); border: 1px solid var(--nwcs-line); border-radius: 8px;
+	font: inherit; font-size: 13px; color: var(--nwcs-ink); text-align: left; cursor: pointer;
+}
+.nwcs-ptables__item span { font-size: 12px; color: var(--nwcs-muted); }
+.nwcs-ptables__item:hover, .nwcs-ptables__item:focus-visible {
+	border-color: var(--nwcs-brand); background: var(--nwcs-brand-soft); outline: 0;
+}
+.nwcs-ptables__add {
+	width: 100%; padding: 9px 12px;
+	border: 1px dashed #b9bff0; border-radius: 9px; background: #fff;
+	font: inherit; font-size: 13px; font-weight: 600; color: var(--nwcs-brand-dark); cursor: pointer;
+}
+.nwcs-ptables__add:hover, .nwcs-ptables__add:focus-visible {
+	border-style: solid; border-color: var(--nwcs-brand); background: var(--nwcs-brand-soft); outline: 0;
+}
+
+/* Pencere */
+.nwcs-ptm {
+	--ptm-grid: #e4e6ef;
+	--ptm-head: #f2f3fa;
+	--ptm-rail: #f7f8fb;
+
+	width: min(1180px, calc(100vw - 32px));
+	height: min(780px, calc(100vh - 32px));
+	max-width: none; max-height: none;
+	padding: 0; border: 0; border-radius: 16px;
+	background: #fff; color: var(--nwcs-ink, #171c2b);
+	box-shadow: 0 30px 80px rgba(23, 28, 43, .32);
+	font-size: 14px;
+	overflow: hidden;
+}
+.nwcs-ptm[open] { display: flex; flex-direction: column; animation: nwcs-ptm-in .16s ease-out; }
+.nwcs-ptm::backdrop { background: rgba(23, 28, 43, .5); backdrop-filter: blur(2px); }
+@keyframes nwcs-ptm-in { from { opacity: 0; transform: translateY(8px) scale(.99); } }
+@media (prefers-reduced-motion: reduce) { .nwcs-ptm[open] { animation: none; } }
+
+.nwcs-ptm__head {
+	display: flex; align-items: center; gap: 14px;
+	padding: 16px 20px 16px 24px;
+	border-bottom: 1px solid var(--nwcs-line);
+	flex: none;
+}
+.nwcs-ptm__thumb {
+	width: 44px; height: 44px; flex: none;
+	border-radius: 10px; object-fit: cover;
+	box-shadow: inset 0 0 0 1px rgba(23, 28, 43, .08);
+}
+.nwcs-ptm__heading { flex: 1; min-width: 0; }
+.nwcs-ptm__kicker { margin: 0; font-size: 12px; color: var(--nwcs-muted); }
+.nwcs-ptm__product {
+	margin: 1px 0 0; padding: 0;
+	font-size: 17px; font-weight: 700; line-height: 1.3;
+	overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.nwcs-ptm__close {
+	width: 36px; height: 36px; flex: none;
+	border: 0; border-radius: 10px; background: transparent;
+	font-size: 24px; line-height: 1; color: var(--nwcs-muted); cursor: pointer;
+}
+.nwcs-ptm__close:hover, .nwcs-ptm__close:focus-visible { background: var(--nwcs-soft); color: var(--nwcs-ink); outline: 0; }
+
+/* Etkin tablo */
+.nwcs-ptm__sheet {
+	flex: 1; min-height: 0;
+	display: flex; flex-direction: column;
+	padding: 18px 24px 16px;
+}
+.nwcs-ptm__bar { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.nwcs-ptm__title {
+	flex: 1; min-width: 0;
+	margin: 0; padding: 4px 0;
+	border: 0; border-bottom: 2px solid transparent; border-radius: 0;
+	background: transparent; box-shadow: none;
+	font: inherit; font-size: 21px; font-weight: 700; color: var(--nwcs-ink); letter-spacing: -.01em;
+}
+.nwcs-ptm__title::placeholder { color: #a8adc2; font-weight: 600; }
+.nwcs-ptm__title:hover { border-bottom-color: var(--ptm-grid); }
+.nwcs-ptm__title:focus { outline: 0; box-shadow: none; border-bottom-color: var(--nwcs-brand); }
+.nwcs-ptm__size { flex: none; font-size: 12px; color: var(--nwcs-muted); font-variant-numeric: tabular-nums; }
+.nwcs-ptm__remove {
+	flex: none; padding: 7px 11px;
+	border: 1px solid transparent; border-radius: 8px; background: transparent;
+	font: inherit; font-size: 12.5px; font-weight: 600; color: #b32d2e; cursor: pointer;
+}
+.nwcs-ptm__remove:hover, .nwcs-ptm__remove:focus-visible { background: #fdecec; border-color: #f3c4c4; outline: 0; }
+
+.nwcs-ptm__scroll {
+	flex: 0 1 auto; min-height: 0;
+	overflow: auto;
+	border: 1px solid #d9dcea; border-radius: 10px;
+	background: #fff;
+}
+.nwcs-ptm__grid { border-collapse: separate; border-spacing: 0; min-width: 100%; }
+.nwcs-ptm__grid th, .nwcs-ptm__grid td {
+	position: relative;
+	padding: 0;
+	border-right: 1px solid var(--ptm-grid);
+	border-bottom: 1px solid var(--ptm-grid);
+	background: #fff;
+	text-align: left;
+}
+.nwcs-ptm__grid thead th {
+	position: sticky; top: 0; z-index: 2;
+	background: var(--ptm-head);
+	border-bottom-color: #d6d9ec;
+}
+.nwcs-ptm__grid tbody tr:not(.nwcs-ptm__addrow):hover td:not(.nwcs-ptm__addcol) { background: #fafbff; }
+
+.nwcs-ptm__cell {
+	display: block; width: 172px; min-height: 42px;
+	margin: 0; padding: 10px 12px;
+	border: 0; border-radius: 0; background: transparent; box-shadow: none;
+	font: inherit; font-size: 13.5px; color: var(--nwcs-ink);
+}
+.nwcs-ptm__colhead .nwcs-ptm__cell { padding-right: 34px; font-weight: 600; }
+.nwcs-ptm__cell::placeholder { color: #a8adc2; font-weight: 500; }
+.nwcs-ptm__cell:focus {
+	position: relative; z-index: 1;
+	outline: 0; background: #fff;
+	box-shadow: inset 0 0 0 2px var(--nwcs-brand);
+}
+
+/* Satır numaraları: solda sabit; üstüne gelince satır silme */
+.nwcs-ptm__grid .nwcs-ptm__num,
+.nwcs-ptm__grid .nwcs-ptm__corner {
+	position: sticky; left: 0; z-index: 1;
+	width: 46px; min-width: 46px;
+	background: var(--ptm-rail);
+	text-align: center;
+}
+.nwcs-ptm__grid thead .nwcs-ptm__corner { z-index: 3; background: #eceef7; }
+.nwcs-ptm__numtext { font-size: 12px; color: #9aa0b4; font-variant-numeric: tabular-nums; }
+
+.nwcs-ptm__x {
+	-webkit-appearance: none; appearance: none;
+	display: inline-flex; align-items: center; justify-content: center;
+	width: 24px; height: 24px; margin: 0; padding: 0;
+	border: 0; border-radius: 6px; background: transparent; box-shadow: none;
+	font-family: inherit; font-size: 17px; line-height: 1; color: #9aa0b4; cursor: pointer;
+}
+.nwcs-ptm__x:hover, .nwcs-ptm__x:focus-visible { background: #fdecec; color: #b32d2e; outline: 0; }
+.nwcs-ptm__colhead > .nwcs-ptm__x {
+	position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+	opacity: 0;
+}
+.nwcs-ptm__colhead:hover > .nwcs-ptm__x,
+.nwcs-ptm__colhead:focus-within > .nwcs-ptm__x { opacity: 1; }
+.nwcs-ptm__x--row { position: absolute; inset: 0; margin: auto; opacity: 0; }
+.nwcs-ptm__num:hover .nwcs-ptm__x--row,
+.nwcs-ptm__num:focus-within .nwcs-ptm__x--row { opacity: 1; }
+.nwcs-ptm__num:hover .nwcs-ptm__numtext,
+.nwcs-ptm__num:focus-within .nwcs-ptm__numtext { visibility: hidden; }
+@media (hover: none) {
+	.nwcs-ptm__colhead > .nwcs-ptm__x { opacity: 1; }
+}
+
+/* Sütun ekle (sağdaki dar sütun) ve satır ekle (en alt şerit) */
+.nwcs-ptm__grid .nwcs-ptm__addcol { width: 46px; min-width: 46px; border-right: 0; background: #fbfbfe; }
+.nwcs-ptm__grid thead .nwcs-ptm__addcol { background: var(--ptm-head); }
+.nwcs-ptm__addcol-btn {
+	display: block; width: 100%; min-height: 42px;
+	border: 0; background: transparent;
+	font-size: 20px; line-height: 1; color: var(--nwcs-brand); cursor: pointer;
+}
+.nwcs-ptm__addcol-btn:hover, .nwcs-ptm__addcol-btn:focus-visible { background: var(--nwcs-brand-soft); outline: 0; }
+.nwcs-ptm__grid .nwcs-ptm__addrow td { border-bottom: 0; border-right: 0; }
+.nwcs-ptm__addrow-btn {
+	display: block; width: 100%;
+	padding: 11px 12px 11px 58px;
+	border: 0; background: transparent;
+	font: inherit; font-size: 13px; font-weight: 600; color: var(--nwcs-brand-dark);
+	text-align: left; cursor: pointer;
+}
+.nwcs-ptm__addrow-btn:hover, .nwcs-ptm__addrow-btn:focus-visible { background: var(--nwcs-brand-soft); outline: 0; }
+
+/* Hiç tablo yokken */
+.nwcs-ptm__empty {
+	flex: 1; display: grid; place-content: center; justify-items: center; gap: 6px;
+	text-align: center;
+}
+.nwcs-ptm__empty-title { margin: 0; font-size: 16px; font-weight: 700; }
+.nwcs-ptm__empty-text { margin: 0 0 10px; max-width: 44ch; color: var(--nwcs-muted); }
+
+/* Sayfa sekmeleri: tablonun altından sarkar, etkin olan beyaz */
+.nwcs-ptm__tabs {
+	display: flex; align-items: flex-start; gap: 4px;
+	padding: 0 24px;
+	background: #f1f2f7;
+	border-top: 1px solid var(--nwcs-line);
+	overflow-x: auto;
+	flex: none;
+}
+.nwcs-ptm__tablist { display: flex; gap: 2px; }
+.nwcs-ptm__tab, .nwcs-ptm__newtab {
+	flex: none; max-width: 240px;
+	margin: -1px 0 0; padding: 10px 16px 11px;
+	border: 0; border-top: 3px solid transparent; border-radius: 0 0 9px 9px;
+	background: transparent;
+	font: inherit; font-size: 13px; font-weight: 600; color: var(--nwcs-muted);
+	white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+}
+.nwcs-ptm__tab:hover { color: var(--nwcs-ink); background: rgba(255, 255, 255, .6); }
+.nwcs-ptm__tab.is-active {
+	background: #fff; color: var(--nwcs-ink);
+	border-top-color: var(--nwcs-brand);
+	box-shadow: 0 1px 2px rgba(23, 28, 43, .08);
+}
+.nwcs-ptm__newtab { color: var(--nwcs-brand-dark); }
+.nwcs-ptm__newtab:hover { background: var(--nwcs-brand-soft); }
+.nwcs-ptm__tab:focus-visible, .nwcs-ptm__newtab:focus-visible { outline: 2px solid var(--nwcs-brand); outline-offset: -2px; }
+
+.nwcs-ptm__foot {
+	display: flex; align-items: center; justify-content: space-between; gap: 16px;
+	padding: 12px 24px;
+	border-top: 1px solid var(--nwcs-line);
+	flex: none;
+}
+.nwcs-ptm__tip { margin: 0; max-width: 72ch; font-size: 12.5px; line-height: 1.5; color: var(--nwcs-muted); }
+.nwcs-ptm__done.button { flex: none; min-width: 104px; min-height: 34px; }
+
+/* Telefon: tam ekran */
+@media (max-width: 640px) {
+	.nwcs-ptm { width: 100vw; height: 100dvh; border-radius: 0; }
+	.nwcs-ptm__head { padding: 12px 12px 12px 16px; }
+	.nwcs-ptm__sheet { padding: 14px 16px 12px; }
+	.nwcs-ptm__bar { flex-wrap: wrap; gap: 6px 12px; }
+	.nwcs-ptm__title { flex-basis: 100%; font-size: 18px; }
+	.nwcs-ptm__size { margin-right: auto; }
+	.nwcs-ptm__cell { width: 140px; }
+	.nwcs-ptm__tabs { padding: 0 12px; }
+	.nwcs-ptm__foot { flex-direction: column; align-items: stretch; padding: 12px 16px; gap: 10px; }
+}

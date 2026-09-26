@@ -412,6 +412,8 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 				</p>
 			</div>
 
+			<?php nwcs_render_product_tables_field( $product ); ?>
+
 			<div class="nwcs-actions">
 				<button type="submit" class="button button-primary">Kaydet</button>
 				<a class="button" href="<?php echo esc_url( nwcs_pool_url() ); ?>">Vazgeç</a>
@@ -677,6 +679,8 @@ function nwcs_handle_pool_save(): void {
 	$gallery = array_values( array_unique( array_merge( $gallery, $uploaded ) ) );
 
 	update_post_meta( $id, '_nwcs_gallery', $gallery );
+
+	nwcs_save_product_tables( $id );
 
 	// One cikan gorsel, galerinin ilki (eski kodla uyum icin).
 	if ( $gallery ) {

@@ -51,6 +51,7 @@ function nwcs_admin_assets( string $hook ): void {
 	if ( str_contains( $hook, NWCS_POOL_SLUG ) ) {
 		wp_enqueue_script( 'nwcs-import', NWCS_URL . 'assets/import.js', array( 'nwcs-admin' ), NWCS_VERSION, true );
 		wp_enqueue_script( 'nwcs-overrides', NWCS_URL . 'assets/overrides.js', array( 'nwcs-admin' ), NWCS_VERSION, true );
+		wp_enqueue_script( 'nwcs-pool-tables', NWCS_URL . 'assets/pool-tables.js', array(), NWCS_VERSION, true );
 	}
 	wp_localize_script(
 		'nwcs-admin',
