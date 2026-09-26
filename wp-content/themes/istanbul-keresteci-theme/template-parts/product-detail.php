@@ -31,7 +31,7 @@ get_template_part(
 		'title_edit' => array( ...$row, 'title' ),
 		'text_edit'  => $lead_edit,
 		'crumbs'     => array(
-			array( nwcs_field( 'products', 'detail', 'back_label' ), home_url( '/urunlerimiz/' ) ),
+			array( nwcs_field( 'products', 'detail', 'back_label' ), ik_link( '/urunlerimiz/' ), array( 'products', 'detail', 'back_label' ) ),
 		),
 	)
 );

@@ -23,7 +23,8 @@ $info = array(
 );
 
 /**
- * Tek form alani: etiket, girdi, varsa hata.
+ * Tek form alani: etiket, girdi, varsa hata. Etiket ve not panelde
+ * (contact.form) duzenlenir; $label ve $note o alanlarin anahtaridir.
  */
 $field = static function ( string $key, string $label, string $type, string $note, string $autocomplete, string $extra = '' ) use ( $errors, $values ): void {
 	$id    = 'ik-' . $key;
@@ -32,9 +33,9 @@ $field = static function ( string $key, string $label, string $type, string $not
 	?>
 	<div class="ik-field<?php echo 'message' === $key ? ' ik-field--wide' : ''; ?>">
 		<label class="ik-field__label" for="<?php echo esc_attr( $id ); ?>">
-			<?php echo esc_html( $label ); ?>
+			<span <?php nwcs_edit_attr( 'contact', 'form', $label ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', $label ) ); ?></span>
 			<?php if ( $note ) : ?>
-				<span class="ik-field__note"><?php echo esc_html( $note ); ?></span>
+				<span class="ik-field__note" <?php nwcs_edit_attr( 'contact', 'form', $note ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', $note ) ); ?></span>
 			<?php endif; ?>
 		</label>
 
@@ -110,11 +111,11 @@ get_template_part( 'template-parts/page-head', null, array( 'page' => 'contact' 
 					<?php wp_nonce_field( 'ik_message', 'ik_nonce' ); ?>
 
 					<?php
-					$field( 'name', 'Adınız soyadınız', 'text', '', 'name' );
-					$field( 'phone', 'Telefonunuz', 'tel', '', 'tel' );
-					$field( 'email', 'E-posta', 'email', '(telefon yoksa)', 'email' );
-					$field( 'product', 'Ürün', 'select', '', 'off', sanitize_text_field( wp_unslash( $_GET['urun'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-					$field( 'message', 'Ölçü, adet ve teslim yeri', 'textarea', '', 'off' );
+					$field( 'name', 'label_name', 'text', '', 'name' );
+					$field( 'phone', 'label_phone', 'tel', '', 'tel' );
+					$field( 'email', 'label_email', 'email', 'email_note', 'email' );
+					$field( 'product', 'label_product', 'select', '', 'off', sanitize_text_field( wp_unslash( $_GET['urun'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+					$field( 'message', 'label_message', 'textarea', '', 'off' );
 					?>
 
 					<?php // Bot tuzagi: ekran okuyuculardan ve klavyeden gizli. ?>

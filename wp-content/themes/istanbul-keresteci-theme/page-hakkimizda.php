@@ -14,7 +14,7 @@ $items = nwcs_rows( 'about', 'values', 'items' );
 ?>
 <?php if ( ! empty( $image['url'] ) ) : ?>
 	<div class="ik-wrap ik-about-page__media">
-		<?php echo ik_image_tag( $image, 'ik-about-page__image', null, 'eager' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+		<?php echo ik_image_tag( $image, 'ik-about-page__image', null, 'eager', ik_edit_attrs( 'about', 'head', 'image' ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 	</div>
 <?php endif; ?>
 

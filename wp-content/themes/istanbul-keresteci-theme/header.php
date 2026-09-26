@@ -38,17 +38,16 @@ $menu = ik_menu();
 			<span class="ik-topbar__label"><?php echo esc_html( nwcs_field( 'global', 'topbar', 'email_label' ) ); ?></span>
 		</a>
 
-		<div class="ik-topbar__social">
-			<?php foreach ( array( 'instagram' => 'Instagram', 'facebook' => 'Facebook' ) as $network => $network_label ) : ?>
-				<?php $network_url = nwcs_field( 'global', 'topbar', $network . '_url' ); ?>
-				<?php if ( '' !== trim( $network_url ) ) : ?>
-					<a class="ik-topbar__social-link" href="<?php echo esc_url( $network_url ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'global', 'topbar', $network . '_url' ); ?>>
+		<?php $social_links = ik_social_links(); ?>
+		<?php if ( $social_links ) : ?>
+			<div class="ik-topbar__social">
+				<?php foreach ( $social_links as $network => $social ) : ?>
+					<a class="ik-topbar__social-link" href="<?php echo esc_url( $social['url'] ); ?>" target="_blank" rel="noopener" aria-label="<?php echo esc_attr( $social['label'] . ' (yeni sekmede açılır)' ); ?>" <?php nwcs_edit_attr( 'global', 'topbar', $network . '_url' ); ?>>
 						<?php ik_icon( $network, 18 ); ?>
-						<span class="screen-reader-text"><?php echo esc_html( $network_label ); ?> (yeni sekmede açılır)</span>
 					</a>
-				<?php endif; ?>
-			<?php endforeach; ?>
-		</div>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
 	</div>
 </div>
 

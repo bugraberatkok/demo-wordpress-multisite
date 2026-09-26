@@ -35,14 +35,14 @@ while ( have_posts() ) :
 					</ol>
 				</nav>
 				<h1 class="ik-pagehead__title ik-article__title" <?php ik_post_edit_attr( $current, 'title' ); ?>><?php the_title(); ?></h1>
-				<time class="ik-article__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( ik_date( $current ) ); ?></time>
+				<time class="ik-article__date" datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>" <?php nwcs_post_attr( (int) $current->ID, 'Yayın tarihi' ); ?>><?php echo esc_html( ik_date( $current ) ); ?></time>
 			</div>
 		</header>
 
 		<div class="ik-section ik-article__body">
 			<div class="ik-wrap ik-article__grid">
 				<div class="ik-article__main">
-					<?php if ( $image ) : ?>
+					<?php if ( ! empty( $image['url'] ) ) : ?>
 						<img class="ik-article__cover" <?php ik_post_edit_attr( $current, 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
 					<?php endif; ?>
 					<div class="ik-prose ik-prose--page" <?php ik_post_edit_attr( $current, 'body' ); ?>>

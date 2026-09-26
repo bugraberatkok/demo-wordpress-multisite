@@ -25,7 +25,7 @@ $image = ik_image_or_default( nwcs_image( 'home', 'about', 'image', 'large' ), '
 		</div>
 
 		<figure class="ik-about__media">
-			<?php echo ik_image_tag( $image, 'ik-about__image' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+			<?php echo ik_image_tag( $image, 'ik-about__image', null, 'lazy', ik_edit_attrs( 'home', 'about', 'image' ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</figure>
 	</div>
 </section>

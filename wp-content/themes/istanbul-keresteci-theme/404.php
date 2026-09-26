@@ -7,14 +7,8 @@ defined( 'ABSPATH' ) || exit;
 
 get_header();
 
-get_template_part(
-	'template-parts/page-head',
-	null,
-	array(
-		'title' => 'Bu adreste bir sayfa yok',
-		'text'  => 'Bağlantı eski ya da hatalı olabilir. Aradığınız ürün aşağıdaki listede olabilir.',
-	)
-);
+// Baslik ve aciklama panelde: 404 Sayfasi > Sayfa Basligi.
+get_template_part( 'template-parts/page-head', null, array( 'page' => 'notfound' ) );
 ?>
 <section class="ik-section">
 	<div class="ik-wrap">

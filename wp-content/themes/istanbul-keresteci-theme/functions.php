@@ -734,18 +734,31 @@ function ik_paragraphs( string $text, string $class = '' ): void {
 /**
  * Gorsel icin img etiketi; deger yoksa isaretli yer tutucu.
  */
-function ik_image_tag( array $image, string $class = '', ?string $alt = null, string $loading = 'lazy' ): string {
+function ik_image_tag( array $image, string $class = '', ?string $alt = null, string $loading = 'lazy', string $attrs = '' ): string {
 	if ( ! empty( $image['url'] ) ) {
 		return sprintf(
-			'<img src="%1$s" alt="%2$s" class="%3$s" loading="%4$s" decoding="async" />',
+			'<img src="%1$s" alt="%2$s" class="%3$s" loading="%4$s" decoding="async"%5$s />',
 			esc_url( $image['url'] ),
 			esc_attr( null === $alt ? $image['alt'] : $alt ),
 			esc_attr( $class ),
-			esc_attr( $loading )
+			esc_attr( $loading ),
+			$attrs
 		);
 	}
 
-	return sprintf( '<div class="ik-placeholder %s" aria-hidden="true"></div>', esc_attr( $class ) );
+	return sprintf( '<div class="ik-placeholder %s" aria-hidden="true"%s></div>', esc_attr( $class ), $attrs );
+}
+
+/**
+ * Panel onizleme isaretini (nwcs_edit_attr) metin olarak dondurur;
+ * ik_image_tag() gibi HTML donduren yardimcilara verilir. Onizleme
+ * disinda bos.
+ */
+function ik_edit_attrs( ...$args ): string {
+	ob_start();
+	nwcs_edit_attr( ...$args );
+
+	return (string) ob_get_clean();
 }
 
 /**
@@ -782,7 +795,8 @@ function ik_date( WP_Post $post ): string {
  *
  * Paneldeki ikon alanlari eklentinin sabit 16 anahtarini kullanir; tema bu
  * anahtarlari ayni anlamdaki Phosphor cizimine esler. Ek olarak sosyal ag
- * ikonlari (instagram, facebook) temanin kendi cizimleridir.
+ * ikonlari (instagram, facebook, linkedin, youtube, x, tiktok) temanin kendi
+ * cizimleridir; eklentinin ikon listesinde sosyal ag isareti yoktur.
  */
 function ik_icon( string $key, int $size = 24, string $class = 'ik-icon' ): void {
 	static $cache = array();
@@ -806,6 +820,10 @@ function ik_icon( string $key, int $size = 24, string $class = 'ik-icon' ): void
 		'arrow'     => 'arrow-right',
 		'instagram' => 'instagram-logo',
 		'facebook'  => 'facebook-logo',
+		'linkedin'  => 'linkedin-logo',
+		'youtube'   => 'youtube-logo',
+		'x'         => 'x-logo',
+		'tiktok'    => 'tiktok-logo',
 		'caret'     => 'caret-down',
 	);
 
@@ -832,6 +850,38 @@ function ik_icon( string $key, int $size = 24, string $class = 'ik-icon' ): void
 }
 
 /**
+ * Sosyal ag baglantilari: global.topbar bileseninin <ag>_url alanlari.
+ *
+ * Varsayilanlar bostur; yalnizca panelde adresi girilen ag listelenir.
+ * Sira ve etiketler burada sabittir. Donen dizi: [ ag => [ label, url ] ].
+ */
+function ik_social_links(): array {
+	$networks = array(
+		'instagram' => 'Instagram',
+		'facebook'  => 'Facebook',
+		'linkedin'  => 'LinkedIn',
+		'youtube'   => 'YouTube',
+		'x'         => 'X',
+		'tiktok'    => 'TikTok',
+	);
+
+	$links = array();
+
+	foreach ( $networks as $network => $label ) {
+		$url = trim( (string) nwcs_field( 'global', 'topbar', $network . '_url' ) );
+
+		if ( '' !== $url && '' !== esc_url( $url ) ) {
+			$links[ $network ] = array(
+				'label' => $label,
+				'url'   => $url,
+			);
+		}
+	}
+
+	return $links;
+}
+
+/**
  * Logo: panelde gorsel varsa o, yoksa agac isareti ve iki satir yazi.
  *
  * Musterinin elindeki PNG logo 146 piksel genisliginde; retina ekranda
@@ -842,9 +892,10 @@ function ik_logo( string $modifier = '' ): void {
 	$top    = nwcs_field( 'global', 'header', 'logo_top' );
 	$bottom = nwcs_field( 'global', 'header', 'logo_bottom' );
 	?>
-	<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="ik-logo <?php echo esc_attr( $modifier ); ?>">
+	<?php // Logo gorseline ya da isaretine tiklaninca logo gorseli alani; yazilara tiklaninca kendi alanlari. ?>
+	<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="ik-logo <?php echo esc_attr( $modifier ); ?>" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?>>
 		<?php if ( ! empty( $logo['url'] ) ) : ?>
-			<img class="ik-logo__image" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( trim( $top . ' ' . $bottom ) ); ?>" />
+			<img class="ik-logo__image" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( trim( $top . ' ' . $bottom ) ); ?>"<?php echo preg_match( '/\.svg(\?|$)/i', $logo['url'] ) ? ' height="48"' : ''; ?> decoding="async" />
 		<?php else : ?>
 			<svg class="ik-logo__mark" viewBox="0 0 32 40" width="32" height="40" aria-hidden="true" focusable="false">
 				<path d="M16 2 7 13h5l-8 10h6L3 33h26l-7-10h6l-8-10h5z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" />
@@ -1022,6 +1073,20 @@ function ik_zoom_assets(): void {
 	wp_enqueue_style( 'ik-zoom', get_theme_file_uri( 'assets/css/zoom.css' ), array( 'ik-base' ), $ver( 'assets/css/zoom.css' ) );
 	wp_enqueue_script( 'ik-zoom-engine', get_theme_file_uri( 'assets/js/zoom.js' ), array(), $ver( 'assets/js/zoom.js' ), true );
 	wp_enqueue_script( 'ik-product-zoom', get_theme_file_uri( 'assets/js/product-zoom.js' ), array( 'ik-zoom-engine' ), $ver( 'assets/js/product-zoom.js' ), true );
+}
+
+/**
+ * Logo icin SVG yukleme: panelde "Logo Gorseli" alanina SVG secilebilsin
+ * (sanayi-palet-theme ile ayni kural). SVG betik tasiyabildigi icin yalnizca
+ * filtresiz HTML yetkisi olanlar (agda yalnizca super yonetici) yukleyebilir.
+ */
+add_filter( 'upload_mimes', 'ik_upload_mimes' );
+function ik_upload_mimes( array $mimes ): array {
+	if ( current_user_can( 'unfiltered_html' ) ) {
+		$mimes['svg'] = 'image/svg+xml';
+	}
+
+	return $mimes;
 }
 
 /**

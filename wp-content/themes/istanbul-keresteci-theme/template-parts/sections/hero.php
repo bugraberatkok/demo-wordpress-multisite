@@ -10,8 +10,9 @@ defined( 'ABSPATH' ) || exit;
 
 $image = ik_image_or_default( nwcs_image( 'home', 'hero', 'image', 'full' ), 'hero-orman.jpg' );
 ?>
-<section class="ik-hero" aria-labelledby="ik-hero-title">
-	<?php echo ik_image_tag( $image, 'ik-hero__image', '', 'eager' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+<?php // Zemine (fotografa) tiklaninca fotograf alani acilir; yazilar kendi alanlarini acar. ?>
+<section class="ik-hero" aria-labelledby="ik-hero-title" <?php nwcs_edit_attr( 'home', 'hero', 'image' ); ?>>
+	<?php echo ik_image_tag( $image, 'ik-hero__image', '', 'eager', ik_edit_attrs( 'home', 'hero', 'image' ) ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 
 	<div class="ik-wrap ik-hero__inner">
 		<h1 class="ik-hero__title" id="ik-hero-title">

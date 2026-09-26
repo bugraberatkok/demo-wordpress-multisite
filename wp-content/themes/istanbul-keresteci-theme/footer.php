@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 				<h2 class="ik-footer__title" id="ik-footer-products" <?php nwcs_edit_attr( 'global', 'footer', 'products_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'products_title' ) ); ?></h2>
 				<ul class="ik-footer__list ik-footer__list--two">
 					<?php foreach ( ik_products() as $product ) : ?>
-						<li><a href="<?php echo esc_url( $product['url'] ); ?>"><?php echo esc_html( $product['title'] ); ?></a></li>
+						<li><a href="<?php echo esc_url( $product['url'] ); ?>" <?php nwcs_edit_attr( 'products', 'catalog', 'items', (int) $product['index'], 'title' ); ?>><?php echo esc_html( $product['title'] ); ?></a></li>
 					<?php endforeach; ?>
 				</ul>
 			</nav>

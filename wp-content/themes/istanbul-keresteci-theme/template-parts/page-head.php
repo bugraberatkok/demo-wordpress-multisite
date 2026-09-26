@@ -3,7 +3,8 @@
  * Ic sayfa basligi: koyu zemin, buyuk baslik, kisa aciklama.
  *
  * Beklenen $args: page (manifest sayfa anahtari). Istege bagli: title ve
- * text (alan yerine dogrudan deger), crumbs ([ [etiket, adres], ... ]),
+ * text (alan yerine dogrudan deger), crumbs ([ [etiket, adres, duzenleme], ... ];
+ * duzenleme istege bagli nwcs_edit_attr argumanlari),
  * title_edit ve text_edit (dogrudan deger verildiginde onizlemede tiklaninca
  * acilacak alan: nwcs_edit_attr argumanlari).
  */
@@ -32,7 +33,7 @@ $edit = static function ( bool $own, string $field, array $args ) use ( $page ):
 			<nav class="ik-crumbs" aria-label="Konum">
 				<ol>
 					<?php foreach ( $crumbs as $crumb ) : ?>
-						<li><a href="<?php echo esc_url( $crumb[1] ); ?>"><?php echo esc_html( $crumb[0] ); ?></a></li>
+						<li><a href="<?php echo esc_url( $crumb[1] ); ?>" <?php if ( ! empty( $crumb[2] ) ) { nwcs_edit_attr( ...$crumb[2] ); } ?>><?php echo esc_html( $crumb[0] ); ?></a></li>
 					<?php endforeach; ?>
 				</ol>
 			</nav>

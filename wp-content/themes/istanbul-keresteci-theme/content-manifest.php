@@ -182,7 +182,7 @@ foreach ( (array) include __DIR__ . '/content/blog-posts.php' as $ik_post ) {
 	);
 }
 
-return array(
+$manifest_data = array(
 	'site_key'   => 'istanbul-keresteci',
 	'site_label' => 'İstanbul Keresteci',
 	// SEO ve GEO firma bilgisi (Network Content Studio). Degerler bu sitenin
@@ -204,7 +204,7 @@ return array(
 	'pages'      => array(
 
 		'global' => array(
-			'label'      => 'Tüm Sayfalar (Menü ve Footer)',
+			'label'      => 'Tüm Sayfalar (Menü ve Sayfa Altı)',
 			'path'       => '/',
 			'components' => array(
 
@@ -215,8 +215,13 @@ return array(
 						'address_url'   => array( 'label' => 'Adres Bağlantısı', 'type' => 'url', 'default' => '/iletisim/' ),
 						'email_label'   => array( 'label' => 'E-posta Metni', 'type' => 'text', 'default' => $email ),
 						'email_url'     => array( 'label' => 'E-posta Bağlantısı', 'type' => 'url', 'default' => 'mailto:' . $email ),
-						'instagram_url' => array( 'label' => 'Instagram Bağlantısı', 'type' => 'url', 'default' => 'https://www.instagram.com/' ),
-						'facebook_url'  => array( 'label' => 'Facebook Bağlantısı', 'type' => 'url', 'default' => 'https://www.facebook.com/' ),
+						// Sosyal aglar: bos birakilan agin ikonu gorunmez; hepsi bossa alan gizlenir.
+						'instagram_url' => array( 'label' => 'Instagram Bağlantısı (boşsa gizli)', 'type' => 'url', 'default' => '' ),
+						'facebook_url'  => array( 'label' => 'Facebook Bağlantısı (boşsa gizli)', 'type' => 'url', 'default' => '' ),
+						'linkedin_url'  => array( 'label' => 'LinkedIn Bağlantısı (boşsa gizli)', 'type' => 'url', 'default' => '' ),
+						'youtube_url'   => array( 'label' => 'YouTube Bağlantısı (boşsa gizli)', 'type' => 'url', 'default' => '' ),
+						'x_url'         => array( 'label' => 'X (Twitter) Bağlantısı (boşsa gizli)', 'type' => 'url', 'default' => '' ),
+						'tiktok_url'    => array( 'label' => 'TikTok Bağlantısı (boşsa gizli)', 'type' => 'url', 'default' => '' ),
 					),
 				),
 
@@ -272,7 +277,7 @@ return array(
 				),
 
 				'footer' => array(
-					'label'  => 'Footer',
+					'label'  => 'Sayfa Altı (Footer)',
 					'fields' => array(
 						'about_text'     => array( 'label' => 'Tanıtım Metni', 'type' => 'textarea', 'default' => 'Kereste, tomruk, plaka ve ahşap ambalaj. Çatalca’daki depomuzdan İstanbul’un her yerine teslim ediyoruz. Koçist Grup kuruluşudur.' ),
 						'products_title' => array( 'label' => 'Ürünler Başlığı', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
@@ -524,6 +529,12 @@ return array(
 					'fields' => array(
 						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sipariş ve fiyat formu' ),
 						'text'         => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Ürünü, ölçüyü ve adedi yazın. Aynı gün size dönüyoruz.' ),
+						'label_name'    => array( 'label' => 'Ad Soyad Kutusunun Adı', 'type' => 'text', 'default' => 'Adınız soyadınız' ),
+						'label_phone'   => array( 'label' => 'Telefon Kutusunun Adı', 'type' => 'text', 'default' => 'Telefonunuz' ),
+						'label_email'   => array( 'label' => 'E-posta Kutusunun Adı', 'type' => 'text', 'default' => 'E-posta' ),
+						'email_note'    => array( 'label' => 'E-posta Kutusundaki Küçük Not', 'type' => 'text', 'default' => '(telefon yoksa)', 'hint' => 'Kutunun adının yanında küçük yazıyla görünür.' ),
+						'label_product' => array( 'label' => 'Ürün Seçim Kutusunun Adı', 'type' => 'text', 'default' => 'Ürün', 'hint' => 'Seçenekler Ürünlerimiz sayfasındaki ürün listesinden gelir.' ),
+						'label_message' => array( 'label' => 'Mesaj Kutusunun Adı', 'type' => 'text', 'default' => 'Ölçü, adet ve teslim yeri' ),
 						'button_label' => array( 'label' => 'Düğme Metni', 'type' => 'text', 'default' => 'Mesajı gönder' ),
 						'success'      => array( 'label' => 'Gönderildi Mesajı', 'type' => 'textarea', 'default' => 'Mesajınız bize ulaştı. Aynı gün içinde telefonla ya da e-postayla size dönüyoruz.' ),
 					),
@@ -547,6 +558,7 @@ return array(
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Blog' ),
 						'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Kereste türleri, fiyatlar ve doğru malzemeyi seçmek üzerine yazılar.' ),
+						'empty' => array( 'label' => 'Yazı Yokken Görünen Metin', 'type' => 'textarea', 'default' => 'Henüz yazı yok. Sorunuz varsa bize yazın; yanıtı burada paylaşalım.' ),
 					),
 				),
 				'post' => array(
@@ -559,5 +571,39 @@ return array(
 				),
 			),
 		),
+
+		/*
+		 * Bulunamayan sayfa (404). Onizleme adresi bilerek olmayan bir sayfa.
+		 * Basligin altinda urun listesi gosterilir.
+		 */
+		'notfound' => array(
+			'label'      => '404 Sayfası',
+			'path'       => '/bulunamadi-404/',
+			// Gizli: sekme listesinde yok, "Sayfa bul" ile acilir.
+			'hidden'     => true,
+			'components' => array(
+				'head' => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Bu adreste bir sayfa yok' ),
+						'text'  => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Bağlantı eski ya da hatalı olabilir. Aradığınız ürün aşağıdaki listede olabilir.' ),
+					),
+				),
+			),
+		),
 	) + $ik_product_pages + $ik_blog_pages,
+);
+
+// Panel ipuclari: ayni bilginin sitede yazili oldugu diger yerler, baglanti yazimi.
+$manifest_hints = require __DIR__ . '/content-manifest-hints.php';
+
+return $manifest_hints(
+	$manifest_data,
+	array(
+		'Bu adres' => array( 'global.topbar.address', 'global.footer.address', 'contact.info.address', 'contact.map.query' ),
+		'Bu telefon numarası' => array( 'global.header.phone_label', 'global.footer.phone_label', 'contact.info.phone' ),
+		'Bu WhatsApp numarası' => array( 'global.footer.whatsapp_label', 'contact.info.whatsapp', 'products.help.number_label' ),
+		'Bu WhatsApp bağlantısı' => array( 'global.footer.whatsapp_url', 'contact.info.whatsapp_url', 'products.help.number_url', 'home.ctaband.secondary_url' ),
+		'Bu e-posta adresi' => array( 'global.topbar.email_label', 'global.footer.email_label', 'contact.info.email' ),
+	)
 );
