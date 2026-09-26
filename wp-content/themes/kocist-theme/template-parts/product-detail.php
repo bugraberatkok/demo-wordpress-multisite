@@ -176,14 +176,14 @@ if ( '' !== $body_html || $tables || $preview ) :
 				<?php if ( $tables || $preview ) : ?>
 					<div class="k-pdetail__tables">
 						<?php foreach ( $tables as $table ) : ?>
-							<?php kocist_render_product_table( $table ); ?>
+							<?php kocist_render_product_table( $table, $product ); ?>
 						<?php endforeach; ?>
 
 						<?php if ( ! $tables ) : ?>
-							<?php // Yalnizca panel onizlemesinde: tiklaninca tablo alanlari acilir. ?>
-							<div class="k-ptable k-ptable--empty" <?php nwcs_edit_attr( 'product', 'tables', 'items' ); ?>>
+							<?php // Yalnizca panel onizlemesinde: tiklaninca urun Urun Havuzu'nda acilir. ?>
+							<div class="k-ptable k-ptable--empty" <?php kocist_product_attr( $product, 'Ürün tablosu' ); ?>>
 								<p class="k-ptable__empty-title">Bu ürüne tablo ekleyin</p>
-								<p class="k-ptable__empty-text">Tıklayın, “Satır ekle” ile yeni tablo açın ve Ürün alanına <strong><?php echo esc_html( $product['title'] ); ?></strong> yazın. Bu kutu yalnızca panelde görünür.</p>
+								<p class="k-ptable__empty-text">Tıklayın; ürün Ürün Havuzu'nda açılır. “Ürün Tabloları” bölümünden tabloyu hücre hücre doldurun. Bu kutu yalnızca panelde görünür.</p>
 							</div>
 						<?php endif; ?>
 					</div>

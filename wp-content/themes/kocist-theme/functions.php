@@ -941,80 +941,35 @@ function kocist_product_attr( array $product, string $label ): void {
 }
 
 /**
- * Tablo metninin tek satirini hucrelere boler: "|" ile; "|" yoksa ve satirda
- * sekme varsa Excel'den yapistirilmis sayilir, sekmeyle bolunur.
+ * Urune ozel tablolar: Urun Havuzu'nda urun formundaki "Ürün Tabloları"
+ * bolumunden girilir (yalnizca Kocist'te gosterilen urunlerde acilir) ve
+ * urunle birlikte gelir ($product['tables']). Eklenti hucreleri temizleyip
+ * bos satir/sutunlari atar; burada yalnizca satiri olmayan tablo atlanir ve
+ * sutun sayisi en genis satira gore esitlenir.
  *
- * @return string[]
- */
-function kocist_table_cells( string $line ): array {
-	$separator = ( ! str_contains( $line, '|' ) && str_contains( $line, "\t" ) ) ? "\t" : '|';
-
-	return array_map( 'trim', explode( $separator, $line ) );
-}
-
-/**
- * Urune ozel tablolar (panel: Ürün Sayfaları -> Ürün Tabloları).
- *
- * Her repeater satiri bir tablodur; "Ürün" alanina yazilan ad ya da kisa ad
- * (virgulle birden fazla) bu urunle eslesirse gosterilir. Karsilastirma
- * sanitize_title ile yapilir: "Çam Kalas 5×10 cm" ile "cam-kalas-5x10-cm"
- * ayni urunu bulur. Sutun sayisi en uzun satira (ya da basliklara) gore
- * belirlenir; eksik hucreler bos kalir. Satiri olmayan tablo atlanir; sutun
- * basliklari istege baglidir.
- *
- * @return array<int, array{index:int, title:string, head:string[], rows:array<int, string[]>, cols:int}>
+ * @return array<int, array{title:string, head:string[], rows:array<int, string[]>, cols:int}>
  */
 function kocist_product_tables( array $product ): array {
-	if ( ! function_exists( 'nwcs_rows' ) ) {
-		return array();
-	}
-
-	$keys = array_filter(
-		array(
-			sanitize_title( (string) ( $product['slug'] ?? '' ) ),
-			sanitize_title( (string) ( $product['title'] ?? '' ) ),
-		)
-	);
-
 	$tables = array();
 
-	foreach ( nwcs_rows( 'product', 'tables', 'items' ) as $index => $row ) {
-		$targets = array_filter( array_map( 'sanitize_title', explode( ',', (string) ( $row['product'] ?? '' ) ) ) );
+	foreach ( (array) ( $product['tables'] ?? array() ) as $table ) {
+		$head = array_map( 'strval', (array) ( $table['head'] ?? array() ) );
+		$body = array_values( array_filter( (array) ( $table['rows'] ?? array() ), 'is_array' ) );
 
-		if ( ! $keys || ! array_intersect( $targets, $keys ) ) {
-			continue;
-		}
-
-		$columns = trim( (string) ( $row['columns'] ?? '' ) );
-		$head    = '' === $columns ? array() : kocist_table_cells( $columns );
-		$lines   = preg_split( '/\r\n|\r|\n/', (string) ( $row['rows'] ?? '' ) );
-		$body    = array();
-
-		foreach ( (array) $lines as $line ) {
-			if ( '' === trim( $line ) ) {
-				continue;
-			}
-
-			$body[] = kocist_table_cells( $line );
-		}
-
-		// Yalnizca "|" isaretlerinden olusan bos basliklar da bos sayilir.
-		if ( '' === implode( '', $head ) ) {
-			$head = array();
-		}
-
-		// Satiri olmayan tablo (yalnizca baslik yazilmis) henuz hazir degildir.
 		if ( ! $body ) {
 			continue;
 		}
 
-		$cols = max( array_merge( array( count( $head ) ), array_map( 'count', $body ) ) );
+		if ( '' === implode( '', $head ) ) {
+			$head = array();
+		}
+
+		$cols = max( array_merge( array( count( $head ), 1 ), array_map( 'count', $body ) ) );
 
 		$tables[] = array(
-			'index' => (int) $index,
-			'title' => trim( (string) ( $row['title'] ?? '' ) ),
+			'title' => trim( (string) ( $table['title'] ?? '' ) ),
 			'head'  => $head ? array_pad( $head, $cols, '' ) : array(),
-			'rows'  => array_map( static fn( array $cells ): array => array_pad( $cells, $cols, '' ), $body ),
+			'rows'  => array_map( static fn( array $cells ): array => array_pad( array_map( 'strval', $cells ), $cols, '' ), $body ),
 			'cols'  => $cols,
 		);
 	}
@@ -1024,21 +979,21 @@ function kocist_product_tables( array $product ): array {
 
 /**
  * Tek urun tablosu (kocist_product_tables() ogesi). Genis tablo kartin
- * icinde yatay kayar; sayfa tasmaz.
+ * icinde yatay kayar; sayfa tasmaz. Panel onizlemesinde tiklaninca urun
+ * Urun Havuzu'nda acilir; tablolar orada duzenlenir.
  */
-function kocist_render_product_table( array $table ): void {
-	$index = (int) $table['index'];
+function kocist_render_product_table( array $table, array $product ): void {
 	$label = '' !== $table['title'] ? $table['title'] : 'Ürün tablosu';
 	?>
-	<div class="k-ptable" style="--k-cols: <?php echo (int) $table['cols']; ?>">
+	<div class="k-ptable" style="--k-cols: <?php echo (int) $table['cols']; ?>" <?php kocist_product_attr( $product, 'Ürün tablosu' ); ?>>
 		<?php if ( '' !== $table['title'] ) : ?>
-			<h3 class="k-ptable__title" <?php nwcs_edit_attr( 'product', 'tables', 'items', $index, 'title' ); ?>><?php echo esc_html( $table['title'] ); ?></h3>
+			<h3 class="k-ptable__title"><?php echo esc_html( $table['title'] ); ?></h3>
 		<?php endif; ?>
 
 		<div class="k-ptable__scroll" role="region" aria-label="<?php echo esc_attr( $label ); ?>" tabindex="0">
 			<table class="k-ptable__table">
 				<?php if ( $table['head'] ) : ?>
-					<thead <?php nwcs_edit_attr( 'product', 'tables', 'items', $index, 'columns' ); ?>>
+					<thead>
 						<tr>
 							<?php foreach ( $table['head'] as $cell ) : ?>
 								<th scope="col"><?php echo esc_html( $cell ); ?></th>
@@ -1046,7 +1001,7 @@ function kocist_render_product_table( array $table ): void {
 						</tr>
 					</thead>
 				<?php endif; ?>
-				<tbody <?php nwcs_edit_attr( 'product', 'tables', 'items', $index, 'rows' ); ?>>
+				<tbody>
 					<?php foreach ( $table['rows'] as $cells ) : ?>
 						<tr>
 							<?php foreach ( $cells as $cell ) : ?>

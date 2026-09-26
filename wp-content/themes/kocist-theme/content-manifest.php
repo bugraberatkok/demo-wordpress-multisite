@@ -216,6 +216,9 @@ $manifest_data = array(
 		'postal_code' => '', // 34494 Catalca'nin kodu degil; tek adres kurali (Toplu Guncelleme)
 		'country'     => 'TR',
 	),
+	// Urun Havuzu'ndaki urun formunda "Ürün Tabloları" bolumu bu sitede
+	// gosterilen urunler icin acilir (bkz. kocist_product_tables()).
+	'product_tables' => true,
 	'pages'      => array(
 
 		'global' => array(
@@ -1266,54 +1269,6 @@ $manifest_data = array(
 						'related_group' => array( 'label' => 'Benzer Ürünler Başlığı (grup) — {grup} grubun adı olur', 'type' => 'text', 'default' => '{grup} grubunda diğer ürünler' ),
 						'see_all'       => array( 'label' => 'Tümünü Gör Bağlantısı', 'type' => 'text', 'default' => 'Tümünü gör' ),
 						'body_title'    => array( 'label' => 'Detay Metni Başlığı (ürün bilgilerinin altındaki bölüm)', 'type' => 'text', 'default' => 'Ürün Detayı' ),
-					),
-				),
-
-				/*
-				 * Urune ozel tablolar (/urun/<urun>/ sayfasinda detay metninin
-				 * yaninda). Havuz urununun alanlari eklentide sabit oldugu icin
-				 * tablolar burada tutulur; her satir bir tablo ve "Ürün" alanina
-				 * yazilan urunun sayfasinda gorunur (ad ya da adresteki kisa ad).
-				 * Eklentide ic ice tekrarli alan olmadigindan satirlar tek metin
-				 * kutusunda: her satir bir tablo satiri, hucreler "|" ile ayrilir
-				 * (Excel'den kopyalanan sekmeli metin de kabul edilir).
-				 * Ornekler yalnizca gri yer tutucu metindir; kayitli veri yoktur.
-				 */
-				'tables' => array(
-					'label'  => 'Ürün Tabloları (her ürüne ayrı)',
-					'fields' => array(
-						'items' => array(
-							'label'   => 'Tablolar',
-							'type'    => 'repeater',
-							'max'     => 50,
-							'hint'    => 'Her satır bir tablodur ve yalnızca "Ürün" alanına yazdığınız ürünün sayfasında görünür. Aynı ürüne birden fazla tablo ekleyebilirsiniz. Satırları boş bırakılan tablo sitede gösterilmez.',
-							'fields'  => array(
-								'product' => array(
-									'label'       => 'Ürün',
-									'type'        => 'text',
-									'placeholder' => 'Örn. Çam Kalas 5×10 cm',
-									'hint'        => 'Ürünün sitedeki adı ya da adresindeki kısa adı (…/urun/cam-kalas-5x10-cm/ için cam-kalas-5x10-cm). Aynı tabloyu birkaç üründe göstermek için adları virgülle ayırın.',
-								),
-								'title'   => array(
-									'label'       => 'Tablo Başlığı',
-									'type'        => 'text',
-									'placeholder' => 'Örn. Çıta Kesit ve Uzunlukları',
-								),
-								'columns' => array(
-									'label'       => 'Sütun Başlıkları (aralarına | koyun)',
-									'type'        => 'text',
-									'placeholder' => 'Kesit (mm) | Uzunluk (m) | Malzeme | Kullanım',
-									'hint'        => 'Kaç başlık yazarsanız tablo o kadar sütunlu olur; başlıkları dikey çizgiyle (|) ayırın.',
-								),
-								'rows'    => array(
-									'label'       => 'Satırlar (her satır ayrı bir satırda, hücreler arasına | koyun)',
-									'type'        => 'textarea',
-									'placeholder' => "20×40 | 2–3 | Çam | Kaplama/konstrüksiyon\n30×50 | 3–4 | Ladin | Çatı altı",
-									'hint'        => 'Enter ile yeni satıra geçin; hücreleri sütun başlıklarıyla aynı sırada yazın. Excel\'den kopyalayıp yapıştırdığınız tablo da olduğu gibi kabul edilir. Boş hücre için iki | arasını boş bırakın.',
-								),
-							),
-							'default' => array(),
-						),
 					),
 				),
 
