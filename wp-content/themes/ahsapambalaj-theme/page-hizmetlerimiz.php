@@ -47,7 +47,7 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 				// Form hangi urun icin teklif istendigini adresten okur.
 				$quote_url = add_query_arg(
 					'urun',
-					$item['title'] ?? '',
+					rawurlencode( (string) ( $item['title'] ?? '' ) ),
 					ahsapambalaj_link( nwcs_field( 'services', 'grid', 'cta_url' ) )
 				) . '#teklif';
 				?>
@@ -88,6 +88,7 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 					<?php if ( $gallery ) : ?>
 						<button type="button" data-lightbox-open="0"
 							class="group relative h-56 w-full shrink-0 overflow-hidden bg-dust sm:h-auto sm:w-[50%]"
+							<?php nwcs_edit_attr( 'services', 'grid', 'items', $item_index, 'image' ); ?>
 							aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $item['title'] ?? '' ) ); ?>">
 
 							<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>"

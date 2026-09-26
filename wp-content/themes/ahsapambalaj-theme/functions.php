@@ -9,12 +9,34 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Manifest dizisi (content-manifest.php); eklenti kapaliyken yedek
+ * fonksiyonlar varsayilan metinleri buradan okur.
+ */
+function ahsapambalaj_manifest(): array {
+	static $manifest = null;
+
+	if ( null === $manifest ) {
+		$file     = get_theme_file_path( 'content-manifest.php' );
+		$loaded   = file_exists( $file ) ? include $file : array();
+		$manifest = is_array( $loaded ) ? $loaded : array();
+	}
+
+	return $manifest;
+}
+
 if ( ! function_exists( 'nwcs_field' ) ) {
+	// Eklenti kapaliyken sayfa bos kalmasin: manifestteki varsayilan metin.
 	function nwcs_field( $page, $component, $field, $fallback = null ) {
-		return null === $fallback ? '' : $fallback;
+		if ( null !== $fallback ) {
+			return $fallback;
+		}
+		$default = ahsapambalaj_manifest()['pages'][ $page ]['components'][ $component ]['fields'][ $field ]['default'] ?? '';
+		return null === $default ? '' : $default;
 	}
 	function nwcs_rows( $page, $component, $field ) {
-		return array();
+		$rows = nwcs_field( $page, $component, $field );
+		return is_array( $rows ) ? array_values( $rows ) : array();
 	}
 	function nwcs_image( $page, $component, $field, $size = 'large' ) {
 		return array( 'id' => 0, 'url' => '', 'alt' => '' );
@@ -152,7 +174,6 @@ function ahsapambalaj_default_images(): array {
 		'hero-2' => array( 'hero-2.jpg', 'Tesis önünde sevkiyata hazır bekleyen ahşap sandıklar' ),
 		'hero-3' => array( 'hero-3.jpg', 'Atölyede istiflenmiş ahşap kasa ve sandıklar' ),
 		'atolye' => array( 'atolye.jpg', 'Çatalca atölyesinde ölçüye göre üretilen ahşap sandık' ),
-		'dag'    => array( 'dag.jpg', 'Sisler arasında dağ yamacı' ),
 		'palet'  => array( 'palet.jpg', 'Üst üste dizilmiş ahşap paletler' ),
 		'sandik' => array( 'sandik.jpg', 'Sevkiyata hazır kapalı ahşap sandık' ),
 		'kafes'  => array( 'kafes.jpg', 'Ölçüye göre üretilmiş ahşap kafes' ),
@@ -160,7 +181,8 @@ function ahsapambalaj_default_images(): array {
 
 	return array(
 		'logo'     => $img['logo'],
-		'about'    => $img['dag'],
+		// Hakkimizda hero'su: tek kareli atolye fotografi (kolaj degil), koyu perde altinda da okunur.
+		'about'    => array( 'atolye.jpg', 'Çatalca atölyesinde kereste istifleri önünde üretilmiş ahşap sandık' ),
 		'slides'   => array( $img['hero-1'], $img['hero-2'], $img['hero-3'] ),
 		'family'   => array( $img['palet'], $img['sandik'], $img['kafes'], $img['atolye'] ),
 		// Hizmetler: her urunun kapak + ek gorselleri (image, image_2, image_3).
@@ -487,6 +509,20 @@ add_filter(
 	'nwcs_seo_default_image',
 	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/hero-1.jpg', 'Ahşap sandık ve kafes üretimi' ) : 0
 );
+
+/**
+ * Logo icin SVG yukleme: panelde "Logo Gorseli" alanina SVG secilebilsin
+ * (sanayi-palet-theme ile ayni kural). SVG betik tasiyabildigi icin yalnizca
+ * filtresiz HTML yetkisi olanlar (agda yalnizca super yonetici) yukleyebilir.
+ */
+add_filter( 'upload_mimes', 'ahsapambalaj_upload_mimes' );
+function ahsapambalaj_upload_mimes( array $mimes ): array {
+	if ( current_user_can( 'unfiltered_html' ) ) {
+		$mimes['svg'] = 'image/svg+xml';
+	}
+
+	return $mimes;
+}
 
 /**
  * Favicon: SVG (modern tarayicilar), 32px PNG yedegi ve iOS icin 180px ikon.

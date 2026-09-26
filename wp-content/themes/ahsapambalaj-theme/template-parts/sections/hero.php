@@ -17,7 +17,8 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $slide_index => $row ) {
 	}
 }
 ?>
-<section class="relative isolate flex min-h-[32rem] items-end overflow-hidden md:min-h-[40rem]">
+<?php // Zemine tiklaninca slayt fotograflari acilir; yazilar kendi alanlarini acar. ?>
+<section class="relative isolate flex min-h-[32rem] items-end overflow-hidden md:min-h-[40rem]" <?php nwcs_edit_attr( 'home', 'hero', 'slides' ); ?>>
 
 	<?php if ( $slides ) : ?>
 		<div class="parallax absolute inset-0 -z-20" data-slideshow data-parallax <?php nwcs_edit_attr( 'home', 'hero', 'slides' ); ?>>

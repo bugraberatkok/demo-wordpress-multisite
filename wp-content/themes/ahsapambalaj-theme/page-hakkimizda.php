@@ -14,7 +14,7 @@ $blocks = array( 'purpose', 'quality' );
 ?>
 <article>
 
-	<section class="relative isolate flex min-h-[24rem] items-center justify-center overflow-hidden md:min-h-[30rem]">
+	<section class="relative isolate flex min-h-[24rem] items-center justify-center overflow-hidden md:min-h-[30rem]" <?php nwcs_edit_attr( 'about', 'head', 'image' ); ?>>
 
 		<?php if ( ! empty( $image['url'] ) ) : ?>
 			<img src="<?php echo esc_url( $image['url'] ); ?>"

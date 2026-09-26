@@ -35,7 +35,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 
 	<div class="mx-auto flex h-[88px] max-w-[76rem] items-center justify-between gap-8 px-6 transition-[height] duration-300 ease-out group-data-[stuck=true]:h-[64px]">
 
-		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center gap-3" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
+		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center gap-3" <?php nwcs_edit_attr( 'global', 'header', 'logo_image' ); ?>>
 			<?php // Logo gorseli zaten firma adini tasiyor; yazi tekrarlanmaz. ?>
 			<img src="<?php echo esc_url( $logo['url'] ); ?>"
 				alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"

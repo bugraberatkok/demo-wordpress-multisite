@@ -8,7 +8,7 @@
  * Alan turleri: text, textarea, url, image, icon, repeater
  */
 
-return array(
+$manifest_data = array(
 	'site_key'   => 'ahsapambalaj',
 	'site_label' => 'Ahşap Ambalaj Sanayi · ahsapambalajsanayi.com',
 	// SEO ve GEO firma bilgisi (Network Content Studio). Degerler bu sitenin
@@ -38,9 +38,9 @@ return array(
 				'header' => array(
 					'label'  => 'Üst Menü',
 					'fields' => array(
-						'logo_image' => array( 'label' => 'Logo Görseli', 'type' => 'image', 'default' => 0 ),
-						'logo_text'  => array( 'label' => 'Logo Yazısı', 'type' => 'text', 'default' => 'Ahşap Ambalaj' ),
-						'logo_sub'   => array( 'label' => 'Logo Alt Yazısı', 'type' => 'text', 'default' => 'Sanayi' ),
+						'logo_image' => array( 'label' => 'Logo Görseli', 'type' => 'image', 'default' => 0, 'hint' => 'Üst menüde görünen logo. Boş bırakılırsa temanın kendi logosu kullanılır.' ),
+						'logo_text'  => array( 'label' => 'Firma Adı (logonun açıklaması)', 'type' => 'text', 'default' => 'Ahşap Ambalaj', 'hint' => 'Sayfada yazı olarak görünmez; logo görselinin açıklamasıdır (görme engelliler ve Google için).' ),
+						'logo_sub'   => array( 'label' => 'Firma Adının Devamı (logonun açıklaması)', 'type' => 'text', 'default' => 'Sanayi', 'hint' => 'Sayfada görünmez; firma adının arkasına eklenir.' ),
 						'menu'       => array(
 							'label'   => 'Menü Öğeleri',
 							'type'    => 'repeater',
@@ -56,8 +56,8 @@ return array(
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
-						'whatsapp_label' => array( 'label' => 'WhatsApp Düğmesi Metni', 'type' => 'text', 'default' => 'WhatsApp' ),
-						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => '' ),
+						'whatsapp_label' => array( 'label' => 'WhatsApp Düğmesi Metni', 'type' => 'text', 'default' => 'WhatsApp', 'hint' => 'Düğme yalnızca aşağıdaki WhatsApp Bağlantısı doluyken görünür.' ),
+						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı (boşsa düğme gizlenir)', 'type' => 'url', 'default' => '' ),
 						'cta_label'  => array( 'label' => 'Menü Düğmesi Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
 						'cta_url'    => array( 'label' => 'Menü Düğmesi Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
 					),
@@ -66,6 +66,12 @@ return array(
 				'footer' => array(
 					'label'  => 'Alt Bilgi',
 					'fields' => array(
+						'logo_image'     => array(
+							'label'   => 'Alt bilgi logosu (koyu zemin için açık renk)',
+							'type'    => 'image',
+							'default' => 0,
+							'hint'    => 'Alt bilgi koyu zeminlidir; açık renkli bir logo yükleyin. Boş bırakılırsa temanın varsayılan açık renkli logosu kullanılır.',
+						),
 						'tagline'        => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'Sanayi ve ihracat yükleri için ölçüye göre ahşap sandık, kafes ve palet üretiyoruz.' ),
 						'phone_label'    => array( 'label' => 'Telefon Metni', 'type' => 'text', 'default' => '0 212 648 10 90' ),
 						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+902126481090' ),
@@ -371,4 +377,17 @@ return array(
 			),
 		),
 	),
+);
+
+// Panel ipuclari: ayni bilginin sitede yazili oldugu diger yerler, baglanti yazimi.
+$manifest_hints = require __DIR__ . '/content-manifest-hints.php';
+
+return $manifest_hints(
+	$manifest_data,
+	array(
+		'Bu telefon numarası' => array( 'global.footer.phone_label', 'contact.details.phone_label' ),
+		'Bu cep numarası' => array( 'global.footer.mobile_label', 'contact.details.mobile_label' ),
+		'Bu e-posta adresi' => array( 'global.footer.email_label', 'contact.details.email_label' ),
+		'Bu adres' => array( 'global.footer.address', 'contact.details.address' ),
+	)
 );

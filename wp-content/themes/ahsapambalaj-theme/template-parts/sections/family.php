@@ -27,7 +27,7 @@ $items = nwcs_rows( 'home', 'family', 'items' );
 				<a href="<?php echo esc_url( ahsapambalaj_link( $item['url'] ?? '' ) ); ?>"
 					class="card group grid h-full grid-cols-[8.5rem_1fr] overflow-hidden border-l-4 border-l-transparent transition-colors hover:border-l-signal sm:grid-cols-[11rem_1fr]">
 
-					<span class="block min-h-[8.5rem] overflow-hidden bg-dust">
+					<span class="block min-h-[8.5rem] overflow-hidden bg-dust" <?php nwcs_edit_attr( 'home', 'family', 'items', $item_index, 'image' ); ?>>
 						<?php if ( ! empty( $thumb['url'] ) ) : ?>
 							<img src="<?php echo esc_url( $thumb['url'] ); ?>"
 								alt="<?php echo esc_attr( $thumb['alt'] ?: ( $item['label'] ?? '' ) ); ?>"

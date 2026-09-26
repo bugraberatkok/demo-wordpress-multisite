@@ -6,6 +6,12 @@
 defined( 'ABSPATH' ) || exit;
 
 $menu = nwcs_rows( 'global', 'header', 'menu' );
+
+// Panelden yuklenen alt bilgi logosu; yoksa temanin acik renkli logosu.
+$footer_logo = nwcs_image( 'global', 'footer', 'logo_image', 'medium' );
+if ( empty( $footer_logo['url'] ) ) {
+	$footer_logo['url'] = get_theme_file_uri( 'assets/img/logo-ahsap-ambalaj-acik.svg' );
+}
 ?>
 </main>
 
@@ -15,8 +21,8 @@ $menu = nwcs_rows( 'global', 'header', 'menu' );
 		<div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr]">
 
 			<div>
-				<p <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
-					<img src="<?php echo esc_url( get_theme_file_uri( 'assets/img/logo-ahsap-ambalaj-acik.svg' ) ); ?>"
+				<p <?php nwcs_edit_attr( 'global', 'footer', 'logo_image' ); ?>>
+					<img src="<?php echo esc_url( $footer_logo['url'] ); ?>"
 						alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
 						width="280" height="44" class="block h-11 w-auto" />
 				</p>

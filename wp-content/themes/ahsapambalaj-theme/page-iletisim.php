@@ -196,7 +196,12 @@ $details = array(
 			<h2 id="iletisim-bilgileri" class="sr-only">İletişim bilgileri</h2>
 
 			<ul class="card px-6 py-2 md:px-7">
-				<?php foreach ( $details as $row ) : ?>
+				<?php foreach ( $details as $row ) :
+					// Panelde bos birakilan satir (orn. cep telefonu) basilmaz.
+					if ( '' === trim( (string) nwcs_field( 'contact', 'details', $row['value'] ) ) ) {
+						continue;
+					}
+					?>
 					<li class="flex gap-4 border-b border-line py-5 last:border-0">
 						<span class="mt-1 shrink-0 text-timber" aria-hidden="true">
 							<?php nwcs_the_icon( nwcs_field( 'contact', 'details', $row['icon'] ), '', 22 ); ?>
