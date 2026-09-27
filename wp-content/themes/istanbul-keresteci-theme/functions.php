@@ -957,7 +957,8 @@ function ik_handle_message(): void {
 	$values = array(
 		'name'    => sanitize_text_field( wp_unslash( $_POST['ik_name'] ?? '' ) ),
 		'phone'   => sanitize_text_field( wp_unslash( $_POST['ik_phone'] ?? '' ) ),
-		'email'   => sanitize_email( wp_unslash( $_POST['ik_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['ik_email'] ?? '' ) ) ),
 		'product' => sanitize_text_field( wp_unslash( $_POST['ik_product'] ?? '' ) ),
 		'message' => sanitize_textarea_field( wp_unslash( $_POST['ik_message'] ?? '' ) ),
 	);
