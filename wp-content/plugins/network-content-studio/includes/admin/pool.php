@@ -47,7 +47,7 @@ function nwcs_render_pool(): void {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- gorunum secimi.
 	$edit_id  = isset( $_GET['urun'] ) ? absint( $_GET['urun'] ) : 0;
 	$is_new   = isset( $_GET['yeni'] );
-	$search   = isset( $_GET['ara'] ) ? sanitize_text_field( wp_unslash( $_GET['ara'] ) ) : '';
+	$search   = isset( $_GET['ara'] ) ? nwcs_clean_text( wp_unslash( $_GET['ara'] ) ) : '';
 	$category = isset( $_GET['kategori'] ) ? sanitize_title( wp_unslash( $_GET['kategori'] ) ) : '';
 	$page     = isset( $_GET['sayfa'] ) ? max( 1, absint( $_GET['sayfa'] ) ) : 1;
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
@@ -64,6 +64,11 @@ function nwcs_render_pool(): void {
 	);
 
 	$editing = $edit_id && isset( $all[ $edit_id ] ) ? $all[ $edit_id ] : null;
+
+	// Kaydedilemeyen form: girilenler geri gelir.
+	if ( isset( $_GET['taslak'] ) && ( $editing || $is_new ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$editing = nwcs_pool_take_draft( $editing ) ?? $editing;
+	}
 	$filters = array( 'ara' => $search, 'kategori' => $category );
 	?>
 	<div class="wrap nwcs-wrap nwcs-wrap--pool">
@@ -76,7 +81,6 @@ function nwcs_render_pool(): void {
 			<div class="nwcs-bar__tools">
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_pool_url( array( 'yeni' => 1 ) ) ); ?>">+ Yeni ürün</a>
 				<button type="button" class="nwcs-linkout nwcs-linkout--accent" data-nwcs-import-open>Excel'den ürün yükle</button>
-				<button type="button" class="nwcs-linkout" data-nwcs-csv-open>CSV ile toplu giriş</button>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_media_url() ); ?>">Medya Havuzu ↗</a>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_panel_url( 0 ) ); ?>">İçerik Stüdyosu ↗</a>
 			</div>
@@ -119,7 +123,6 @@ function nwcs_render_pool(): void {
 			</section>
 		</div>
 
-		<?php nwcs_render_csv_box(); ?>
 		<?php nwcs_render_import_modal(); ?>
 	</div>
 	<?php
@@ -135,7 +138,7 @@ function nwcs_render_pool_toolbar( string $search, string $category, array $cate
 			<input type="hidden" name="page" value="<?php echo esc_attr( NWCS_POOL_SLUG ); ?>" />
 
 			<input class="nwcs-input" type="search" name="ara" value="<?php echo esc_attr( $search ); ?>"
-				placeholder="Ürün ara…" />
+				placeholder="Ürün adı veya kodu ara…" />
 
 			<select class="nwcs-input" name="kategori">
 				<option value="">Tüm kategoriler</option>
@@ -301,6 +304,20 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 	<div class="nwcs-pool__card">
 		<h2 class="nwcs-pool__title"><?php echo $id ? 'Ürünü düzenle' : 'Yeni ürün'; ?></h2>
 
+		<?php if ( isset( $product['taken_by'] ) ) : ?>
+			<div class="notice notice-warning inline">
+				<p>
+					<strong>Kaydedilmedi.</strong> Yazdıklarınız aşağıda duruyor; düzeltip yeniden kaydedin.
+					<?php if ( '' !== $product['taken_by'] ) : ?>
+						Bu kod şu üründe kullanılıyor: <strong><?php echo esc_html( $product['taken_by'] ); ?></strong>.
+					<?php endif; ?>
+					<?php if ( ! empty( $product['had_upload'] ) ) : ?>
+						Seçtiğiniz yeni görsel dosyalarını yeniden seçmeniz gerekiyor.
+					<?php endif; ?>
+				</p>
+			</div>
+		<?php endif; ?>
+
 		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="nwcs_pool_save" />
 			<input type="hidden" name="urun" value="<?php echo esc_attr( (string) $id ); ?>" />
@@ -362,6 +379,7 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 
 				<label class="nwcs-sublabel" for="nwcs-p-newcat">Yeni kategori ekle</label>
 				<input class="nwcs-input" type="text" id="nwcs-p-newcat" name="new_category"
+					value="<?php echo esc_attr( $product['new_category'] ?? '' ); ?>"
 					placeholder="Yazıp kaydedin; bu ürüne de eklenir" />
 			</div>
 
@@ -501,56 +519,12 @@ function nwcs_render_category_manager( array $categories ): void {
 }
 
 /**
- * CSV ice/disa aktarma — ust seritteki dugmeyle acilan pencere.
- */
-function nwcs_render_csv_box(): void {
-	?>
-	<dialog class="nwcs-modal" id="nwcs-csv-modal">
-		<div class="nwcs-modal__head">
-			<h2 class="nwcs-pool__title">CSV ile toplu giriş</h2>
-			<button type="button" class="nwcs-modal__close" data-nwcs-csv-close aria-label="Kapat">×</button>
-		</div>
-
-		<p class="nwcs-hint">
-			Sütunlar: <code>slug, ad, kisa_aciklama, fiyat, olcu_not, kategoriler, gorseller, detay_metni</code>.
-			Kategoriler ve görseller <code>|</code> ile ayrılır; görsellerde medya kimliği veya dosya adı yazılabilir.
-			Aynı <code>slug</code> varsa ürün güncellenir, yoksa oluşturulur.
-		</p>
-
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="nwcs_pool_export" />
-			<?php wp_nonce_field( 'nwcs_pool_export' ); ?>
-			<div class="nwcs-actions">
-				<button type="submit" class="button">Dışa aktar (CSV)</button>
-			</div>
-		</form>
-
-		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="nwcs_pool_import" />
-			<?php wp_nonce_field( 'nwcs_pool_import' ); ?>
-
-			<div class="nwcs-field">
-				<label class="nwcs-sublabel" for="nwcs-csv">CSV dosyası</label>
-				<input class="nwcs-file" type="file" id="nwcs-csv" name="csv" accept=".csv,text/csv" required />
-			</div>
-
-			<div class="nwcs-actions">
-				<button type="submit" class="button button-primary">İçe aktar</button>
-				<button type="button" class="button" data-nwcs-csv-close>Kapat</button>
-			</div>
-		</form>
-	</dialog>
-	<?php
-}
-
-/**
  * Havuz bildirimleri.
  */
 function nwcs_render_pool_notices(): void {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- yalnizca bildirim.
 	$key   = isset( $_GET['nwcs_pool'] ) ? sanitize_key( wp_unslash( $_GET['nwcs_pool'] ) ) : '';
 	$count = isset( $_GET['adet'] ) ? absint( $_GET['adet'] ) : 0;
-	$extra = isset( $_GET['adet2'] ) ? absint( $_GET['adet2'] ) : 0;
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 	$map = array(
@@ -561,8 +535,6 @@ function nwcs_render_pool_notices(): void {
 		'cats_pruned'  => array( 'success', sprintf( 'Ürünü olmayan %d kategori silindi.', $count ) ),
 		'bulk'         => array( 'success', sprintf( '%d ürün güncellendi.', $count ) ),
 		'bulk_empty'   => array( 'error', 'Ürün seçilmedi ya da işlem seçilmedi.' ),
-		'imported'     => array( 'success', sprintf( 'İçe aktarma tamam: %d yeni, %d güncellendi.', $count, $extra ) ),
-		'import_error' => array( 'error', 'CSV okunamadı. Başlık satırını ve sütun adlarını kontrol edin.' ),
 		'upload'       => array( 'error', 'Görsel yüklenemedi.' ),
 		'title'        => array( 'error', 'Ürün adı boş olamaz.' ),
 		'code_taken'   => array( 'error', 'Bu ürün kodu başka bir üründe kullanılıyor. Farklı bir kod yazın.' ),
@@ -590,19 +562,31 @@ function nwcs_handle_pool_save(): void {
 	$id = isset( $_POST['urun'] ) ? absint( $_POST['urun'] ) : 0;
 	check_admin_referer( 'nwcs_pool_save_' . $id );
 
-	$title = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+	$title = isset( $_POST['title'] ) ? nwcs_clean_text( wp_unslash( $_POST['title'] ) ) : '';
+	$code  = isset( $_POST['code'] ) ? nwcs_normalize_product_code( wp_unslash( $_POST['code'] ) ) : '';
 
 	if ( '' === $title ) {
-		nwcs_pool_redirect( 'title', $id );
+		nwcs_pool_keep_draft( $id, 'title' );
 	}
 
 	switch_to_blog( nwcs_pool_blog_id() );
 
+	// Kod, hicbir sey yazilmadan once denetlenir: cakisirsa yeni urun
+	// olusmaz, mevcut urun degismez; girilenler formda geri gelir.
+	$taken = '' !== $code ? nwcs_product_id_by_code( $code, $id ) : 0;
+
+	if ( $taken ) {
+		$taken_title = get_the_title( $taken );
+		restore_current_blog();
+		nwcs_pool_keep_draft( $id, 'code_taken', $taken_title );
+	}
+
+	// wp_insert_post ve update_post_meta ters egik cizgiyi siler; metin aynen kalsin.
 	$postarr = array(
 		'post_type'    => NWCS_PRODUCT_TYPE,
 		'post_status'  => 'publish',
-		'post_title'   => $title,
-		'post_content' => isset( $_POST['body'] ) ? wp_kses_post( wp_unslash( $_POST['body'] ) ) : '',
+		'post_title'   => wp_slash( $title ),
+		'post_content' => isset( $_POST['body'] ) ? wp_slash( wp_kses_post( wp_unslash( $_POST['body'] ) ) ) : '',
 	);
 
 	if ( $id ) {
@@ -614,26 +598,19 @@ function nwcs_handle_pool_save(): void {
 
 	if ( ! $id ) {
 		restore_current_blog();
-		nwcs_pool_redirect( 'title', 0 );
+		nwcs_pool_keep_draft( 0, 'title' );
 	}
 
-	// Urun kodu: verilmisse benzersizligi denetlenir, verilmemisse uretilir.
-	$code = isset( $_POST['code'] ) ? nwcs_normalize_product_code( wp_unslash( $_POST['code'] ) ) : '';
-
-	if ( '' !== $code && nwcs_product_id_by_code( $code, $id ) ) {
-		restore_current_blog();
-		nwcs_pool_redirect( 'code_taken', $id );
-	}
-
+	// Urun kodu: verilmisse (benzersizligi yukarida denetlendi) yazilir, verilmemisse uretilir.
 	if ( '' !== $code ) {
 		update_post_meta( $id, '_nwcs_code', $code );
 	} else {
 		nwcs_ensure_product_code( $id );
 	}
 
-	update_post_meta( $id, '_nwcs_short', isset( $_POST['short'] ) ? sanitize_textarea_field( wp_unslash( $_POST['short'] ) ) : '' );
-	update_post_meta( $id, '_nwcs_price', isset( $_POST['price'] ) ? sanitize_text_field( wp_unslash( $_POST['price'] ) ) : '' );
-	update_post_meta( $id, '_nwcs_spec', isset( $_POST['spec'] ) ? sanitize_text_field( wp_unslash( $_POST['spec'] ) ) : '' );
+	update_post_meta( $id, '_nwcs_short', wp_slash( isset( $_POST['short'] ) ? nwcs_clean_text( wp_unslash( $_POST['short'] ), true ) : '' ) );
+	update_post_meta( $id, '_nwcs_price', wp_slash( isset( $_POST['price'] ) ? nwcs_clean_text( wp_unslash( $_POST['price'] ) ) : '' ) );
+	update_post_meta( $id, '_nwcs_spec', wp_slash( isset( $_POST['spec'] ) ? nwcs_clean_text( wp_unslash( $_POST['spec'] ) ) : '' ) );
 
 	// Kategoriler: listeden secilenler + varsa yeni olusturulan.
 	$slugs = isset( $_POST['categories'] ) && is_array( $_POST['categories'] )
@@ -650,7 +627,7 @@ function nwcs_handle_pool_save(): void {
 		}
 	}
 
-	$new_category = isset( $_POST['new_category'] ) ? sanitize_text_field( wp_unslash( $_POST['new_category'] ) ) : '';
+	$new_category = isset( $_POST['new_category'] ) ? nwcs_clean_text( wp_unslash( $_POST['new_category'] ) ) : '';
 
 	if ( '' !== $new_category ) {
 		$created = wp_insert_term( $new_category, NWCS_PRODUCT_TAX );
@@ -693,6 +670,98 @@ function nwcs_handle_pool_save(): void {
 	nwcs_pool_flush_cache();
 
 	nwcs_pool_redirect( 'saved', $id );
+}
+
+/**
+ * Kaydedilemeyen formu kullanicinin taslagina alir ve forma geri doner.
+ *
+ * Kod cakismasi ya da bos ad gibi bir hatada yazilanlar kaybolmasin diye
+ * ham degerler 15 dakikalik bir gecici kayda yazilir; form acilirken
+ * nwcs_pool_take_draft ile geri doldurulur. Yuklenen dosyalar tasinamaz;
+ * kullaniciya yeniden secmesi soylenir.
+ */
+function nwcs_pool_keep_draft( int $id, string $error, string $taken_by = '' ): void {
+	// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- cagiran denetledi; degerler formda kacisla basilir.
+	$field = static fn( string $key ): string => isset( $_POST[ $key ] ) && is_scalar( $_POST[ $key ] ) ? (string) wp_unslash( $_POST[ $key ] ) : '';
+
+	$draft = array(
+		'id'           => $id,
+		'title'        => nwcs_clean_text( $field( 'title' ) ),
+		'code'         => nwcs_clean_text( $field( 'code' ) ),
+		'short'        => nwcs_clean_text( $field( 'short' ), true ),
+		'price'        => nwcs_clean_text( $field( 'price' ) ),
+		'spec'         => nwcs_clean_text( $field( 'spec' ) ),
+		'body'         => wp_kses_post( $field( 'body' ) ),
+		'new_category' => nwcs_clean_text( $field( 'new_category' ) ),
+		'categories'   => isset( $_POST['categories'] ) && is_array( $_POST['categories'] ) ? array_map( 'sanitize_title', array_filter( wp_unslash( $_POST['categories'] ), 'is_scalar' ) ) : array(),
+		'gallery'      => isset( $_POST['gallery'] ) && is_array( $_POST['gallery'] ) ? array_values( array_filter( array_map( 'absint', array_filter( $_POST['gallery'], 'is_scalar' ) ) ) ) : array(),
+		'tables'       => nwcs_sanitize_product_tables( (array) json_decode( $field( 'tables_json' ), true ) ),
+		'had_upload'   => ! empty( $_FILES['gallery_upload']['name'][0] ),
+		'taken_by'     => $taken_by,
+	);
+	// phpcs:enable
+
+	set_transient( 'nwcs_pool_draft_' . get_current_user_id(), $draft, 15 * MINUTE_IN_SECONDS );
+
+	$args = array( 'nwcs_pool' => $error, 'taslak' => 1 );
+	$args += $id ? array( 'urun' => $id ) : array( 'yeni' => 1 );
+
+	wp_safe_redirect( nwcs_pool_url( $args ) );
+	exit;
+}
+
+/**
+ * nwcs_pool_keep_draft ile saklanan taslak; bir kez okunur. Urun formunun
+ * bekledigi bicime cevrilir (gorseller ve kategoriler dahil).
+ */
+function nwcs_pool_take_draft( ?array $product ): ?array {
+	$key   = 'nwcs_pool_draft_' . get_current_user_id();
+	$draft = get_transient( $key );
+
+	if ( ! is_array( $draft ) || (int) $draft['id'] !== (int) ( $product['id'] ?? 0 ) ) {
+		return null;
+	}
+
+	delete_transient( $key );
+
+	$categories = array();
+	$pool       = nwcs_pool_categories();
+
+	foreach ( $draft['categories'] as $slug ) {
+		if ( isset( $pool[ $slug ] ) ) {
+			$categories[ $slug ] = $pool[ $slug ]['name'];
+		}
+	}
+
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	$images = array();
+
+	foreach ( $draft['gallery'] as $image_id ) {
+		$src      = wp_get_attachment_image_src( $image_id, 'thumbnail' );
+		$images[] = array( 'id' => $image_id, 'url' => $src ? $src[0] : '' );
+	}
+
+	restore_current_blog();
+
+	return array_merge(
+		(array) $product,
+		array(
+			'id'           => (int) $draft['id'],
+			'title'        => $draft['title'],
+			'code'         => $draft['code'],
+			'short'        => $draft['short'],
+			'price'        => $draft['price'],
+			'spec'         => $draft['spec'],
+			'body'         => $draft['body'],
+			'categories'   => $categories,
+			'images'       => $images,
+			'tables'       => $draft['tables'],
+			'new_category' => $draft['new_category'],
+			'had_upload'   => $draft['had_upload'],
+			'taken_by'     => $draft['taken_by'],
+		)
+	);
 }
 
 /**
@@ -862,7 +931,7 @@ function nwcs_handle_category_add(): void {
 
 	check_admin_referer( 'nwcs_pool_category_add' );
 
-	$name = isset( $_POST['isim'] ) ? sanitize_text_field( wp_unslash( $_POST['isim'] ) ) : '';
+	$name = isset( $_POST['isim'] ) ? nwcs_clean_text( wp_unslash( $_POST['isim'] ) ) : '';
 
 	if ( '' !== $name ) {
 		switch_to_blog( nwcs_pool_blog_id() );
@@ -922,208 +991,6 @@ function nwcs_handle_pool_category_prune(): void {
 	nwcs_pool_redirect( 'cats_pruned', $removed, true );
 }
 
-/* ---------------- CSV ---------------- */
-
-const NWCS_CSV_COLUMNS = array( 'slug', 'urun_kodu', 'ad', 'kisa_aciklama', 'fiyat', 'olcu_not', 'kategoriler', 'gorseller', 'detay_metni' );
-
-add_action( 'admin_post_nwcs_pool_export', 'nwcs_handle_pool_export' );
-function nwcs_handle_pool_export(): void {
-	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
-		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
-	}
-
-	check_admin_referer( 'nwcs_pool_export' );
-
-	nocache_headers();
-	header( 'Content-Type: text/csv; charset=utf-8' );
-	header( 'Content-Disposition: attachment; filename=urun-havuzu-' . gmdate( 'Y-m-d' ) . '.csv' );
-
-	$out = fopen( 'php://output', 'w' );
-
-	// Excel'in UTF-8'i dogru okumasi icin BOM.
-	fwrite( $out, "\xEF\xBB\xBF" );
-	fputcsv( $out, NWCS_CSV_COLUMNS );
-
-	foreach ( nwcs_pool_products() as $product ) {
-		fputcsv(
-			$out,
-			array(
-				$product['slug'],
-				$product['code'],
-				$product['title'],
-				$product['short'],
-				$product['price'],
-				$product['spec'],
-				implode( '|', $product['categories'] ),
-				implode( '|', $product['gallery_ids'] ),
-				$product['body'],
-			)
-		);
-	}
-
-	fclose( $out );
-	exit;
-}
-
-add_action( 'admin_post_nwcs_pool_import', 'nwcs_handle_pool_import' );
-function nwcs_handle_pool_import(): void {
-	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
-		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
-	}
-
-	check_admin_referer( 'nwcs_pool_import' );
-
-	$file = $_FILES['csv']['tmp_name'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- dosya yolu asagida dogrulanir.
-
-	if ( ! $file || ! is_uploaded_file( $file ) ) {
-		nwcs_pool_redirect( 'import_error', 0 );
-	}
-
-	$handle = fopen( $file, 'r' );
-
-	if ( ! $handle ) {
-		nwcs_pool_redirect( 'import_error', 0 );
-	}
-
-	$header = fgetcsv( $handle );
-
-	if ( ! $header ) {
-		fclose( $handle );
-		nwcs_pool_redirect( 'import_error', 0 );
-	}
-
-	// BOM ve bosluklari temizleyip sutun adlarini eslestir.
-	$header = array_map(
-		static fn( $name ): string => strtolower( trim( str_replace( "\xEF\xBB\xBF", '', (string) $name ) ) ),
-		$header
-	);
-
-	if ( ! in_array( 'ad', $header, true ) ) {
-		fclose( $handle );
-		nwcs_pool_redirect( 'import_error', 0 );
-	}
-
-	$created = 0;
-	$updated = 0;
-
-	switch_to_blog( nwcs_pool_blog_id() );
-
-	while ( ( $row = fgetcsv( $handle ) ) !== false ) {
-		$data = array_combine( $header, array_pad( array_slice( $row, 0, count( $header ) ), count( $header ), '' ) );
-
-		if ( ! $data || '' === trim( (string) ( $data['ad'] ?? '' ) ) ) {
-			continue;
-		}
-
-		$slug = sanitize_title( $data['slug'] ?? '' );
-
-		if ( '' === $slug ) {
-			$slug = sanitize_title( $data['ad'] );
-		}
-
-		$existing = get_posts(
-			array(
-				'post_type'      => NWCS_PRODUCT_TYPE,
-				'post_status'    => 'any',
-				'name'           => $slug,
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-			)
-		);
-
-		$postarr = array(
-			'post_type'    => NWCS_PRODUCT_TYPE,
-			'post_status'  => 'publish',
-			'post_title'   => sanitize_text_field( $data['ad'] ),
-			'post_name'    => $slug,
-			'post_content' => wp_kses_post( (string) ( $data['detay_metni'] ?? '' ) ),
-		);
-
-		if ( $existing ) {
-			$postarr['ID'] = (int) $existing[0];
-			wp_update_post( $postarr );
-			$id = (int) $existing[0];
-			++$updated;
-		} else {
-			$id = (int) wp_insert_post( $postarr );
-			++$created;
-		}
-
-		if ( ! $id ) {
-			continue;
-		}
-
-		$code = nwcs_normalize_product_code( (string) ( $data['urun_kodu'] ?? '' ) );
-
-		if ( '' !== $code && ! nwcs_product_id_by_code( $code, $id ) ) {
-			update_post_meta( $id, '_nwcs_code', $code );
-		} else {
-			nwcs_ensure_product_code( $id );
-		}
-
-		update_post_meta( $id, '_nwcs_short', sanitize_textarea_field( (string) ( $data['kisa_aciklama'] ?? '' ) ) );
-		update_post_meta( $id, '_nwcs_price', sanitize_text_field( (string) ( $data['fiyat'] ?? '' ) ) );
-		update_post_meta( $id, '_nwcs_spec', sanitize_text_field( (string) ( $data['olcu_not'] ?? '' ) ) );
-
-		$names = array_values( array_filter( array_map( 'trim', explode( '|', (string) ( $data['kategoriler'] ?? '' ) ) ) ) );
-		wp_set_object_terms( $id, $names, NWCS_PRODUCT_TAX, false );
-
-		$gallery = nwcs_csv_gallery_ids( (string) ( $data['gorseller'] ?? '' ) );
-
-		if ( $gallery ) {
-			update_post_meta( $id, '_nwcs_gallery', $gallery );
-			set_post_thumbnail( $id, (int) $gallery[0] );
-		}
-	}
-
-	fclose( $handle );
-	restore_current_blog();
-
-	nwcs_pool_flush_cache();
-
-	wp_safe_redirect(
-		nwcs_pool_url(
-			array(
-				'nwcs_pool' => 'imported',
-				'adet'      => $created,
-				'adet2'     => $updated,
-			)
-		)
-	);
-	exit;
-}
-
-/**
- * CSV'deki gorsel hucresini ek kimliklerine cevirir.
- * Hucrede medya kimligi ya da dosya adi olabilir.
- */
-function nwcs_csv_gallery_ids( string $cell ): array {
-	$ids = array();
-
-	foreach ( array_filter( array_map( 'trim', explode( '|', $cell ) ) ) as $token ) {
-		if ( ctype_digit( $token ) ) {
-			$ids[] = (int) $token;
-			continue;
-		}
-
-		$found = get_posts(
-			array(
-				'post_type'      => 'attachment',
-				'post_status'    => 'inherit',
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-				's'              => pathinfo( $token, PATHINFO_FILENAME ),
-			)
-		);
-
-		if ( $found ) {
-			$ids[] = (int) $found[0];
-		}
-	}
-
-	return array_values( array_unique( array_filter( $ids ) ) );
-}
-
 /**
  * Havuz sayfasina bildirimli donus.
  *
@@ -1139,4 +1006,47 @@ function nwcs_pool_redirect( string $key, int $context = 0, bool $as_count = fal
 
 	wp_safe_redirect( nwcs_pool_url( $args ) );
 	exit;
+}
+
+/**
+ * Tek seferlik temizlik: kaynak sitelerden kopyalanan bazi urun adlarinin
+ * sonunda gorunmez satir ayirici (U+2028/U+2029) kalmis; sayfa basliginda
+ * ve aramada sorun cikariyordu. Ad nwcs_clean_text'ten gecirilir, adres
+ * (post_name) degismez. Bir kez calisir.
+ */
+add_action( 'admin_init', 'nwcs_pool_cleanup_line_separators' );
+function nwcs_pool_cleanup_line_separators(): void {
+	if ( get_site_option( 'nwcs_cleanup_line_separators' ) || ! current_user_can( NWCS_CAPABILITY ) ) {
+		return;
+	}
+
+	update_site_option( 'nwcs_cleanup_line_separators', 1 );
+
+	global $wpdb;
+
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND ( post_title LIKE %s OR post_title LIKE %s )",
+			NWCS_PRODUCT_TYPE,
+			'%' . $wpdb->esc_like( "\u{2028}" ) . '%',
+			'%' . $wpdb->esc_like( "\u{2029}" ) . '%'
+		)
+	);
+
+	foreach ( $ids as $id ) {
+		wp_update_post(
+			array(
+				'ID'         => (int) $id,
+				'post_title' => wp_slash( nwcs_clean_text( get_post_field( 'post_title', (int) $id ) ) ),
+			)
+		);
+	}
+
+	restore_current_blog();
+
+	if ( $ids ) {
+		nwcs_pool_flush_cache();
+	}
 }

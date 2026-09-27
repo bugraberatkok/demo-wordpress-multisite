@@ -96,8 +96,7 @@ function nwcs_save_component( int $blog_id, array $manifest, string $page_key, s
  * POST'tan gelen ham urun secimi (temizleme nwcs_save_site_product_settings icinde).
  */
 function nwcs_posted_products(): array {
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- temizleme kaydedicide.
-	$posted = isset( $_POST['products'] ) && is_array( $_POST['products'] ) ? wp_unslash( $_POST['products'] ) : array();
+	$posted = nwcs_posted_group( 'products' );
 
 	return array(
 		'mode'      => $posted['mode'] ?? 'all',
@@ -110,8 +109,25 @@ function nwcs_posted_products(): array {
  * POST'tan gelen ham alan dizisi (temizleme asagida tur bazli yapilir).
  */
 function nwcs_posted_fields(): array {
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- tur bazli temizleme nwcs_sanitize_value icinde.
-	return isset( $_POST['fields'] ) && is_array( $_POST['fields'] ) ? wp_unslash( $_POST['fields'] ) : array();
+	return nwcs_posted_group( 'fields' );
+}
+
+/**
+ * fields / products dizisini POST'tan okur. Panel betigi bunlari tek bir
+ * JSON alaninda gonderir (<ad>_json): yuzlerce urun satiri sunucunun alan
+ * sayisi sinirini (max_input_vars) asip secimleri yarida kesmesin.
+ * JavaScript kapaliyken klasik dizi alanlari okunur.
+ */
+function nwcs_posted_group( string $name ): array {
+	// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- tur bazli temizleme kaydedicide.
+	if ( isset( $_POST[ $name . '_json' ] ) && is_string( $_POST[ $name . '_json' ] ) ) {
+		$decoded = json_decode( wp_unslash( $_POST[ $name . '_json' ] ), true );
+
+		return is_array( $decoded ) ? $decoded : array();
+	}
+
+	return isset( $_POST[ $name ] ) && is_array( $_POST[ $name ] ) ? wp_unslash( $_POST[ $name ] ) : array();
+	// phpcs:enable
 }
 
 /* ------------------------------------------------------------------ */
@@ -351,7 +367,7 @@ function nwcs_collect_image( string $path, int $selected_id, int &$media_updates
 	}
 
 	if ( $attachment_id > 0 && isset( $_POST[ $alt_key ] ) ) {
-		$alt = sanitize_text_field( wp_unslash( $_POST[ $alt_key ] ) );
+		$alt = nwcs_clean_text( wp_unslash( $_POST[ $alt_key ] ) );
 
 		if ( $alt !== (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) {
 			update_post_meta( $attachment_id, '_wp_attachment_image_alt', $alt );

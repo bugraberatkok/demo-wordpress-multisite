@@ -212,7 +212,8 @@ function ahsapkasa_handle_quote(): void {
 	$values = array(
 		'name'    => sanitize_text_field( wp_unslash( $_POST['ak_name'] ?? '' ) ),
 		'company' => sanitize_text_field( wp_unslash( $_POST['ak_company'] ?? '' ) ),
-		'email'   => sanitize_email( wp_unslash( $_POST['ak_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['ak_email'] ?? '' ) ) ),
 		'phone'   => sanitize_text_field( wp_unslash( $_POST['ak_phone'] ?? '' ) ),
 		'product' => sanitize_text_field( wp_unslash( $_POST['ak_product'] ?? '' ) ),
 		'size'    => sanitize_textarea_field( wp_unslash( $_POST['ak_size'] ?? '' ) ),

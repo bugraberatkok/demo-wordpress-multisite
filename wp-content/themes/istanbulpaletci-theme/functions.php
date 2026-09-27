@@ -572,7 +572,8 @@ function ip_handle_quote(): void {
 	$values = array(
 		'name'    => sanitize_text_field( wp_unslash( $_POST['ip_name'] ?? '' ) ),
 		'company' => sanitize_text_field( wp_unslash( $_POST['ip_company'] ?? '' ) ),
-		'email'   => sanitize_email( wp_unslash( $_POST['ip_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['ip_email'] ?? '' ) ) ),
 		'phone'   => sanitize_text_field( wp_unslash( $_POST['ip_phone'] ?? '' ) ),
 		'product' => sanitize_text_field( wp_unslash( $_POST['ip_product'] ?? '' ) ),
 		'size'    => sanitize_textarea_field( wp_unslash( $_POST['ip_size'] ?? '' ) ),

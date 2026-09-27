@@ -275,19 +275,16 @@ function nwcs_import_ajax_run(): void {
 			continue;
 		}
 
-		$slug = sanitize_title( $values['code'] ?? '' );
+		// Once urun koduyla eslestirilir. Kod sutunu yoksa ya da hucre bossa
+		// urun adiyla (adres adi) eslestirilir; kod verilip bulunamazsa yeni urun.
+		$code = nwcs_normalize_product_code( $values['code'] ?? '' );
+		$slug = sanitize_title( $title );
 
-		if ( '' === $slug ) {
-			$slug = sanitize_title( $title );
-		}
-
-		// Once urun koduyla, bulunamazsa kisa adla eslestirilir.
-		$code  = nwcs_normalize_product_code( $values['code'] ?? '' );
-		$match = $code ? nwcs_product_id_by_code( $code ) : 0;
-
-		$existing = $match
-			? array( $match )
-			: get_posts(
+		if ( '' !== $code ) {
+			$match    = nwcs_product_id_by_code( $code );
+			$existing = $match ? array( $match ) : array();
+		} else {
+			$existing = get_posts(
 				array(
 					'post_type'      => NWCS_PRODUCT_TYPE,
 					'post_status'    => 'any',
@@ -296,16 +293,20 @@ function nwcs_import_ajax_run(): void {
 					'fields'         => 'ids',
 				)
 			);
+		}
 
+		// Bos hucre mevcut urundeki bilgiyi silmez; yalnizca dolu hucreler yazilir.
+		$filled = static fn( string $key ): bool => isset( $values[ $key ] ) && '' !== $values[ $key ];
+
+		// wp_insert_post ters egik cizgiyi siler; metin aynen kalsin.
 		$postarr = array(
 			'post_type'   => NWCS_PRODUCT_TYPE,
 			'post_status' => 'publish',
-			'post_title'  => sanitize_text_field( $title ),
-			'post_name'   => $slug,
+			'post_title'  => wp_slash( nwcs_clean_text( $title ) ),
 		);
 
-		if ( isset( $values['body'] ) ) {
-			$postarr['post_content'] = wp_kses_post( $values['body'] );
+		if ( $filled( 'body' ) ) {
+			$postarr['post_content'] = wp_slash( wp_kses_post( $values['body'] ) );
 		}
 
 		if ( $existing ) {
@@ -316,10 +317,13 @@ function nwcs_import_ajax_run(): void {
 				$batch['updated'][ $id ] = nwcs_import_snapshot( $id );
 			}
 
+			// Adres (post_name) degismez: urun sayfasinin baglantilari ve
+			// arama motorundaki kaydi korunur.
 			$postarr['ID'] = $id;
 			wp_update_post( $postarr );
 		} else {
-			$id = (int) wp_insert_post( $postarr );
+			$postarr['post_name'] = $slug;
+			$id                   = (int) wp_insert_post( $postarr );
 
 			if ( ! $id ) {
 				$batch['skipped'][] = array( 'line' => $line + 2, 'reason' => 'Kayıt oluşturulamadı' );
@@ -335,19 +339,19 @@ function nwcs_import_ajax_run(): void {
 			nwcs_ensure_product_code( $id );
 		}
 
-		if ( isset( $values['short'] ) ) {
-			update_post_meta( $id, '_nwcs_short', sanitize_textarea_field( $values['short'] ) );
+		if ( $filled( 'short' ) ) {
+			update_post_meta( $id, '_nwcs_short', wp_slash( nwcs_clean_text( $values['short'], true ) ) );
 		}
 
-		if ( isset( $values['price'] ) ) {
-			update_post_meta( $id, '_nwcs_price', sanitize_text_field( $values['price'] ) );
+		if ( $filled( 'price' ) ) {
+			update_post_meta( $id, '_nwcs_price', wp_slash( nwcs_clean_text( $values['price'] ) ) );
 		}
 
-		if ( isset( $values['spec'] ) ) {
-			update_post_meta( $id, '_nwcs_spec', sanitize_text_field( $values['spec'] ) );
+		if ( $filled( 'spec' ) ) {
+			update_post_meta( $id, '_nwcs_spec', wp_slash( nwcs_clean_text( $values['spec'] ) ) );
 		}
 
-		if ( isset( $values['categories'] ) ) {
+		if ( $filled( 'categories' ) ) {
 			$names = array_values(
 				array_filter(
 					array_map(
@@ -435,6 +439,7 @@ function nwcs_import_snapshot( int $id ): array {
 		'title'      => $post->post_title,
 		'content'    => $post->post_content,
 		'name'       => $post->post_name,
+		'code'       => (string) get_post_meta( $id, '_nwcs_code', true ),
 		'short'      => (string) get_post_meta( $id, '_nwcs_short', true ),
 		'price'      => (string) get_post_meta( $id, '_nwcs_price', true ),
 		'spec'       => (string) get_post_meta( $id, '_nwcs_spec', true ),
@@ -504,15 +509,20 @@ function nwcs_import_ajax_undo(): void {
 		wp_update_post(
 			array(
 				'ID'           => (int) $id,
-				'post_title'   => $snapshot['title'] ?? '',
-				'post_content' => $snapshot['content'] ?? '',
+				'post_title'   => wp_slash( $snapshot['title'] ?? '' ),
+				'post_content' => wp_slash( $snapshot['content'] ?? '' ),
 				'post_name'    => $snapshot['name'] ?? '',
 			)
 		);
 
-		update_post_meta( (int) $id, '_nwcs_short', $snapshot['short'] ?? '' );
-		update_post_meta( (int) $id, '_nwcs_price', $snapshot['price'] ?? '' );
-		update_post_meta( (int) $id, '_nwcs_spec', $snapshot['spec'] ?? '' );
+		update_post_meta( (int) $id, '_nwcs_short', wp_slash( $snapshot['short'] ?? '' ) );
+		update_post_meta( (int) $id, '_nwcs_price', wp_slash( $snapshot['price'] ?? '' ) );
+		update_post_meta( (int) $id, '_nwcs_spec', wp_slash( $snapshot['spec'] ?? '' ) );
+
+		// Eski yuklemelerin kayitlarinda kod yok; onlarda kod oldugu gibi kalir.
+		if ( isset( $snapshot['code'] ) && '' !== $snapshot['code'] ) {
+			update_post_meta( (int) $id, '_nwcs_code', $snapshot['code'] );
+		}
 		wp_set_object_terms( (int) $id, $snapshot['categories'] ?? array(), NWCS_PRODUCT_TAX, false );
 
 		++$restored;
@@ -622,6 +632,11 @@ function nwcs_render_import_modal(): void {
 				<p class="nwcs-hint">
 					İlk satır başlık satırı olmalıdır. Sütunların hangi alana karşılık geldiğini
 					bir sonraki adımda siz seçeceksiniz; şimdilik havuza hiçbir şey yazılmaz.
+				</p>
+				<p class="nwcs-hint">
+					<strong>Ürün kodu</strong> havuzdaki bir ürünle aynıysa o ürün güncellenir, değilse yeni ürün eklenir.
+					Kod sütunu yoksa ürün adıyla eşleştirilir. Boş hücreler mevcut bilgiyi silmez.
+					Yüklemeyi sonradan tek tıkla geri alabilirsiniz.
 				</p>
 			</section>
 

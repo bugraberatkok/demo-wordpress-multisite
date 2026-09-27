@@ -120,11 +120,161 @@
 		body.set( 'action', action );
 		body.set( 'nonce', cfg.nonce );
 
-		return fetch( cfg.ajaxUrl, { method: 'POST', body: body, credentials: 'same-origin' } )
+		// Islem ve nonce adreste de gider: sunucunun alan sayisi siniri
+		// (max_input_vars) govdenin sonunu keserse istek yine taninir.
+		var url = cfg.ajaxUrl + ( cfg.ajaxUrl.indexOf( '?' ) === -1 ? '?' : '&' ) +
+			'action=' + encodeURIComponent( action ) + '&nonce=' + encodeURIComponent( cfg.nonce );
+
+		return fetch( url, { method: 'POST', body: body, credentials: 'same-origin' } )
 			.then( function ( response ) {
 				return response.json();
 			} );
 	}
+
+	/*
+	 * Uzun urun listeleri yuzlerce alan uretir; sunucu 1000 alandan sonrasini
+	 * sessizce atar (max_input_vars) ve secimler yarim kaydedilir. fields[...]
+	 * ve products[...] alanlari bu yuzden tek bir JSON alanina toplanir;
+	 * PHP'nin ad[a][b][] cozumlemesiyle ayni yapiyi kurar. Dosyalar yerinde kalir.
+	 */
+	function packForm( data ) {
+		var groups = { fields: null, products: null };
+		var keep = [];
+
+		data.forEach( function ( value, name ) {
+			var match = /^(fields|products)\[/.exec( name );
+
+			if ( ! match || 'string' !== typeof value ) {
+				keep.push( [ name, value ] );
+				return;
+			}
+
+			var parts = name.slice( match[1].length ).match( /\[[^\]]*\]/g ) || [];
+			var node = groups[ match[1] ] || ( groups[ match[1] ] = {} );
+
+			parts.forEach( function ( part, i ) {
+				var key = part.slice( 1, -1 );
+				var last = i === parts.length - 1;
+
+				if ( '' === key ) {
+					key = Object.keys( node ).length;
+				}
+
+				if ( last ) {
+					node[ key ] = value;
+				} else {
+					if ( 'object' !== typeof node[ key ] || null === node[ key ] ) {
+						node[ key ] = {};
+					}
+					node = node[ key ];
+				}
+			} );
+		} );
+
+		var packed = new FormData();
+
+		keep.forEach( function ( pair ) {
+			packed.append( pair[0], pair[1] );
+		} );
+
+		Object.keys( groups ).forEach( function ( key ) {
+			if ( groups[ key ] ) {
+				packed.append( key + '_json', JSON.stringify( groups[ key ] ) );
+			}
+		} );
+
+		return packed;
+	}
+
+	/*
+	 * Urun listesi suzgeci: arama (Turkce harf ve buyuk/kucuk harf farki
+	 * gozetilmez; ad, kod, kategori) ve "yalnizca secilenler". Kayda etkisi
+	 * yok; gizlenen satirlar formda kalir.
+	 */
+	function foldText( text ) {
+		return String( text )
+			.replace( /İ/g, 'i' ).replace( /I/g, 'ı' )
+			.toLowerCase()
+			.replace( /ı/g, 'i' ).replace( /ğ/g, 'g' ).replace( /ü/g, 'u' )
+			.replace( /ş/g, 's' ).replace( /ö/g, 'o' ).replace( /ç/g, 'c' )
+			.replace( /â/g, 'a' ).replace( /î/g, 'i' ).replace( /û/g, 'u' );
+	}
+
+	function filterProducts( field ) {
+		if ( ! field ) {
+			return;
+		}
+
+		var search = field.querySelector( '[data-nwcs-products-search]' );
+		var only = field.querySelector( '[data-nwcs-products-only]' );
+		var count = field.querySelector( '[data-nwcs-products-count]' );
+		var words = foldText( search ? search.value : '' ).split( /\s+/ ).filter( Boolean );
+		var items = field.querySelectorAll( '[data-nwcs-product]' );
+		var shown = 0;
+		var picked = 0;
+
+		items.forEach( function ( item ) {
+			var box = item.querySelector( '[data-nwcs-product-pick]' );
+			var haystack = item.getAttribute( 'data-search' ) || '';
+			var match = words.every( function ( word ) {
+				return haystack.indexOf( word ) !== -1;
+			} );
+
+			if ( box && box.checked ) {
+				picked++;
+			}
+
+			if ( only && only.checked && box && ! box.checked ) {
+				match = false;
+			}
+
+			item.hidden = ! match;
+			shown += match ? 1 : 0;
+		} );
+
+		if ( count ) {
+			count.textContent = picked + ' / ' + items.length + ' seçili' + ( shown < items.length ? ' · ' + shown + ' gösteriliyor' : '' );
+		}
+	}
+
+	wrap.addEventListener( 'input', function ( event ) {
+		if ( event.target.matches && event.target.matches( '[data-nwcs-products-search]' ) ) {
+			filterProducts( event.target.closest( '.nwcs-field--products' ) );
+		}
+	} );
+
+	// Urun gorsel secimi: secenekler ilk dokunusta ortak sablondan doldurulur.
+	function fillMediaSelect( event ) {
+		var select = event.target;
+
+		if ( ! select.matches || ! select.matches( 'select[data-nwcs-lazy-media]' ) ) {
+			return;
+		}
+
+		var source = select.closest( '.nwcs-field--products' ).querySelector( 'template[data-nwcs-media-options]' );
+		var value = select.value;
+
+		select.removeAttribute( 'data-nwcs-lazy-media' );
+
+		if ( ! source ) {
+			return;
+		}
+
+		select.innerHTML = source.innerHTML;
+		select.value = value;
+	}
+
+	wrap.addEventListener( 'mousedown', fillMediaSelect );
+	wrap.addEventListener( 'focusin', fillMediaSelect );
+
+	// Arama kutusunda Enter formu gondermesin.
+	wrap.addEventListener( 'keydown', function ( event ) {
+		if ( 'Enter' === event.key && event.target.matches && event.target.matches( '[data-nwcs-products-search]' ) ) {
+			event.preventDefault();
+		}
+	} );
+
+	wrap.querySelectorAll( '.nwcs-field--products' ).forEach( filterProducts );
 
 	function reloadPreview() {
 		if ( ! frame ) {
@@ -166,6 +316,7 @@
 				}
 
 				editorBox.innerHTML = result.data.html;
+				editorBox.querySelectorAll( '.nwcs-field--products' ).forEach( filterProducts );
 				markActiveSection( componentKey );
 				applyFocus();
 				updateHistory( componentKey );
@@ -316,23 +467,6 @@
 			return;
 		}
 
-		// CSV kutusu (Urun Havuzu) — acilir pencere
-		if ( target.closest && target.closest( '[data-nwcs-csv-open]' ) ) {
-			var csvBox = document.getElementById( 'nwcs-csv-modal' );
-			if ( csvBox && csvBox.showModal ) {
-				csvBox.showModal();
-			}
-			return;
-		}
-
-		if ( target.closest && target.closest( '[data-nwcs-csv-close]' ) ) {
-			var openBox = document.getElementById( 'nwcs-csv-modal' );
-			if ( openBox && openBox.close ) {
-				openBox.close();
-			}
-			return;
-		}
-
 		// Bolum ac (soldaki liste her zaman sunucudan gelen sayfaya aittir)
 		var opener = target.closest ? target.closest( '[data-nwcs-open-component]' ) : null;
 		if ( opener ) {
@@ -417,9 +551,21 @@
 		var productMove = target.closest ? target.closest( '[data-nwcs-product-move]' ) : null;
 		if ( productMove ) {
 			var item = productMove.closest( '[data-nwcs-product]' );
-			var neighbour = 'up' === productMove.getAttribute( 'data-nwcs-product-move' )
-				? item.previousElementSibling
-				: item.nextElementSibling;
+			var direction = productMove.getAttribute( 'data-nwcs-product-move' );
+
+			if ( 'top' === direction ) {
+				if ( item.previousElementSibling ) {
+					item.parentNode.insertBefore( item, item.parentNode.firstElementChild );
+					setDirty( true );
+				}
+				return;
+			}
+
+			// Suzgec acikken gizli satirlarin arkasina gecmek bir sey degistirmez; gorunen komsuya atlanir.
+			var neighbour = 'up' === direction ? item.previousElementSibling : item.nextElementSibling;
+			while ( neighbour && neighbour.hidden ) {
+				neighbour = 'up' === direction ? neighbour.previousElementSibling : neighbour.nextElementSibling;
+			}
 
 			if ( neighbour ) {
 				if ( 'up' === productMove.getAttribute( 'data-nwcs-product-move' ) ) {
@@ -664,6 +810,11 @@
 		// Urun secim kutusu
 		if ( event.target.matches( '[data-nwcs-product-pick]' ) ) {
 			event.target.closest( '[data-nwcs-product]' ).classList.toggle( 'is-selected', event.target.checked );
+			filterProducts( event.target.closest( '.nwcs-field--products' ) );
+		}
+
+		if ( event.target.matches( '[data-nwcs-products-only]' ) ) {
+			filterProducts( event.target.closest( '.nwcs-field--products' ) );
 		}
 
 		// Urun secim kipi
@@ -728,7 +879,7 @@
 
 		event.preventDefault();
 
-		var data = new FormData( form );
+		var data = packForm( new FormData( form ) );
 		showToast( T.saving || '', 'busy' );
 
 		post( 'nwcs_save_ajax', data )

@@ -195,11 +195,12 @@ girme ihtiyacı yoktur.
 
 - Ürün alanları: ad, kart açıklaması, fiyat, ölçü/not, kategoriler, **görseller (galeri)**, detay metni.
 - **Kategoriler** listeden seçilir; yeni kategori havuz sayfasından eklenir/silinir.
-- **Arama, kategori filtresi ve sayfalama** listenin üstünde.
+- **Arama, kategori filtresi ve sayfalama** listenin üstünde. Arama ürün adında ve kodunda
+  yapılır; Türkçe harf ve büyük/küçük harf farkı gözetilmez ("civi" = "ÇİVİ").
 - **Toplu işlem**: birden çok ürünü seçip "şu sitede göster/gizle" ya da "kategoriye ekle".
-- **CSV ile toplu giriş**: dışa aktarıp düzenleyin, geri yükleyin. Sütunlar
-  `slug, ad, kisa_aciklama, fiyat, olcu_not, kategoriler, gorseller, detay_metni`;
-  aynı `slug` varsa ürün güncellenir, yoksa oluşturulur.
+- **Excel'den toplu yükleme** (aşağıda). CSV ile giriş 0.20.0'da kaldırıldı.
+- Kaydedilemeyen form (başka üründe kullanılan kod, boş ad) hiçbir şey yazmaz; girilenler
+  formda geri gelir ve kodun hangi üründe kullanıldığı yazar.
 - **Görseller** ağ ana sitesinin WordPress medya kitaplığına yüklenir ve oradan silinir.
   Bir ürüne bağlı görsel silinemez; önce ürünün görselini değiştirmeniz gerekir.
 - **Fiyat boş bırakılırsa** sitede fiyat yerine **“Teklif al”** görünür.
@@ -226,8 +227,9 @@ Her ürünün kendine ait bir kodu vardır. Havuz formundan yazabilir, boş bır
 `URN-0006` biçiminde kimliğinden üretilir. Aynı kod iki üründe kullanılamaz.
 
 Kod, Excel yüklemesinde eşleştirme anahtarıdır: yüklenen satırın kodu havuzdaki bir ürünle
-tutuyorsa o ürün güncellenir, tutmuyorsa yeni ürün eklenir. CSV dışa/içe aktarmada da
-`urun_kodu` sütunu olarak yer alır.
+tutuyorsa o ürün güncellenir, tutmuyorsa yeni ürün eklenir. Kod sütunu yoksa ürün adıyla
+eşleştirilir. Güncellenen ürünün adresi (`/urun/…/`) değişmez; boş hücre mevcut bilgiyi
+silmez.
 
 ## Site bazlı özelleştirme (Özelleştirmeler)
 
@@ -279,8 +281,7 @@ yani her an yalnızca son yükleme geri alınabilir.
 - Sunucu yükleme sınırı `docker/php-uploads.ini` ile 32 MB'a çıkarılmıştır (WordPress imajının
   varsayılanı 2 MB'dır ve birkaç bin satırlık dosyaya yetmez).
 - Görsel sütunu bu sürümde aktarılmaz; görseller Medya Havuzu'ndan bağlanır.
-- `.xls` (eski biçim) ve `.csv` bu pencereden yüklenmez. CSV için eski "CSV ile toplu giriş"
-  penceresi yerinde duruyor.
+- `.xls` (eski biçim) ve `.csv` yüklenmez; Excel'de "Farklı Kaydet → .xlsx" seçin.
 
 ## Medya Havuzu
 

@@ -93,7 +93,8 @@ function wk_handle_checkout(): void {
 		'first'     => $text( 'wk_first' ),
 		'last'      => $text( 'wk_last' ),
 		'phone'     => $text( 'wk_phone' ),
-		'email'     => sanitize_email( wp_unslash( $_POST['wk_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'     => trim( sanitize_text_field( wp_unslash( $_POST['wk_email'] ?? '' ) ) ),
 		'delivery'  => 'fabrika' === $text( 'wk_delivery' ) ? 'fabrika' : 'adres',
 		'city'      => $text( 'wk_city' ),
 		'district'  => $text( 'wk_district' ),

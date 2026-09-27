@@ -386,7 +386,8 @@ function ahsapambalaj_handle_quote(): void {
 	$values = array(
 		'name'    => sanitize_text_field( wp_unslash( $_POST['aas_name'] ?? '' ) ),
 		'company' => sanitize_text_field( wp_unslash( $_POST['aas_company'] ?? '' ) ),
-		'email'   => sanitize_email( wp_unslash( $_POST['aas_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['aas_email'] ?? '' ) ) ),
 		'phone'   => sanitize_text_field( wp_unslash( $_POST['aas_phone'] ?? '' ) ),
 		'product' => sanitize_text_field( wp_unslash( $_POST['aas_product'] ?? '' ) ),
 		'size'    => sanitize_textarea_field( wp_unslash( $_POST['aas_size'] ?? '' ) ),

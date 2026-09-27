@@ -155,22 +155,24 @@ function kocist_catalog_groups(): array {
  * panel sayfasi buna baglidir).
  *
  * Sirasiyla:
- *   1. panelde yazilan "Grup anahtari" (menu satirinin 'key' alani);
+ *   1. panelde yazilan "Grup anahtari" (menu satirinin 'key' alani),
+ *      manifestte boyle bir grup varsa;
  *   2. menu metninden turetilen ad, manifestte boyle bir grup varsa
  *      (anahtar alani eklenmeden once kaydedilmis menuler: eski davranis);
  *   3. alt menu anahtarindan (menu_kereste -> kereste), manifestte boyle bir
  *      grup varsa: anahtar bos ama menu metni degistirilmisse grup kaybolmaz;
- *   4. menu metninden turetilen ad (manifestte olmayan yeni bir grup).
+ *   4. manifestte olmayan yeni grup: yazilan anahtar, o da bossa menu metni.
  */
 function kocist_catalog_group_key( array $row, string $label, string $submenu ): string {
-	$key = sanitize_title( (string) ( $row['key'] ?? '' ) );
-
-	if ( '' !== $key ) {
-		return $key;
-	}
-
+	$key   = sanitize_title( (string) ( $row['key'] ?? '' ) );
 	$pages = function_exists( 'nwcs_manifest' ) ? ( nwcs_manifest()['pages'] ?? array() ) : array();
 	$slug  = sanitize_title( $label );
+
+	// Anahtar yalnizca bilinen bir grubu gosteriyorsa kullanilir: panelde
+	// yanlis yazilan anahtar grubun adresini tasiyip sayfasini bosaltmasin.
+	if ( '' !== $key && isset( $pages[ 'grp-' . $key ] ) ) {
+		return $key;
+	}
 
 	if ( isset( $pages[ 'grp-' . $slug ] ) ) {
 		return $slug;
@@ -182,7 +184,7 @@ function kocist_catalog_group_key( array $row, string $label, string $submenu ):
 		return $from_submenu;
 	}
 
-	return $slug;
+	return '' !== $key ? $key : $slug;
 }
 
 /**

@@ -10,6 +10,7 @@
  * - Ayni urun iki kez acilmaz. Eslesme sirasiyla: urun kodu, kaynak adresi
  *   (_nwcs_source), adres adi (slug).
  * - Hedefte zaten olan urune DOKUNULMAZ (metin, fiyat, kategori, yayin durumu).
+ *   Tek istisna: hic tablosu olmayan urune paketteki urun tablolari eklenir.
  * - Gorseller tasinmaz (medya kimlikleri kurulumlar arasinda gecerli degil).
  * - Site secimi site anahtariyla (manifest 'site_key') eslenir; sitenin mevcut
  *   secimi ve sirasi korunur, pakette olup sitede olmayanlar sona eklenir.
@@ -72,6 +73,7 @@ function nwcs_package_build(): array {
 			'spec'       => (string) $product['spec'],
 			'order'      => (int) $product['order'],
 			'categories' => $terms,
+			'tables'     => (array) ( $product['tables'] ?? array() ),
 		);
 	}
 
@@ -139,6 +141,7 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 		'existing' => 0,
 		'skipped'  => 0,
 		'terms'    => 0,
+		'tables'   => 0,
 		'sites'    => array(),
 		'warnings' => array(),
 	);
@@ -159,7 +162,7 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 		}
 
 		$key    = (string) ( $item['key'] ?? '' );
-		$title  = sanitize_text_field( (string) ( $item['title'] ?? '' ) );
+		$title  = nwcs_clean_text( $item['title'] ?? '' );
 		$code   = nwcs_normalize_product_code( (string) ( $item['code'] ?? '' ) );
 		$source = esc_url_raw( (string) ( $item['source'] ?? '' ) );
 		$slug   = sanitize_title( (string) ( $item['slug'] ?? '' ) );
@@ -182,8 +185,20 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 			$id    = (int) ( $found[0] ?? 0 );
 		}
 
+		$tables = nwcs_sanitize_product_tables( (array) ( $item['tables'] ?? array() ) );
+
 		if ( $id ) {
 			++$report['existing'];
+
+			// Mevcut urune dokunulmaz; tek istisna hic tablosu yoksa paketteki
+			// tablolarin eklenmesi (hedefteki bir duzenlemenin ustune yazilmaz).
+			if ( $tables && ! get_post_meta( $id, '_nwcs_tables', true ) ) {
+				++$report['tables'];
+
+				if ( $apply ) {
+					update_post_meta( $id, '_nwcs_tables', wp_slash( $tables ) );
+				}
+			}
 
 			if ( 'publish' === get_post_status( $id ) ) {
 				$map[ $key ] = $id;
@@ -224,13 +239,17 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 
 		update_post_meta( $id, '_nwcs_code', $code );
 		update_post_meta( $id, '_nwcs_source', wp_slash( $source ) );
-		update_post_meta( $id, '_nwcs_short', wp_slash( sanitize_textarea_field( (string) ( $item['short'] ?? '' ) ) ) );
-		update_post_meta( $id, '_nwcs_price', wp_slash( sanitize_text_field( (string) ( $item['price'] ?? '' ) ) ) );
-		update_post_meta( $id, '_nwcs_spec', wp_slash( sanitize_text_field( (string) ( $item['spec'] ?? '' ) ) ) );
+		update_post_meta( $id, '_nwcs_short', wp_slash( nwcs_clean_text( $item['short'] ?? '', true ) ) );
+		update_post_meta( $id, '_nwcs_price', wp_slash( nwcs_clean_text( $item['price'] ?? '' ) ) );
+		update_post_meta( $id, '_nwcs_spec', wp_slash( nwcs_clean_text( $item['spec'] ?? '' ) ) );
+
+		if ( $tables ) {
+			update_post_meta( $id, '_nwcs_tables', wp_slash( $tables ) );
+		}
 
 		$term_ids = array();
 		foreach ( (array) ( $item['categories'] ?? array() ) as $category ) {
-			$name = sanitize_text_field( (string) ( $category['name'] ?? '' ) );
+			$name = nwcs_clean_text( $category['name'] ?? '' );
 
 			if ( '' === $name ) {
 				continue;
@@ -392,6 +411,9 @@ function nwcs_render_package(): void {
 						<?php if ( $report['terms'] ) : ?>
 							<?php echo (int) $report['terms']; ?> yeni kategori açıldı.
 						<?php endif; ?>
+						<?php if ( ! empty( $report['tables'] ) ) : ?>
+							Tablosu olmayan <?php echo (int) $report['tables']; ?> mevcut ürüne paketteki tablolar <?php echo esc_html( $report['apply'] ? 'eklendi' : 'eklenecek' ); ?>.
+						<?php endif; ?>
 					</p>
 
 					<?php if ( $report['sites'] ) : ?>
@@ -414,7 +436,7 @@ function nwcs_render_package(): void {
 					<p class="nwcs-badge nwcs-badge--warn"><?php echo esc_html( $warning ); ?></p>
 				<?php endforeach; ?>
 
-				<?php if ( ! $report['apply'] && ( ! empty( $report['new'] ) || array_sum( array_column( (array) ( $report['sites'] ?? array() ), 'added' ) ) ) ) : ?>
+				<?php if ( ! $report['apply'] && ( ! empty( $report['new'] ) || ! empty( $report['tables'] ) || array_sum( array_column( (array) ( $report['sites'] ?? array() ), 'added' ) ) ) ) : ?>
 					<p class="nwcs-seo__lead">Sonuç doğruysa aynı dosyayı aşağıdan <strong>Aktar</strong> seçeneğiyle yükleyin.</p>
 				<?php elseif ( ! $report['apply'] && isset( $report['new'] ) ) : ?>
 					<p class="nwcs-seo__lead">Aktarılacak yeni bir şey yok: bu havuz paketle aynı.</p>

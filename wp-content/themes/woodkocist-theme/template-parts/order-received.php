@@ -94,7 +94,7 @@ get_header();
 			<?php if ( $fabrika ) : ?>
 				<p <?php nwcs_edit_attr( 'global', 'shop', 'pickup_address' ); ?>><span <?php $attr( 'pickup_prefix' ); ?>><?php echo esc_html( $text( 'pickup_prefix' ) ); ?></span> <?php echo esc_html( (string) nwcs_field( 'global', 'shop', 'pickup_address' ) ); ?></p>
 			<?php else : ?>
-				<p><?php echo esc_html( (string) ( $address['address'] ?? '' ) ); ?><br /><?php echo esc_html( trim( ( $address['district'] ?? '' ) . ' / ' . ( $address['city'] ?? '' ), ' /' ) ); ?></p>
+				<p><?php echo nl2br( esc_html( (string) ( $address['address'] ?? '' ) ) ); ?><br /><?php echo esc_html( trim( ( $address['district'] ?? '' ) . ' / ' . ( $address['city'] ?? '' ), ' /' ) ); ?></p>
 			<?php endif; ?>
 			<p class="wk-form__note" <?php nwcs_edit_attr( 'global', 'shop', 'lead_time' ); ?>><?php echo esc_html( nwcs_field( 'global', 'shop', 'lead_time' ) ); ?></p>
 		</section>

@@ -23,7 +23,7 @@ function nwcs_register_mailtest_menu(): void {
  * Cagiran site baglaminda olmali.
  */
 function nwcs_mailtest_recipients(): array {
-	$default = function_exists( 'nwcs_field' ) ? nwcs_form_clean_email( nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'email', '' ) ) : '';
+	$default = nwcs_form_site_email();
 
 	if ( '' === $default ) {
 		$default = nwcs_form_clean_email( get_option( 'admin_email' ) );
@@ -215,13 +215,27 @@ function nwcs_render_mailtest(): void {
 						<?php
 						switch_to_blog( (int) $blog_id );
 						$recipients = nwcs_mailtest_recipients();
+						$site_email = nwcs_form_site_email();
+						$shown      = nwcs_form_site_email( true );
 						$from       = nwcs_mailtest_from();
 						$stats      = nwcs_mailtest_form_stats();
 						restore_current_blog();
 						?>
 						<tr id="site-<?php echo (int) $blog_id; ?>">
 							<td><strong><?php echo esc_html( $site['label'] ); ?></strong><br /><span class="description"><?php echo esc_html( untrailingslashit( $site['url'] ) ); ?></span></td>
-							<td><?php echo $recipients ? esc_html( implode( ', ', $recipients ) ) : '<em>yok</em>'; ?></td>
+							<td>
+								<?php echo $recipients ? esc_html( implode( ', ', $recipients ) ) : '<em>yok</em>'; ?>
+								<?php if ( '' === $site_email ) : ?>
+									<?php // Firma adresi yoksa bildirim ag yoneticisinin adresine gider; firma bunu gormez. ?>
+									<p class="nwcs-badge nwcs-badge--warn">
+										Firma e-postası panelde girilmemiş; bildirimler yönetici adresine gidiyor.
+										<?php if ( '' !== $shown ) : ?>
+											Sitede görünen adres: <?php echo esc_html( $shown ); ?>. Firma onaylarsa aynısını girin.
+										<?php endif; ?>
+										<a href="<?php echo esc_url( nwcs_seo_url( (int) $blog_id ) ); ?>">SEO ve GEO → Firma e-postası</a>
+									</p>
+								<?php endif; ?>
+							</td>
 							<td><?php echo esc_html( $from ); ?></td>
 							<td>
 								<?php if ( ! $stats ) : ?>

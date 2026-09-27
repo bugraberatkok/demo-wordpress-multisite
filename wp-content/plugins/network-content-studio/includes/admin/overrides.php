@@ -74,7 +74,7 @@ function nwcs_override_image_choices( array $product ): array {
  * Urunun sitelere gore ozellestirilmis hali; duzenlenebilir.
  */
 function nwcs_render_product_customizations( ?array $product, array $media ): void {
-	if ( ! $product ) {
+	if ( empty( $product['id'] ) ) {
 		return;
 	}
 
@@ -218,13 +218,13 @@ function nwcs_ajax_override_save(): void {
 	$price_override = ! empty( $_POST['price_override'] );
 
 	$values = array(
-		'title'          => sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) ),
-		'short'          => sanitize_textarea_field( wp_unslash( $_POST['short'] ?? '' ) ),
+		'title'          => nwcs_clean_text( wp_unslash( $_POST['title'] ?? '' ) ),
+		'short'          => nwcs_clean_text( wp_unslash( $_POST['short'] ?? '' ), true ),
 		'image'          => absint( $_POST['image'] ?? 0 ),
 		'price_override' => $price_override ? 1 : 0,
 		// Fiyat yalnizca isaretliyse anlamli; isaretliyken bos birakmak
 		// "Teklif al" demektir, bu yuzden bos deger de saklanir.
-		'price'          => $price_override ? sanitize_text_field( wp_unslash( $_POST['price'] ?? '' ) ) : '',
+		'price'          => $price_override ? nwcs_clean_text( wp_unslash( $_POST['price'] ?? '' ) ) : '',
 	);
 
 	// price_override isaretliyse kayit bos sayilmasin diye ayri tutulur.

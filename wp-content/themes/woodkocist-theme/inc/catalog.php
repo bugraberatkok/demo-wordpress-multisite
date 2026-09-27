@@ -232,7 +232,14 @@ function wk_filter_products( string $category = '', string $search = '', string 
 			}
 		);
 	} elseif ( 'ad' === $sort ) {
-		usort( $products, static fn( array $a, array $b ): int => strcmp( $a['title'], $b['title'] ) );
+		// Turkce alfabe sirasi (C, Ç, ... I, İ); intl yoksa buyuk/kucuk harfe duyarsiz.
+		$collator = class_exists( 'Collator' ) ? new Collator( 'tr_TR' ) : null;
+		usort(
+			$products,
+			static fn( array $a, array $b ): int => $collator
+				? (int) $collator->compare( $a['title'], $b['title'] )
+				: strcasecmp( $a['title'], $b['title'] )
+		);
 	}
 
 	return $products;

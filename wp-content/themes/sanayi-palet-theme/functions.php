@@ -189,7 +189,8 @@ function sanayi_palet_handle_message(): void {
 
 	$values = array(
 		'name'    => sanitize_text_field( wp_unslash( $_POST['sp_name'] ?? '' ) ),
-		'email'   => sanitize_email( wp_unslash( $_POST['sp_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['sp_email'] ?? '' ) ) ),
 		'phone'   => sanitize_text_field( wp_unslash( $_POST['sp_phone'] ?? '' ) ),
 		'subject' => sanitize_text_field( wp_unslash( $_POST['sp_subject'] ?? '' ) ),
 		'message' => sanitize_textarea_field( wp_unslash( $_POST['sp_message'] ?? '' ) ),

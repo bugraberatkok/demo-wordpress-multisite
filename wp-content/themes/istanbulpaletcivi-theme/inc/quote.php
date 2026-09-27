@@ -80,7 +80,8 @@ function pc_handle_quote(): void {
 		'name'    => sanitize_text_field( wp_unslash( $_POST['pc_name'] ?? '' ) ),
 		'company' => sanitize_text_field( wp_unslash( $_POST['pc_company'] ?? '' ) ),
 		'phone'   => sanitize_text_field( wp_unslash( $_POST['pc_phone'] ?? '' ) ),
-		'email'   => sanitize_email( wp_unslash( $_POST['pc_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['pc_email'] ?? '' ) ) ),
 		'product' => sanitize_text_field( wp_unslash( $_POST['pc_product'] ?? '' ) ),
 		'size'    => sanitize_textarea_field( wp_unslash( $_POST['pc_size'] ?? '' ) ),
 		'message' => sanitize_textarea_field( wp_unslash( $_POST['pc_message'] ?? '' ) ),

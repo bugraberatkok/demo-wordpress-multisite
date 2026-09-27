@@ -148,6 +148,16 @@ function nwcs_pool_products( bool $reset = false ): array {
 }
 
 /**
+ * Aramada Turkce harf ve buyuk/kucuk harf farki gozetilmesin diye metni
+ * sadelestirir: "ÇİVİ", "çivi", "civi" ayni sonucu verir.
+ */
+function nwcs_search_fold( string $text ): string {
+	$text = mb_strtolower( strtr( $text, array( 'İ' => 'i', 'I' => 'ı' ) ), 'UTF-8' );
+
+	return strtr( $text, array( 'ı' => 'i', 'ğ' => 'g', 'ü' => 'u', 'ş' => 's', 'ö' => 'o', 'ç' => 'c', 'â' => 'a', 'î' => 'i', 'û' => 'u' ) );
+}
+
+/**
  * Yonetim listesi icin filtrelenmis/sayfalanmis sorgu.
  *
  * @return array{items: array<int, array>, total: int, pages: int, page: int}
@@ -171,9 +181,16 @@ function nwcs_pool_query( array $args = array() ): array {
 				return true;
 			}
 
-			$haystack = mb_strtolower( $product['title'] . ' ' . $product['short'] . ' ' . $product['spec'] . ' ' . implode( ' ', $product['categories'] ) );
+			$haystack = nwcs_search_fold( $product['title'] . ' ' . $product['code'] . ' ' . $product['short'] . ' ' . $product['spec'] . ' ' . implode( ' ', $product['categories'] ) );
 
-			return str_contains( $haystack, mb_strtolower( $search ) );
+			// Her kelime bir yerde gecmeli; sira onemsiz ("kamelya 3x3" = "3x3 kamelya").
+			foreach ( preg_split( '/\s+/u', nwcs_search_fold( $search ), -1, PREG_SPLIT_NO_EMPTY ) as $word ) {
+				if ( ! str_contains( $haystack, $word ) ) {
+					return false;
+				}
+			}
+
+			return true;
 		}
 	);
 
@@ -447,9 +464,9 @@ function nwcs_save_site_product_settings( array $settings ): void {
 		}
 
 		$clean = array(
-			'title'  => sanitize_text_field( (string) ( $row['title'] ?? '' ) ),
-			'short'  => sanitize_textarea_field( (string) ( $row['short'] ?? '' ) ),
-			'price'  => sanitize_text_field( (string) ( $row['price'] ?? '' ) ),
+			'title'  => nwcs_clean_text( $row['title'] ?? '' ),
+			'short'  => nwcs_clean_text( $row['short'] ?? '', true ),
+			'price'  => nwcs_clean_text( $row['price'] ?? '' ),
 			'image'  => absint( $row['image'] ?? 0 ),
 			'hidden' => ! empty( $row['hidden'] ) ? 1 : 0,
 			// Fiyatin bilincli olarak bos birakildigini, "hic dokunulmadi"dan
@@ -577,7 +594,7 @@ function nwcs_site_supports_product_tables( int $blog_id ): bool {
  * @return array<int, array{title:string, head:string[], rows:array<int, string[]>}>
  */
 function nwcs_sanitize_product_tables( array $raw ): array {
-	$clean = static fn( $cell ): string => is_scalar( $cell ) ? trim( sanitize_text_field( (string) $cell ) ) : '';
+	$clean = static fn( $cell ): string => nwcs_clean_text( $cell );
 	$out   = array();
 
 	foreach ( array_slice( $raw, 0, 20 ) as $table ) {

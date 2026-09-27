@@ -144,7 +144,8 @@ function wk_handle_request(): void {
 		'name'       => sanitize_text_field( wp_unslash( $_POST['wk_name'] ?? '' ) ),
 		'company'    => sanitize_text_field( wp_unslash( $_POST['wk_company'] ?? '' ) ),
 		'phone'      => sanitize_text_field( wp_unslash( $_POST['wk_phone'] ?? '' ) ),
-		'email'      => sanitize_email( wp_unslash( $_POST['wk_email'] ?? '' ) ),
+		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
+		'email'      => trim( sanitize_text_field( wp_unslash( $_POST['wk_email'] ?? '' ) ) ),
 		'department' => sanitize_text_field( wp_unslash( $_POST['wk_department'] ?? '' ) ),
 		'product'    => sanitize_text_field( wp_unslash( $_POST['wk_product'] ?? '' ) ),
 		'message'    => sanitize_textarea_field( wp_unslash( $_POST['wk_message'] ?? '' ) ),

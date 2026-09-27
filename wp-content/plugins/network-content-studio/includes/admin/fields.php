@@ -344,6 +344,23 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 				Buradaki alanlar <strong>yalnızca bu site için</strong> özelleştirmedir; boş bırakılan alan havuzdaki değeri kullanır.
 			</p>
 
+			<?php // Uzun listede arama ve "yalnizca secilenler" suzgeci; kayda etkisi yok, yalnizca gorunumu daraltir. ?>
+			<div class="nwcs-products__tools">
+				<input class="nwcs-input" type="search" data-nwcs-products-search
+					placeholder="Ürün adı veya kodu ara…" aria-label="Listede ürün ara" />
+				<label class="nwcs-products__only">
+					<input type="checkbox" data-nwcs-products-only /> Yalnızca seçilenler
+				</label>
+				<span class="nwcs-products__count" data-nwcs-products-count aria-live="polite"></span>
+			</div>
+
+			<template data-nwcs-media-options>
+				<option value="0">— Havuzdaki görsel —</option>
+				<?php foreach ( $media as $item ) : ?>
+					<option value="<?php echo esc_attr( (string) $item['id'] ); ?>"><?php echo esc_html( $item['title'] ); ?></option>
+				<?php endforeach; ?>
+			</template>
+
 			<div class="nwcs-products" data-nwcs-products>
 				<?php
 				// "Hepsi" kipinde her urun gosterildigi icin kutular da isaretli gelir.
@@ -353,7 +370,8 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 					$override    = $settings['overrides'][ $id ] ?? array();
 					$is_selected = $show_all || in_array( $id, $settings['selected'], true );
 					?>
-					<div class="nwcs-product<?php echo $is_selected ? ' is-selected' : ''; ?>" data-nwcs-product>
+					<div class="nwcs-product<?php echo $is_selected ? ' is-selected' : ''; ?>" data-nwcs-product
+						data-search="<?php echo esc_attr( nwcs_search_fold( $product['title'] . ' ' . $product['code'] . ' ' . implode( ' ', (array) $product['categories'] ) ) ); ?>">
 						<div class="nwcs-product__bar">
 							<label class="nwcs-product__pick">
 								<input type="checkbox" name="products[selected][]" value="<?php echo esc_attr( (string) $id ); ?>"
@@ -367,6 +385,7 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 									<?php echo esc_html( $product['title'] ); ?>
 									<small>
 										<?php
+										echo '' !== $product['code'] ? esc_html( $product['code'] ) . ' · ' : '';
 										echo '' !== trim( $product['price'] )
 											? esc_html( $product['price'] )
 											: '<em>Teklif al</em>'; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit metin.
@@ -376,6 +395,7 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 							</label>
 
 							<div class="nwcs-product__tools">
+								<button type="button" class="nwcs-move" data-nwcs-product-move="top" aria-label="En üste taşı" title="En üste taşı">⤒</button>
 								<button type="button" class="nwcs-move" data-nwcs-product-move="up" aria-label="Yukarı taşı">↑</button>
 								<button type="button" class="nwcs-move" data-nwcs-product-move="down" aria-label="Aşağı taşı">↓</button>
 								<button type="button" class="nwcs-iconpick__toggle" data-nwcs-product-toggle aria-expanded="false">Özelleştirilmiş</button>
@@ -426,12 +446,17 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 
 							<div class="nwcs-field">
 								<label class="nwcs-sublabel">Görsel (bu sitede)</label>
-								<select class="nwcs-input" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][image]">
+								<?php
+								// Secenekler tiklaninca doldurulur (ortak sablondan): yuzlerce urun x
+								// yuzlerce gorsel sayfayi megabaytlarca buyutmesin.
+								$current = (int) ( $override['image'] ?? 0 );
+								?>
+								<select class="nwcs-input" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][image]" data-nwcs-lazy-media>
 									<option value="0">— Havuzdaki görsel —</option>
 									<?php foreach ( $media as $item ) : ?>
-										<option value="<?php echo esc_attr( (string) $item['id'] ); ?>" <?php selected( $item['id'], $override['image'] ?? 0 ); ?>>
-											<?php echo esc_html( $item['title'] ); ?>
-										</option>
+										<?php if ( (int) $item['id'] === $current ) : ?>
+											<option value="<?php echo esc_attr( (string) $item['id'] ); ?>" selected><?php echo esc_html( $item['title'] ); ?></option>
+										<?php endif; ?>
 									<?php endforeach; ?>
 								</select>
 							</div>

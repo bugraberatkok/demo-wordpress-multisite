@@ -35,6 +35,7 @@ function nwcs_form_post_types(): array {
 		'aas_quote'  => '_aas_',  // ahsapambalaj-theme
 		'pc_quote'   => '_pc_',   // istanbulpaletcivi-theme
 		'wk_order'   => '_wk_',   // woodkocist-theme
+		'wk_request' => '_wkr_',  // woodkocist-theme (numune, proje, bayilik)
 	);
 
 	$types = apply_filters( 'nwcs_form_post_types', $defaults );
@@ -188,15 +189,27 @@ function nwcs_form_clean_email( $value ): string {
 }
 
 /**
+ * Sitenin panelde girilmis firma e-postasi (SEO ve GEO -> Firma). Temanin
+ * varsayilan adresi bilerek kullanilmaz: firma onaylamadan bildirimler var
+ * olup olmadigi bilinmeyen bir kutuya gitmesin; o zaman yonetici adresine
+ * gider ve E-posta Testi sayfasi uyarir. Cagiran site baglaminda olmali.
+ *
+ * $with_default: sitede gorunen (tema varsayilani dahil) adres.
+ */
+function nwcs_form_site_email( bool $with_default = false ): string {
+	if ( ! function_exists( 'nwcs_field' ) ) {
+		return '';
+	}
+
+	return nwcs_form_clean_email( (string) nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'email', $with_default ? null : '' ) );
+}
+
+/**
  * Bildirim alicilari. Filtre dizge (virgulle ayrilmis olabilir) ya da dizi
  * dondurebilir; gecersiz adresler atilir.
  */
 function nwcs_form_recipients( WP_Post $post ): array {
-	$default = '';
-
-	if ( function_exists( 'nwcs_field' ) ) {
-		$default = nwcs_form_clean_email( nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'email', '' ) );
-	}
+	$default = nwcs_form_site_email();
 
 	if ( '' === $default ) {
 		$default = nwcs_form_clean_email( get_option( 'admin_email' ) );
@@ -234,7 +247,7 @@ function nwcs_form_fields( WP_Post $post, string $prefix ): array {
 		}
 
 		$field = substr( $key, strlen( $prefix ) );
-		$value = trim( sanitize_textarea_field( (string) $values[0] ) );
+		$value = nwcs_clean_text( $values[0], true );
 
 		if ( isset( $labels[ $field ] ) ) {
 			$known[ $field ] = array( $labels[ $field ], $value );
@@ -339,7 +352,9 @@ function nwcs_form_send_notification( int $post_id ): bool {
 			"\n",
 			array_filter(
 				preg_split( '/\R/u', $content ),
+				// Temanin bos alan icin yazdigi "E-posta: —" satirlari da atlanir.
 				static fn( string $line ): bool => ! in_array( mb_strtolower( trim( $line ), 'UTF-8' ), array_filter( $written ), true )
+					&& ! preg_match( '/^[^:]{1,40}:\s*[—–-]\s*$/u', trim( $line ) )
 			)
 		);
 		$content = trim( (string) preg_replace( "/\n{3,}/", "\n\n", $content ) );

@@ -475,7 +475,7 @@ function nwcs_bulk_run(): int {
 		switch_to_blog( $change['blog_id'] );
 
 		if ( isset( $change['attachment_id'] ) ) {
-			update_post_meta( $change['attachment_id'], '_wp_attachment_image_alt', sanitize_text_field( $change['new'] ) );
+			update_post_meta( $change['attachment_id'], '_wp_attachment_image_alt', nwcs_clean_text( $change['new'] ) );
 		} else {
 			$data = nwcs_get_all();
 			$data[ $change['page'] ][ $change['component'] ][ $change['field'] ] = nwcs_sanitize_value( $change['new'], $change['definition'] );

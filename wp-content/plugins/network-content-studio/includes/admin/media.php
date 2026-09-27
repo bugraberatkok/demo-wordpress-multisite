@@ -397,7 +397,7 @@ function nwcs_handle_media_upload(): void {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 
-	$alt   = isset( $_POST['alt'] ) ? sanitize_text_field( wp_unslash( $_POST['alt'] ) ) : '';
+	$alt   = isset( $_POST['alt'] ) ? nwcs_clean_text( wp_unslash( $_POST['alt'] ) ) : '';
 	$files = $_FILES['files'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- asagida tek tek islenir.
 	$count = 0;
 
@@ -457,14 +457,14 @@ function nwcs_handle_media_update(): void {
 		wp_update_post(
 			array(
 				'ID'         => $attachment_id,
-				'post_title' => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
+				'post_title' => isset( $_POST['title'] ) ? nwcs_clean_text( wp_unslash( $_POST['title'] ) ) : '',
 			)
 		);
 
 		update_post_meta(
 			$attachment_id,
 			'_wp_attachment_image_alt',
-			isset( $_POST['alt'] ) ? sanitize_text_field( wp_unslash( $_POST['alt'] ) ) : ''
+			isset( $_POST['alt'] ) ? nwcs_clean_text( wp_unslash( $_POST['alt'] ) ) : ''
 		);
 
 		restore_current_blog();

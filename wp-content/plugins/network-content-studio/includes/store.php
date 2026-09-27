@@ -92,6 +92,36 @@ function nwcs_image_by_id( int $attachment_id, string $size = 'large' ): array {
 }
 
 /**
+ * Metin temizleme: etiketleri ve kontrol karakterlerini atar, bosluklari toplar.
+ *
+ * sanitize_text_field yerine kullanilir: o, adres kodlamasi sandigi "%" ile
+ * baslayan iki haneyi siler ve Turkce yazimdaki yuzdeler kaybolur
+ * ("Nem %18 - %20" -> "Nem -"). Tek satirlik metinde satir sonlari (U+2028
+ * dahil) bosluga doner; cok satirlida satirlar korunur.
+ */
+function nwcs_clean_text( $value, bool $multiline = false ): string {
+	if ( ! is_scalar( $value ) ) {
+		return '';
+	}
+
+	// Etiket olmayan "<" ("<20 mm", "x <= 5") korunur: once kacirilir, etiketler
+	// atilir, sonra geri cevrilir. Ciktida her zaman esc_* kullanilir.
+	$text = wp_pre_kses_less_than( wp_check_invalid_utf8( (string) $value ) );
+	$text = str_replace( '&lt;', '<', wp_strip_all_tags( $text ) );
+	$text = str_replace( array( "\r\n", "\r", "\u{2028}", "\u{2029}" ), "\n", $text );
+
+	if ( $multiline ) {
+		$text = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/u', '', $text );
+
+		return trim( preg_replace( '/[ \t]+$/mu', '', (string) $text ) );
+	}
+
+	$text = preg_replace( '/[\x00-\x1F\x7F\s]+/u', ' ', $text );
+
+	return trim( (string) $text );
+}
+
+/**
  * Tur bazli girdi temizleme. Panel ve seed tek yazma yolunu paylasir.
  */
 function nwcs_sanitize_value( $value, array $definition ) {
@@ -99,7 +129,7 @@ function nwcs_sanitize_value( $value, array $definition ) {
 
 	switch ( $type ) {
 		case 'textarea':
-			return sanitize_textarea_field( (string) $value );
+			return nwcs_clean_text( $value, true );
 
 		case 'url':
 			return esc_url_raw( trim( (string) $value ) );
@@ -131,7 +161,7 @@ function nwcs_sanitize_value( $value, array $definition ) {
 
 		case 'text':
 		default:
-			return sanitize_text_field( (string) $value );
+			return nwcs_clean_text( $value );
 	}
 }
 
