@@ -171,7 +171,17 @@ function nwcs_render_mailtest(): void {
 	}
 
 	$result = get_site_transient( NWCS_MAILTEST_RESULT . '_' . get_current_user_id() );
-	$smtp   = has_action( 'phpmailer_init' ) ? 'Gönderim ayarı değiştirilmiş (SMTP eklentisi ya da yerel ayar)' : 'PHP mail(): sunucunun kendi gönderimi, SMTP eklentisi yok';
+	$no_mail = false;
+
+	if ( nwcs_smtp_configured() ) {
+		list( $port, $secure ) = nwcs_smtp_transport();
+		$smtp = sprintf( 'SMTP, %s:%d%s, gönderen %s', trim( (string) NWCS_SMTP_HOST ), $port, $secure ? ' (' . strtoupper( $secure ) . ')' : '', nwcs_smtp_from() );
+	} elseif ( has_action( 'phpmailer_init' ) ) {
+		$smtp = 'Gönderim ayarı başka bir eklenti ya da yerel ayar tarafından değiştirilmiş';
+	} else {
+		$smtp    = 'PHP mail(): sunucunun kendi gönderimi';
+		$no_mail = ! function_exists( 'mail' );
+	}
 	?>
 	<div class="wrap nwcs-wrap nwcs-wrap--pool nwcs-seo">
 		<header class="nwcs-bar">
@@ -187,6 +197,18 @@ function nwcs_render_mailtest(): void {
 				Aşağıdaki düğme, form doldurmadan aynı yolla bir deneme e-postası gönderir. E-posta gelmezse ya da Spam’e düşerse gerçek bildirimler de aynı yere düşer.
 			</p>
 			<p class="nwcs-seo__lead"><strong>Gönderim yolu:</strong> <?php echo esc_html( $smtp ); ?>.</p>
+
+			<?php if ( $no_mail ) : ?>
+				<?php // Natro'da mail() kapali: SMTP olmadan hicbir bildirim gitmez. ?>
+				<div class="notice notice-error inline">
+					<p>
+						<strong>Bu sunucuda PHP mail() kapalı; form bildirimleri gönderilemiyor.</strong>
+						Bir e-posta kutusunun SMTP bilgilerini sunucudaki <code>wp-config.php</code> dosyasına ekleyin
+						(<code>NWCS_SMTP_HOST</code>, <code>NWCS_SMTP_PORT</code>, <code>NWCS_SMTP_USER</code>, <code>NWCS_SMTP_PASS</code>).
+						Form kayıtları yine de yönetim panelinde saklanıyor.
+					</p>
+				</div>
+			<?php endif; ?>
 
 			<?php if ( is_array( $result ) ) : ?>
 				<p class="nwcs-badge <?php echo $result['sent'] ? 'nwcs-badge--ok' : 'nwcs-badge--warn'; ?>">
