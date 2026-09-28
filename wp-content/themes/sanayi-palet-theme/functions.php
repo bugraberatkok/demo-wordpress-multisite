@@ -147,7 +147,8 @@ function sanayi_palet_post_image( WP_Post $post, string $size = 'medium_large' )
  * Iletisim formu
  *
  * Sahte basari ekrani yok: gonderilen mesaj gercekten kaydedilir, yonetimde
- * "İletişim Mesajları" altinda gorulur. Demoda e-posta gonderilmez.
+ * "İletişim Mesajları" altinda gorulur. Bildirim e-postasini Network Content
+ * Studio gonderir; alici info@kocist.com.tr (sanayi_palet_form_recipient).
  * ====================================================================== */
 
 add_action( 'init', 'sanayi_palet_register_message_cpt' );
@@ -174,6 +175,13 @@ function sanayi_palet_register_message_cpt(): void {
 			'query_var'       => false,
 		)
 	);
+}
+
+// Bildirim e-postasi (Network Content Studio, includes/forms.php) her sitede
+// ortak adrese gider; paneldeki SEO firma e-postasindan bagimsiz.
+add_filter( 'nwcs_form_recipient', 'sanayi_palet_form_recipient' );
+function sanayi_palet_form_recipient(): string {
+	return 'info@kocist.com.tr';
 }
 
 add_action( 'admin_post_sanayi_palet_message', 'sanayi_palet_handle_message' );
@@ -709,7 +717,32 @@ function sanayi_palet_link( $url ): string {
 		return home_url( $url );
 	}
 
-	return $url;
+	return sanayi_palet_whatsapp_message( $url );
+}
+
+/**
+ * WhatsApp baglantisina hazir mesaj ekler (wa.me/<numara>?text=...).
+ *
+ * Numara panelde yazildigi gibi kalir; yalnizca mesaj eklenir. Panelde
+ * yazilan baglantida zaten mesaj (text=) varsa dokunulmaz. Sitede urun
+ * detay sayfasi olmadigi icin mesaj her yerde ayni genel selam.
+ */
+function sanayi_palet_whatsapp_message( string $url ): string {
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+
+	if ( ! in_array( $host, array( 'wa.me', 'api.whatsapp.com', 'whatsapp.com', 'www.whatsapp.com' ), true ) ) {
+		return $url;
+	}
+
+	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+	if ( '' !== trim( (string) ( $query['text'] ?? '' ) ) ) {
+		return $url;
+	}
+
+	$text = 'Merhaba, web sitenizden yazıyorum. Palet ve ambalaj ürünleriniz hakkında bilgi almak istiyorum.';
+
+	return add_query_arg( 'text', rawurlencode( $text ), remove_query_arg( 'text', $url ) );
 }
 
 /**

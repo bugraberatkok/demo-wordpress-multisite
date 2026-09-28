@@ -404,9 +404,11 @@ p { margin: 0; }
 /* ------------------------------------------------------------------ */
 
 .wk-product { display: grid; gap: 2rem; padding-block: 1.5rem clamp(3rem, 6vw, 4.5rem); }
-@media (min-width: 960px) { .wk-product { grid-template-columns: 1.1fr 1fr; gap: 3.5rem; align-items: start; } .wk-product__body { grid-column: 1 / 2; } }
-.wk-product__media { overflow: hidden; padding: 0.6rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
-.wk-product__media img { width: 100%; height: auto; background: var(--frame); }
+/* Gorsel sayfanin ana ogesi: genis ekranda sutunun ~%60'i, mobilde kenardan kenara (ince cerceve). */
+@media (min-width: 960px) { .wk-product { grid-template-columns: 1.45fr 1fr; gap: clamp(2rem, 3.5vw, 3rem); align-items: start; } .wk-product__body { grid-column: 1 / 2; } }
+.wk-product__media { overflow: hidden; margin-inline: -0.5rem; padding: 0.35rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+@media (min-width: 768px) { .wk-product__media { margin-inline: 0; padding: 0.5rem; } }
+.wk-product__media img { display: block; width: 100%; height: auto; border-radius: calc(var(--radius) - 2px); background: var(--frame); }
 .wk-product__info { display: flex; flex-direction: column; }
 @media (min-width: 960px) { .wk-product__info { position: sticky; top: calc(var(--header) + 1.25rem); grid-row: span 2; } }
 .wk-product__code { color: var(--mahogany); font-size: 0.9375rem; font-weight: 700; }

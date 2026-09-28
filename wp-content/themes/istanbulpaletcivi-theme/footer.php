@@ -8,8 +8,10 @@ defined( 'ABSPATH' ) || exit;
 $menu     = nwcs_rows( 'global', 'header', 'menu' );
 $logo     = pc_logo();
 $phone    = pc_phone();
-$whatsapp = pc_whatsapp();
-$email    = trim( (string) nwcs_field( 'global', 'header', 'email' ) );
+// Mobil alt cubuk urun sayfasinda o urunun mesajiyla acilir.
+$current  = pc_products()[ pc_current_product_key() ] ?? null;
+$whatsapp = $current ? pc_whatsapp_product( $current ) : pc_whatsapp();
+$email   = trim( (string) nwcs_field( 'global', 'header', 'email' ) );
 $external = trim( (string) nwcs_field( 'global', 'footer', 'external_label' ) );
 ?>
 </main>

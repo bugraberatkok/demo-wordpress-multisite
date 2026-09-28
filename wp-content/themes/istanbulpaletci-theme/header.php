@@ -128,7 +128,7 @@ $whatsapp  = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 			</a>
 
 			<?php if ( $whatsapp ) : ?>
-				<a href="<?php echo esc_url( ip_link( $whatsapp ) ); ?>" target="_blank" rel="noopener"
+				<a href="<?php echo esc_url( ip_whatsapp_url( $whatsapp ) ); ?>" target="_blank" rel="noopener"
 					class="btn btn--sm btn--whatsapp hidden md:inline-flex"
 					<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 					<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 18 ); ?>
@@ -204,7 +204,7 @@ $whatsapp  = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 				</a>
 
 				<?php if ( $whatsapp ) : ?>
-					<a href="<?php echo esc_url( ip_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp" <?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
+					<a href="<?php echo esc_url( ip_whatsapp_url( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--md btn--whatsapp" <?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 18 ); ?>
 						<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
 					</a>

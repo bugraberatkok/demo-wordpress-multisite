@@ -34,7 +34,8 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 				$gallery = array();
 
 				foreach ( array( 'image', 'image_2', 'image_3', 'image_4' ) as $key ) {
-					$picture = nwcs_image_by_id( $item[ $key ] ?? 0, 'large' );
+					// 1536 boy: buyuyen gorsel 2x ekranda da net (yoksa asil dosya).
+					$picture = nwcs_image_by_id( (int) ( $item[ $key ] ?? 0 ), '1536x1536' );
 
 					if ( ! empty( $picture['url'] ) ) {
 						$gallery[] = array(
@@ -47,11 +48,11 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 				// Form hangi urun icin teklif istendigini adresten okur.
 				$quote_url = add_query_arg(
 					'urun',
-					$item['title'] ?? '',
+					rawurlencode( (string) ( $item['title'] ?? '' ) ),
 					ahsapkasa_link( nwcs_field( 'services', 'grid', 'cta_url' ) )
 				) . '#teklif';
 				?>
-				<div class="card flex flex-col-reverse overflow-hidden sm:flex-row" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
+				<div class="product-card card flex flex-col-reverse overflow-hidden sm:flex-row" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
 
 					<div class="flex min-w-0 flex-1 flex-col p-6 md:p-7">
 						<h2 class="font-display text-2xl font-semibold md:text-[1.75rem]" <?php nwcs_edit_attr( 'services', 'grid', 'items', $item_index, 'title' ); ?>>
@@ -87,7 +88,7 @@ $items = nwcs_rows( 'services', 'grid', 'items' );
 					      // kendi kenari gorur. Kucuk cerceveli onizleme pul gibi duruyordu. ?>
 					<?php if ( $gallery ) : ?>
 						<button type="button" data-lightbox-open="0"
-							class="group relative h-56 w-full shrink-0 overflow-hidden bg-dust sm:h-auto sm:w-[50%]"
+							class="product-card__shot group relative h-56 w-full shrink-0 overflow-hidden bg-dust sm:h-auto sm:w-[50%]"
 							aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $item['title'] ?? '' ) ); ?>">
 
 							<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>"

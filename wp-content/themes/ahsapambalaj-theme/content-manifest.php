@@ -58,6 +58,7 @@ $manifest_data = array(
 						),
 						'whatsapp_label' => array( 'label' => 'WhatsApp Düğmesi Metni', 'type' => 'text', 'default' => 'WhatsApp', 'hint' => 'Düğme yalnızca aşağıdaki WhatsApp Bağlantısı doluyken görünür.' ),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı (boşsa düğme gizlenir)', 'type' => 'url', 'default' => '' ),
+						'whatsapp_message' => array( 'label' => 'WhatsApp Hazır Mesajı', 'type' => 'text', 'default' => 'Merhaba, ahşap ambalaj ürünleriniz hakkında bilgi almak istiyorum.', 'hint' => 'WhatsApp açıldığında yazı kutusunda hazır gelir (bağlantı wa.me ise).' ),
 						'cta_label'  => array( 'label' => 'Menü Düğmesi Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
 						'cta_url'    => array( 'label' => 'Menü Düğmesi Adresi', 'type' => 'url', 'default' => '/iletisim/' ),
 					),

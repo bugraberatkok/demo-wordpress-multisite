@@ -10,7 +10,7 @@
  * Metinler woodkocist.com.tr'nin kendi sayfalarindan (25 Eylul 2026): ana sayfa,
  * Sirketimiz, Cozum Merkezi (/iletisim/), Ozel Uretim, SSS ve odeme adimi.
  * Iletisim: sitenin kendi /iletisim/ sayfasi (WhatsApp 0549 648 19 19, kurumsal
- * hat 0212 648 19 19, info@woodkocist.com.tr). Adres ve "50 yil" butun
+ * hat 0212 648 19 19, info@kocist.com.tr). Adres ve "50 yil" butun
  * sitelerde ayni (kullanici karari, 25 Eylul 2026): Kestanelik ... 2125/1.
  *
  * Yasal ve kurumsal metinler (KVKK, mesafeli satis...) WordPress sayfasidir:
@@ -120,7 +120,7 @@ return array(
 		'legal_name'  => '',
 		'description' => 'Ahşap bahçe mobilyası, ev ürünleri ve evcil hayvan yuvaları: Adirondack sandalye, çardak, kamelya, piknik masası, şezlong, kedi yuvası ve köpek kulübesi. Koçist Orman Ürünleri markası.',
 		'phone'       => '+90 212 648 19 19',
-		'email'       => 'info@woodkocist.com.tr',
+		'email'       => 'info@kocist.com.tr',
 		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
 		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',
@@ -175,9 +175,11 @@ return array(
 						),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => 'https://wa.me/905496481919' ),
 						'whatsapp_label' => array( 'label' => 'WhatsApp Numarası (görünen)', 'type' => 'text', 'default' => '0549 648 19 19' ),
+						'whatsapp_text'  => array( 'label' => 'WhatsApp hazır mesajı (genel)', 'type' => 'text', 'default' => 'Merhaba, WOOD Koçist ürünleri hakkında bilgi almak istiyorum.', 'hint' => 'Ürün dışındaki WhatsApp düğmelerinde mesaj kutusuna hazır gelir.' ),
+						'whatsapp_product_text' => array( 'label' => 'WhatsApp hazır mesajı (ürün sayfası)', 'type' => 'text', 'default' => 'Merhaba, {urun} ({kategori}) hakkında bilgi almak istiyorum. Ürün kodu: {kod} {url}', 'hint' => '{urun} ürün adı, {kategori} kategorisi, {kod} ürün kodu, {url} ürün sayfasının adresidir; silmeyin.' ),
 						'phone_label'    => array( 'label' => 'Kurumsal Telefon (boşsa gizlenir)', 'type' => 'text', 'default' => '0212 648 19 19' ),
 						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => 'tel:+902126481919' ),
-						'email'          => array( 'label' => 'E-posta (boşsa gizlenir)', 'type' => 'text', 'default' => 'info@woodkocist.com.tr' ),
+						'email'          => array( 'label' => 'E-posta (boşsa gizlenir)', 'type' => 'text', 'default' => 'info@kocist.com.tr' ),
 						'custom_label'   => array( 'label' => 'Özel Üretim düğmesi (üst menü)', 'type' => 'text', 'default' => 'Özel Üretim' ),
 						'mega_all'       => array( 'label' => 'Ürün menüsü: tüm ürünler bağlantısı', 'type' => 'text', 'default' => 'Tüm ürünleri görüntüle' ),
 						'search_label'   => array( 'label' => 'Arama kutusu etiketi (ekran okuyucu)', 'type' => 'text', 'default' => 'Ürün adı ya da kodu' ),
@@ -363,6 +365,8 @@ return array(
 						'choose'          => array( 'label' => 'Liste: boş seçenek', 'type' => 'text', 'default' => 'Seçin' ),
 						'product_label'   => array( 'label' => 'Alan: ürün (Çözüm Merkezi)', 'type' => 'text', 'default' => 'Ürün' ),
 						'product_none'    => array( 'label' => 'Alan: ürün, boş seçenek', 'type' => 'text', 'default' => 'Belirli bir ürün değil' ),
+						'prefill_contact' => array( 'label' => 'Üründen gelince mesaj alanına hazır yazı (Çözüm Merkezi)', 'type' => 'text', 'default' => '{urun} ({kategori}) için fiyat teklifi almak istiyorum. Ürün kodu: {kod}', 'hint' => 'Ürün sayfasındaki form düğmesiyle gelinince yazılır. {urun}, {kategori}, {kod}, {url} ürünün bilgileridir.' ),
+						'prefill_custom'  => array( 'label' => 'Üründen gelince mesaj alanına hazır yazı (Özel Üretim)', 'type' => 'text', 'default' => '{urun} ({kategori}, ürün kodu {kod}) ürününü farklı ölçüde istiyorum. İstediğim ölçüler:', 'hint' => 'Ürün sayfasındaki "Özel üretim isteyin" bağlantısıyla gelinince yazılır. {urun}, {kategori}, {kod}, {url} ürünün bilgileridir.' ),
 						'file_label'      => array( 'label' => 'Alan: dosya (Özel Üretim)', 'type' => 'text', 'default' => 'Teknik çizim ya da referans görsel' ),
 						'file_help'       => array( 'label' => 'Alan: dosya açıklaması', 'type' => 'text', 'default' => 'En fazla 5 MB. PDF, JPG, PNG ya da DWG.' ),
 						'consent'         => array( 'label' => 'KVKK onayı', 'type' => 'text', 'default' => '{kvkk}’ni okudum; kişisel verilerimin bu talep için işlenmesini kabul ediyorum.', 'hint' => '{kvkk} aşağıdaki bağlantı yazısıdır; silmeyin.' ),

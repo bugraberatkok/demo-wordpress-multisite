@@ -14,7 +14,6 @@ defined( 'ABSPATH' ) || exit;
 
 $items      = kocist_home_products( 'latest', (int) nwcs_field( 'home', 'latest', 'count' ) ?: 8 );
 $link_label = nwcs_field( 'home', 'latest', 'link_label' );
-$quote_url  = kocist_link( '#teklif' );
 $groups     = kocist_catalog_groups();
 
 if ( ! $items ) {
@@ -47,7 +46,7 @@ if ( ! $items ) {
 			$spec     = kocist_product_first_spec( $item );
 			?>
 			<li class="k-latest__item">
-				<a class="k-latest__card" href="<?php echo esc_url( $has_page ? $item['url'] : $quote_url ); ?>" draggable="false">
+				<a class="k-latest__card" href="<?php echo esc_url( $has_page ? $item['url'] : kocist_quote_url( $item ) ); ?>" draggable="false">
 					<span class="k-latest__media" <?php kocist_product_attr( $item, 'Görsel' ); ?>>
 						<?php echo kocist_image_tag( kocist_product_image( $item ), 'k-latest__img', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					</span>

@@ -21,7 +21,7 @@ $lines = array(
 		}
 		?>
 		<li>
-			<a href="<?php echo esc_url( ip_link( $url ) ); ?>"
+			<a href="<?php echo esc_url( 'whatsapp' === $line['key'] ? ip_whatsapp_url( $url ) : ip_link( $url ) ); ?>"
 				<?php echo $line['external'] ? 'target="_blank" rel="noopener"' : ''; ?>
 				class="group inline-flex items-center gap-3 py-1.5 text-ink no-underline"
 				<?php nwcs_edit_attr( 'contact', 'details', $line['key'] . '_label' ); ?>>

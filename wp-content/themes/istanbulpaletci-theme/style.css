@@ -11,3 +11,13 @@ Text Domain: istanbulpaletci
 
 /* Gorunum kurallarinin tamami assets/tailwind.css icindedir.
    Bu dosya yalnizca tema basligini tasir. */
+
+/* Urun sayfasi: galeri kolonu genisler (onceki 1.1fr/0.9fr gorseli kucuk
+   birakiyordu); mobilde buyuk gorsel kenar boslugunun bir kismina tasar.
+   Katmansiz kural, Tailwind'in lg:grid-cols-* sinifini ezer. */
+@media (min-width: 64rem) {
+	.ip-product-layout { grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.85fr); column-gap: 3.5rem; }
+}
+@media (max-width: 39.99rem) {
+	.ip-product-shot { width: calc(100% + 1.5rem); margin-inline: -0.75rem; }
+}

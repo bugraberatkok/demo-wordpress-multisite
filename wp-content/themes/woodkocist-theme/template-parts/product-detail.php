@@ -22,7 +22,9 @@ foreach ( wk_products() as $candidate ) {
 $image   = wk_image( $product );
 $specs   = wk_specs( (string) $product['spec'] );
 $wa      = wk_whatsapp( wk_order_text( $product ) );
-$contact = add_query_arg( 'urun', rawurlencode( trim( $product['code'] . ' ' . $product['title'] ) ), wk_page_url( 'iletisim' ) ) . '#talep';
+// Formlar ?urun=<havuz no> ile acilir; urun sunucuda cozulur ve form dolu gelir.
+$contact = add_query_arg( 'urun', (int) $product['id'], wk_page_url( 'iletisim' ) ) . '#talep';
+$custom  = add_query_arg( 'urun', (int) $product['id'], wk_page_url( 'ozel-uretim-talep-formu' ) ) . '#talep';
 $place   = wk_product_place( $product );
 $group   = $place['child'] ?? $place['line'];
 $buy     = wk_can_buy( $product );
@@ -62,7 +64,11 @@ get_header();
 <article class="wk-wrap wk-product">
 	<div class="wk-product__media" <?php wk_product_src( $product, 'Görsel' ); ?>>
 		<?php if ( $image['url'] ) : ?>
-			<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ?: $product['title'] ); ?>" fetchpriority="high" />
+			<?php $large = wk_image_large( $image ); ?>
+			<img src="<?php echo esc_url( $large['src'] ); ?>"
+				<?php if ( $large['srcset'] ) : ?>srcset="<?php echo esc_attr( $large['srcset'] ); ?>" sizes="(min-width: 1280px) 700px, (min-width: 960px) 56vw, calc(100vw - 2rem)"<?php endif; ?>
+				<?php if ( $large['width'] && $large['height'] ) : ?>width="<?php echo (int) $large['width']; ?>" height="<?php echo (int) $large['height']; ?>"<?php endif; ?>
+				alt="<?php echo esc_attr( $image['alt'] ?: $product['title'] ); ?>" fetchpriority="high" decoding="async" />
 		<?php else : ?>
 			<span class="wk-plate wk-plate--lg" aria-hidden="true"><?php echo esc_html( $product['code'] ); ?></span>
 		<?php endif; ?>
@@ -100,7 +106,7 @@ get_header();
 			<?php endif; ?>
 			<ul class="wk-assure">
 				<li <?php nwcs_edit_attr( 'global', 'shop', 'shipping_note' ); ?>><?php echo wk_icon( 'truck' ); // phpcs:ignore WordPress.Security.EscapingOutput ?> <?php echo esc_html( nwcs_field( 'global', 'shop', 'shipping_note' ) ); ?></li>
-				<li <?php nwcs_edit_attr( 'product', 'labels', 'custom_question' ); ?>><?php echo wk_icon( 'ruler' ); // phpcs:ignore WordPress.Security.EscapingOutput ?> <?php echo esc_html( nwcs_field( 'product', 'labels', 'custom_question' ) ); ?> <a href="<?php echo esc_url( wk_page_url( 'ozel-uretim-talep-formu' ) ); ?>" <?php nwcs_edit_attr( 'product', 'labels', 'custom_link' ); ?>><?php echo esc_html( nwcs_field( 'product', 'labels', 'custom_link' ) ); ?></a></li>
+				<li <?php nwcs_edit_attr( 'product', 'labels', 'custom_question' ); ?>><?php echo wk_icon( 'ruler' ); // phpcs:ignore WordPress.Security.EscapingOutput ?> <?php echo esc_html( nwcs_field( 'product', 'labels', 'custom_question' ) ); ?> <a href="<?php echo esc_url( $custom ); ?>" <?php nwcs_edit_attr( 'product', 'labels', 'custom_link' ); ?>><?php echo esc_html( nwcs_field( 'product', 'labels', 'custom_link' ) ); ?></a></li>
 			</ul>
 		</div>
 

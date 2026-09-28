@@ -94,7 +94,21 @@ $features   = nwcs_rows( 'product', 'main', 'features' );
 				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'cta_url' ) ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'cta_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'cta_label' ) ); ?>
 				</a>
-				<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'secondary_url' ) ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'secondary_label' ); ?>>
+				<?php
+				// WhatsApp ise ornek urunun adi ve kategorisiyle hazir mesaj (inc/quote.php).
+				$wa_panel = (string) nwcs_field( 'product', 'main', 'secondary_url' );
+				$wa_href  = kocist_is_whatsapp_url( $wa_panel )
+					? kocist_product_wa_url(
+						array(
+							'name'     => (string) nwcs_field( 'product', 'main', 'title' ),
+							'category' => (string) nwcs_field( 'product', 'main', 'category' ),
+							'url'      => home_url( '/urun/' ),
+						),
+						$wa_panel
+					)
+					: kocist_link( $wa_panel );
+				?>
+				<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( $wa_href ); ?>"<?php echo kocist_is_whatsapp_url( $wa_href ) ? ' target="_blank" rel="noopener"' : ''; ?><?php nwcs_edit_attr( 'product', 'main', 'secondary_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'secondary_label' ) ); ?>
 				</a>
 			</div>

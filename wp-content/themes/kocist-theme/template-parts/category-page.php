@@ -183,7 +183,7 @@ else :
 					<?php foreach ( $products as $product ) : ?>
 						<?php
 						$has_page = '' !== trim( (string) $product['body'] );
-						$href     = $has_page ? $product['url'] : $quote_url;
+						$href     = $has_page ? $product['url'] : kocist_quote_url( $product );
 						$sub_name = $group['subs'][ $product['sub'] ]['name'] ?? '';
 						?>
 						<li class="k-pcard">

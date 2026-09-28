@@ -1,8 +1,8 @@
 <?php
 /**
  * Talep formu (Cozum Merkezi ve Ozel Uretim). Isleyici: inc/requests.php.
- * $args['kind']: 'iletisim' | 'ozel'. Urun sayfasindan ?urun=<kod ad> ile
- * gelinirse urun secili gelir.
+ * $args['kind']: 'iletisim' | 'ozel'. Urun sayfasindan ?urun=<havuz no> ile
+ * gelinirse urun secili, mesaj alani urun bilgisiyle dolu gelir.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,7 +18,15 @@ $state = wk_request_state();
 
 $errors   = $state['errors'];
 $values   = $state['values'];
-$selected = $values['product'] ?? ( isset( $_GET['urun'] ) ? sanitize_text_field( wp_unslash( $_GET['urun'] ) ) : '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+// ?urun=<havuz no>: yalnizca sitedeki bir urune cozulur (adres cubugundaki
+// yazi forma basilmaz). Urun secili, mesaj alani urun bilgisiyle dolu gelir;
+// gonderim hatasinda ziyaretcinin yazdiklari korunur.
+$from_product = isset( $_GET['urun'] ) ? wk_product_by_ref( sanitize_text_field( wp_unslash( $_GET['urun'] ) ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$selected     = $values['product'] ?? ( $from_product ? trim( $from_product['code'] . ' ' . $from_product['title'] ) : '' );
+
+if ( $from_product && ! isset( $values['message'] ) ) {
+	$values['message'] = wk_product_text( 'global', 'forms', 'ozel' === $kind ? 'prefill_custom' : 'prefill_contact', $from_product );
+}
 
 $describe = static function ( string $key ) use ( $errors ): string {
 	return isset( $errors[ $key ] ) ? 'aria-invalid="true" aria-describedby="wk-' . esc_attr( $key ) . '-err"' : '';
@@ -100,6 +108,8 @@ $input = static function ( string $key, string $label_field, string $type = 'tex
 						<?php endforeach; ?>
 					</select>
 				</div>
+			<?php elseif ( '' !== $selected ) : ?>
+				<input type="hidden" name="wk_product" value="<?php echo esc_attr( $selected ); ?>" />
 			<?php endif; ?>
 
 			<div class="wk-field wk-field--wide">

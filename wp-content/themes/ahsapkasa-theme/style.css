@@ -11,3 +11,17 @@ Text Domain: ahsapkasa
 
 /* Gorunum kurallarinin tamami assets/tailwind.css icindedir.
    Bu dosya yalnizca tema basligini tasir. */
+
+/* Urun kartlari (Hizmetlerimiz): gorsel buyudu. Mobilde ince serit yerine
+   kareye yakin; genis ekranda kart uzar ve gorsel kartin yarisindan fazlasini
+   alir. Katmansiz kural, Tailwind siniflarini (h-56, sm:w-[50%]) ezer. */
+@media (max-width: 39.99rem) {
+	.product-card__shot { height: auto; aspect-ratio: 1 / 1; max-height: 26rem; }
+}
+@media (min-width: 40rem) {
+	.product-card { min-height: 22rem; }
+}
+@media (min-width: 64rem) {
+	.product-card { min-height: 30rem; }
+	.product-card__shot { width: 56%; }
+}

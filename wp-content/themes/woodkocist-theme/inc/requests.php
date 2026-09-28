@@ -47,6 +47,13 @@ add_filter(
 	}
 );
 
+// Siparis ve talep bildirimleri her sitede ortak adrese gider; paneldeki SEO
+// firma e-postasindan bagimsiz.
+add_filter( 'nwcs_form_recipient', 'wk_form_recipient' );
+function wk_form_recipient(): string {
+	return 'info@kocist.com.tr';
+}
+
 /**
  * Form turleri: alanlar, secenekler ve dugme metni. Gorunen yazilar panelden:
  * Cozum Merkezi -> Form Alanlari (contact.request), Ozel Uretim -> Form

@@ -26,11 +26,12 @@ $whatsapp = kr_whatsapp_url();
 				</ol>
 			</nav>
 
-			<div class="mt-6 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
+			<?php // Sutun orani functions.php'de (.kr-product-top): galeri genis. ?>
+			<div class="kr-product-top mt-6 grid gap-10 lg:gap-14">
 
 				<div data-kr-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>" <?php nwcs_edit_attr( $key, 'detail', 'gallery' ); ?>>
 					<?php if ( $gallery ) : ?>
-						<button type="button" data-kr-open="0" data-kr-main class="group shot relative block aspect-[16/9] w-full cursor-zoom-in"
+						<button type="button" data-kr-open="0" data-kr-main class="group shot relative block aspect-[4/3] w-full cursor-zoom-in"
 							aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $product['name'] ) ); ?>">
 							<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>" alt="<?php echo esc_attr( $gallery[0]['alt'] ); ?>" fetchpriority="high" decoding="async" data-kr-main-image />
 							<span class="absolute bottom-3 right-3 bg-ink/80 px-2.5 py-1.5 text-sm font-semibold text-paper" aria-hidden="true" <?php nwcs_edit_attr( 'products', 'shared', 'zoom_label' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'zoom_label' ) ); ?></span>
@@ -50,7 +51,7 @@ $whatsapp = kr_whatsapp_url();
 							</ul>
 						<?php endif; ?>
 					<?php else : ?>
-						<?php echo kr_image_tag( array(), 'aspect-[16/9] w-full', 'Görsel eklenmedi' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+						<?php echo kr_image_tag( array(), 'aspect-[4/3] w-full', 'Görsel eklenmedi' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					<?php endif; ?>
 				</div>
 

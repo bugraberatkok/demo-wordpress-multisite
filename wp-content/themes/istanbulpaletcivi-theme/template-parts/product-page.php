@@ -21,11 +21,15 @@ if ( ! $product ) {
 
 $hub      = pc_manifest()['pages']['products'] ?? array();
 $phone    = pc_phone();
-$wa       = pc_whatsapp( sprintf( '%s hakkında fiyat almak istiyorum.', $product['name'] ) );
+$wa       = pc_whatsapp_product( $product );
 $uses     = nwcs_rows( $key, 'detail', 'uses' );
 $contact  = pc_link( pc_manifest()['pages']['contact']['path'] ?? '/iletisim/' );
 $quote    = add_query_arg( 'urun', rawurlencode( $product['name'] ), $contact ) . '#siparis';
 $others   = array_diff_key( $products, array( $key => true ) );
+
+// Urun sayfasindaki buyuk gorsel genis kolonu 2x ekranda da net doldursun:
+// 1536 boy (yoksa asil dosya). Kartlar 'large' ile kalir.
+$hero_img = pc_img( nwcs_image( $key, 'card', 'image', '1536x1536' ), PC_PRODUCT_IMAGES[ $key ] ?? '', $product['name'] );
 
 pc_part(
 	'page-head',
@@ -43,8 +47,8 @@ pc_part(
 	<div class="pc-wrap pc-product">
 		<div class="pc-product__main">
 			<figure class="pc-product__figure" <?php nwcs_edit_attr( $key, 'card', 'image' ); ?>>
-				<?php echo pc_img_tag( $product['image'], 'pc-product__img', true ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
-				<?php if ( $product['image']['sample'] ) : ?>
+				<?php echo pc_img_tag( $hero_img, 'pc-product__img', true ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+				<?php if ( $hero_img['sample'] ) : ?>
 					<span class="pc-sample"><?php echo esc_html( nwcs_field( 'global', 'common', 'sample_note' ) ); ?></span>
 				<?php endif; ?>
 			</figure>

@@ -459,6 +459,7 @@ $manifest_data = array(
 					'fields' => array(
 						'image_soon' => array( 'label' => 'Görseli Olmayan Alandaki Yazı', 'type' => 'text', 'default' => 'Görsel yakında' ),
 						'home_crumb' => array( 'label' => 'Yol Göstergesi: Ana Sayfa', 'type' => 'text', 'default' => 'Ana Sayfa' ),
+						'wa_message' => array( 'label' => 'WhatsApp Hazır Mesajı (genel düğmeler)', 'type' => 'textarea', 'default' => 'Merhaba, Koçist web sitesinden ulaşıyorum. Bilgi almak istiyorum.', 'hint' => 'Mesajı yazılmamış her WhatsApp bağlantısında (footer, iletişim sayfası) sohbet bu metinle açılır. Ürünlerden açılan WhatsApp mesajı Ürün Sayfaları › WhatsApp ve Teklif bölümündedir.' ),
 					),
 				),
 
@@ -1272,6 +1273,27 @@ $manifest_data = array(
 					),
 				),
 
+				/*
+				 * Urunden acilan WhatsApp ve teklif formu (inc/quote.php).
+				 * Numara urunun grubuna gore secilir (sabit grup anahtari).
+				 * {urun} urun adi, {kategori} kategori adi, {url} urun sayfasi,
+				 * {ozellik} urunun ozellik/olcu metni olur; degeri bos olan
+				 * satir mesajdan atilir.
+				 */
+				'whatsapp' => array(
+					'label'  => 'WhatsApp ve Teklif (ürünlerden)',
+					'fields' => array(
+						'wa_kereste'    => array( 'label' => 'WhatsApp Numarası: Kereste ürünleri', 'type' => 'text', 'default' => '0532 374 98 32' ),
+						'wa_ambalaj'    => array( 'label' => 'WhatsApp Numarası: Ambalaj ürünleri', 'type' => 'text', 'default' => '0532 374 98 32' ),
+						'wa_hirdavat'   => array( 'label' => 'WhatsApp Numarası: Hırdavat ürünleri', 'type' => 'text', 'default' => '0532 374 98 32' ),
+						'wa_dekorasyon' => array( 'label' => 'WhatsApp Numarası: Dekorasyon ürünleri', 'type' => 'text', 'default' => '0549 648 19 19' ),
+						'product_msg'   => array( 'label' => 'Üründen WhatsApp Mesajı — {urun}, {kategori}, {url}, {ozellik}', 'type' => 'textarea', 'default' => 'Merhaba, {urun} ({kategori}) hakkında bilgi almak istiyorum. {url}' ),
+						'quote_subject' => array( 'label' => 'Teklif Formu Konusu (üründen gelince) — {urun}, {kategori}', 'type' => 'text', 'default' => '{urun} ({kategori})' ),
+						'quote_msg'     => array( 'label' => 'Teklif Formu Mesajı (üründen gelince) — {urun}, {kategori}, {url}, {ozellik}', 'type' => 'textarea', 'default' => "Merhaba, {urun} ({kategori}) için fiyat teklifi almak istiyorum.\nÖzellik: {ozellik}\nÖlçü ve adet: " ),
+						'quote_label'   => array( 'label' => 'Teklif Formunda Seçilen Ürün Yazısı', 'type' => 'text', 'default' => 'Teklif istediğiniz ürün' ),
+					),
+				),
+
 				'specs' => array(
 					'label'  => 'Teknik Özellikler (yalnızca örnek ürün)',
 					'fields' => array(
@@ -1397,7 +1419,8 @@ $manifest_data = array(
 					'fields' => array(
 						'title'        => array( 'label' => 'Form Başlığı', 'type' => 'text', 'default' => 'Teklif ve bilgi talebi' ),
 						'text'         => array( 'label' => 'Form Açıklaması', 'type' => 'textarea', 'default' => 'Aradığınız ürünü ve ölçüleri yazın; en kısa sürede dönüş yapalım.' ),
-						'demo_notice'  => array( 'label' => 'Demo Uyarısı', 'type' => 'text', 'default' => 'Bu form demo amaçlıdır; gönderim yapılmaz. Lütfen telefon veya WhatsApp üzerinden ulaşın.' ),
+						'form_note'    => array( 'label' => 'Form Alt Notu', 'type' => 'text', 'default' => 'Bilgileriniz yalnızca talebinize dönüş için kullanılır.' ),
+						'success_msg'  => array( 'label' => 'Gönderim Başarılı Mesajı', 'type' => 'text', 'default' => 'Talebiniz bize ulaştı. En kısa sürede size dönüş yapacağız.' ),
 						'name_label'    => array( 'label' => 'Ad Soyad Etiketi', 'type' => 'text', 'default' => 'Ad Soyad' ),
 						'name_ph'       => array( 'label' => 'Ad Soyad İpucu', 'type' => 'text', 'default' => 'Adınız ve soyadınız' ),
 						'phone_label'   => array( 'label' => 'Telefon Etiketi', 'type' => 'text', 'default' => 'Telefon' ),
@@ -1417,7 +1440,7 @@ $manifest_data = array(
 					'fields' => array(
 						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Tesisimiz' ),
 						'query'      => array( 'label' => 'Harita Konumu (adres olarak yazın)', 'type' => 'text', 'default' => 'Kestanelik Mahallesi, Çatalca, İstanbul' ),
-						'coords'     => array( 'label' => 'Koordinat (enlem,boylam — doldurulursa adres yerine bu kullanılır)', 'type' => 'text', 'default' => '' ),
+						'coords'     => array( 'label' => 'Koordinat (enlem,boylam — doldurulursa adres yerine bu kullanılır)', 'type' => 'text', 'default' => '41.2311136,28.5012366' ), // KOÇİST Kereste, Orman Ürünleri ve İnşaat Malzemeleri
 						'link_label' => array( 'label' => 'Yol Tarifi Buton Metni', 'type' => 'text', 'default' => 'Yol tarifi al' ),
 					),
 				),

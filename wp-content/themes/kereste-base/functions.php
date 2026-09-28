@@ -74,6 +74,10 @@ function kr_assets(): void {
 
 		// Buyutulen gorselin altindaki yazi sayfanin ustunde okunsun: perde koyu.
 		wp_add_inline_style( 'kr-tailwind', '.kr-lightbox::backdrop{background:color-mix(in srgb,var(--color-ink) 92%,transparent)}' );
+
+		// Urun galerisi genis sutunda: gorsel buyuk, sagda baslik ve dugmeler.
+		// (Tailwind derlemesi tema disinda; bu tek kural burada.)
+		wp_add_inline_style( 'kr-tailwind', '@media (min-width:64rem){.kr-product-top{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}}' );
 	}
 
 	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', $site_deps, $ver( 'assets/site.js' ), true );
@@ -115,7 +119,37 @@ function kr_link( $url ): string {
 		return home_url( $url );
 	}
 
-	return $url;
+	return kr_whatsapp_message( $url );
+}
+
+/**
+ * WhatsApp baglantisina hazir mesaj ekler (wa.me/<numara>?text=...).
+ *
+ * Numara panelde yazildigi gibi kalir; yalnizca mesaj eklenir. Panelde
+ * yazilan baglantida zaten mesaj (text=) varsa dokunulmaz. Urun sayfasinda
+ * mesaj urunun adini ve adresini tasir (ustteki ve urun sayfasindaki
+ * WhatsApp dugmeleri); diger sayfalarda genel selam.
+ */
+function kr_whatsapp_message( string $url ): string {
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+
+	if ( ! in_array( $host, array( 'wa.me', 'api.whatsapp.com', 'whatsapp.com', 'www.whatsapp.com' ), true ) ) {
+		return $url;
+	}
+
+	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+	if ( '' !== trim( (string) ( $query['text'] ?? '' ) ) ) {
+		return $url;
+	}
+
+	$key     = kr_current_product_key();
+	$product = '' !== $key ? kr_products()[ $key ] : array();
+	$text    = $product
+		? sprintf( 'Merhaba, %s hakkında bilgi almak istiyorum. %s', $product['name'], kr_link( $product['path'] ) )
+		: 'Merhaba, web sitenizden yazıyorum. Bilgi almak istiyorum.';
+
+	return add_query_arg( 'text', rawurlencode( $text ), remove_query_arg( 'text', $url ) );
 }
 
 function kr_request_path(): string {
@@ -305,7 +339,9 @@ function kr_product_gallery( string $key ): array {
 	$name    = (string) nwcs_field( $key, 'card', 'name' );
 
 	foreach ( array_unique( array_filter( $ids ) ) as $id ) {
-		$large = nwcs_image_by_id( $id, 'large' );
+		// Ana gorsel genis sutunda (~700px, retina ekranda iki kati): 1536px
+		// boyu; yoksa WordPress tam boyu verir.
+		$large = nwcs_image_by_id( $id, '1536x1536' );
 
 		if ( '' !== $large['url'] ) {
 			$gallery[] = array(
@@ -379,6 +415,13 @@ function kr_quote_redirect( string $redirect, array $state ): void {
 	set_transient( 'kr_quote_' . $token, $state, 10 * MINUTE_IN_SECONDS );
 	wp_safe_redirect( add_query_arg( 'teklif', $token, $redirect ) . '#teklif' );
 	exit;
+}
+
+// Bildirim e-postasi (Network Content Studio, includes/forms.php) her sitede
+// ortak adrese gider; paneldeki SEO firma e-postasindan bagimsiz.
+add_filter( 'nwcs_form_recipient', 'kr_form_recipient' );
+function kr_form_recipient(): string {
+	return 'info@kocist.com.tr';
 }
 
 add_action( 'admin_post_kr_quote', 'kr_handle_quote' );

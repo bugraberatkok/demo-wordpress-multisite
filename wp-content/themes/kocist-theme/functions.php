@@ -43,6 +43,8 @@ if ( ! function_exists( 'nwcs_field' ) ) {
 require_once __DIR__ . '/inc/blog.php';
 require_once __DIR__ . '/inc/catalog.php';
 require_once __DIR__ . '/inc/katalog.php';
+require_once __DIR__ . '/inc/quote.php';
+require_once __DIR__ . '/inc/form.php';
 
 add_action( 'after_setup_theme', 'kocist_setup' );
 function kocist_setup(): void {
@@ -277,7 +279,7 @@ function kocist_assets(): void {
 		);
 	}
 
-	// Iletisim sayfasi varliklari yalnizca o sayfada. Betik yok: form demo,
+	// Iletisim sayfasi varliklari yalnizca o sayfada. Betik yok: form duz POST,
 	// harita kendi iframe'i icinde calisiyor.
 	if ( is_page( 'iletisim' ) ) {
 		wp_enqueue_style(
@@ -748,6 +750,11 @@ function kocist_link( $url, string $fallback = '' ): string {
 		return home_url( $url );
 	}
 
+	// Mesajsiz WhatsApp baglantisi ortak varsayilan mesaji alir (inc/quote.php).
+	if ( function_exists( 'kocist_is_whatsapp_url' ) && kocist_is_whatsapp_url( $url ) ) {
+		return kocist_wa_with_text( $url, kocist_wa_default_message() );
+	}
+
 	return $url;
 }
 
@@ -1017,6 +1024,49 @@ function kocist_render_product_table( array $table, array $product ): void {
 }
 
 /**
+ * Havuz gorselinin buyuk hali. Havuz urunleri 768 px'lik (medium_large)
+ * kopyayla gelir; detay sayfasinda buyuk sahnede bulaniklasmasin diye
+ * 'large' kopyasi, srcset ve buyutme icin tam boy adresi eklenir.
+ * Gorsel havuz sitesinin medyasindadir; bulunamazsa gelen deger aynen doner.
+ *
+ * @return array{id:int, url:string, alt:string, full:string, thumb:string, srcset:string}
+ */
+function kocist_pool_image_large( array $image, string $size = 'large' ): array {
+	$image['full']   = (string) ( $image['url'] ?? '' );
+	$image['thumb']  = (string) ( $image['url'] ?? '' );
+	$image['srcset'] = '';
+	$id              = (int) ( $image['id'] ?? 0 );
+
+	if ( $id <= 0 || ! function_exists( 'nwcs_pool_blog_id' ) || kocist_is_placeholder_image( $image ) ) {
+		return $image;
+	}
+
+	$switched = (int) nwcs_pool_blog_id() !== get_current_blog_id();
+
+	if ( $switched ) {
+		switch_to_blog( (int) nwcs_pool_blog_id() );
+	}
+
+	$large = wp_get_attachment_image_src( $id, $size );
+	$full  = wp_get_attachment_image_src( $id, 'full' );
+
+	if ( $large ) {
+		$image['url']    = $large[0];
+		$image['srcset'] = (string) wp_get_attachment_image_srcset( $id, $size );
+	}
+
+	if ( $full ) {
+		$image['full'] = $full[0];
+	}
+
+	if ( $switched ) {
+		restore_current_blog();
+	}
+
+	return $image;
+}
+
+/**
  * Urun galerisindeki "buyut" dugmesi: gorselin tamamini kaplar, tiklaninca
  * assets/js/lightbox.js gorseli tam boyutta acar. Gorsel yoksa (yer tutucu)
  * ya da panel onizlemesindeyse cizilmez: onizlemede gorsele tiklamak alani
@@ -1031,7 +1081,7 @@ function kocist_zoom_button( array $image ): void {
 		return;
 	}
 	?>
-	<button type="button" class="k-zoom" data-k-zoom data-full="<?php echo esc_url( $image['url'] ); ?>" data-alt="<?php echo esc_attr( $image['alt'] ?? '' ); ?>">
+	<button type="button" class="k-zoom" data-k-zoom data-full="<?php echo esc_url( ! empty( $image['full'] ) ? $image['full'] : $image['url'] ); ?>" data-alt="<?php echo esc_attr( $image['alt'] ?? '' ); ?>">
 		<span class="screen-reader-text">Görseli büyüt</span>
 		<span class="k-zoom__badge" aria-hidden="true">
 			<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">

@@ -36,7 +36,7 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 		</ol>
 	</nav>
 
-	<div class="mx-auto grid max-w-[80rem] gap-10 px-5 pt-6 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:grid-rows-[auto_1fr_auto] lg:gap-x-16 lg:gap-y-10">
+	<div class="ip-product-layout mx-auto grid max-w-[80rem] gap-10 px-5 pt-6 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:grid-rows-[auto_1fr_auto] lg:gap-x-16 lg:gap-y-10">
 
 		<header class="lg:col-start-2 lg:row-start-1">
 			<h1 class="text-[3rem] font-bold leading-[0.95] md:text-[4rem]" <?php nwcs_edit_attr( $key, 'card', 'name' ); ?>>
@@ -51,7 +51,7 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 		<div class="lg:col-start-1 lg:row-span-2 lg:row-start-1" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>" data-product-gallery>
 			<?php if ( $gallery ) : ?>
 				<button type="button" data-lightbox-open="0" data-gallery-main
-					class="group sheet relative block w-full cursor-zoom-in p-2"
+					class="ip-product-shot group sheet relative block w-full cursor-zoom-in p-2"
 					aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $product['name'] ) ); ?>"
 					<?php nwcs_edit_attr( $key, 'detail', 'gallery' ); ?>>
 					<span class="shot block aspect-[4/3]">
@@ -112,7 +112,7 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 				</a>
 
 				<?php if ( $whatsapp ) : ?>
-					<a href="<?php echo esc_url( ip_link( $whatsapp ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full"
+					<a href="<?php echo esc_url( ip_whatsapp_url( $whatsapp, $product ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full"
 						<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
 						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 20 ); ?>
 						<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>

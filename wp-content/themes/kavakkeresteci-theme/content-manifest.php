@@ -31,7 +31,7 @@ return $build(
 			'email'        => 'info@kocist.com.tr',
 			'address'      => $address,
 			'hours'        => '08:00 – 19:00',
-			'map_url'      => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
+			'map_url'      => 'https://maps.app.goo.gl/goTd8wPiXnbDb8BY9', // KOÇİST Kereste, Orman Ürünleri ve İnşaat Malzemeleri
 		),
 
 		'footer_tagline' => 'Kavak kereste, çıta, ahşap takoz ve OSB levha. Ambalaj, palet ve mobilya üretimine uygun; toptan alımda Koçist Orman Ürünleri güvencesiyle.',

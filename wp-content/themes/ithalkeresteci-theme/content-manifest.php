@@ -30,7 +30,7 @@ return $build(
 			'email'        => 'info@kocist.com.tr',
 			'address'      => $address,
 			'hours'        => '08:00 – 19:00',
-			'map_url'      => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
+			'map_url'      => 'https://maps.app.goo.gl/goTd8wPiXnbDb8BY9', // KOÇİST Kereste, Orman Ürünleri ve İnşaat Malzemeleri
 		),
 
 		'footer_tagline' => 'İthal kereste, inşaatlık ve çatılık kereste, kalas ve plywood. Koçist Orman Ürünleri güvencesiyle, toptan alıma uygun.',

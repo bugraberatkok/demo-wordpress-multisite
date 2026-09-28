@@ -6,14 +6,16 @@
  * seridi, ardindan solda form sagda harita. Simetrik "kart listesi + form
  * karti" duzeninden kacinildi; agirlik banda ve haritaya verildi.
  *
- * Form bilincli olarak DEMO'dur: hicbir yere gonderilmez, kaydedilmez ve
- * "gonderildi" basarisi gosterilmez (paletci temasindaki teklif formuyla
- * ayni yaklasim). Gercek iletisim icin telefon, WhatsApp ve e-posta
- * baglantilari serit'te duruyor.
+ * Form gercek gonderim yapar (inc/form.php): kayit olarak saklanir, bildirim
+ * info@kocist.com.tr adresine gider. Hata olursa girilen degerler korunur.
  *
  * Harita gomme adresi panelden gelmiyor; panelde yalnizca konum METNI ya da
  * koordinat tutuluyor, adres burada kuruluyor. Boylece iframe kaynagi her
  * zaman google.com kalir.
+ *
+ * Yol tarifi isletmenin Google Haritalar kaydina gider: "KOÇİST Kereste, Orman
+ * Ürünleri ve İnşaat Malzemeleri" (ana kayit; ambalaj ve kamelya atolyeleri
+ * ayni tesiste, kendi sitelerinde).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -54,6 +56,21 @@ $coords = trim( (string) nwcs_field( 'contact', 'map', 'coords' ) );
  */
 $has_coords = (bool) preg_match( '/^-?\d{1,2}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?$/', $coords );
 $place      = $has_coords ? preg_replace( '/\s+/', '', $coords ) : $query;
+
+// Urunden "Teklif Al" ile gelindiyse (?urun=<slug>) konu ve mesaj o urunle dolar (inc/quote.php).
+$prefill = function_exists( 'kocist_quote_prefill' ) ? kocist_quote_prefill() : array( 'product' => null, 'context' => array(), 'subject' => '', 'message' => '' );
+
+// Gonderim sonrasi durum (inc/form.php). Hata varsa ziyaretcinin yazdiklari on dolgunun yerine gecer.
+$form_state  = function_exists( 'kocist_quote_state' ) ? kocist_quote_state() : array( 'errors' => array(), 'values' => array(), 'success' => false );
+$form_errors = $form_state['errors'];
+$form_value  = static function ( string $key, string $fallback = '' ) use ( $form_state ): string {
+	return array_key_exists( $key, $form_state['values'] ) ? (string) $form_state['values'][ $key ] : $fallback;
+};
+$form_error  = static function ( string $key ) use ( $form_errors ): void {
+	if ( ! empty( $form_errors[ $key ] ) ) {
+		echo '<span class="k-field__error" role="alert">' . esc_html( $form_errors[ $key ] ) . '</span>';
+	}
+};
 ?>
 <section class="k-contact" data-nwcs-section="head">
 
@@ -106,50 +123,91 @@ $place      = $has_coords ? preg_replace( '/\s+/', '', $coords ) : $query;
 
 		<div class="k-contact__grid">
 
-			<div class="k-contact__form-col" data-nwcs-section="form">
+			<div class="k-contact__form-col" id="teklif-formu" data-nwcs-section="form">
 				<h2 class="k-contact__h2" <?php nwcs_edit_attr( 'contact', 'form', 'title' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'title' ) ); ?></h2>
 				<p class="k-contact__lead" <?php nwcs_edit_attr( 'contact', 'form', 'text' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'text' ) ); ?></p>
 
-				<form class="k-contact__form" novalidate>
+				<?php if ( $prefill['product'] ) : ?>
+					<?php
+					$quote_ctx   = $prefill['context'];
+					$quote_image = kocist_product_image( $prefill['product'] );
+					?>
+					<div class="k-quote-item">
+						<span class="k-quote-item__media">
+							<?php echo kocist_image_tag( $quote_image, 'k-quote-item__img', '' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+						</span>
+						<span class="k-quote-item__body">
+							<span class="k-quote-item__label" <?php nwcs_edit_attr( 'product', 'whatsapp', 'quote_label' ); ?>><?php echo esc_html( nwcs_field( 'product', 'whatsapp', 'quote_label' ) ); ?></span>
+							<?php if ( '' !== $quote_ctx['url'] ) : ?>
+								<a class="k-quote-item__name" href="<?php echo esc_url( $quote_ctx['url'] ); ?>"><?php echo esc_html( $quote_ctx['name'] ); ?></a>
+							<?php else : ?>
+								<span class="k-quote-item__name"><?php echo esc_html( $quote_ctx['name'] ); ?></span>
+							<?php endif; ?>
+							<?php if ( '' !== $quote_ctx['category'] ) : ?>
+								<span class="k-quote-item__meta"><?php echo esc_html( $quote_ctx['category'] ); ?></span>
+							<?php endif; ?>
+						</span>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( $form_state['success'] ) : ?>
+					<div class="k-contact__notice k-contact__notice--ok" role="status" <?php nwcs_edit_attr( 'contact', 'form', 'success_msg' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'success_msg' ) ); ?></div>
+				<?php elseif ( ! empty( $form_errors['form'] ) ) : ?>
+					<div class="k-contact__notice k-contact__notice--err" role="alert"><?php echo esc_html( $form_errors['form'] ); ?></div>
+				<?php endif; ?>
+
+				<form class="k-contact__form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" novalidate>
+					<input type="hidden" name="action" value="kc_quote" />
+					<?php wp_nonce_field( 'kc_quote', 'kc_quote_nonce', false ); ?>
+					<?php if ( $prefill['product'] ) : ?>
+						<input type="hidden" name="kc_product" value="<?php echo esc_attr( (string) ( $prefill['product']['slug'] ?? '' ) ); ?>" />
+					<?php endif; ?>
+					<?php /* Bot tuzagi: ekranda gorunmez, insan doldurmaz. */ ?>
+					<div class="k-hp" aria-hidden="true">
+						<label for="kc-website">Web sitesi</label>
+						<input type="text" id="kc-website" name="kc_website" tabindex="-1" autocomplete="off" />
+					</div>
 					<div class="k-field">
 						<label for="kc-name" <?php nwcs_edit_attr( 'contact', 'form', 'name_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'name_label' ) ); ?></label>
-						<input type="text" id="kc-name" name="kc-name" autocomplete="name" <?php nwcs_edit_attr( 'contact', 'form', 'name_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'name_ph' ) ); ?>" />
+						<input type="text" id="kc-name" name="kc-name" autocomplete="name" <?php nwcs_edit_attr( 'contact', 'form', 'name_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'name_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'name' ) ); ?>" />
+						<?php $form_error( 'name' ); ?>
 					</div>
 
 					<div class="k-field">
 						<label for="kc-phone" <?php nwcs_edit_attr( 'contact', 'form', 'phone_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'phone_label' ) ); ?></label>
-						<input type="tel" id="kc-phone" name="kc-phone" autocomplete="tel" <?php nwcs_edit_attr( 'contact', 'form', 'phone_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'phone_ph' ) ); ?>" />
+						<input type="tel" id="kc-phone" name="kc-phone" autocomplete="tel" <?php nwcs_edit_attr( 'contact', 'form', 'phone_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'phone_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'phone' ) ); ?>" />
+						<?php $form_error( 'phone' ); ?>
 					</div>
 
 					<div class="k-field">
 						<label for="kc-email" <?php nwcs_edit_attr( 'contact', 'form', 'email_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'email_label' ) ); ?></label>
-						<input type="email" id="kc-email" name="kc-email" autocomplete="email" <?php nwcs_edit_attr( 'contact', 'form', 'email_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'email_ph' ) ); ?>" />
+						<input type="email" id="kc-email" name="kc-email" autocomplete="email" <?php nwcs_edit_attr( 'contact', 'form', 'email_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'email_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'email' ) ); ?>" />
+						<?php $form_error( 'email' ); ?>
 					</div>
 
 					<div class="k-field">
 						<label for="kc-subject" <?php nwcs_edit_attr( 'contact', 'form', 'subject_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'subject_label' ) ); ?></label>
-						<input type="text" id="kc-subject" name="kc-subject" autocomplete="off" <?php nwcs_edit_attr( 'contact', 'form', 'subject_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'subject_ph' ) ); ?>" />
+						<input type="text" id="kc-subject" name="kc-subject" autocomplete="off" <?php nwcs_edit_attr( 'contact', 'form', 'subject_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'subject_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'subject', $prefill['subject'] ) ); ?>" />
 					</div>
 
 					<div class="k-field k-field--wide">
 						<label for="kc-detail" <?php nwcs_edit_attr( 'contact', 'form', 'detail_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'detail_label' ) ); ?></label>
-						<textarea id="kc-detail" name="kc-detail" rows="5" <?php nwcs_edit_attr( 'contact', 'form', 'detail_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'detail_ph' ) ); ?>"></textarea>
+						<textarea id="kc-detail" name="kc-detail" rows="5" <?php nwcs_edit_attr( 'contact', 'form', 'detail_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'detail_ph' ) ); ?>"><?php echo esc_textarea( $form_value( 'message', $prefill['message'] ) ); ?></textarea>
+						<?php $form_error( 'message' ); ?>
 					</div>
 
 					<div class="k-field k-field--wide k-contact__submit-row">
 						<?php
-						// Devre disi dugme (ve icindeki metin) tiklama almiyor; panel onizlemesinde
-						// metin tiklanabilsin diye yalnizca orada aria-disabled. Gorunum ayni
-						// (stil :disabled'a bagli degil), dugme type="button" oldugu icin bir sey yapmaz.
-						$submit_off = function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ? 'aria-disabled="true"' : 'disabled';
+						// Panel onizlemesinde gonderim yok: metin tiklanabilsin diye type="button".
+						$submit_type = function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ? 'button' : 'submit';
 						?>
-						<button type="button" class="k-contact__submit" <?php echo $submit_off; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit. ?>>
+						<button type="<?php echo esc_attr( $submit_type ); ?>" class="k-contact__submit">
 							<span <?php nwcs_edit_attr( 'contact', 'form', 'submit_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'submit_label' ) ); ?></span>
 						</button>
 
-						<span class="k-contact__demo" <?php nwcs_edit_attr( 'contact', 'form', 'demo_notice' ); ?>>
+						<span class="k-contact__demo" <?php nwcs_edit_attr( 'contact', 'form', 'form_note' ); ?>>
 							<?php nwcs_the_icon( 'shield', 'k-strip__icon', 15 ); ?>
-							<?php echo esc_html( nwcs_field( 'contact', 'form', 'demo_notice' ) ); ?>
+							<?php echo esc_html( nwcs_field( 'contact', 'form', 'form_note' ) ); ?>
 						</span>
 					</div>
 				</form>
@@ -174,7 +232,7 @@ $place      = $has_coords ? preg_replace( '/\s+/', '', $coords ) : $query;
 
 							<a
 								class="k-map__link"
-								href="<?php echo esc_url( 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $place ) ); ?>"
+								href="https://maps.app.goo.gl/goTd8wPiXnbDb8BY9"
 								target="_blank"
 								rel="noopener noreferrer"
 								<?php nwcs_edit_attr( 'contact', 'map', 'link_label' ); ?>

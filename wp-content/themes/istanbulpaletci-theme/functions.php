@@ -476,7 +476,9 @@ function ip_product_gallery( string $key ): array {
 	$name    = (string) nwcs_field( $key, 'card', 'name' );
 
 	foreach ( array_unique( array_filter( $ids ) ) as $id ) {
-		$large = nwcs_image_by_id( $id, 'large' );
+		// Buyuk gorsel genis kolonu 2x ekranda da net doldursun: 1536 boy
+		// (yoksa WordPress asil dosyayi verir). Kucukler orta boyda kalir.
+		$large = nwcs_image_by_id( $id, '1536x1536' );
 		$thumb = nwcs_image_by_id( $id, 'medium' );
 
 		if ( '' === $large['url'] ) {
@@ -500,6 +502,45 @@ function ip_quote_url( string $product_name ): string {
 	$base = ip_link( nwcs_field( 'products', 'shared', 'quote_url' ) );
 
 	return add_query_arg( 'urun', rawurlencode( $product_name ), $base ) . '#teklif';
+}
+
+/**
+ * WhatsApp baglantisina hazir mesaj ekler. Mesaj yalnizca wa.me /
+ * api.whatsapp.com adreslerine ve icinde zaten mesaj yoksa eklenir; panelde
+ * baska bir adres (ya da hazir ?text=) girildiyse dokunulmaz.
+ *
+ * Urun verilirse mesaj urun adini ve sayfa adresini tasir, verilmezse
+ * genel mesaj kullanilir. Iki metin de panelden degisir.
+ */
+function ip_whatsapp_url( $url, array $product = array() ): string {
+	$link = ip_link( $url );
+	$host = strtolower( (string) wp_parse_url( $link, PHP_URL_HOST ) );
+
+	if ( ! in_array( $host, array( 'wa.me', 'api.whatsapp.com', 'www.whatsapp.com', 'whatsapp.com' ), true ) ) {
+		return $link;
+	}
+
+	parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
+
+	if ( '' !== trim( (string) ( $query['text'] ?? '' ) ) ) {
+		return $link;
+	}
+
+	if ( ! empty( $product['name'] ) ) {
+		$text = strtr(
+			(string) nwcs_field( 'products', 'shared', 'whatsapp_message' ),
+			array( '{urun}' => $product['name'] )
+		);
+		$text = trim( $text . ' ' . ( $product['url'] ?? '' ) );
+	} else {
+		$text = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_message' ) );
+	}
+
+	if ( '' === $text ) {
+		return $link;
+	}
+
+	return add_query_arg( 'text', rawurlencode( $text ), $link );
 }
 
 /* ====================================================================== *
@@ -550,6 +591,13 @@ function ip_quote_redirect( string $redirect, string $token, array $state ): voi
 	set_transient( 'ip_quote_' . $token, $state, 10 * MINUTE_IN_SECONDS );
 	wp_safe_redirect( add_query_arg( 'ip', $token, $redirect ) . '#teklif' );
 	exit;
+}
+
+// Bildirim e-postasi (Network Content Studio, includes/forms.php) her sitede
+// ortak adrese gider; paneldeki SEO firma e-postasindan bagimsiz.
+add_filter( 'nwcs_form_recipient', 'ip_form_recipient' );
+function ip_form_recipient(): string {
+	return 'info@kocist.com.tr';
 }
 
 add_action( 'admin_post_ip_quote', 'ip_handle_quote' );

@@ -14,7 +14,13 @@ if ( ! $product ) {
 	return;
 }
 
-$image = ik_product_image( $product, 'large' );
+// Gorsel sayfa genisliginde (~1240px) basildigi icin 'large' (1024px) yetmez;
+// 1536px boyu yoksa WordPress tam boyu verir.
+$image = ik_product_image( $product, '1536x1536' );
+
+// Panel gorselinde telefon kucuk boyu, genis ekran buyugu indirir.
+$srcset      = ! empty( $image['id'] ) ? (string) wp_get_attachment_image_srcset( (int) $image['id'], '1536x1536' ) : '';
+$image_attrs = '' !== $srcset ? sprintf( ' srcset="%s" sizes="(min-width: 1304px) 1240px, calc(100vw - 32px)"', esc_attr( $srcset ) ) : '';
 $specs = ik_specs( $product['specs'] );
 $row   = array( 'products', 'catalog', 'items', (int) $product['index'] );
 
@@ -38,14 +44,14 @@ get_template_part(
 ?>
 <section class="ik-section ik-product">
 	<div class="ik-wrap ik-product__grid">
-		<article class="ik-product__main">
+		<?php // Gorsel iki sutunun ustunde tam genislikte (pages.css: .ik-product__media). ?>
 			<figure class="ik-product__media" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'image' ); ?>>
 				<?php if ( ! empty( $image['url'] ) ) : ?>
 					<?php // Buyutme: tam boy gorsel pencerede, icinde ikinci kademe yakinlastirma (assets/js/product-zoom.js). ?>
 					<button type="button" class="ik-zoom-open" data-ik-zoom-open
 						data-full="<?php echo esc_url( ik_product_image( $product, 'full' )['url'] ?? $image['url'] ); ?>"
 						aria-label="<?php echo esc_attr( $product['title'] . ' görselini büyüt' ); ?>">
-						<?php echo ik_image_tag( $image, 'ik-product__image', null, 'eager' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+						<?php echo ik_image_tag( $image, 'ik-product__image', null, 'eager', $image_attrs ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 						<span class="ik-zoom-open__badge" aria-hidden="true">Büyüt</span>
 					</button>
 				<?php else : ?>
@@ -75,6 +81,7 @@ get_template_part(
 				</dialog>
 			<?php endif; ?>
 
+		<article class="ik-product__main">
 			<div class="ik-prose ik-product__body" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'body' ); ?>>
 				<?php ik_paragraphs( $product['body'] ); ?>
 			</div>
@@ -95,7 +102,7 @@ get_template_part(
 				<a class="btn btn--solid" href="<?php echo esc_url( add_query_arg( 'urun', rawurlencode( $product['title'] ), ik_link( nwcs_field( 'products', 'detail', 'quote_url' ) ) ) ); ?>" <?php nwcs_edit_attr( 'products', 'detail', 'quote_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'products', 'detail', 'quote_label' ) ); ?>
 				</a>
-				<a class="btn btn--ghost" href="<?php echo esc_url( add_query_arg( 'text', rawurlencode( $product['title'] . ' hakkında bilgi almak istiyorum.' ), ik_link( nwcs_field( 'products', 'help', 'number_url' ) ) ) ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'products', 'detail', 'whatsapp_label' ); ?>>
+				<a class="btn btn--ghost" href="<?php echo esc_url( ik_whatsapp_link( ik_link( nwcs_field( 'products', 'help', 'number_url' ) ), $product ) ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'products', 'detail', 'whatsapp_label' ); ?>>
 					<?php ik_icon( 'whatsapp', 20 ); ?>
 					<?php echo esc_html( nwcs_field( 'products', 'detail', 'whatsapp_label' ) ); ?>
 				</a>

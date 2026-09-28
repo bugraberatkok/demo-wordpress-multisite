@@ -4,7 +4,7 @@
  *
  * Sahte basari ekrani yok: gonderilen form kaydedilir (yonetimde "Siparis
  * Istekleri"), Network Content Studio bildirim e-postasini gonderir
- * (includes/forms.php; alici SEO sekmesindeki firma e-postasi). Ana sayfa
+ * (includes/forms.php; alici info@kocist.com.tr, pc_form_recipient). Ana sayfa
  * ve Iletisim ayni formu (template-parts/quote-form.php) kullanir.
  */
 
@@ -45,6 +45,12 @@ add_filter(
 		return $types;
 	}
 );
+
+// Bildirim alicisi her sitede ortak adres; paneldeki SEO firma e-postasindan bagimsiz.
+add_filter( 'nwcs_form_recipient', 'pc_form_recipient' );
+function pc_form_recipient(): string {
+	return 'info@kocist.com.tr';
+}
 
 /**
  * Yonlendirme sonrasi durumu tasiyan gecici kaydin anahtari: kucuk harfli

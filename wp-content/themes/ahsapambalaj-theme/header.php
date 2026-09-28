@@ -60,7 +60,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 			<?php // Baglanti girilmeden dugme tiklanamaz durur; kimseyi bos bir
 			      // adrese goturmesin diye. ?>
 			<?php $whatsapp = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) ); ?>
-			<a href="<?php echo $whatsapp ? esc_url( ahsapambalaj_link( $whatsapp ) ) : '#'; ?>"
+			<a href="<?php echo $whatsapp ? esc_url( ahsapambalaj_whatsapp_url( $whatsapp ) ) : '#'; ?>"
 				<?php echo $whatsapp ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1" title="WhatsApp bağlantısı henüz girilmedi"'; ?>
 				class="btn btn--sm btn--outline hidden md:inline-flex<?php echo $whatsapp ? '' : ( ahsapambalaj_is_preview() ? ' opacity-55' : ' pointer-events-none opacity-55' ); ?>"
 				<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
@@ -96,7 +96,7 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 				</a>
 			<?php endforeach; ?>
 
-			<a href="<?php echo $whatsapp ? esc_url( ahsapambalaj_link( $whatsapp ) ) : '#'; ?>"
+			<a href="<?php echo $whatsapp ? esc_url( ahsapambalaj_whatsapp_url( $whatsapp ) ) : '#'; ?>"
 				<?php echo $whatsapp ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1"'; ?>
 				class="btn btn--sm btn--outline mt-4 w-full translate-y-2 opacity-0 transition duration-300 ease-out group-data-[open=true]/panel:translate-y-0 group-data-[open=true]/panel:opacity-100 delay-[240ms]<?php echo $whatsapp ? '' : ( ahsapambalaj_is_preview() ? ' opacity-55' : ' pointer-events-none opacity-55' ); ?>"
 				<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>

@@ -7,8 +7,9 @@
  * odeme yok (sanal POS sozlesmesi gerekir; sahte odeme adimi gosterilmez).
  *
  * Fiyat ve tutar her zaman sunucuda Urun Havuzu'ndan hesaplanir (inc/cart.php).
- * Siparis yonetimde "Siparisler" altina duser; Network Content Studio firma
- * e-postasina bildirim gonderir (_wk_ alanlari). Ayrintilar _wko_ metasinda.
+ * Siparis yonetimde "Siparisler" altina duser; Network Content Studio
+ * info@kocist.com.tr adresine bildirim gonderir (wk_form_recipient, _wk_
+ * alanlari). Ayrintilar _wko_ metasinda.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -361,12 +362,8 @@ function wk_order_mail_customer( int $post_id ): void {
 				. "\n\n" . wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ' — ' . home_url( '/' );
 
 			// Musteri "Yanitla" deyince magazaya yazsin (varsayilan gonderen adresi okunmaz).
-			$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
-			$shop    = function_exists( 'nwcs_field' ) && defined( 'NWCS_SEO_SITE_PAGE' ) ? sanitize_email( (string) nwcs_field( NWCS_SEO_SITE_PAGE, 'org', 'email' ) ) : '';
-
-			if ( $shop ) {
-				$headers[] = 'Reply-To: ' . $shop;
-			}
+			// Magaza adresi siparis bildirimiyle ayni: wk_form_recipient (inc/requests.php).
+			$headers = array( 'Content-Type: text/plain; charset=UTF-8', 'Reply-To: ' . wk_form_recipient() );
 
 			wp_mail( $email, sprintf( 'Siparişiniz alındı: %s', $number ), $body, $headers );
 		},

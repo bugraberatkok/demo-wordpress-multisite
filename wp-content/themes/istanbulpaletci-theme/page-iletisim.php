@@ -52,7 +52,7 @@ $map = trim( (string) nwcs_field( 'contact', 'details', 'map_url' ) );
 							</h3>
 
 							<?php if ( $row['link'] ) : ?>
-								<a href="<?php echo esc_url( ip_link( nwcs_field( 'contact', 'details', $row['key'] . '_url' ) ) ); ?>"
+								<a href="<?php echo esc_url( 'whatsapp' === $row['key'] ? ip_whatsapp_url( nwcs_field( 'contact', 'details', 'whatsapp_url' ) ) : ip_link( nwcs_field( 'contact', 'details', $row['key'] . '_url' ) ) ); ?>"
 									<?php echo $row['external'] ? 'target="_blank" rel="noopener"' : ''; ?>
 									class="tabular mt-0.5 block break-words text-lg font-semibold text-ink no-underline hover:text-indigo"
 									<?php nwcs_edit_attr( 'contact', 'details', $value_field ); ?>>

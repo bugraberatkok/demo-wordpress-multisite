@@ -139,7 +139,8 @@
 		var start  = 0;
 
 		thumbs.forEach( function ( thumb ) {
-			var src = thumb.getAttribute( 'data-full' );
+			// data-zoom: tam boy dosya (varsa); yoksa sahnedeki buyuk kopya.
+			var src = thumb.getAttribute( 'data-zoom' ) || thumb.getAttribute( 'data-full' );
 
 			if ( src ) {
 				if ( thumb.classList.contains( 'is-active' ) ) {

@@ -2,6 +2,11 @@
 /**
  * Cozum Merkezi (/iletisim/): destek hatlari, e-posta, adresler, harita ve
  * talep formu (inc/requests.php).
+ *
+ * Harita isletmenin Google Haritalar kaydini gosterir: "KOÇİST Kamelya ve Ahşap
+ * Dekorasyon İmalat Atölyesi" (https://maps.app.goo.gl/LkNB2t4ktyr6f5g69; kisa
+ * baglanti gomulemedigi icin koordinatla). Paneldeki "Harita Araması" baslik ve
+ * haritanin gorunurlugu icin.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -70,7 +75,7 @@ $map   = trim( (string) nwcs_field( 'contact', 'details', 'map' ) );
 
 <?php if ( '' !== $map ) : ?>
 	<div class="wk-map">
-		<iframe title="<?php echo esc_attr( $map ); ?> haritada" src="<?php echo esc_url( 'https://maps.google.com/maps?q=' . rawurlencode( $map ) . '&t=m&z=15&output=embed' ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+		<iframe title="<?php echo esc_attr( $map ); ?> haritada" src="<?php echo esc_url( 'https://maps.google.com/maps?q=41.2312164,28.5016346&t=m&z=17&output=embed' ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 	</div>
 <?php endif; ?>
 

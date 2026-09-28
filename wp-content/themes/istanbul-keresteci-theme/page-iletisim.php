@@ -15,6 +15,12 @@ $errors = $state['errors'];
 $values = $state['values'];
 $query  = nwcs_field( 'contact', 'map', 'query' );
 
+// Isletmenin Google Haritalar kaydi: "KOÇİST Kereste, Orman Ürünleri ve İnşaat
+// Malzemeleri". Kisa baglanti gomulemez; harita isletmenin koordinatini gosterir.
+// Paneldeki "Harita Adresi" yalnizca baslik ve haritanin gorunurlugu icin.
+$map_link  = 'https://maps.app.goo.gl/goTd8wPiXnbDb8BY9';
+$map_embed = 'https://www.google.com/maps?q=41.2311136,28.5012366&z=17&output=embed';
+
 $info = array(
 	array( 'icon' => 'pin', 'label' => 'address_label', 'value' => 'address', 'url' => '' ),
 	array( 'icon' => 'phone', 'label' => 'phone_label', 'value' => 'phone', 'url' => 'phone_url' ),
@@ -140,12 +146,12 @@ get_template_part( 'template-parts/page-head', null, array( 'page' => 'contact' 
 		<iframe
 			class="ik-map__frame"
 			title="<?php echo esc_attr( 'Harita: ' . $query ); ?>"
-			src="<?php echo esc_url( 'https://www.google.com/maps?q=' . rawurlencode( $query ) . '&output=embed' ); ?>"
+			src="<?php echo esc_url( $map_embed ); ?>"
 			loading="lazy"
 			referrerpolicy="no-referrer-when-downgrade"></iframe>
 
 		<div class="ik-wrap ik-map__bar">
-			<a class="btn btn--solid" href="<?php echo esc_url( 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $query ) ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'contact', 'map', 'directions_label' ); ?>>
+			<a class="btn btn--solid" href="<?php echo esc_url( $map_link ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'contact', 'map', 'directions_label' ); ?>>
 				<?php ik_icon( 'pin', 18 ); ?>
 				<?php echo esc_html( nwcs_field( 'contact', 'map', 'directions_label' ) ); ?>
 				<span class="screen-reader-text">(yeni sekmede açılır)</span>

@@ -36,7 +36,14 @@ if ( ! $images ) {
 	$images = array( kocist_product_image( $product ) );
 }
 
-$main = $images[0];
+// Buyuk sahne icin buyuk kopya (havuz 768 px veriyor), buyutmede tam boy.
+$images = array_map( static fn( array $image ): array => kocist_pool_image_large( $image, '1536x1536' ), $images );
+$main   = $images[0];
+
+// Teklif ve WhatsApp: urune ozel (inc/quote.php).
+$quote_href = kocist_quote_url( $product );
+$wa_panel   = (string) nwcs_field( 'product', 'main', 'secondary_url' );
+$wa_href    = kocist_is_whatsapp_url( $wa_panel ) ? kocist_product_wa_url( $product, $wa_panel ) : kocist_link( $wa_panel );
 
 // Ayni kategorideki (yoksa ayni gruptaki) diger urunler, en fazla dort.
 $related       = array();
@@ -105,10 +112,11 @@ get_header();
 							class="k-product__thumb<?php echo 0 === $thumb_index ? ' is-active' : ''; ?>"
 							data-k-thumb
 							data-full="<?php echo esc_url( $thumb['url'] ); ?>"
+							data-zoom="<?php echo esc_url( $thumb['full'] ?: $thumb['url'] ); ?>"
 							data-alt="<?php echo esc_attr( $thumb['alt'] ?? '' ); ?>"
 							aria-label="<?php echo esc_attr( sprintf( '%d. görsel', $thumb_index + 1 ) ); ?>"
 						>
-							<img src="<?php echo esc_url( $thumb['url'] ); ?>" alt="" loading="lazy" decoding="async" />
+							<img src="<?php echo esc_url( $thumb['thumb'] ?: $thumb['url'] ); ?>" alt="" loading="lazy" decoding="async" />
 						</button>
 					<?php endforeach; ?>
 				</div>
@@ -136,11 +144,11 @@ get_header();
 			</div>
 
 			<div class="k-product__actions">
-				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'cta_url' ) ?: '#teklif' ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'cta_label' ); ?>>
+				<a class="k-product__btn k-product__btn--primary" href="<?php echo esc_url( $quote_href ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'cta_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'cta_label' ) ?: 'Teklif Alın' ); ?>
 				</a>
 				<?php if ( nwcs_field( 'product', 'main', 'secondary_label' ) ) : ?>
-					<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( kocist_link( nwcs_field( 'product', 'main', 'secondary_url' ) ) ); ?>" <?php nwcs_edit_attr( 'product', 'main', 'secondary_label' ); ?>>
+					<a class="k-product__btn k-product__btn--ghost" href="<?php echo esc_url( $wa_href ); ?>"<?php echo kocist_is_whatsapp_url( $wa_href ) ? ' target="_blank" rel="noopener"' : ''; ?> <?php nwcs_edit_attr( 'product', 'main', 'secondary_label' ); ?>>
 						<?php echo esc_html( nwcs_field( 'product', 'main', 'secondary_label' ) ); ?>
 					</a>
 				<?php endif; ?>
@@ -210,7 +218,7 @@ if ( '' !== $body_html || $tables || $preview ) :
 				<?php foreach ( $related as $item ) : ?>
 					<?php $has_page = '' !== trim( (string) $item['body'] ); ?>
 					<li class="k-pcard">
-						<a class="k-pcard__link" href="<?php echo esc_url( $has_page ? $item['url'] : kocist_link( '#teklif' ) ); ?>">
+						<a class="k-pcard__link" href="<?php echo esc_url( $has_page ? $item['url'] : kocist_quote_url( $item ) ); ?>">
 							<span class="k-pcard__media" <?php kocist_product_attr( $item, 'Görsel' ); ?>>
 								<?php echo kocist_image_tag( kocist_product_image( $item ), 'k-pcard__img', 'Örnek görsel' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 							</span>

@@ -16,6 +16,12 @@ $errors = $state['errors'];
 $values = $state['values'];
 $query  = nwcs_field( 'contact', 'map', 'query' );
 
+// Isletmenin Google Haritalar kaydi: "KOÇİST Ahşap Ambalaj Ürünleri, Kontrplak
+// Plywood ve Sandık İmalatı Atölyesi". Kisa baglanti gomulemez; harita isletmenin
+// koordinatini gosterir. Paneldeki adres yalnizca baslik ve gorunurluk icin.
+$map_link  = 'https://maps.app.goo.gl/AgXYYvta8Pm67yyM8';
+$map_embed = 'https://www.google.com/maps?q=41.2309394,28.5008329&z=17&output=embed';
+
 // Urun kartlarindaki "teklif isteyin" baglantisi konuyu tasir (?konu=Euro palet).
 // Hatali gonderimden donuldugunde kullanicinin kendi yazdigi one gecer.
 if ( ! isset( $values['subject'] ) && isset( $_GET['konu'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- yalnizca on doldurma.
@@ -138,12 +144,12 @@ get_template_part( 'template-parts/page-head', null, array( 'page' => 'contact' 
 		<iframe
 			class="sp-map__frame"
 			title="<?php echo esc_attr( 'Harita: ' . $query ); ?>"
-			src="<?php echo esc_url( 'https://www.google.com/maps?q=' . rawurlencode( $query ) . '&output=embed' ); ?>"
+			src="<?php echo esc_url( $map_embed ); ?>"
 			loading="lazy"
 			referrerpolicy="no-referrer-when-downgrade"></iframe>
 
 		<div class="sp-wrap sp-map__bar">
-			<a class="btn btn--solid" href="<?php echo esc_url( 'https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode( $query ) ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'contact', 'map', 'directions_label' ); ?>>
+			<a class="btn btn--solid" href="<?php echo esc_url( $map_link ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'contact', 'map', 'directions_label' ); ?>>
 				<?php sanayi_palet_icon( 'pin', 18 ); ?>
 				<?php echo esc_html( nwcs_field( 'contact', 'map', 'directions_label' ) ); ?>
 				<span class="screen-reader-text">(yeni sekmede açılır)</span>

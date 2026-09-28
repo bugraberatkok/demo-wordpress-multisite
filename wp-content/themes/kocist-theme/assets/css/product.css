@@ -8,8 +8,9 @@
 
 .k-product__grid {
 	display: grid;
-	grid-template-columns: 1.05fr 1fr;
-	gap: 46px;
+	/* Galeri genis sutunda: urun gorseli sayfanin ana ogesi. */
+	grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+	gap: 44px;
 	align-items: start;
 }
 
@@ -17,7 +18,7 @@
 .k-product__stage {
 	position: relative;
 	overflow: hidden;
-	aspect-ratio: 16 / 10;
+	aspect-ratio: 4 / 3;
 	border: 1px solid var(--line);
 	border-radius: 16px;
 	background: var(--paper-2);
@@ -94,8 +95,8 @@
 
 .k-product__thumb {
 	overflow: hidden;
-	width: 84px;
-	height: 62px;
+	width: 96px;
+	height: 72px;
 	padding: 0;
 	border: 1.5px solid var(--line);
 	border-radius: 10px;
@@ -532,6 +533,10 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	.k-pdetail--split .k-pdetail__grid { gap: 28px; }
 }
 
+@media (max-width: 1099.98px) and (min-width: 900px) {
+	.k-product__grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 34px; }
+}
+
 @media (max-width: 899.98px) {
 	.k-product__grid { grid-template-columns: 1fr; gap: 28px; }
 	.k-pdetail { margin-top: 26px; padding: 30px 0 34px; }
@@ -541,6 +546,19 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	.k-specs__card { padding: 20px 18px 6px; }
 	.k-faq__question { padding: 16px 18px; }
 	.k-faq__answer p { padding: 0 18px 18px; }
+}
+
+/* Telefonda gorsel kenardan kenara: birkac piksel kenar boslugu bile kucultuyor. */
+@media (max-width: 599.98px) {
+	.k-product__stage {
+		margin: 0 -20px;
+		border-right: 0;
+		border-left: 0;
+		border-radius: 0;
+	}
+
+	.k-product__thumbs { gap: 8px; }
+	.k-product__thumb { width: 76px; height: 58px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

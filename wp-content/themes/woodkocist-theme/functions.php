@@ -89,12 +89,24 @@ function wk_part( string $name, array $args = array() ): void {
 }
 
 /**
- * WhatsApp baglantisi; $text verilirse mesaj hazir gelir.
+ * WhatsApp baglantisi; mesaj kutusuna hazir yazi gelir. $text verilmezse
+ * urun sayfasinda urunun mesaji (wk_order_text), baska yerde paneldeki
+ * genel mesaj kullanilir. Numara paneldeki whatsapp_url'den.
  */
 function wk_whatsapp( string $text = '' ): string {
 	$url = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 
-	return ( '' === $url || '' === $text ) ? $url : add_query_arg( 'text', rawurlencode( $text ), $url );
+	if ( '' === $url ) {
+		return '';
+	}
+
+	if ( '' === $text ) {
+		$text = ! empty( $GLOBALS['wk_current_product'] )
+			? wk_order_text( $GLOBALS['wk_current_product'] )
+			: trim( (string) nwcs_field( 'global', 'header', 'whatsapp_text' ) );
+	}
+
+	return '' === $text ? $url : add_query_arg( 'text', rawurlencode( $text ), remove_query_arg( 'text', $url ) );
 }
 
 /**
@@ -354,6 +366,43 @@ function wk_image( array $product ): array {
 }
 
 /**
+ * Urun sayfasinin buyuk gorseli: havuzdaki gorsel 768px (medium_large) gelir,
+ * genis ekranda ve retinada bulanik kalir. Havuz sitesinde en buyuk boyut ve
+ * srcset alinir; tarayici ekrana uygun olani secer. Olmazsa $image['url'].
+ *
+ * @return array{src:string, srcset:string, width:int, height:int}
+ */
+function wk_image_large( array $image ): array {
+	$out = array( 'src' => (string) ( $image['url'] ?? '' ), 'srcset' => '', 'width' => 0, 'height' => 0 );
+	$id  = (int) ( $image['id'] ?? 0 );
+
+	if ( $id <= 0 ) {
+		return $out;
+	}
+
+	$switched = function_exists( 'nwcs_pool_blog_id' ) && is_multisite() && (int) nwcs_pool_blog_id() !== get_current_blog_id();
+
+	if ( $switched ) {
+		switch_to_blog( (int) nwcs_pool_blog_id() );
+	}
+
+	$src = wp_get_attachment_image_src( $id, 'full' );
+
+	if ( $src ) {
+		$out['src']    = (string) $src[0];
+		$out['width']  = (int) $src[1];
+		$out['height'] = (int) $src[2];
+		$out['srcset'] = (string) wp_get_attachment_image_srcset( $id, 'full' );
+	}
+
+	if ( $switched ) {
+		restore_current_blog();
+	}
+
+	return $out;
+}
+
+/**
  * Havuzdaki fiyat metni ("10.250 ₺", "1.299,90 ₺") -> sayi; okunamazsa 0
  * (0 ise yapilandirilmis veride teklif uretilmez).
  */
@@ -367,8 +416,71 @@ function wk_price_number( string $price ): float {
 	return (float) str_replace( ',', '.', $digits );
 }
 
+/**
+ * Urunun WhatsApp mesaji (panel: global.header.whatsapp_product_text).
+ */
 function wk_order_text( array $product ): string {
-	return trim( sprintf( 'Merhaba, %s %s hakkında bilgi almak ve sipariş vermek istiyorum.', $product['code'], $product['title'] ) );
+	return wk_product_text( 'global', 'header', 'whatsapp_product_text', $product );
+}
+
+/**
+ * Urunun kategori adi: alt kategori, yoksa seri, yoksa havuzdaki ilk kategori.
+ */
+function wk_product_category( array $product ): string {
+	$place = wk_product_place( $product );
+	$group = $place['child'] ?? $place['line'];
+
+	if ( $group ) {
+		return (string) $group['label'];
+	}
+
+	$names = array_values( (array) ( $product['categories'] ?? array() ) );
+
+	return (string) ( $names[0] ?? '' );
+}
+
+/**
+ * Panel metnindeki {urun} {kategori} {kod} {url} urunun bilgileriyle dolar;
+ * bos kalan "()" ve fazla bosluklar temizlenir.
+ */
+function wk_product_text( string $page, string $component, string $field, array $product ): string {
+	$text = wk_text(
+		$page,
+		$component,
+		$field,
+		array(
+			'urun'     => html_entity_decode( (string) $product['title'], ENT_QUOTES, 'UTF-8' ),
+			'kategori' => html_entity_decode( wk_product_category( $product ), ENT_QUOTES, 'UTF-8' ),
+			'kod'      => (string) $product['code'],
+			'url'      => (string) ( $product['url'] ?? '' ),
+		)
+	);
+
+	$text = preg_replace( array( '/\(\s*,\s*/u', '/\s*\(\s*\)/u', '/[ \t]{2,}/u' ), array( '(', '', ' ' ), $text );
+
+	return trim( (string) $text );
+}
+
+/**
+ * Formlarda ?urun=<havuz no> (eski baglantilar icin "KOD Ad" ya da kod da
+ * olur): yalnizca sitede gosterilen bir urune cozulur, yoksa null.
+ */
+function wk_product_by_ref( string $ref ): ?array {
+	$ref = trim( $ref );
+
+	if ( '' === $ref ) {
+		return null;
+	}
+
+	foreach ( wk_products() as $product ) {
+		if ( ( ctype_digit( $ref ) && (int) $ref === (int) $product['id'] )
+			|| ( '' !== $product['code'] && 0 === strcasecmp( $ref, (string) $product['code'] ) )
+			|| trim( $product['code'] . ' ' . $product['title'] ) === $ref ) {
+			return $product;
+		}
+	}
+
+	return null;
 }
 
 /* ====================================================================== *

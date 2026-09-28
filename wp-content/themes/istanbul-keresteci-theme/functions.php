@@ -666,7 +666,7 @@ function ik_link( $url ): string {
 	}
 
 	if ( ! str_starts_with( $url, '/' ) || str_starts_with( $url, '//' ) ) {
-		return $url;
+		return ik_whatsapp_link( $url );
 	}
 
 	if ( '' !== (string) get_option( 'permalink_structure' ) ) {
@@ -691,6 +691,36 @@ function ik_link( $url ): string {
 	}
 
 	return $link . ( isset( $parts['fragment'] ) ? '#' . $parts['fragment'] : '' );
+}
+
+/**
+ * WhatsApp baglantisina hazir mesaj ekler (wa.me/<numara>?text=...).
+ *
+ * Numara panelde yazildigi gibi kalir; yalnizca mesaj eklenir. Panelde
+ * yazilan baglantida zaten mesaj (text=) varsa dokunulmaz. Urun sayfasinda
+ * (ya da $product verilirse) mesaj urunun adini ve adresini tasir; boylece
+ * yardim kutusu ve footer'daki genel WhatsApp baglantilari da o sayfada
+ * urunu soyler. Diger sayfalarda genel selam.
+ */
+function ik_whatsapp_link( string $url, array $product = array() ): string {
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+
+	if ( ! in_array( $host, array( 'wa.me', 'api.whatsapp.com', 'whatsapp.com', 'www.whatsapp.com' ), true ) ) {
+		return $url;
+	}
+
+	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+	if ( '' !== trim( (string) ( $query['text'] ?? '' ) ) ) {
+		return $url;
+	}
+
+	$product = $product ?: ik_current_product();
+	$text    = $product
+		? sprintf( 'Merhaba, %s hakkında bilgi almak istiyorum. %s', $product['title'], $product['url'] )
+		: 'Merhaba, web sitenizden yazıyorum. Bilgi almak istiyorum.';
+
+	return add_query_arg( 'text', rawurlencode( $text ), remove_query_arg( 'text', $url ) );
 }
 
 /**
@@ -914,7 +944,8 @@ function ik_logo( string $modifier = '' ): void {
  * Iletisim formu
  *
  * Sahte basari ekrani yok: gonderilen mesaj gercekten kaydedilir, yonetimde
- * "İletişim Mesajları" altinda gorulur. Demoda e-posta gonderilmez.
+ * "İletişim Mesajları" altinda gorulur. Bildirim e-postasini Network Content
+ * Studio gonderir; alici info@kocist.com.tr (ik_form_recipient).
  * ====================================================================== */
 
 add_action( 'init', 'ik_register_message_cpt' );
@@ -941,6 +972,13 @@ function ik_register_message_cpt(): void {
 			'query_var'       => false,
 		)
 	);
+}
+
+// Bildirim e-postasi (Network Content Studio, includes/forms.php) her sitede
+// ortak adrese gider; paneldeki SEO firma e-postasindan bagimsiz.
+add_filter( 'nwcs_form_recipient', 'ik_form_recipient' );
+function ik_form_recipient(): string {
+	return 'info@kocist.com.tr';
 }
 
 add_action( 'admin_post_ik_message', 'ik_handle_message' );

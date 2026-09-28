@@ -72,13 +72,26 @@
 	.ik-product__grid { grid-template-columns: minmax(0, 1fr) 22rem; gap: 4rem; align-items: start; }
 }
 
-.ik-product__media { margin: 0 0 2.5rem; }
+/*
+ * Urun gorseli iki sutunun ustunde, sayfa genisliginde: metin ve yan liste
+ * altta baslar. Oran 16:9 (tema fotograflari da bu oranda); kisa ekranda
+ * yukseklik ekranin cogunu gecmez, fazlasi ustten ve alttan kirpilir.
+ */
+.ik-product__media { grid-column: 1 / -1; margin: 0; }
 
 .ik-product__image {
 	width: 100%;
 	aspect-ratio: 16 / 9;
+	max-height: 82vh;
 	object-fit: cover;
 	border-radius: var(--kose);
+}
+
+@media (max-width: 599px) {
+	/* Telefonda kenar boslugu da gorsele verilir: ekran genisliginde. */
+	.ik-product__media { margin-inline: calc(-1 * var(--kenar)); }
+	.ik-product__image,
+	.ik-product__media .ik-zoom-open { border-radius: 0; }
 }
 
 .ik-product__body { color: var(--murekkep); max-width: 44rem; }

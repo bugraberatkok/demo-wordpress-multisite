@@ -1,7 +1,10 @@
 <?php
 /**
- * Iletisim: bilgiler, form, harita (Google Haritalar yerlestirmesi; adres
- * degisirse panelden "Haritada Aranacak Adres" guncellenir).
+ * Iletisim: bilgiler, form, harita (Google Haritalar yerlestirmesi). Harita
+ * isletmenin kaydini gosterir: "KOÇİST Ahşap Ambalaj Ürünleri, Kontrplak Plywood
+ * ve Sandık İmalatı Atölyesi" (https://maps.app.goo.gl/AgXYYvta8Pm67yyM8; kisa
+ * baglanti gomulemedigi icin koordinatla). Paneldeki "Haritada Aranacak Adres"
+ * baslik ve haritanin gorunurlugu icin.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -35,7 +38,7 @@ pc_part(
 <?php if ( $map ) : ?>
 	<section class="pc-map" <?php nwcs_edit_attr( 'contact', 'details', 'map_query' ); ?>>
 		<iframe title="Harita: <?php echo esc_attr( $map ); ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-			src="<?php echo esc_url( 'https://www.google.com/maps?output=embed&q=' . rawurlencode( $map ) ); ?>"></iframe>
+			src="<?php echo esc_url( 'https://www.google.com/maps?q=41.2309394,28.5008329&z=17&output=embed' ); ?>"></iframe>
 	</section>
 <?php endif; ?>
 

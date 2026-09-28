@@ -18,7 +18,7 @@ if ( ! $product ) {
 $tag = in_array( $args['heading'] ?? '', array( 'h2', 'h3' ), true ) ? $args['heading'] : 'h3';
 $more      = isset( $args['more'] ) ? (string) $args['more'] : (string) nwcs_field( 'products', 'list', 'more' );
 $more_edit = isset( $args['more'] ) ? ( $args['more_edit'] ?? null ) : array( 'products', 'list', 'more' );
-$wa  = pc_whatsapp( sprintf( '%s hakkında fiyat almak istiyorum.', $product['name'] ) );
+$wa  = pc_whatsapp_product( $product );
 ?>
 <article class="pc-prow">
 	<a href="<?php echo esc_url( $product['url'] ); ?>" class="pc-prow__media" tabindex="-1" aria-hidden="true"<?php nwcs_edit_attr( $product['key'], 'card', 'image' ); ?>>

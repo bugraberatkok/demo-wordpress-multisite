@@ -88,6 +88,28 @@ function ahsapkasa_link( $url ): string {
 }
 
 /**
+ * WhatsApp baglantisi, paneldeki hazir mesajla. Mesaj yalnizca wa.me /
+ * api.whatsapp.com adreslerine ve adreste zaten ?text= yoksa eklenir.
+ */
+function ahsapkasa_whatsapp_url( $url ): string {
+	$link = ahsapkasa_link( $url );
+	$host = strtolower( (string) wp_parse_url( $link, PHP_URL_HOST ) );
+
+	if ( ! in_array( $host, array( 'wa.me', 'api.whatsapp.com', 'www.whatsapp.com', 'whatsapp.com' ), true ) ) {
+		return $link;
+	}
+
+	parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
+	$text = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_message' ) );
+
+	if ( '' === $text || '' !== trim( (string) ( $query['text'] ?? '' ) ) ) {
+		return $link;
+	}
+
+	return add_query_arg( 'text', rawurlencode( $text ), $link );
+}
+
+/**
  * Menudeki baglantinin bulunulan sayfa olup olmadigini soyler.
  */
 function ahsapkasa_is_current( string $url ): bool {
@@ -189,6 +211,13 @@ function ahsapkasa_register_quote_cpt(): void {
 			'query_var'       => false,
 		)
 	);
+}
+
+// Bildirim e-postasi (Network Content Studio, includes/forms.php) her sitede
+// ortak adrese gider; paneldeki SEO firma e-postasindan bagimsiz.
+add_filter( 'nwcs_form_recipient', 'ahsapkasa_form_recipient' );
+function ahsapkasa_form_recipient(): string {
+	return 'info@kocist.com.tr';
 }
 
 add_action( 'admin_post_ahsapkasa_quote', 'ahsapkasa_handle_quote' );

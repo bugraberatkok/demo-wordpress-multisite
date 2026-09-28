@@ -42,7 +42,7 @@ if ( ! $items && ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() )
 
 						<p class="k-cat__text" <?php kocist_product_attr( $item, 'Kısa açıklama' ); ?>><?php echo esc_html( $item['short'] ); ?></p>
 
-						<a class="k-cat__link" href="<?php echo esc_url( $item['body'] ? $item['url'] : kocist_link( '#teklif' ) ); ?>" <?php nwcs_edit_attr( 'home', 'products', $item['body'] ? 'detail_label' : 'cta_label' ); ?>>
+						<a class="k-cat__link" href="<?php echo esc_url( $item['body'] ? $item['url'] : kocist_quote_url( $item ) ); ?>" <?php nwcs_edit_attr( 'home', 'products', $item['body'] ? 'detail_label' : 'cta_label' ); ?>>
 							<?php echo esc_html( $item['body'] ? nwcs_field( 'home', 'products', 'detail_label' ) : $cta_label ); ?>
 							<?php nwcs_the_icon( 'arrow', 'k-icon', 16 ); ?>
 						</a>

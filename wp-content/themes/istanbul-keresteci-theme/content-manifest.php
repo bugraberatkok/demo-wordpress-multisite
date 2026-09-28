@@ -19,7 +19,7 @@ $phone_label    = '+90 212 648 1090';
 $phone_url      = 'tel:+902126481090';
 $whatsapp_label = '+90 532 374 98 32';
 $whatsapp_url   = 'https://wa.me/905323749832';
-$email          = 'info@istanbulkeresteci.com';
+$email          = 'info@kocist.com.tr';
 $address        = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 
 /*
@@ -192,7 +192,7 @@ $manifest_data = array(
 		'legal_name'  => 'Koçist Grup Dış Ticaret ve Sanayi Ltd. Şti.',
 		'description' => 'İstanbul Çatalca’da çam, köknar, kayın ve meşe kereste; tomruk, OSB, kontrplak ve plywood plaka. İstenen ölçüde kesip adrese teslim.',
 		'phone'       => '+90 212 648 10 90',
-		'email'       => 'info@istanbulkeresteci.com',
+		'email'       => 'info@kocist.com.tr',
 		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
 		'district'    => 'Çatalca',
 		'city'        => 'İstanbul',

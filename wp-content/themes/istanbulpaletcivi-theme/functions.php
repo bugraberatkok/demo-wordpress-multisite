@@ -573,16 +573,46 @@ function pc_redirect_product_parent(): void {
  * ====================================================================== */
 
 /**
- * WhatsApp baglantisi; $text verilirse mesaj hazir gelir.
+ * WhatsApp baglantisi, hazir mesajla. $text verilmezse paneldeki genel mesaj
+ * kullanilir. Mesaj yalnizca wa.me / api.whatsapp.com adreslerine ve adreste
+ * zaten ?text= yoksa eklenir.
  */
 function pc_whatsapp( string $text = '' ): string {
 	$url = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_url' ) );
 
-	if ( '' === $url || '' === $text ) {
+	if ( '' === $url ) {
 		return $url;
 	}
 
-	return add_query_arg( 'text', rawurlencode( $text ), $url );
+	$host = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+
+	if ( ! in_array( $host, array( 'wa.me', 'api.whatsapp.com', 'www.whatsapp.com', 'whatsapp.com' ), true ) ) {
+		return $url;
+	}
+
+	parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+	if ( '' !== trim( (string) ( $query['text'] ?? '' ) ) ) {
+		return $url;
+	}
+
+	if ( '' === $text ) {
+		$text = trim( (string) nwcs_field( 'global', 'header', 'whatsapp_message' ) );
+	}
+
+	return '' === $text ? $url : add_query_arg( 'text', rawurlencode( $text ), $url );
+}
+
+/**
+ * Urune ozel WhatsApp baglantisi: urun adi ve urun sayfasinin adresi.
+ */
+function pc_whatsapp_product( array $product ): string {
+	$text = strtr(
+		(string) nwcs_field( 'products', 'shared', 'wa_message' ),
+		array( '{urun}' => (string) ( $product['name'] ?? '' ) )
+	);
+
+	return pc_whatsapp( trim( $text . ' ' . ( $product['url'] ?? '' ) ) );
 }
 
 /**

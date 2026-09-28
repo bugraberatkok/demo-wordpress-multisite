@@ -172,6 +172,7 @@ return array(
 						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => $phone_url ),
 						'whatsapp_label' => array( 'label' => 'WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp' ),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => $whatsapp_url ),
+						'whatsapp_message' => array( 'label' => 'WhatsApp Hazır Mesajı', 'type' => 'text', 'default' => 'Merhaba, palet çivisi hakkında bilgi almak istiyorum.', 'hint' => 'WhatsApp açıldığında yazı kutusunda hazır gelir. Ürün düğmelerinde ürüne özel mesaj kullanılır.' ),
 						'email'          => array( 'label' => 'E-posta', 'type' => 'text', 'default' => $email ),
 						'menu_toggle'    => array( 'label' => 'Mobil Menü Düğmesi', 'type' => 'text', 'default' => 'Menü' ),
 					),
@@ -333,6 +334,7 @@ return array(
 						'order_title' => array( 'label' => 'Sipariş Kutusu Başlığı', 'type' => 'text', 'default' => 'Ölçü ve fiyat' ),
 						'wa_label'    => array( 'label' => 'Sipariş Kutusu: WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp’tan fiyat sorun' ),
 						'form_label'  => array( 'label' => 'Sipariş Kutusu: Form Bağlantısı', 'type' => 'text', 'default' => 'Formla sipariş isteği gönderin' ),
+						'wa_message'  => array( 'label' => 'Ürün WhatsApp Hazır Mesajı', 'type' => 'text', 'default' => 'Merhaba, {urun} hakkında bilgi almak istiyorum.', 'hint' => '{urun} yerine ürünün adı yazılır; sonuna ürün sayfasının adresi eklenir.' ),
 					),
 				),
 				'list' => array(

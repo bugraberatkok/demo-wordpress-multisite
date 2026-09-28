@@ -84,7 +84,7 @@ $mobile_url   = 'tel:+905323749832';
 // Canli sitedeki WhatsApp baglantisinda numara bosluklu yazildigi icin
 // calismiyor; burada dogru bicim kullaniliyor.
 $whatsapp_url = 'https://wa.me/905323749832';
-$email        = 'info@istanbulpaletci.com';
+$email        = 'info@kocist.com.tr';
 $address      = "Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1\nÇatalca, İstanbul";
 
 /*
@@ -189,6 +189,7 @@ return array(
 						'phone_url'      => array( 'label' => 'Telefon Bağlantısı', 'type' => 'url', 'default' => $phone_url ),
 						'whatsapp_label' => array( 'label' => 'WhatsApp Düğmesi Metni', 'type' => 'text', 'default' => 'WhatsApp' ),
 						'whatsapp_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => $whatsapp_url ),
+						'whatsapp_message' => array( 'label' => 'WhatsApp Hazır Mesajı', 'type' => 'text', 'default' => 'Merhaba, bilgi almak istiyorum.', 'hint' => 'WhatsApp açıldığında yazı kutusunda hazır gelir. Ürün sayfalarında ürüne özel mesaj kullanılır.' ),
 					),
 				),
 
@@ -426,6 +427,7 @@ return array(
 						'body_title'    => array( 'label' => 'Açıklama Başlığı', 'type' => 'text', 'default' => 'Ürün hakkında' ),
 						'related_title' => array( 'label' => 'Diğer Ürünler Başlığı', 'type' => 'text', 'default' => 'Diğer ürünlerimiz' ),
 						'call_note'     => array( 'label' => 'Telefon Notu', 'type' => 'text', 'default' => 'Hemen konuşmak isterseniz' ),
+						'whatsapp_message' => array( 'label' => 'WhatsApp Hazır Mesajı', 'type' => 'text', 'default' => 'Merhaba, {urun} hakkında bilgi almak istiyorum.', 'hint' => '{urun} yerine ürünün adı yazılır; sonuna sayfanın adresi eklenir.' ),
 					),
 				),
 
@@ -608,7 +610,7 @@ return array(
 						'address_title'  => array( 'label' => 'Adres Başlığı', 'type' => 'text', 'default' => 'Adres' ),
 						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => $address ),
 						'map_label'      => array( 'label' => 'Yol Tarifi Metni', 'type' => 'text', 'default' => 'Yol tarifi alın' ),
-						'map_url'        => array( 'label' => 'Harita Bağlantısı', 'type' => 'url', 'default' => 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ) ),
+						'map_url'        => array( 'label' => 'Harita Bağlantısı', 'type' => 'url', 'default' => 'https://maps.app.goo.gl/AgXYYvta8Pm67yyM8' ), // KOÇİST Ahşap Ambalaj Ürünleri, Kontrplak Plywood ve Sandık İmalatı Atölyesi
 						'hours_title'    => array( 'label' => 'Çalışma Saatleri Başlığı', 'type' => 'text', 'default' => 'Çalışma saatleri' ),
 						'hours'          => array( 'label' => 'Çalışma Saatleri (boşsa gizlenir)', 'type' => 'text', 'default' => '' ),
 					),
