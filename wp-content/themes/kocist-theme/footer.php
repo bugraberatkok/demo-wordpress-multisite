@@ -131,5 +131,15 @@ if ( ! ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
 </footer>
 
 <?php wp_footer(); ?>
+
+<!-- Ailways asistan balonu -->
+<script
+	src="https://app.ailways.com/widget-v2.js"
+	data-user="fc05dd5a-4316-4977-9b07-874b5ae9caa7"
+	data-agent="c41e70de-641e-4315-a597-1e2ab29803c1"
+	data-position="right"
+	data-color="#22c55e"
+	data-api="https://app.ailways.com/api">
+</script>
 </body>
 </html>
