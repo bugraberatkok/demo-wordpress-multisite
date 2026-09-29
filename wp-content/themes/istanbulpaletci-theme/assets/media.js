@@ -51,6 +51,36 @@
 		} );
 	} );
 
+	/* ================================================================
+	 * 1b. Fareyle buyuk gorselin uzerine gelince imlecin oldugu yer buyur
+	 *    (yalnizca fare; dokunmatikte tiklama buyutme penceresini acar).
+	 * ================================================================ */
+	document.querySelectorAll( '.ip-product-shot' ).forEach( function ( shot ) {
+		// Yer tutucuda (gorsel yok) buyutulecek bir sey yok.
+		var lens = function ( event ) {
+			if ( 'mouse' !== event.pointerType || ! shot.querySelector( '.ip-product-frame > img' ) ) {
+				return;
+			}
+
+			var box = shot.getBoundingClientRect();
+
+			shot.style.setProperty( '--zx', ( ( event.clientX - box.left ) / box.width * 100 ) + '%' );
+			shot.style.setProperty( '--zy', ( ( event.clientY - box.top ) / box.height * 100 ) + '%' );
+			shot.classList.add( 'is-lens' );
+		};
+
+		shot.addEventListener( 'pointerenter', lens );
+		shot.addEventListener( 'pointermove', lens );
+		shot.addEventListener( 'pointerleave', function () {
+			shot.classList.remove( 'is-lens' );
+		} );
+
+		// Pencere acilinca sayfadaki buyutme birakilsin.
+		shot.addEventListener( 'click', function () {
+			shot.classList.remove( 'is-lens' );
+		} );
+	} );
+
 	/* ================================================================ *
 	 * 2. Buyutme penceresi
 	 * ================================================================ */
@@ -199,6 +229,11 @@
 
 	document.addEventListener( 'click', function ( event ) {
 		var trigger = event.target.closest( '[data-lightbox-open]' );
+
+		// Gorsel yoksa (yer tutucu) buyutulecek bir sey yok.
+		if ( trigger && ! trigger.querySelector( 'img' ) ) {
+			return;
+		}
 		var holder  = trigger && trigger.closest( '[data-gallery]' );
 
 		if ( ! holder ) {
@@ -243,4 +278,5 @@
 			dialog.close();
 		}
 	} );
+
 }() );

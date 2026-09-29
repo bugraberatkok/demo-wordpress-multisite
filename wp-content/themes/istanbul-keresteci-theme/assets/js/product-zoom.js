@@ -9,6 +9,31 @@
 	var opener = document.querySelector( '[data-ik-zoom-open]' );
 	var dialog = document.querySelector( '[data-ik-zoom]' );
 
+	// Fareyle gorselin uzerine gelince imlecin oldugu yer buyur (yalnizca fare).
+	if ( opener ) {
+		var lens = function ( event ) {
+			// Yer tutucuda (gorsel yok) buyutulecek bir sey yok.
+			if ( 'mouse' !== event.pointerType || ! opener.querySelector( 'img' ) ) {
+				return;
+			}
+
+			var box = opener.getBoundingClientRect();
+
+			opener.style.setProperty( '--zx', ( ( event.clientX - box.left ) / box.width * 100 ) + '%' );
+			opener.style.setProperty( '--zy', ( ( event.clientY - box.top ) / box.height * 100 ) + '%' );
+			opener.classList.add( 'is-lens' );
+		};
+
+		opener.addEventListener( 'pointerenter', lens );
+		opener.addEventListener( 'pointermove', lens );
+		opener.addEventListener( 'pointerleave', function () {
+			opener.classList.remove( 'is-lens' );
+		} );
+		opener.addEventListener( 'click', function () {
+			opener.classList.remove( 'is-lens' );
+		} );
+	}
+
 	// Panel onizlemesinde gorsele tiklamak alan duzenleyicisini acar;
 	// buyutme penceresi araya girmesin.
 	if ( ! opener || ! dialog || 'function' !== typeof dialog.showModal || 'function' !== typeof window.woodZoom
@@ -28,6 +53,11 @@
 
 	opener.addEventListener( 'click', function () {
 		var full = opener.getAttribute( 'data-full' );
+
+		// Gorsel yoksa (yer tutucu) buyutulecek bir sey yok.
+		if ( ! opener.querySelector( 'img' ) ) {
+			return;
+		}
 
 		zoom.reset();
 

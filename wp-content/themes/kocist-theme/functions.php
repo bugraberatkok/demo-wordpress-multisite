@@ -398,10 +398,19 @@ function kocist_assets(): void {
 				(string) filemtime( get_theme_file_path( 'assets/css/lightbox.css' ) )
 			);
 
+			// Pencere icinde ikinci kademe yakinlastirma (kereste temalariyla ayni motor).
+			wp_enqueue_script(
+				'kocist-zoom',
+				get_theme_file_uri( 'assets/js/zoom.js' ),
+				array(),
+				(string) filemtime( get_theme_file_path( 'assets/js/zoom.js' ) ),
+				true
+			);
+
 			wp_enqueue_script(
 				'kocist-lightbox',
 				get_theme_file_uri( 'assets/js/lightbox.js' ),
-				array(),
+				array( 'kocist-zoom' ),
 				(string) filemtime( get_theme_file_path( 'assets/js/lightbox.js' ) ),
 				true
 			);
@@ -948,6 +957,27 @@ function kocist_product_attr( array $product, string $label ): void {
 }
 
 /**
+ * Havuzdaki olcu/ozellik metnini ("Boyut Sinifi: Mega Boy; Ahsap Cinsi: Cam")
+ * etiket / deger ciftlerine ayirir. En az iki "Etiket: deger" parcasi yoksa
+ * bos dizi: kisa metin ("80 x 120 cm") bilgi sutununda oldugu gibi kalir.
+ *
+ * @return array<int, array{0:string, 1:string}>
+ */
+function kocist_spec_pairs( string $spec ): array {
+	$pairs = array();
+
+	foreach ( preg_split( '/\s*[;\n]\s*/u', trim( $spec ) ) ?: array() as $part ) {
+		if ( ! preg_match( '/^([^:]{1,40}):\s*(.+)$/u', trim( $part ), $match ) ) {
+			return array();
+		}
+
+		$pairs[] = array( trim( $match[1] ), trim( $match[2] ) );
+	}
+
+	return count( $pairs ) >= 2 ? $pairs : array();
+}
+
+/**
  * Urune ozel tablolar: Urun Havuzu'nda urun formundaki "Ürün Tabloları"
  * bolumunden girilir (yalnizca Kocist'te gosterilen urunlerde acilir) ve
  * urunle birlikte gelir ($product['tables']). Eklenti hucreleri temizleyip
@@ -1057,6 +1087,13 @@ function kocist_pool_image_large( array $image, string $size = 'large' ): array 
 
 	if ( $full ) {
 		$image['full'] = $full[0];
+	}
+
+	// Kucuk resim satiri 64px: 768px'lik kopya yerine kucuk boyut (hizli yuklenir).
+	$small = wp_get_attachment_image_src( $id, 'thumbnail' );
+
+	if ( $small ) {
+		$image['thumb'] = $small[0];
 	}
 
 	if ( $switched ) {

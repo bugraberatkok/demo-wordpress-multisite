@@ -49,7 +49,9 @@ function pc_assets(): void {
 		null
 	);
 	wp_enqueue_style( 'pc-site', get_theme_file_uri( 'assets/site.css' ), array( 'pc-fonts' ), $ver( 'assets/site.css' ) );
-	wp_enqueue_script( 'pc-site', get_theme_file_uri( 'assets/site.js' ), array(), $ver( 'assets/site.js' ), true );
+	// Urun gorseli tam ekraninda ikinci kademe yakinlastirma (kereste temalariyla ayni motor).
+	wp_enqueue_script( 'pc-zoom', get_theme_file_uri( 'assets/zoom.js' ), array(), $ver( 'assets/zoom.js' ), true );
+	wp_enqueue_script( 'pc-site', get_theme_file_uri( 'assets/site.js' ), array( 'pc-zoom' ), $ver( 'assets/site.js' ), true );
 }
 
 add_action( 'wp_head', 'pc_preconnect', 1 );

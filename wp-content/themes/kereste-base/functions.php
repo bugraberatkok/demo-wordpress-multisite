@@ -75,9 +75,19 @@ function kr_assets(): void {
 		// Buyutulen gorselin altindaki yazi sayfanin ustunde okunsun: perde koyu.
 		wp_add_inline_style( 'kr-tailwind', '.kr-lightbox::backdrop{background:color-mix(in srgb,var(--color-ink) 92%,transparent)}' );
 
-		// Urun galerisi genis sutunda: gorsel buyuk, sagda baslik ve dugmeler.
-		// (Tailwind derlemesi tema disinda; bu tek kural burada.)
-		wp_add_inline_style( 'kr-tailwind', '@media (min-width:64rem){.kr-product-top{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}}' );
+		// (Tailwind derlemesi tema disinda; bu kurallar burada.)
+		// Urun sayfasi: solda bilgi, sagda buyuk galeri (firmanin istegi, eski
+		// woodkocist.com.tr urun sayfasi gibi). Gorsel kendi oraninda, kirpilmadan.
+		wp_add_inline_style(
+			'kr-tailwind',
+			'@media (max-width:68.74rem){.kr-pt-gallery,.kr-pt-info{width:100%;max-width:45rem;margin-inline:auto}}@media (min-width:40rem) and (max-width:68.74rem){.kr-product-shot>img{width:auto;max-width:100%;max-height:calc(100svh - 220px);margin-inline:auto}}@media (max-width:39.99rem){.kr-pt-gallery{width:auto;max-width:none;margin-inline:-1.25rem}}@media (min-width:68.75rem){.kr-product-top{grid-template-columns:minmax(0,.55fr) minmax(0,1fr);align-items:start}.kr-pt-gallery{grid-column:2;grid-row:1}.kr-pt-info{grid-column:1;grid-row:1;position:sticky;top:8rem}}'
+			. '.kr-product-shot{aspect-ratio:auto;overflow:hidden}.kr-product-shot>img,.kr-product-shot>[role=img]{position:static;display:block;height:auto;object-fit:contain}'
+			// Fareyle uzerine gelince imlecin oldugu yer buyur (assets/site.js).
+			. '.kr-product-shot>img{transform-origin:var(--zx,50%) var(--zy,50%);transition:transform .25s ease}.kr-product-shot.is-lens>img{transform:scale(2.2);transition-duration:.12s}'
+			. '@media (prefers-reduced-motion:reduce){.kr-product-shot>img{transition:none}}'
+			// Yer tutucuda buyutme etiketi, imleci ve bos kucuk resim sirasi yok.
+			. '.kr-product-shot:not(:has(img)){cursor:default}.kr-product-shot:not(:has(img))>.absolute{display:none}.kr-pt-gallery ul:not(:has(img)){display:none}'
+		);
 	}
 
 	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', $site_deps, $ver( 'assets/site.js' ), true );

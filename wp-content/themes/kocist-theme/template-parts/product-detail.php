@@ -70,6 +70,8 @@ if ( $group ) {
 	);
 }
 
+$spec_pairs = kocist_spec_pairs( (string) $product['spec'] );
+
 get_header();
 ?>
 <div class="k-wrap k-product__crumbs">
@@ -80,30 +82,6 @@ get_header();
 	<div class="k-wrap k-product__grid">
 
 		<div class="k-product__gallery" data-k-gallery>
-			<div class="k-product__stage" <?php kocist_product_attr( $product, 'Görseller' ); ?>>
-				<?php echo kocist_image_tag( $main, 'k-product__photo', 'Örnek görsel — ürün' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
-
-				<?php kocist_zoom_button( $main ); ?>
-
-				<?php if ( count( $images ) > 1 ) : ?>
-					<button type="button" class="k-product__arrow k-product__arrow--prev" data-k-gallery-prev>
-						<span class="screen-reader-text">Önceki görsel</span>
-						<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-							<path d="M11 3.5 5.5 9l5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-						</svg>
-					</button>
-
-					<button type="button" class="k-product__arrow k-product__arrow--next" data-k-gallery-next>
-						<span class="screen-reader-text">Sonraki görsel</span>
-						<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-							<path d="M7 3.5 12.5 9 7 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-						</svg>
-					</button>
-
-					<span class="k-product__counter" data-k-gallery-counter aria-hidden="true">1 / <?php echo (int) count( $images ); ?></span>
-				<?php endif; ?>
-			</div>
-
 			<?php if ( count( $images ) > 1 ) : ?>
 				<div class="k-product__thumbs">
 					<?php foreach ( $images as $thumb_index => $thumb ) : ?>
@@ -116,11 +94,19 @@ get_header();
 							data-alt="<?php echo esc_attr( $thumb['alt'] ?? '' ); ?>"
 							aria-label="<?php echo esc_attr( sprintf( '%d. görsel', $thumb_index + 1 ) ); ?>"
 						>
-							<img src="<?php echo esc_url( $thumb['thumb'] ?: $thumb['url'] ); ?>" alt="" loading="lazy" decoding="async" />
+							<img src="<?php echo esc_url( $thumb['thumb'] ?: $thumb['url'] ); ?>" alt="" width="64" height="64" decoding="async" />
 						</button>
 					<?php endforeach; ?>
 				</div>
 			<?php endif; ?>
+
+			<div class="k-product__stage" <?php kocist_product_attr( $product, 'Görseller' ); ?>>
+				<?php echo kocist_image_tag( $main, 'k-product__photo', 'Örnek görsel — ürün' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+
+				<?php kocist_zoom_button( $main ); ?>
+
+			</div>
+
 		</div>
 
 		<div class="k-product__info">
@@ -138,7 +124,8 @@ get_header();
 
 			<div class="k-product__facts">
 				<span class="k-product__price<?php echo $product['has_price'] ? '' : ' is-quote'; ?>" <?php kocist_product_attr( $product, 'Fiyat' ); ?>><?php echo esc_html( $product['price_label'] ); ?></span>
-				<?php if ( $product['spec'] ) : ?>
+				<?php // Uzun "Etiket: deger; ..." metni altta tablo olur; kisa metin burada kalir. ?>
+				<?php if ( $product['spec'] && ! $spec_pairs ) : ?>
 					<span class="k-product__spec" <?php kocist_product_attr( $product, 'Özellikler' ); ?>><?php echo esc_html( $product['spec'] ); ?></span>
 				<?php endif; ?>
 			</div>
@@ -170,15 +157,30 @@ $body_html = trim( (string) $product['body'] ) !== '' ? wp_kses_post( wpautop( $
 $tables    = kocist_product_tables( $product );
 $preview   = function_exists( 'nwcs_is_preview' ) && nwcs_is_preview();
 
-if ( '' !== $body_html || $tables || $preview ) :
+if ( '' !== $body_html || $tables || $preview || $spec_pairs ) :
 	?>
-	<section class="k-pdetail<?php echo ( '' !== $body_html && ( $tables || $preview ) ) ? ' k-pdetail--split' : ''; ?>" aria-labelledby="k-pdetail-title">
+	<?php // Metin solda, ozellik tablosu sagda; urun tablolari (cok sutunlu olabilir) altta tam genislikte. ?>
+	<section class="k-pdetail<?php echo ( '' !== $body_html && $spec_pairs ) ? ' k-pdetail--split' : ''; ?>" aria-labelledby="k-pdetail-title">
 		<div class="k-wrap">
 			<h2 class="k-pdetail__title" id="k-pdetail-title" <?php nwcs_edit_attr( 'product', 'detail', 'body_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'detail', 'body_title' ) ?: 'Ürün Detayı' ); ?></h2>
 
 			<div class="k-pdetail__grid">
 				<?php if ( '' !== $body_html ) : ?>
 					<div class="k-pdetail__text k-product__desc--rich" <?php kocist_product_attr( $product, 'Detay metni' ); ?>><?php echo $body_html; // phpcs:ignore WordPress.Security.EscapingOutput -- wp_kses_post ile temizlendi. ?></div>
+				<?php endif; ?>
+
+				<?php if ( $spec_pairs ) : ?>
+					<div class="k-pdetail__specs" <?php kocist_product_attr( $product, 'Özellikler' ); ?>>
+						<h3 class="k-pdetail__subtitle">Teknik özellikler</h3>
+						<dl class="k-specs-list">
+							<?php foreach ( $spec_pairs as $pair ) : ?>
+								<div>
+									<dt><?php echo esc_html( $pair[0] ); ?></dt>
+									<dd><?php echo esc_html( $pair[1] ); ?></dd>
+								</div>
+							<?php endforeach; ?>
+						</dl>
+					</div>
 				<?php endif; ?>
 
 				<?php if ( $tables || $preview ) : ?>

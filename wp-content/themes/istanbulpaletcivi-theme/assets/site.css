@@ -317,13 +317,64 @@ p { margin: 0; }
 .pc-pagehead__title { max-width: 20ch; font-size: clamp(2.5rem, 6vw, 4.5rem); }
 .pc-pagehead__lead { max-width: 42rem; margin-top: 1rem; color: rgb(255 255 255 / 0.86); font-size: 1.1875rem; }
 
-.pc-product { display: grid; gap: 3rem; align-items: start; }
-/* Siparis kutusu daralir, gorsel kolonu genisler; mobilde gorsel ekran
-   kenarina kadar uzanir (kenar boslugu yazilarda kalir). */
-@media (min-width: 960px) { .pc-product { grid-template-columns: minmax(0, 1fr) 19rem; gap: 3rem; } }
-.pc-product__figure { position: relative; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--radius); background: var(--steel); }
-@media (max-width: 767.98px) { .pc-product__figure { margin-inline: -1.25rem; border-radius: 0; } }
-.pc-product__img { width: 100%; height: 100%; object-fit: cover; }
+/* Urun sayfasi: solda cesit bilgisi ve siparis kutusu (yapisik), sagda buyuk,
+   cercevesiz gorsel (firmanin istegi, eski woodkocist.com.tr urun sayfasi gibi).
+   Gorsel kendi oraninda, kirpilmadan. Aciklama altta, okunur genislikte.
+   Telefonda gorsel ustte, ekran kenarina kadar. */
+.pc-product { display: grid; gap: 2.5rem; align-items: start; }
+.pc-pagehead--slim { padding-block: 1rem; }
+/* Urun sayfasinda ince seritten sonra gorsel ve siparis kutusu hemen baslar. */
+.pc-section:has(> .pc-product) { padding-top: 2.5rem; }
+.pc-product__title { color: var(--navy); font-size: clamp(2.125rem, 3.4vw, 2.875rem); line-height: 1; }
+.pc-product__lead { margin-top: 0.875rem; color: var(--muted, #4a5568); font-size: 1.125rem; }
+.pc-product__side .pc-product__tool { margin: 1rem 0 1.25rem; }
+@media (max-width: 1099.98px) {
+	.pc-product__figure { width: 100%; max-width: 45rem; margin-inline: auto; }
+}
+/* Ust bolum yalniz [bilgi | gorsel]; aciklama ayri bolumde (yapisik sutun alta tasmasin). */
+@media (min-width: 1100px) {
+	.pc-product { grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); gap: 3rem; }
+	.pc-product__figure { grid-column: 2; grid-row: 1; }
+	.pc-product__side { grid-column: 1; grid-row: 1; position: sticky; top: calc(var(--header) + 1.5rem); }
+}
+.pc-pdetail { padding-block: 3rem 0; }
+@media (min-width: 1100px) {
+	/* Aciklama solda okunur genislikte, "Kullanildigi isler" yaninda. */
+	.pc-product__main:has(.pc-ticks) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: clamp(2.5rem, 5vw, 5rem); }
+	.pc-product__main:has(.pc-ticks) > .pc-prose { grid-column: 1; grid-row: 1 / span 2; }
+	.pc-product__main:has(.pc-ticks) > .pc-product__subtitle { grid-column: 2; grid-row: 1; margin-top: 0; }
+	.pc-product__main:has(.pc-ticks) > .pc-ticks { grid-column: 2; grid-row: 2; align-self: start; }
+	.pc-product__main .pc-prose { max-width: 48rem; }
+}
+.pc-product .pc-order-card { position: static; }
+.pc-product__figure { position: relative; margin: 0; overflow: hidden; border-radius: var(--radius); }
+/* Tablette (tek sutun) gorsel ve bilgi ortada; dikey fotograf ekrani tek basina doldurmasin. */
+@media (min-width: 768px) and (max-width: 1099.98px) {
+	.pc-product__figure, .pc-product__side { width: 100%; max-width: 45rem; margin-inline: auto; }
+	.pc-product__img { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
+}
+@media (max-width: 767.98px) { .pc-product__figure { width: auto; max-width: none; margin-inline: -1.25rem; border-radius: 0; } }
+.pc-product__img { display: block; width: 100%; height: auto; }
+
+/* Fareyle uzerine gelince imlecin oldugu yer buyur; tiklayinca tam ekran (assets/site.js). */
+.pc-product__stage { display: block; width: 100%; padding: 0; overflow: hidden; border: 0; background: none; cursor: zoom-in; }
+.pc-product__stage:not(:has(img)) { cursor: default; }
+.pc-product__stage:focus-visible { outline: 3px solid var(--navy); outline-offset: -3px; }
+.pc-product__stage .pc-product__img { transform-origin: var(--zx, 50%) var(--zy, 50%); transition: transform .25s ease; }
+.pc-product__stage.is-lens .pc-product__img { transform: scale(2.2); transition-duration: .12s; }
+
+.pc-lb { width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: #0b1730; color: #fff; overflow: hidden; }
+.pc-lb[open] { display: grid; place-items: center; }
+.pc-lb::backdrop { background: rgb(11 23 48 / 0.92); }
+html:has(.pc-lb[open]) { overflow: hidden; }
+.pc-lb__stage { display: flex; align-items: center; justify-content: center; max-width: 100vw; max-height: 100dvh; }
+.pc-lb__img { display: block; max-width: 100vw; max-height: 100dvh; width: auto; height: auto; object-fit: contain; user-select: none; }
+.pc-lb__close { position: absolute; top: 1rem; right: 1rem; z-index: 2; display: grid; place-items: center; width: 3rem; height: 3rem; padding: 0; border: 1px solid rgb(255 255 255 / 0.3); border-radius: 999px; background: rgb(11 23 48 / 0.6); color: #fff; font-size: 1.75rem; line-height: 1; cursor: pointer; }
+.pc-lb__close:hover { background: var(--navy); }
+.pc-lb__close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.pc-lb__hint { position: absolute; bottom: 1rem; left: 50%; z-index: 2; margin: 0; padding: 0.4rem 0.9rem; transform: translateX(-50%); border-radius: 999px; background: rgb(11 23 48 / 0.6); color: rgb(255 255 255 / 0.85); font-size: 0.875rem; white-space: nowrap; }
+@media (max-width: 599px) { .pc-lb__hint { width: calc(100% - 2rem); white-space: normal; text-align: center; } }
+@media (prefers-reduced-motion: reduce) { .pc-product__stage .pc-product__img { transition: none; } }
 .pc-product__tool { margin-top: 1.5rem; font-weight: 700; }
 .pc-product__tool::before { content: ""; display: inline-block; width: 1.5rem; height: 3px; margin-right: 0.625rem; vertical-align: middle; background: var(--navy); }
 .pc-product__subtitle { margin-top: 2.5rem; color: var(--navy); font-size: 1.75rem; }

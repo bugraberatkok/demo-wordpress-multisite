@@ -148,7 +148,32 @@
 			nav.hidden = gallery.length < 2;
 		};
 
+		// Fareyle buyuk gorselin uzerine gelince imlecin oldugu yer buyur (yalnizca fare).
+		var lens = function ( event ) {
+			if ( 'mouse' !== event.pointerType || ! main.querySelector( 'img' ) ) {
+				return;
+			}
+
+			var box = main.getBoundingClientRect();
+
+			main.style.setProperty( '--zx', ( ( event.clientX - box.left ) / box.width * 100 ) + '%' );
+			main.style.setProperty( '--zy', ( ( event.clientY - box.top ) / box.height * 100 ) + '%' );
+			main.classList.add( 'is-lens' );
+		};
+
+		main.addEventListener( 'pointerenter', lens );
+		main.addEventListener( 'pointermove', lens );
+		main.addEventListener( 'pointerleave', function () {
+			main.classList.remove( 'is-lens' );
+		} );
+
 		main.addEventListener( 'click', function () {
+			main.classList.remove( 'is-lens' );
+
+			// Gorsel yoksa (yer tutucu) buyutulecek bir sey yok.
+			if ( ! main.querySelector( 'img' ) ) {
+				return;
+			}
 			show( parseInt( main.getAttribute( 'data-kr-open' ), 10 ) || 0 );
 			returnTo = document.activeElement;
 

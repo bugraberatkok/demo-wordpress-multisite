@@ -5,17 +5,18 @@
  *
  * $args: title, lead, page (manifest anahtari; duzenleme isaretleri icin),
  * crumbs (array of [label, url, isaret?]), title_edit / lead_edit (pc_edit()
- * isaret tanimi; verilmezse page.head.title / page.head.lead).
+ * isaret tanimi; verilmezse page.head.title / page.head.lead), compact (true:
+ * yalnizca ince serit ve konum yolu; baslik sayfanin icinde, ornegin urun sayfasi).
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$args = wp_parse_args( $args ?? array(), array( 'title' => '', 'lead' => '', 'page' => '', 'crumbs' => array(), 'title_edit' => null, 'lead_edit' => null ) );
+$args = wp_parse_args( $args ?? array(), array( 'title' => '', 'lead' => '', 'page' => '', 'crumbs' => array(), 'title_edit' => null, 'lead_edit' => null, 'compact' => false ) );
 
 $title_edit = $args['title_edit'] ?? ( $args['page'] ? array( $args['page'], 'head', 'title' ) : null );
 $lead_edit  = $args['lead_edit'] ?? ( $args['page'] ? array( $args['page'], 'head', 'lead' ) : null );
 ?>
-<section class="pc-pagehead">
+<section class="pc-pagehead<?php echo $args['compact'] ? ' pc-pagehead--slim' : ''; ?>">
 	<div class="pc-wrap">
 		<nav class="pc-crumbs" aria-label="Konum">
 			<ol>
@@ -26,8 +27,10 @@ $lead_edit  = $args['lead_edit'] ?? ( $args['page'] ? array( $args['page'], 'hea
 				<li aria-current="page"<?php pc_edit( $title_edit ); ?>><?php echo esc_html( wp_strip_all_tags( $args['title'] ) ); ?></li>
 			</ol>
 		</nav>
-		<h1 class="pc-pagehead__title" <?php pc_edit( $title_edit ); ?>><?php echo esc_html( $args['title'] ); ?></h1>
-		<?php if ( '' !== $args['lead'] ) : ?>
+		<?php if ( ! $args['compact'] ) : ?>
+			<h1 class="pc-pagehead__title" <?php pc_edit( $title_edit ); ?>><?php echo esc_html( $args['title'] ); ?></h1>
+		<?php endif; ?>
+		<?php if ( ! $args['compact'] && '' !== $args['lead'] ) : ?>
 			<p class="pc-pagehead__lead" <?php pc_edit( $lead_edit ); ?>><?php echo esc_html( $args['lead'] ); ?></p>
 		<?php endif; ?>
 	</div>

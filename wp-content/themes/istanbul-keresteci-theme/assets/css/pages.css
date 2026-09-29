@@ -68,28 +68,82 @@
 	gap: 3rem;
 }
 
-@media (min-width: 960px) {
-	.ik-product__grid { grid-template-columns: minmax(0, 1fr) 22rem; gap: 4rem; align-items: start; }
+/*
+ * Solda aciklama, ozellikler ve diger urunler; sagda buyuk gorsel (firmanin
+ * istegi, eski woodkocist.com.tr urun sayfasi gibi). Gorsel kendi oraninda,
+ * kirpilmadan: dikey fotograf ekrandan uzun olabilir. Telefonda gorsel ustte.
+ */
+/* Ust bolum yalniz [bilgi | gorsel]; 1100px altinda tek sutun, gorsel ustte. */
+@media (max-width: 1099px) {
+	.ik-product__media { width: 100%; max-width: 45rem; margin-inline: auto; }
+}
+@media (min-width: 1100px) {
+	.ik-product__grid { grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); gap: 3rem; align-items: start; }
+	.ik-product__buy { grid-column: 1; grid-row: 1; position: sticky; top: 6.5rem; }
+	.ik-product__media { grid-column: 2; grid-row: 1; }
 }
 
+.ik-product__title { font-size: clamp(2.5rem, 4.5vw, 3.75rem); font-weight: 900; line-height: 0.95; }
+.ik-product__lead { margin-top: 1rem; color: var(--toz); font-size: 1.1875rem; line-height: 1.5; }
+/* Urun sayfasinda koyu bant yok: acik zeminde yalniz konum yolu (diger sitelerdeki gibi). */
+.ik-pagehead--slim { padding-block: 1.25rem 0; background: none; color: var(--murekkep); }
+.ik-pagehead--slim .ik-crumbs ol { margin-bottom: 0; }
+.ik-pagehead--slim .ik-crumbs a { color: var(--murekkep); }
+.ik-pagehead--slim .ik-crumbs a:hover { color: var(--golge); }
+
+/* Alt bolum: solda metin, sagda ozellikler; altta diger urunler ve yardim kutusu yan yana. */
+.ik-product__below { display: grid; gap: 3rem; padding-top: clamp(3rem, 6vw, 4.5rem); }
+@media (min-width: 960px) {
+	.ik-product__main--split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 4rem; align-items: start; }
+	.ik-product__aside { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+.ik-product__specs > .ik-product__subtitle:first-child { margin-top: 0; }
 /*
- * Urun gorseli iki sutunun ustunde, sayfa genisliginde: metin ve yan liste
- * altta baslar. Oran 16:9 (tema fotograflari da bu oranda); kisa ekranda
- * yukseklik ekranin cogunu gecmez, fazlasi ustten ve alttan kirpilir.
+ * Ozellik tablosu yoksa: metin solda, yardim kutusu sagda (boylari yakin);
+ * diger urunler listesi altta tam genislikte, uc sutun.
  */
-.ik-product__media { grid-column: 1 / -1; margin: 0; }
+@media (min-width: 960px) {
+	.ik-product__below:not(:has(.ik-product__specs)) { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 4rem; align-items: start; }
+	.ik-product__below:not(:has(.ik-product__specs)) .ik-product__aside { display: contents; }
+	.ik-product__below:not(:has(.ik-product__specs)) .ik-product__main { grid-column: 1; grid-row: 1; }
+	.ik-product__below:not(:has(.ik-product__specs)) .ik-sidelist { grid-column: 1 / -1; grid-row: 2; }
+	.ik-product__below:not(:has(.ik-product__specs)) .ik-sidelist ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 2rem; }
+	.ik-product__below:not(:has(.ik-product__specs)) .ik-sidelist + * { grid-column: 2; grid-row: 1; }
+}
+/* Ince seritten sonra gorsel ve dugmeler hemen baslar. */
+.ik-section.ik-product { padding-top: clamp(2rem, 4vw, 3rem); }
+
+/* Fareyle uzerine gelince imlecin oldugu yer buyur (assets/js/product-zoom.js). */
+.ik-product__media .ik-zoom-open { overflow: hidden; }
+.ik-zoom-open .ik-product__image { transform-origin: var(--zx, 50%) var(--zy, 50%); transition: transform .25s ease; }
+.ik-zoom-open.is-lens .ik-product__image { transform: scale(2.2); transition-duration: .12s; }
+.ik-zoom-open.is-lens .ik-zoom-open__badge { opacity: 0; }
+/* Yer tutucuda buyutme isareti ve imleci yok. */
+.ik-zoom-open:not(:has(img)) { cursor: default; }
+.ik-zoom-open:not(:has(img)) .ik-zoom-open__badge { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+	.ik-zoom-open .ik-product__image { transition: none; }
+}
+
+.ik-product__media { margin-block: 0; margin-inline: 0; }
+@media (max-width: 1099px) {
+	.ik-product__media, .ik-product__buy { width: 100%; max-width: 45rem; margin-inline: auto; }
+}
+@media (min-width: 600px) and (max-width: 1099px) {
+	.ik-product__image { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
+}
 
 .ik-product__image {
+	display: block;
 	width: 100%;
-	aspect-ratio: 16 / 9;
-	max-height: 82vh;
-	object-fit: cover;
+	height: auto;
 	border-radius: var(--kose);
 }
 
 @media (max-width: 599px) {
 	/* Telefonda kenar boslugu da gorsele verilir: ekran genisliginde. */
-	.ik-product__media { margin-inline: calc(-1 * var(--kenar)); }
+	.ik-product__media { width: auto; max-width: none; margin-inline: calc(-1 * var(--kenar)); }
 	.ik-product__image,
 	.ik-product__media .ik-zoom-open { border-radius: 0; }
 }
@@ -129,9 +183,6 @@
 	gap: 2rem;
 }
 
-@media (min-width: 960px) {
-	.ik-product__aside { position: sticky; top: 6.5rem; }
-}
 
 /* Yan liste: butun urunler */
 .ik-sidelist {

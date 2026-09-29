@@ -26,12 +26,12 @@ $whatsapp = kr_whatsapp_url();
 				</ol>
 			</nav>
 
-			<?php // Sutun orani functions.php'de (.kr-product-top): galeri genis. ?>
+			<?php // Yerlesim functions.php'de (.kr-product-top): solda bilgi, sagda buyuk galeri; telefonda galeri ustte. ?>
 			<div class="kr-product-top mt-6 grid gap-10 lg:gap-14">
 
-				<div data-kr-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>" <?php nwcs_edit_attr( $key, 'detail', 'gallery' ); ?>>
+				<div class="kr-pt-gallery" data-kr-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>" <?php nwcs_edit_attr( $key, 'detail', 'gallery' ); ?>>
 					<?php if ( $gallery ) : ?>
-						<button type="button" data-kr-open="0" data-kr-main class="group shot relative block aspect-[4/3] w-full cursor-zoom-in"
+						<button type="button" data-kr-open="0" data-kr-main class="kr-product-shot group shot relative block w-full cursor-zoom-in"
 							aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $product['name'] ) ); ?>">
 							<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>" alt="<?php echo esc_attr( $gallery[0]['alt'] ); ?>" fetchpriority="high" decoding="async" data-kr-main-image />
 							<span class="absolute bottom-3 right-3 bg-ink/80 px-2.5 py-1.5 text-sm font-semibold text-paper" aria-hidden="true" <?php nwcs_edit_attr( 'products', 'shared', 'zoom_label' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'zoom_label' ) ); ?></span>
@@ -55,7 +55,7 @@ $whatsapp = kr_whatsapp_url();
 					<?php endif; ?>
 				</div>
 
-				<div>
+				<div class="kr-pt-info">
 					<span class="stencil block text-[1.9rem]" <?php nwcs_edit_attr( $key, 'card', 'mark' ); ?>><?php echo esc_html( $product['mark'] ); ?></span>
 					<h1 class="mt-3 text-[2.5rem] md:text-[3.25rem]" <?php nwcs_edit_attr( $key, 'card', 'name' ); ?>><?php echo esc_html( $product['name'] ); ?></h1>
 					<p class="mt-4 text-lg leading-relaxed text-muted" <?php nwcs_edit_attr( $key, 'detail', 'lead' ); ?>><?php echo esc_html( nwcs_field( $key, 'detail', 'lead' ) ); ?></p>

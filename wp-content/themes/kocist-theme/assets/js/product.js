@@ -8,6 +8,33 @@
 
 	var gallery = document.querySelector( '[data-k-gallery]' );
 
+	/*
+	 * Fareyle buyuk gorselin uzerine gelince imlecin oldugu yer buyur
+	 * (yalnizca fare; dokunmatikte tiklama dogrudan buyutme penceresini acar).
+	 * Yer tutucuda (gorsel yok) calismaz.
+	 */
+	var lensStage = gallery ? gallery.querySelector( '.k-product__stage' ) : null;
+
+	if ( lensStage && lensStage.querySelector( 'img.k-product__photo' ) ) {
+		var lens = function ( event ) {
+			if ( 'mouse' !== event.pointerType ) {
+				return;
+			}
+
+			var box = lensStage.getBoundingClientRect();
+
+			lensStage.style.setProperty( '--zx', ( ( event.clientX - box.left ) / box.width * 100 ) + '%' );
+			lensStage.style.setProperty( '--zy', ( ( event.clientY - box.top ) / box.height * 100 ) + '%' );
+			lensStage.classList.add( 'is-lens' );
+		};
+
+		lensStage.addEventListener( 'pointerenter', lens );
+		lensStage.addEventListener( 'pointermove', lens );
+		lensStage.addEventListener( 'pointerleave', function () {
+			lensStage.classList.remove( 'is-lens' );
+		} );
+	}
+
 	if ( gallery ) {
 		var stage   = gallery.querySelector( '.k-product__stage' );
 		var photo   = gallery.querySelector( '.k-product__photo' );

@@ -403,6 +403,47 @@ function wk_image_large( array $image ): array {
 }
 
 /**
+ * Urun sayfasinin galerisi: her gorsel icin buyuk hali (wk_image_large) ve
+ * kucuk resim. Kucuk resim havuz sitesinden 'thumbnail' boyutunda alinir.
+ *
+ * @return array<int, array{src:string, srcset:string, width:int, height:int, alt:string, thumb:string}>
+ */
+function wk_gallery( array $product ): array {
+	$out      = array();
+	$switched = function_exists( 'nwcs_pool_blog_id' ) && is_multisite() && (int) nwcs_pool_blog_id() !== get_current_blog_id();
+
+	foreach ( (array) ( $product['images'] ?? array() ) as $image ) {
+		if ( empty( $image['url'] ) ) {
+			continue;
+		}
+
+		$large = wk_image_large( $image );
+		$thumb = (string) $image['url'];
+		$id    = (int) ( $image['id'] ?? 0 );
+
+		if ( $id > 0 ) {
+			if ( $switched ) {
+				switch_to_blog( (int) nwcs_pool_blog_id() );
+			}
+
+			$small = wp_get_attachment_image_src( $id, 'thumbnail' );
+			$thumb = $small ? (string) $small[0] : $thumb;
+
+			if ( $switched ) {
+				restore_current_blog();
+			}
+		}
+
+		$out[] = $large + array(
+			'alt'   => (string) ( $image['alt'] ?? '' ),
+			'thumb' => $thumb,
+		);
+	}
+
+	return $out;
+}
+
+/**
  * Havuzdaki fiyat metni ("10.250 ₺", "1.299,90 ₺") -> sayi; okunamazsa 0
  * (0 ise yapilandirilmis veride teklif uretilmez).
  */

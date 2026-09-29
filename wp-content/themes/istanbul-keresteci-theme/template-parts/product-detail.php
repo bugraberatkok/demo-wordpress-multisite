@@ -20,7 +20,7 @@ $image = ik_product_image( $product, '1536x1536' );
 
 // Panel gorselinde telefon kucuk boyu, genis ekran buyugu indirir.
 $srcset      = ! empty( $image['id'] ) ? (string) wp_get_attachment_image_srcset( (int) $image['id'], '1536x1536' ) : '';
-$image_attrs = '' !== $srcset ? sprintf( ' srcset="%s" sizes="(min-width: 1304px) 1240px, calc(100vw - 32px)"', esc_attr( $srcset ) ) : '';
+$image_attrs = '' !== $srcset ? sprintf( ' srcset="%s" sizes="(min-width: 1304px) 760px, (min-width: 960px) 58vw, 100vw"', esc_attr( $srcset ) ) : '';
 $specs = ik_specs( $product['specs'] );
 $row   = array( 'products', 'catalog', 'items', (int) $product['index'] );
 
@@ -39,12 +39,14 @@ get_template_part(
 		'crumbs'     => array(
 			array( nwcs_field( 'products', 'detail', 'back_label' ), ik_link( '/urunlerimiz/' ), array( 'products', 'detail', 'back_label' ) ),
 		),
+		// Urun adi ve alt metin bilgi sutununda: gorsel ve dugmeler sayfanin basinda.
+		'compact'    => true,
 	)
 );
 ?>
 <section class="ik-section ik-product">
 	<div class="ik-wrap ik-product__grid">
-		<?php // Gorsel iki sutunun ustunde tam genislikte (pages.css: .ik-product__media). ?>
+		<?php // Genis ekranda sagda buyuk gorsel, solda metin ve yan liste; telefonda gorsel ustte (pages.css). ?>
 			<figure class="ik-product__media" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'image' ); ?>>
 				<?php if ( ! empty( $image['url'] ) ) : ?>
 					<?php // Buyutme: tam boy gorsel pencerede, icinde ikinci kademe yakinlastirma (assets/js/product-zoom.js). ?>
@@ -81,23 +83,13 @@ get_template_part(
 				</dialog>
 			<?php endif; ?>
 
-		<article class="ik-product__main">
-			<div class="ik-prose ik-product__body" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'body' ); ?>>
-				<?php ik_paragraphs( $product['body'] ); ?>
-			</div>
-
-			<?php if ( $specs ) : ?>
-				<h2 class="ik-product__subtitle" <?php nwcs_edit_attr( 'products', 'detail', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'products', 'detail', 'specs_title' ) ); ?></h2>
-				<dl class="ik-specs" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'specs' ); ?>>
-					<?php foreach ( $specs as $spec ) : ?>
-						<div class="ik-specs__row">
-							<dt><?php echo esc_html( $spec[0] ); ?></dt>
-							<dd><?php echo esc_html( $spec[1] ); ?></dd>
-						</div>
-					<?php endforeach; ?>
-				</dl>
+		<?php // Genis ekranda solda ad, kisa metin ve dugmeler (yapisik), sagda buyuk gorsel. ?>
+		<div class="ik-product__buy">
+			<h1 class="ik-product__title" <?php nwcs_edit_attr( ...array_merge( $row, array( 'title' ) ) ); ?>><?php echo esc_html( $product['title'] ); ?></h1>
+			<?php $intro = '' !== $lead ? $lead : $product['short']; ?>
+			<?php if ( '' !== trim( (string) $intro ) ) : ?>
+				<p class="ik-product__lead" <?php nwcs_edit_attr( ...$lead_edit ); ?>><?php echo esc_html( $intro ); ?></p>
 			<?php endif; ?>
-
 			<div class="ik-product__actions">
 				<a class="btn btn--solid" href="<?php echo esc_url( add_query_arg( 'urun', rawurlencode( $product['title'] ), ik_link( nwcs_field( 'products', 'detail', 'quote_url' ) ) ) ); ?>" <?php nwcs_edit_attr( 'products', 'detail', 'quote_label' ); ?>>
 					<?php echo esc_html( nwcs_field( 'products', 'detail', 'quote_label' ) ); ?>
@@ -107,6 +99,28 @@ get_template_part(
 					<?php echo esc_html( nwcs_field( 'products', 'detail', 'whatsapp_label' ) ); ?>
 				</a>
 			</div>
+		</div>
+	</div>
+
+	<?php // Metin ve ozellikler ust bolumun altinda, kendi kabinda: yapisik sutun bunlarin ustune binmez. ?>
+	<div class="ik-wrap ik-product__below">
+		<article class="ik-product__main<?php echo $specs ? ' ik-product__main--split' : ''; ?>">
+			<div class="ik-prose ik-product__body" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'body' ); ?>>
+				<?php ik_paragraphs( $product['body'] ); ?>
+			</div>
+			<?php if ( $specs ) : ?>
+				<div class="ik-product__specs">
+					<h2 class="ik-product__subtitle" <?php nwcs_edit_attr( 'products', 'detail', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'products', 'detail', 'specs_title' ) ); ?></h2>
+					<dl class="ik-specs" <?php nwcs_edit_attr( 'products', 'catalog', 'items', $product['index'], 'specs' ); ?>>
+						<?php foreach ( $specs as $spec ) : ?>
+							<div class="ik-specs__row">
+								<dt><?php echo esc_html( $spec[0] ); ?></dt>
+								<dd><?php echo esc_html( $spec[1] ); ?></dd>
+							</div>
+						<?php endforeach; ?>
+					</dl>
+				</div>
+			<?php endif; ?>
 		</article>
 
 		<aside class="ik-product__aside">

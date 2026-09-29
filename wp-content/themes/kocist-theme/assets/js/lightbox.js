@@ -24,7 +24,7 @@
 	// Dugme CSS'te bu sinif olmadan gizli: betik yoksa ise yaramaz dugme gorunmez.
 	document.documentElement.classList.add( 'k-lb-ready' );
 
-	var dialog, img, caption, counter, prevBtn, nextBtn;
+	var dialog, img, stage, zoom, caption, counter, prevBtn, nextBtn;
 	var items   = [];
 	var index   = 0;
 	var opener  = null;
@@ -44,7 +44,7 @@
 				'<button type="button" class="k-lb__btn k-lb__close" data-k-lb-close>' + icon( 'M5.5 5.5l11 11M16.5 5.5l-11 11' ) + '<span class="screen-reader-text">Kapat</span></button>' +
 			'</div>' +
 			'<figure class="k-lb__figure">' +
-				'<img class="k-lb__img" alt="" decoding="async" />' +
+				'<div class="k-lb__stage"><img class="k-lb__img" alt="" decoding="async" /></div>' +
 				'<figcaption class="k-lb__caption"></figcaption>' +
 			'</figure>' +
 			'<button type="button" class="k-lb__btn k-lb__nav k-lb__nav--prev" data-k-lb-prev>' + icon( 'M13.5 4.5 7 11l6.5 6.5' ) + '<span class="screen-reader-text">Önceki görsel</span></button>' +
@@ -53,6 +53,7 @@
 		document.body.appendChild( dialog );
 
 		img     = dialog.querySelector( '.k-lb__img' );
+		stage   = dialog.querySelector( '.k-lb__stage' );
 		caption = dialog.querySelector( '.k-lb__caption' );
 		counter = dialog.querySelector( '.k-lb__count' );
 		prevBtn = dialog.querySelector( '[data-k-lb-prev]' );
@@ -76,6 +77,10 @@
 		} );
 
 		dialog.addEventListener( 'keydown', function ( event ) {
+			if ( zoom && zoom.key( event ) ) {
+				return;
+			}
+
 			if ( 'ArrowLeft' === event.key ) {
 				event.preventDefault();
 				show( index - 1 );
@@ -85,31 +90,50 @@
 			}
 		} );
 
-		var startX = null;
+		// Gorsele tiklayinca tiklanan yer yakinlasir, yakinken surukleyerek gezilir;
+		// tekerlek ve iki parmak da calisir (assets/js/zoom.js). Sigdirilmisken
+		// parmakla yana kaydirmak onceki / sonraki gorsele gecer.
+		zoom = 'function' === typeof window.woodZoom
+			? window.woodZoom( stage, img, {
+				swipe: function ( direction ) {
+					if ( items.length > 1 ) {
+						show( index + direction );
+					}
+				},
+			} )
+			: null;
 
-		dialog.addEventListener( 'touchstart', function ( event ) {
-			startX = event.changedTouches[ 0 ].clientX;
-		}, { passive: true } );
+		if ( ! zoom ) {
+			var startX = null;
 
-		dialog.addEventListener( 'touchend', function ( event ) {
-			if ( null === startX ) {
-				return;
-			}
+			dialog.addEventListener( 'touchstart', function ( event ) {
+				startX = event.changedTouches[ 0 ].clientX;
+			}, { passive: true } );
 
-			var delta = event.changedTouches[ 0 ].clientX - startX;
+			dialog.addEventListener( 'touchend', function ( event ) {
+				if ( null === startX ) {
+					return;
+				}
 
-			if ( Math.abs( delta ) > 50 ) {
-				show( index + ( delta < 0 ? 1 : -1 ) );
-			}
+				var delta = event.changedTouches[ 0 ].clientX - startX;
 
-			startX = null;
-		}, { passive: true } );
+				if ( Math.abs( delta ) > 50 ) {
+					show( index + ( delta < 0 ? 1 : -1 ) );
+				}
+
+				startX = null;
+			}, { passive: true } );
+		}
 	}
 
 	function show( target ) {
 		index = ( target + items.length ) % items.length;
 
 		var item = items[ index ];
+
+		if ( zoom ) {
+			zoom.reset();
+		}
 
 		dialog.classList.add( 'is-loading' );
 		img.onload = img.onerror = function () {

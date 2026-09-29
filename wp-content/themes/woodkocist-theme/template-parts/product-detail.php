@@ -3,9 +3,13 @@
  * Urun sayfasi (/urun/<slug>/). Eklenti (nwcs_product_template) bu dosyayi
  * $product ile cagirir: site istisnalari uygulanmis havuz urunu.
  *
- * Solda gorsel (yoksa kod plakasi) ve aciklama; sagda fiyat, adet ve "Sepete
- * ekle" (fiyatsiz urunde WhatsApp / form ile fiyat sorma),
- * altinda teknik ozellikler tablosu; en altta ayni kategoriden urunler.
+ * Solda ad, fiyat, adet ve "Sepete ekle" (fiyatsiz urunde WhatsApp / form ile
+ * fiyat sorma); sagda buyuk galeri (yoksa kod plakasi).
+ * Gorsel kendi oraninda, kirpilmadan gosterilir: dikey fotograf ekrandan uzun
+ * olabilir (firmanin istegi, eski woodkocist.com.tr urun sayfasi gibi).
+ * Fareyle uzerine gelince imlecin oldugu yer buyur; tiklayinca tam ekran,
+ * tam ekranda tiklayinca daha da yakinlasir. Altta detay metni ve teknik
+ * ozellikler kendi bolumunde, en altta ayni kategoriden urunler.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -19,7 +23,7 @@ foreach ( wk_products() as $candidate ) {
 	}
 }
 
-$image   = wk_image( $product );
+$gallery = wk_gallery( $product );
 $specs   = wk_specs( (string) $product['spec'] );
 $wa      = wk_whatsapp( wk_order_text( $product ) );
 // Formlar ?urun=<havuz no> ile acilir; urun sunucuda cozulur ve form dolu gelir.
@@ -62,13 +66,47 @@ get_header();
 </nav>
 
 <article class="wk-wrap wk-product">
-	<div class="wk-product__media" <?php wk_product_src( $product, 'Görsel' ); ?>>
-		<?php if ( $image['url'] ) : ?>
-			<?php $large = wk_image_large( $image ); ?>
-			<img src="<?php echo esc_url( $large['src'] ); ?>"
-				<?php if ( $large['srcset'] ) : ?>srcset="<?php echo esc_attr( $large['srcset'] ); ?>" sizes="(min-width: 1280px) 700px, (min-width: 960px) 56vw, calc(100vw - 2rem)"<?php endif; ?>
-				<?php if ( $large['width'] && $large['height'] ) : ?>width="<?php echo (int) $large['width']; ?>" height="<?php echo (int) $large['height']; ?>"<?php endif; ?>
-				alt="<?php echo esc_attr( $image['alt'] ?: $product['title'] ); ?>" fetchpriority="high" decoding="async" />
+	<div class="wk-product__media" data-wk-gallery <?php wk_product_src( $product, 'Görsel' ); ?>>
+		<?php if ( $gallery ) : ?>
+			<?php if ( count( $gallery ) > 1 ) : ?>
+				<ul class="wk-product__thumbs" aria-label="<?php echo esc_attr( $product['title'] ); ?> görselleri">
+					<?php foreach ( $gallery as $index => $item ) : ?>
+						<li>
+							<button type="button" class="wk-product__thumb<?php echo 0 === $index ? ' is-active' : ''; ?>"
+								data-wk-thumb
+								data-src="<?php echo esc_url( $item['src'] ); ?>"
+								data-srcset="<?php echo esc_attr( $item['srcset'] ); ?>"
+								data-width="<?php echo (int) $item['width']; ?>" data-height="<?php echo (int) $item['height']; ?>"
+								aria-label="<?php echo esc_attr( sprintf( 'Görsel %d', $index + 1 ) ); ?>"
+								aria-pressed="<?php echo 0 === $index ? 'true' : 'false'; ?>">
+								<img src="<?php echo esc_url( $item['thumb'] ); ?>" alt="" width="64" height="64" loading="lazy" decoding="async" />
+							</button>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+			<?php $first = $gallery[0]; ?>
+			<?php // Fareyle uzerine gelince imlecin oldugu yer buyur; tiklayinca tam ekran (assets/site.js). ?>
+			<button type="button" class="wk-product__stage" data-wk-stage data-full="<?php echo esc_url( $first['src'] ); ?>"
+				aria-label="<?php echo esc_attr( $product['title'] ); ?> görselini tam ekranda aç">
+				<img class="wk-product__photo" data-wk-photo src="<?php echo esc_url( $first['src'] ); ?>"
+					<?php if ( $first['srcset'] ) : ?>srcset="<?php echo esc_attr( $first['srcset'] ); ?>" sizes="(min-width: 1280px) 760px, (min-width: 960px) 58vw, 100vw"<?php endif; ?>
+					<?php if ( $first['width'] && $first['height'] ) : ?>width="<?php echo (int) $first['width']; ?>" height="<?php echo (int) $first['height']; ?>"<?php endif; ?>
+					alt="<?php echo esc_attr( $first['alt'] ?: $product['title'] ); ?>" fetchpriority="high" decoding="async" />
+			</button>
+
+			<dialog class="wk-lb" data-wk-lb aria-label="<?php echo esc_attr( $product['title'] ); ?>">
+				<div class="wk-lb__stage" data-wk-lb-stage>
+					<img class="wk-lb__img" data-wk-lb-img src="" alt="<?php echo esc_attr( $product['title'] ); ?>" />
+				</div>
+				<p class="wk-lb__hint" data-wk-lb-hint>Yakınlaştırmak için görsele tıklayın; yakınken fareyle gezinin.</p>
+				<?php if ( count( $gallery ) > 1 ) : ?>
+					<button type="button" class="wk-lb__nav wk-lb__nav--prev" data-wk-lb-prev aria-label="Önceki görsel"><span aria-hidden="true">‹</span></button>
+					<button type="button" class="wk-lb__nav wk-lb__nav--next" data-wk-lb-next aria-label="Sonraki görsel"><span aria-hidden="true">›</span></button>
+					<p class="wk-lb__count" data-wk-lb-count aria-live="polite"></p>
+				<?php endif; ?>
+				<button type="button" class="wk-lb__close" data-wk-lb-close aria-label="Kapat"><span aria-hidden="true">×</span></button>
+			</dialog>
 		<?php else : ?>
 			<span class="wk-plate wk-plate--lg" aria-hidden="true"><?php echo esc_html( $product['code'] ); ?></span>
 		<?php endif; ?>
@@ -110,23 +148,37 @@ get_header();
 			</ul>
 		</div>
 
-		<?php if ( $specs ) : ?>
-			<h2 class="wk-product__subtitle" <?php nwcs_edit_attr( 'product', 'labels', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'labels', 'specs_title' ) ); ?></h2>
-			<dl class="wk-specs" <?php wk_product_src( $product, 'Teknik özellikler' ); ?>>
-				<?php foreach ( $specs as $pair ) : ?>
-					<div>
-						<dt><?php echo esc_html( $pair[0] ); ?></dt>
-						<dd><?php echo esc_html( $pair[1] ); ?></dd>
-					</div>
-				<?php endforeach; ?>
-			</dl>
-		<?php endif; ?>
 	</div>
 
-	<div class="wk-product__body wk-prose" <?php wk_product_src( $product, 'Detay metni' ); ?>>
-		<?php echo wp_kses_post( wpautop( (string) $product['body'] ) ); ?>
-	</div>
 </article>
+
+<?php
+$has_body = '' !== trim( wp_strip_all_tags( (string) $product['body'] ) );
+?>
+<?php if ( $has_body || $specs ) : ?>
+	<?php // Detay metni ve teknik ozellikler gorselin altinda, kendi bolumunde: sol sutun uzayip sag bos kalmasin. ?>
+	<section class="wk-wrap wk-pdetail<?php echo $has_body && $specs ? ' wk-pdetail--split' : ''; ?>" aria-label="Ürün detayı">
+		<?php if ( $has_body ) : ?>
+			<div class="wk-pdetail__text wk-prose" <?php wk_product_src( $product, 'Detay metni' ); ?>>
+				<?php echo wp_kses_post( wpautop( (string) $product['body'] ) ); ?>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $specs ) : ?>
+			<aside class="wk-pdetail__specs">
+				<h2 class="wk-product__subtitle" <?php nwcs_edit_attr( 'product', 'labels', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'labels', 'specs_title' ) ); ?></h2>
+				<dl class="wk-specs" <?php wk_product_src( $product, 'Teknik özellikler' ); ?>>
+					<?php foreach ( $specs as $pair ) : ?>
+						<div>
+							<dt><?php echo esc_html( $pair[0] ); ?></dt>
+							<dd><?php echo esc_html( $pair[1] ); ?></dd>
+						</div>
+					<?php endforeach; ?>
+				</dl>
+			</aside>
+		<?php endif; ?>
+	</section>
+<?php endif; ?>
 
 <?php if ( $related ) : ?>
 	<section class="wk-related" aria-labelledby="wk-related-title">

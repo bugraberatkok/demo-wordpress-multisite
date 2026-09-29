@@ -404,13 +404,82 @@ p { margin: 0; }
 /* ------------------------------------------------------------------ */
 
 .wk-product { display: grid; gap: 2rem; padding-block: 1.5rem clamp(3rem, 6vw, 4.5rem); }
-/* Gorsel sayfanin ana ogesi: genis ekranda sutunun ~%60'i, mobilde kenardan kenara (ince cerceve). */
-@media (min-width: 960px) { .wk-product { grid-template-columns: 1.45fr 1fr; gap: clamp(2rem, 3.5vw, 3rem); align-items: start; } .wk-product__body { grid-column: 1 / 2; } }
-.wk-product__media { overflow: hidden; margin-inline: -0.5rem; padding: 0.35rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
-@media (min-width: 768px) { .wk-product__media { margin-inline: 0; padding: 0.5rem; } }
-.wk-product__media img { display: block; width: 100%; height: auto; border-radius: calc(var(--radius) - 2px); background: var(--frame); }
+/*
+ * Urun sayfasi: solda bilgi ve satin alma, sagda buyuk galeri (firmanin
+ * istegi, eski woodkocist.com.tr urun sayfasi gibi). Gorsel kendi oraninda,
+ * kirpilmadan ve cercevesiz: 1280x1714 dikey fotograf genis ekranda ~760x1020
+ * olur ve ekrandan uzun kalir, bu bilerek. Bilgi sutunu yapisik (sticky):
+ * uzun gorsel kayarken fiyat ve "Sepete ekle" gozde kalir. Detay metni ve
+ * teknik ozellikler altta kendi bolumunde (.wk-pdetail). 1100px altinda tek
+ * sutun, galeri ustte (tablette 320px bilgi sutunu cok dar kaliyordu).
+ */
+@media (min-width: 1100px) {
+	.wk-product { grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); gap: clamp(2rem, 3.5vw, 3rem); align-items: start; }
+	.wk-product__info { grid-column: 1; grid-row: 1; position: sticky; top: calc(var(--header) + 1.25rem); }
+	.wk-product__media { grid-column: 2; grid-row: 1; }
+}
+.wk-product__media { display: flex; flex-direction: column; min-width: 0; margin-inline: -1rem; }
+@media (min-width: 768px) { .wk-product__media { margin-inline: 0; } }
+/* Tablette (tek sutun) galeri ve bilgi ortada, 45rem; dikey fotograf ekrani tek basina doldurmasin. */
+@media (min-width: 600px) and (max-width: 1099.98px) {
+	.wk-product__media, .wk-product__info { width: 100%; max-width: 45rem; margin-inline: auto; }
+	.wk-product__photo { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
+}
+
+/* Buyuk gorsel: cerceve yok; fareyle uzerine gelince imlecin oldugu yer buyur. */
+.wk-product__stage { position: relative; display: block; width: 100%; padding: 0; overflow: hidden; border: 0; background: var(--frame); cursor: zoom-in; }
+@media (min-width: 768px) { .wk-product__stage { border-radius: var(--radius); } }
+.wk-product__stage:focus-visible { outline: 3px solid var(--mahogany); outline-offset: 3px; }
+.wk-product__photo { display: block; width: 100%; height: auto; transform-origin: var(--zx, 50%) var(--zy, 50%); transition: transform .25s ease; }
+.wk-product__stage.is-zoomed .wk-product__photo { transform: scale(2.2); transition-duration: .12s; }
+
+/* Kucuk resimler: telefonda buyuk gorselin altinda (gorsel ilk gorunen sey); genis ekranda ustte. */
+.wk-product__thumbs { order: 2; display: flex; gap: 0.5rem; margin: 0.75rem 0 0; padding: 0 1rem; list-style: none; overflow-x: auto; scrollbar-width: none; }
+.wk-product__thumbs::-webkit-scrollbar { display: none; }
+@media (min-width: 768px) { .wk-product__thumbs { order: 0; flex-wrap: wrap; gap: 0.625rem; margin: 0 0 0.875rem; padding: 0; } }
+.wk-product__thumb { display: block; flex: none; width: 3.5rem; height: 3.5rem; padding: 0; overflow: hidden; border: 2px solid transparent; border-radius: 0.5rem; background: var(--frame); opacity: 0.55; cursor: pointer; transition: opacity .15s, border-color .15s; }
+@media (min-width: 768px) { .wk-product__thumb { width: 4.25rem; height: 4.25rem; } }
+.wk-product__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.wk-product__thumb:hover { opacity: 0.9; }
+.wk-product__thumb.is-active { opacity: 1; border-color: var(--mahogany); }
+.wk-product__thumb:focus-visible { outline: 2px solid var(--mahogany); outline-offset: 2px; }
+
 .wk-product__info { display: flex; flex-direction: column; }
-@media (min-width: 960px) { .wk-product__info { position: sticky; top: calc(var(--header) + 1.25rem); grid-row: span 2; } }
+
+/* Detay metni ve teknik ozellikler: gorselin altinda, iki sutun (metin genis). */
+.wk-pdetail { display: grid; gap: 2.5rem; padding-block: 0 clamp(3rem, 6vw, 4.5rem); }
+@media (min-width: 960px) {
+	.wk-pdetail { padding-top: 1rem; border-top: 1px solid var(--line); }
+	.wk-pdetail--split { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(2.5rem, 5vw, 5rem); align-items: start; }
+	.wk-pdetail__specs { position: sticky; top: calc(var(--header) + 1.25rem); }
+}
+.wk-pdetail__text { padding-top: 1.25rem; }
+.wk-pdetail__specs .wk-product__subtitle { margin-top: 1.25rem; }
+
+/* Tam ekran gorsel: koyu zemin; tiklayinca tiklanan yer buyur, yakinken fareyle gezilir. */
+.wk-lb { width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: #140b0b; color: #fff; overflow: hidden; }
+.wk-lb::backdrop { background: rgb(20 11 11 / 0.92); }
+html:has(.wk-lb[open]) { overflow: hidden; }
+.wk-lb[open] { display: grid; }
+.wk-lb__stage { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; cursor: zoom-in; touch-action: none; }
+.wk-lb__img { max-width: 100vw; max-height: 100dvh; width: auto; height: auto; object-fit: contain; transform-origin: 0 0; user-select: none; -webkit-user-drag: none; }
+.wk-lb.is-zoomed .wk-lb__stage { cursor: zoom-out; }
+.wk-lb__close, .wk-lb__nav { position: absolute; z-index: 2; display: grid; place-items: center; width: 3rem; height: 3rem; padding: 0; border: 1px solid rgb(255 255 255 / 0.25); border-radius: 999px; background: rgb(20 11 11 / 0.6); color: #fff; font-size: 1.75rem; line-height: 1; cursor: pointer; }
+.wk-lb__close { top: 1rem; right: 1rem; }
+.wk-lb__nav { top: 50%; margin-top: -1.5rem; }
+.wk-lb__nav--prev { left: 1rem; }
+.wk-lb__nav--next { right: 1rem; }
+.wk-lb__close:hover, .wk-lb__nav:hover { background: var(--mahogany); border-color: var(--mahogany); }
+.wk-lb__close:focus-visible, .wk-lb__nav:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.wk-lb__count, .wk-lb__hint { position: absolute; z-index: 2; margin: 0; font-size: 0.875rem; color: rgb(255 255 255 / 0.8); }
+.wk-lb__count { top: 1.25rem; left: 1rem; padding: 0.35rem 0.75rem; border-radius: 999px; background: rgb(20 11 11 / 0.6); font-variant-numeric: tabular-nums; }
+.wk-lb__hint { bottom: 1rem; left: 50%; transform: translateX(-50%); padding: 0.4rem 0.9rem; border-radius: 999px; background: rgb(20 11 11 / 0.6); white-space: nowrap; transition: opacity .3s; }
+.wk-lb.is-zoomed .wk-lb__hint { opacity: 0; }
+@media (max-width: 599px) { .wk-lb__hint { white-space: normal; width: calc(100% - 2rem); text-align: center; } .wk-lb__nav { top: auto; bottom: 4.5rem; margin: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+	.wk-product__photo, .wk-lb__hint { transition: none; }
+}
 .wk-product__code { color: var(--mahogany); font-size: 0.9375rem; font-weight: 700; }
 .wk-product__title { margin-top: 0.5rem; color: var(--wine); font-size: clamp(1.625rem, 3.2vw, 2.375rem); }
 .wk-product__short { margin-top: 1rem; color: var(--muted); }

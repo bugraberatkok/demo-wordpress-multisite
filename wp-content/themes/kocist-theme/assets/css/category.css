@@ -390,7 +390,8 @@
 .k-product__spec {
 	padding: 5px 13px;
 	border: 1px solid var(--line);
-	border-radius: 999px;
+	/* Uzun ozellik metni birkac satira iner; tam yuvarlak hap o zaman elips gibi duruyordu. */
+	border-radius: 12px;
 	font-size: 14px;
 	color: var(--muted);
 }

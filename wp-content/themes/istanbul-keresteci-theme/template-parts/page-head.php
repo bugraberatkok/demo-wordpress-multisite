@@ -6,7 +6,8 @@
  * text (alan yerine dogrudan deger), crumbs ([ [etiket, adres, duzenleme], ... ];
  * duzenleme istege bagli nwcs_edit_attr argumanlari),
  * title_edit ve text_edit (dogrudan deger verildiginde onizlemede tiklaninca
- * acilacak alan: nwcs_edit_attr argumanlari).
+ * acilacak alan: nwcs_edit_attr argumanlari), compact (true: yalnizca ince
+ * serit ve konum yolu; baslik sayfanin icinde, ornegin urun sayfasi).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -17,6 +18,7 @@ $own_text  = isset( $args['text'] );
 $title     = $own_title ? (string) $args['title'] : nwcs_field( $page, 'head', 'title' );
 $text      = $own_text ? (string) $args['text'] : nwcs_field( $page, 'head', 'text' );
 $crumbs    = $args['crumbs'] ?? array();
+$compact   = ! empty( $args['compact'] );
 
 // Dogrudan verilen deger panelde baska bir alandan geliyorsa o alana isaret.
 $edit = static function ( bool $own, string $field, array $args ) use ( $page ): void {
@@ -27,7 +29,7 @@ $edit = static function ( bool $own, string $field, array $args ) use ( $page ):
 	}
 };
 ?>
-<header class="ik-pagehead">
+<header class="ik-pagehead<?php echo $compact ? ' ik-pagehead--slim' : ''; ?>">
 	<div class="ik-wrap">
 		<?php if ( $crumbs ) : ?>
 			<nav class="ik-crumbs" aria-label="Konum">
@@ -39,9 +41,11 @@ $edit = static function ( bool $own, string $field, array $args ) use ( $page ):
 			</nav>
 		<?php endif; ?>
 
-		<h1 class="ik-pagehead__title" <?php $edit( $own_title, 'title', $args ); ?>><?php echo esc_html( $title ); ?></h1>
+		<?php if ( ! $compact ) : ?>
+			<h1 class="ik-pagehead__title" <?php $edit( $own_title, 'title', $args ); ?>><?php echo esc_html( $title ); ?></h1>
+		<?php endif; ?>
 
-		<?php if ( '' !== trim( $text ) ) : ?>
+		<?php if ( ! $compact && '' !== trim( $text ) ) : ?>
 			<p class="ik-pagehead__text" <?php $edit( $own_text, 'text', $args ); ?>><?php echo esc_html( $text ); ?></p>
 		<?php endif; ?>
 	</div>

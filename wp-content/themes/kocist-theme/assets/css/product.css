@@ -1,6 +1,8 @@
 /*
- * Urun sayfasi: solda galeri, sagda bilgiler; altinda teknik ozellikler
- * ve sikca sorulan sorular.
+ * Urun sayfasi: solda bilgiler, sagda buyuk galeri; altinda teknik
+ * ozellikler ve sikca sorulan sorular. Gorsel kendi oraninda, kirpilmadan
+ * gosterilir; dikey fotograf ekrandan uzun olabilir (firmanin istegi, eski
+ * woodkocist.com.tr urun sayfasi gibi). Telefonda galeri en ustte.
  */
 
 /* ---------- Ust bolum ---------- */
@@ -8,20 +10,24 @@
 
 .k-product__grid {
 	display: grid;
-	/* Galeri genis sutunda: urun gorseli sayfanin ana ogesi. */
-	grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-	gap: 44px;
+	/* Galeri sagda, genis sutunda: urun gorseli sayfanin ana ogesi. */
+	grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr);
+	gap: 48px;
 	align-items: start;
 }
+
+.k-product__gallery { grid-column: 2; grid-row: 1; min-width: 0; }
+
+/* Bilgi sutunu yapisik: uzun gorsel kayarken fiyat ve dugmeler gozde kalir. */
+.k-product__info { grid-column: 1; grid-row: 1; position: sticky; top: 88px; }
 
 /* ---------- Galeri ---------- */
 .k-product__stage {
 	position: relative;
 	overflow: hidden;
-	aspect-ratio: 4 / 3;
-	border: 1px solid var(--line);
-	border-radius: 16px;
-	background: var(--paper-2);
+	/* Cerceve yok: fotograf sutunu kenardan kenara doldurur. */
+	border-radius: 0;
+	background: none;
 }
 
 /* ---------- Galeri oklari ---------- */
@@ -74,11 +80,10 @@
 	letter-spacing: .04em;
 }
 
-.k-product__photo,
-.k-product__stage .k-placeholder {
+.k-product__photo {
+	display: block;
 	width: 100%;
-	height: 100%;
-	object-fit: cover;
+	height: auto;
 
 	/* Kucuk gorselden buyuge gecis: sert degisim yerine yumusak gecis. */
 	transition: opacity .28s ease;
@@ -86,17 +91,36 @@
 
 .k-product__stage.is-swapping .k-product__photo { opacity: 0; }
 
+/* Fareyle uzerine gelince imlecin oldugu yer buyur (assets/js/product.js). */
+.k-product__photo { transform-origin: var(--zx, 50%) var(--zy, 50%); transition: opacity .28s ease, transform .25s ease; }
+.k-product__stage.is-lens .k-product__photo { transform: scale(2.2); transition-duration: .28s, .12s; }
+.k-product__stage.is-lens .k-product__arrow,
+.k-product__stage.is-lens .k-product__counter { opacity: 0; }
+
+/* Gorsel yoksa yer tutucu: kendi orani olmadigi icin yatay bir cerceve. */
+.k-product__stage .k-placeholder {
+	display: block;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+}
+
+/* Kucuk gorseller tek sira, buyuk gorselin ustunde (WOOD KOCIST ile ayni). */
 .k-product__thumbs {
 	display: flex;
-	flex-wrap: wrap;
 	gap: 10px;
-	margin-top: 12px;
+	margin: 0 0 12px;
+	overflow-x: auto;
+	scrollbar-width: none;
 }
+
+.k-product__thumbs::-webkit-scrollbar { display: none; }
 
 .k-product__thumb {
 	overflow: hidden;
-	width: 96px;
-	height: 72px;
+	flex: none;
+	width: 64px;
+	height: 64px;
 	padding: 0;
 	border: 1.5px solid var(--line);
 	border-radius: 10px;
@@ -286,10 +310,43 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	align-items: start;
 }
 
-/* Metin ustte, tablolar altinda tam genislikte: cok sutunlu tablo da sigar. */
-.k-pdetail--split .k-pdetail__grid {
-	grid-template-columns: minmax(0, 1fr);
-	gap: 32px;
+/* Metin solda, teknik ozellikler sagda; urun tablolari (cok sutunlu olabilir) altta tam genislikte. */
+@media (min-width: 900px) {
+	.k-pdetail--split .k-pdetail__grid {
+		grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+		column-gap: clamp(32px, 5vw, 72px);
+		row-gap: 32px;
+	}
+
+	.k-pdetail--split .k-pdetail__tables { grid-column: 1 / -1; }
+	.k-pdetail__specs { position: sticky; top: 88px; }
+}
+
+.k-pdetail__subtitle {
+	margin: 0 0 12px;
+	font-size: 17px;
+	color: var(--forest);
+}
+
+.k-specs-list {
+	margin: 0;
+	border-top: 2px solid var(--forest);
+}
+
+.k-specs-list div {
+	display: grid;
+	grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+	gap: 16px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--line);
+	font-size: 14.5px;
+}
+
+.k-specs-list dt { color: var(--muted); }
+.k-specs-list dd { margin: 0; font-weight: 700; color: var(--text); }
+
+@media (max-width: 479.98px) {
+	.k-specs-list div { grid-template-columns: 1fr; gap: 2px; }
 }
 
 .k-pdetail__text {
@@ -533,12 +590,23 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	.k-pdetail--split .k-pdetail__grid { gap: 28px; }
 }
 
-@media (max-width: 1099.98px) and (min-width: 900px) {
-	.k-product__grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 34px; }
+/* 1100px altinda tek sutun, galeri ustte: dar bir bilgi sutunu yerine. */
+@media (max-width: 1099.98px) {
+	.k-product__grid { grid-template-columns: 1fr; gap: 28px; }
+	.k-product__gallery,
+	.k-product__info { grid-column: auto; grid-row: auto; position: static; }
+	.k-product__gallery { width: 100%; max-width: 720px; margin-inline: auto; }
+	.k-product__info { width: 100%; max-width: 720px; margin-inline: auto; }
+}
+
+/* Tablette dikey fotograf ekrani tek basina doldurmasin: ad ve fiyat ilk ekrana yakin kalsin (kirpma yok). */
+@media (min-width: 600px) and (max-width: 1099.98px) {
+	/* Sahne gorsel kadar: buyutme dugmesi gorselin kosesinde kalsin. */
+	.k-product__stage { width: fit-content; max-width: 100%; margin-inline: auto; }
+	.k-product__photo { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
 }
 
 @media (max-width: 899.98px) {
-	.k-product__grid { grid-template-columns: 1fr; gap: 28px; }
 	.k-pdetail { margin-top: 26px; padding: 30px 0 34px; }
 	.k-ptable { padding: 18px 18px 6px; }
 	.k-ptable__scroll { margin: 0 -18px; padding: 0 18px; }

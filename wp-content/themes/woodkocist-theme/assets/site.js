@@ -521,4 +521,240 @@
 		writeCart( { items: {}, order: [] } );
 		renderCount();
 	}
+
+	/* ---------------------------------------------------------------- */
+	/* Urun galerisi                                                     */
+	/*  - kucuk resme basinca buyuk gorsel degisir;                      */
+	/*  - fareyle buyuk gorselin uzerine gelince imlecin oldugu yer      */
+	/*    buyur (yalnizca fare; dokunmatikte yok);                       */
+	/*  - tiklayinca tam ekran; tam ekranda tiklayinca tiklanan yer      */
+	/*    daha da buyur, yakinken fareyle ya da parmakla gezilir.        */
+	/* ---------------------------------------------------------------- */
+
+	doc.querySelectorAll( '[data-wk-gallery]' ).forEach( function ( gallery ) {
+		var stage = gallery.querySelector( '[data-wk-stage]' );
+		var photo = gallery.querySelector( '[data-wk-photo]' );
+		var thumbs = Array.prototype.slice.call( gallery.querySelectorAll( '[data-wk-thumb]' ) );
+		var dialog = gallery.querySelector( '[data-wk-lb]' );
+		var current = 0;
+
+		if ( ! stage || ! photo ) {
+			return;
+		}
+
+		// Tek gorselli urunde kucuk resim yok; kaynak buyuk gorselin kendisi.
+		var sources = thumbs.length ? thumbs.map( function ( thumb ) {
+			return thumb.getAttribute( 'data-src' );
+		} ) : [ stage.getAttribute( 'data-full' ) ];
+
+		var select = function ( index ) {
+			var thumb = thumbs[ index ];
+
+			current = index;
+
+			if ( ! thumb ) {
+				return;
+			}
+
+			var srcset = thumb.getAttribute( 'data-srcset' );
+
+			if ( srcset ) {
+				photo.setAttribute( 'srcset', srcset );
+			} else {
+				photo.removeAttribute( 'srcset' );
+			}
+
+			photo.src = thumb.getAttribute( 'data-src' );
+
+			// Oran degisirse (dikey/yatay) yer tutma boyutu da degissin.
+			if ( '0' !== thumb.getAttribute( 'data-width' ) ) {
+				photo.setAttribute( 'width', thumb.getAttribute( 'data-width' ) );
+				photo.setAttribute( 'height', thumb.getAttribute( 'data-height' ) );
+			}
+
+			thumbs.forEach( function ( other ) {
+				other.classList.toggle( 'is-active', other === thumb );
+				other.setAttribute( 'aria-pressed', other === thumb ? 'true' : 'false' );
+			} );
+		};
+
+		thumbs.forEach( function ( thumb, index ) {
+			thumb.addEventListener( 'click', function () {
+				select( index );
+			} );
+		} );
+
+		/* Imlecin oldugu yeri buyutme (yalnizca fare). */
+		var lens = function ( event ) {
+			var box = stage.getBoundingClientRect();
+
+			stage.style.setProperty( '--zx', ( ( event.clientX - box.left ) / box.width * 100 ) + '%' );
+			stage.style.setProperty( '--zy', ( ( event.clientY - box.top ) / box.height * 100 ) + '%' );
+		};
+
+		stage.addEventListener( 'pointerenter', function ( event ) {
+			if ( 'mouse' === event.pointerType ) {
+				lens( event );
+				stage.classList.add( 'is-zoomed' );
+			}
+		} );
+
+		stage.addEventListener( 'pointermove', function ( event ) {
+			if ( 'mouse' === event.pointerType ) {
+				lens( event );
+				stage.classList.add( 'is-zoomed' );
+			}
+		} );
+
+		stage.addEventListener( 'pointerleave', function () {
+			stage.classList.remove( 'is-zoomed' );
+		} );
+
+		if ( ! dialog || ! dialog.showModal ) {
+			return;
+		}
+
+		/* Tam ekran */
+		var lbStage = dialog.querySelector( '[data-wk-lb-stage]' );
+		var lbImg = dialog.querySelector( '[data-wk-lb-img]' );
+		var count = dialog.querySelector( '[data-wk-lb-count]' );
+		var ZOOM = 2.5;
+		var zoomed = false;
+		var rx = 0.5;
+		var ry = 0.5;
+		var drag = null;
+
+		var place = function () {
+			if ( ! zoomed ) {
+				lbImg.style.transform = '';
+				return;
+			}
+
+			var area = lbStage.getBoundingClientRect();
+			var bigW = lbImg.offsetWidth * ZOOM;
+			var bigH = lbImg.offsetHeight * ZOOM;
+
+			// Buyuyen gorsel alandan tasiyorsa oranla kaydirilir, tasmiyorsa ortalanir.
+			var x = bigW > area.width ? -( bigW - area.width ) * rx : ( area.width - bigW ) / 2;
+			var y = bigH > area.height ? -( bigH - area.height ) * ry : ( area.height - bigH ) / 2;
+
+			lbImg.style.transform = 'translate(' + ( x - lbImg.offsetLeft ) + 'px, ' + ( y - lbImg.offsetTop ) + 'px) scale(' + ZOOM + ')';
+		};
+
+		var setZoom = function ( on ) {
+			zoomed = on;
+			dialog.classList.toggle( 'is-zoomed', on );
+			place();
+		};
+
+		var ratioAt = function ( event ) {
+			var area = lbStage.getBoundingClientRect();
+
+			rx = Math.min( 1, Math.max( 0, ( event.clientX - area.left ) / area.width ) );
+			ry = Math.min( 1, Math.max( 0, ( event.clientY - area.top ) / area.height ) );
+		};
+
+		var show = function ( index ) {
+			var total = sources.length;
+
+			current = ( index + total ) % total;
+			setZoom( false );
+			lbImg.src = sources[ current ];
+
+			if ( count ) {
+				count.textContent = ( current + 1 ) + ' / ' + total;
+			}
+		};
+
+		stage.addEventListener( 'click', function () {
+			stage.classList.remove( 'is-zoomed' );
+			show( current );
+			dialog.showModal();
+		} );
+
+		lbStage.addEventListener( 'pointerdown', function ( event ) {
+			drag = { x: event.clientX, y: event.clientY, rx: rx, ry: ry, moved: false, touch: 'mouse' !== event.pointerType };
+		} );
+
+		lbStage.addEventListener( 'pointermove', function ( event ) {
+			if ( ! zoomed ) {
+				return;
+			}
+
+			if ( drag && drag.touch ) {
+				// Parmakla surukleme: gorsel parmakla birlikte hareket eder.
+				var area = lbStage.getBoundingClientRect();
+				var dx = event.clientX - drag.x;
+				var dy = event.clientY - drag.y;
+
+				if ( Math.abs( dx ) + Math.abs( dy ) > 6 ) {
+					drag.moved = true;
+				}
+
+				rx = Math.min( 1, Math.max( 0, drag.rx - dx / area.width ) );
+				ry = Math.min( 1, Math.max( 0, drag.ry - dy / area.height ) );
+				place();
+			} else if ( 'mouse' === event.pointerType ) {
+				ratioAt( event );
+				place();
+			}
+		} );
+
+		lbStage.addEventListener( 'pointerup', function ( event ) {
+			if ( ! drag ) {
+				return;
+			}
+
+			var moved = drag.moved;
+
+			drag = null;
+
+			if ( moved ) {
+				return;
+			}
+
+			if ( zoomed ) {
+				setZoom( false );
+			} else {
+				ratioAt( event );
+				setZoom( true );
+			}
+		} );
+
+		lbImg.addEventListener( 'load', place );
+		window.addEventListener( 'resize', place );
+
+		var prev = dialog.querySelector( '[data-wk-lb-prev]' );
+		var next = dialog.querySelector( '[data-wk-lb-next]' );
+
+		if ( prev ) {
+			prev.addEventListener( 'click', function () {
+				show( current - 1 );
+			} );
+		}
+
+		if ( next ) {
+			next.addEventListener( 'click', function () {
+				show( current + 1 );
+			} );
+		}
+
+		dialog.querySelector( '[data-wk-lb-close]' ).addEventListener( 'click', function () {
+			dialog.close();
+		} );
+
+		dialog.addEventListener( 'keydown', function ( event ) {
+			if ( sources.length > 1 && ( 'ArrowLeft' === event.key || 'ArrowRight' === event.key ) ) {
+				event.preventDefault();
+				show( current + ( 'ArrowLeft' === event.key ? -1 : 1 ) );
+			}
+		} );
+
+		// Kapaninca sayfadaki buyuk gorsel, tam ekranda en son bakilan gorsel olsun.
+		dialog.addEventListener( 'close', function () {
+			setZoom( false );
+			select( current );
+			stage.focus();
+		} );
+	} );
 }() );

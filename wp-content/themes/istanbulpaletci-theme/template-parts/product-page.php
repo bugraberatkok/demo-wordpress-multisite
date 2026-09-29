@@ -38,23 +38,44 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 
 	<div class="ip-product-layout mx-auto grid max-w-[80rem] gap-10 px-5 pt-6 md:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:grid-rows-[auto_1fr_auto] lg:gap-x-16 lg:gap-y-10">
 
-		<header class="lg:col-start-2 lg:row-start-1">
+		<?php // Baslik, dugmeler ve telefon: genis ekranda solda, yapisik (style.css). ?>
+		<header class="ip-pp-head lg:col-start-2 lg:row-start-1">
 			<h1 class="text-[3rem] font-bold leading-[0.95] md:text-[4rem]" <?php nwcs_edit_attr( $key, 'card', 'name' ); ?>>
 				<?php echo esc_html( $product['name'] ); ?>
 			</h1>
 			<p class="mt-5 text-xl leading-snug text-steel" <?php nwcs_edit_attr( $key, 'detail', 'lead' ); ?>>
 				<?php echo esc_html( nwcs_field( $key, 'detail', 'lead' ) ); ?>
 			</p>
+
+			<div class="mt-6 flex flex-wrap gap-3">
+				<a href="<?php echo esc_url( ip_quote_url( $product['name'] ) ); ?>" class="btn btn--lg btn--solid max-sm:w-full"
+					<?php nwcs_edit_attr( 'products', 'shared', 'quote_label' ); ?>>
+					<?php echo esc_html( nwcs_field( 'products', 'shared', 'quote_label' ) ); ?>
+				</a>
+
+				<?php if ( $whatsapp ) : ?>
+					<a href="<?php echo esc_url( ip_whatsapp_url( $whatsapp, $product ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full"
+						<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
+						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 20 ); ?>
+						<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
+					</a>
+				<?php endif; ?>
+			</div>
+
+			<p class="mt-5 text-steel">
+				<span <?php nwcs_edit_attr( 'products', 'shared', 'call_note' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'call_note' ) ); ?></span>
+				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="tabular font-semibold" <?php nwcs_edit_attr( 'contact', 'details', 'phone_label' ); ?>><?php echo esc_html( $phone['label'] ); ?></a>
+			</p>
 		</header>
 
 		<?php // Galeri: buyuk gorsel buyutme penceresini acar; kucukler buyugu degistirir. ?>
-		<div class="lg:col-start-1 lg:row-span-2 lg:row-start-1" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>" data-product-gallery>
+		<div class="ip-pp-gallery lg:col-start-1 lg:row-span-2 lg:row-start-1" data-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>" data-product-gallery>
 			<?php if ( $gallery ) : ?>
 				<button type="button" data-lightbox-open="0" data-gallery-main
-					class="ip-product-shot group sheet relative block w-full cursor-zoom-in p-2"
+					class="ip-product-shot group relative block w-full cursor-zoom-in overflow-hidden"
 					aria-label="<?php echo esc_attr( sprintf( '%s görselini büyüt', $product['name'] ) ); ?>"
 					<?php nwcs_edit_attr( $key, 'detail', 'gallery' ); ?>>
-					<span class="shot block aspect-[4/3]">
+					<span class="shot ip-product-frame block">
 						<img src="<?php echo esc_url( $gallery[0]['url'] ); ?>" alt="<?php echo esc_attr( $gallery[0]['alt'] ); ?>"
 							fetchpriority="high" decoding="async" data-gallery-image />
 					</span>
@@ -87,47 +108,14 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 			<?php endif; ?>
 		</div>
 
-		<div class="lg:col-start-2 lg:row-start-2">
-			<?php if ( $specs ) : ?>
-				<section class="sheet px-6 pb-2 pt-5 md:px-7" aria-labelledby="sartname" <?php nwcs_edit_attr( $key, 'specs', 'rows' ); ?>>
-					<h2 id="sartname" class="font-body text-lg font-semibold" <?php nwcs_edit_attr( 'products', 'shared', 'specs_title' ); ?>>
-						<?php echo esc_html( nwcs_field( 'products', 'shared', 'specs_title' ) ); ?>
-					</h2>
 
-					<dl class="spec mt-4">
-						<?php foreach ( $specs as $row ) : ?>
-							<div class="spec__row">
-								<dt class="spec__key"><?php echo esc_html( $row['label'] ?? '' ); ?></dt>
-								<dd class="spec__value"><?php echo esc_html( $row['value'] ?? '' ); ?></dd>
-							</div>
-						<?php endforeach; ?>
-					</dl>
-				</section>
-			<?php endif; ?>
+	</div>
 
-			<div class="mt-6 flex flex-wrap gap-3">
-				<a href="<?php echo esc_url( ip_quote_url( $product['name'] ) ); ?>" class="btn btn--lg btn--solid max-sm:w-full"
-					<?php nwcs_edit_attr( 'products', 'shared', 'quote_label' ); ?>>
-					<?php echo esc_html( nwcs_field( 'products', 'shared', 'quote_label' ) ); ?>
-				</a>
-
-				<?php if ( $whatsapp ) : ?>
-					<a href="<?php echo esc_url( ip_whatsapp_url( $whatsapp, $product ) ); ?>" target="_blank" rel="noopener" class="btn btn--lg btn--whatsapp max-sm:w-full"
-						<?php nwcs_edit_attr( 'global', 'header', 'whatsapp_label' ); ?>>
-						<?php nwcs_the_icon( 'whatsapp', 'shrink-0', 20 ); ?>
-						<?php echo esc_html( nwcs_field( 'global', 'header', 'whatsapp_label' ) ); ?>
-					</a>
-				<?php endif; ?>
-			</div>
-
-			<p class="mt-5 text-steel">
-				<span <?php nwcs_edit_attr( 'products', 'shared', 'call_note' ); ?>><?php echo esc_html( nwcs_field( 'products', 'shared', 'call_note' ) ); ?></span>
-				<a href="<?php echo esc_url( $phone['url'] ); ?>" class="tabular font-semibold" <?php nwcs_edit_attr( 'contact', 'details', 'phone_label' ); ?>><?php echo esc_html( $phone['label'] ); ?></a>
-			</p>
-		</div>
-
+	<?php // Aciklama ve sartname ust bolumun altinda, kendi bolumunde: solda metin, sagda tablo. ?>
+	<?php if ( '' !== trim( $body ) || $specs ) : ?>
+		<div class="ip-pdetail mx-auto max-w-[80rem] px-5 pt-16 md:px-8">
 		<?php if ( '' !== trim( $body ) ) : ?>
-			<section class="lg:col-start-1 lg:row-start-3 lg:pt-6" aria-labelledby="urun-hakkinda">
+			<section class="ip-pp-about" aria-labelledby="urun-hakkinda">
 				<h2 id="urun-hakkinda" class="text-[2rem] font-semibold" <?php nwcs_edit_attr( 'products', 'shared', 'body_title' ); ?>>
 					<?php echo esc_html( nwcs_field( 'products', 'shared', 'body_title' ) ); ?>
 				</h2>
@@ -136,7 +124,24 @@ $hub      = ip_manifest()['pages']['products'] ?? array( 'label' => 'Ürünlerim
 				</div>
 			</section>
 		<?php endif; ?>
-	</div>
+		<?php if ( $specs ) : ?>
+			<section class="ip-pp-specs sheet px-6 pb-2 pt-5 md:px-7" aria-labelledby="sartname" <?php nwcs_edit_attr( $key, 'specs', 'rows' ); ?>>
+				<h2 id="sartname" class="font-body text-lg font-semibold" <?php nwcs_edit_attr( 'products', 'shared', 'specs_title' ); ?>>
+					<?php echo esc_html( nwcs_field( 'products', 'shared', 'specs_title' ) ); ?>
+				</h2>
+
+				<dl class="spec mt-4">
+					<?php foreach ( $specs as $row ) : ?>
+						<div class="spec__row">
+							<dt class="spec__key"><?php echo esc_html( $row['label'] ?? '' ); ?></dt>
+							<dd class="spec__value"><?php echo esc_html( $row['value'] ?? '' ); ?></dd>
+						</div>
+					<?php endforeach; ?>
+				</dl>
+			</section>
+		<?php endif; ?>
+		</div>
+	<?php endif; ?>
 
 	<?php if ( $others ) : ?>
 		<section class="mx-auto max-w-[80rem] px-5 pt-24 md:px-8 md:pt-32" aria-labelledby="diger-urunler">

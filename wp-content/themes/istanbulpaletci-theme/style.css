@@ -12,12 +12,44 @@ Text Domain: istanbulpaletci
 /* Gorunum kurallarinin tamami assets/tailwind.css icindedir.
    Bu dosya yalnizca tema basligini tasir. */
 
-/* Urun sayfasi: galeri kolonu genisler (onceki 1.1fr/0.9fr gorseli kucuk
-   birakiyordu); mobilde buyuk gorsel kenar boslugunun bir kismina tasar.
-   Katmansiz kural, Tailwind'in lg:grid-cols-* sinifini ezer. */
-@media (min-width: 64rem) {
-	.ip-product-layout { grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.85fr); column-gap: 3.5rem; }
+/* Urun sayfasi: solda ad, aciklama ve dugmeler (yapisik: uzun gorsel kayarken
+   gozde kalir); sagda buyuk, cercevesiz galeri (firmanin istegi, eski
+   woodkocist.com.tr urun sayfasi gibi). Gorsel kendi oraninda, kirpilmadan.
+   Altta: solda urun hakkinda metni, sagda sartname. Telefonda galeri ustte.
+   Katmansiz kurallar, Tailwind'in lg:col-* / lg:row-* siniflarini ezer. */
+@media (min-width: 70rem) {
+	.ip-product-layout { grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); grid-template-rows: auto; column-gap: 3rem; align-items: start; }
+	.ip-pp-head { grid-column: 1; grid-row: 1; position: sticky; top: 6rem; }
+	.ip-pp-gallery { grid-column: 2; grid-row: 1; }
 }
+/* 70rem altinda tek sutun, galeri ustte; dar bir bilgi sutunu yerine. */
+@media (max-width: 69.99rem) {
+	.ip-product-layout { grid-template-columns: minmax(0, 1fr); }
+	.ip-pp-head, .ip-pp-gallery { grid-column: 1; grid-row: auto; }
+	.ip-pp-gallery, .ip-pp-head { width: 100%; max-width: 45rem; margin-inline: auto; }
+}
+@media (min-width: 40rem) and (max-width: 69.99rem) {
+	.ip-product-frame > img { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
+}
+/* Alt bolum: solda urun hakkinda metni, sagda sartname. */
+.ip-pdetail { display: grid; gap: 2.5rem; }
+@media (min-width: 60rem) {
+	.ip-pdetail:has(.ip-pp-about):has(.ip-pp-specs) { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 4rem; align-items: start; }
+}
+.ip-pp-about .reading { max-width: 68ch; }
+/* Telefonda ve tablette galeri basliktan once gelir. */
+@media (max-width: 69.99rem) {
+	.ip-pp-gallery { order: -1; }
+}
+.ip-product-frame > img,
+.ip-product-frame > [role=img] { position: static; display: block; height: auto; object-fit: contain; }
+/* Fareyle uzerine gelince imlecin oldugu yer buyur (assets/media.js). */
+.ip-product-frame > img { transform-origin: var(--zx, 50%) var(--zy, 50%); transition: transform .25s ease; }
+.ip-product-shot.is-lens .ip-product-frame > img { transform: scale(2.2); transition-duration: .12s; }
+@media (prefers-reduced-motion: reduce) { .ip-product-frame > img { transition: none; } }
+/* Yer tutucuda buyutme isareti ve imleci yok. */
+.ip-product-shot:not(:has(img)) { cursor: default; }
+.ip-product-shot:not(:has(img)) > .absolute { display: none; }
 @media (max-width: 39.99rem) {
-	.ip-product-shot { width: calc(100% + 1.5rem); margin-inline: -0.75rem; }
+	.ip-product-shot { width: calc(100% + 2.5rem); margin-inline: -1.25rem; }
 }
