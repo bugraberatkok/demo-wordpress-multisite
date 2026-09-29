@@ -1,113 +1,79 @@
 /**
- * Hero sag kartindaki slayt.
+ * Hero tesis videosu.
  *
- * Slaytlar ust uste durur; gecis opaklik + gidis yonune gore kayma ile yapilir.
- * Ok tuslari, noktalar, klavye ve dokunmatik kaydirma desteklenir.
- * Otomatik ilerleme yok: kullanici hangi urunu okudugunu kaybetmesin.
+ * Video sessiz ve dongulu; ekrandayken oynar, ekrandan cikinca durur.
+ * Durdur/oynat dugmesi her zaman var (WCAG 2.2.2). Hareket azaltma aciksa
+ * video kendiliginden baslamaz, kapak karesi gorunur; ziyaretci isterse
+ * dugmeyle oynatir.
  */
 ( function () {
 	'use strict';
 
-	var slider = document.querySelector( '[data-k-slider]' );
+	var stage = document.querySelector( '[data-k-hero-video]' );
 
-	if ( ! slider ) {
+	if ( ! stage ) {
 		return;
 	}
 
-	var slides = Array.prototype.slice.call( slider.querySelectorAll( '[data-k-slide]' ) );
-	var dots   = Array.prototype.slice.call( slider.querySelectorAll( '[data-k-slider-dot]' ) );
-	var prev   = slider.querySelector( '[data-k-slider-prev]' );
-	var next   = slider.querySelector( '[data-k-slider-next]' );
+	var video  = stage.querySelector( 'video' );
+	var toggle = stage.querySelector( '[data-k-hero-toggle]' );
+	var label  = stage.querySelector( '[data-k-hero-toggle-label]' );
 
-	if ( slides.length < 2 ) {
+	if ( ! video || ! toggle ) {
 		return;
 	}
 
-	var current = 0;
+	var reduced = window.matchMedia && window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 
-	/**
-	 * @param {number} index Gidilecek slayt.
-	 * @param {number} direction 1 ileri, -1 geri. Kayma yonunu belirler.
-	 */
-	function show( index, direction ) {
-		// Bas ve son arasinda dolanir.
-		var target = ( index + slides.length ) % slides.length;
+	// Ziyaretci durdurduysa, ekrana geri donunce de durmus kalsin.
+	var userPaused = reduced;
 
-		if ( target === current ) {
-			return;
+	function sync() {
+		var paused = video.paused;
+
+		toggle.classList.toggle( 'is-paused', paused );
+		label.textContent = paused ? 'Videoyu oynat' : 'Videoyu durdur';
+	}
+
+	function play() {
+		var attempt = video.play();
+
+		// Tarayici otomatik oynatmayi reddederse dugme "oynat"ta kalir.
+		if ( attempt && attempt.catch ) {
+			attempt.catch( sync );
 		}
-
-		var offset  = 26 * direction;
-		var leaving = slides[ current ];
-		var arriving = slides[ target ];
-
-		leaving.style.setProperty( '--k-slide-x', -offset + 'px' );
-		leaving.classList.remove( 'is-active' );
-		leaving.setAttribute( 'aria-hidden', 'true' );
-
-		arriving.style.setProperty( '--k-slide-x', offset + 'px' );
-
-		// Baslangic konumunu ayni karede uygula ki gecis oradan baslasin.
-		arriving.getBoundingClientRect();
-
-		arriving.classList.add( 'is-active' );
-		arriving.removeAttribute( 'aria-hidden' );
-
-		dots.forEach( function ( dot, dotIndex ) {
-			dot.classList.toggle( 'is-active', dotIndex === target );
-		} );
-
-		current = target;
 	}
 
-	if ( prev ) {
-		prev.addEventListener( 'click', function () {
-			show( current - 1, -1 );
-		} );
-	}
+	video.addEventListener( 'play', sync );
+	video.addEventListener( 'pause', sync );
 
-	if ( next ) {
-		next.addEventListener( 'click', function () {
-			show( current + 1, 1 );
-		} );
-	}
-
-	dots.forEach( function ( dot, index ) {
-		dot.addEventListener( 'click', function () {
-			show( index, index > current ? 1 : -1 );
-		} );
-	} );
-
-	slider.addEventListener( 'keydown', function ( event ) {
-		if ( 'ArrowLeft' === event.key ) {
-			event.preventDefault();
-			show( current - 1, -1 );
-		} else if ( 'ArrowRight' === event.key ) {
-			event.preventDefault();
-			show( current + 1, 1 );
+	toggle.addEventListener( 'click', function () {
+		if ( video.paused ) {
+			userPaused = false;
+			play();
+		} else {
+			userPaused = true;
+			video.pause();
 		}
 	} );
 
-	/* ---------- dokunmatik kaydirma ---------- */
+	toggle.hidden = false;
+	sync();
 
-	var startX = null;
-
-	slider.addEventListener( 'touchstart', function ( event ) {
-		startX = event.changedTouches[ 0 ].clientX;
-	}, { passive: true } );
-
-	slider.addEventListener( 'touchend', function ( event ) {
-		if ( null === startX ) {
-			return;
-		}
-
-		var delta = event.changedTouches[ 0 ].clientX - startX;
-
-		// Kazara dokunuslari slayt degisimi saymamak icin esik.
-		if ( Math.abs( delta ) > 44 ) {
-			show( current + ( delta < 0 ? 1 : -1 ), delta < 0 ? 1 : -1 );
-		}
-
-		startX = null;
-	}, { passive: true } );
-}() );
+	// Ekran disindayken bant genisligi ve pil harcamasin.
+	if ( 'IntersectionObserver' in window ) {
+		new IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( entry ) {
+				if ( entry.isIntersecting ) {
+					if ( ! userPaused ) {
+						play();
+					}
+				} else if ( ! video.paused ) {
+					video.pause();
+				}
+			} );
+		}, { threshold: 0.15 } ).observe( stage );
+	} else if ( ! userPaused ) {
+		play();
+	}
+} )();

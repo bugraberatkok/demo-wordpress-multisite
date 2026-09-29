@@ -317,8 +317,7 @@ a { color: inherit; }
 	.k-placeholder__badge svg { width: 20px; height: 20px; }
 }
 
-/* Koyu yesil kartlarin icinde: hero slaydi ve ana sayfa urun gruplari. */
-.k-hero__slide-media .k-placeholder,
+/* Koyu yesil kartlarin icinde: ana sayfa urun gruplari. */
 .k-group > .k-placeholder {
 	--ph-bg: var(--forest-2);
 	--ph-glow: rgba(122, 182, 72, .22);
@@ -330,7 +329,6 @@ a { color: inherit; }
 	--ph-pill: transparent;
 }
 
-.k-hero__slide-media .k-placeholder__badge,
 .k-group > .k-placeholder .k-placeholder__badge {
 	box-shadow: 0 0 0 8px var(--ph-halo);
 	backdrop-filter: blur(2px);

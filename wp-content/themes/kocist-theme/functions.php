@@ -233,7 +233,7 @@ function kocist_assets(): void {
 			'kocist-hero',
 			get_theme_file_uri( 'assets/js/hero.js' ),
 			array(),
-			wp_get_theme()->get( 'Version' ),
+			(string) filemtime( get_theme_file_path( 'assets/js/hero.js' ) ),
 			true
 		);
 

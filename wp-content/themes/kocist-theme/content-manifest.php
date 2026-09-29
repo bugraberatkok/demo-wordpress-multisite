@@ -595,70 +595,21 @@ $manifest_data = array(
 			'components'        => array(
 
 				/*
-				 * Hero iki kartlidir: solda buyuk gorsel karti, sagda ok
-				 * tuslariyla ilerleyen slayt. Referans tuin.co.uk ana sayfasi.
+				 * Hero kenardan kenara tesis videosudur (assets/video/, temaya
+				 * gomulu; panelde video alani yok). Logo global.header.logo_image
+				 * alanindan okunur ki marka gorseli tek yerden yonetilsin.
 				 *
-				 * Sol kart temiz bir atolye fotografi tasir (assets/img/atolye.jpg):
-				 * kadrajin ortasi bos acik ahsap, yazi oraya oturuyor. Zemin acik
-				 * oldugu icin metin beyaz degil koyu yesil; okunaklilik boyle
-				 * saglaniyor, uzerine koyu perde atmaya gerek kalmiyor.
-				 *
-				 * Onemli: buraya ustunde hazir yazi/buton bulunan bir banner
-				 * gorseli konursa metin katmani ikili gorunume yol acar.
-				 * Bu alan temiz fotograf bekler.
-				 *
-				 * Slaytlar ve guven seridi ayri repeater'lar; ayni bilesende
-				 * yan yana durmalari sorun degil, yasak olan repeater ICINDE
-				 * repeater (schema.php).
+				 * Guven seridi bir repeater; repeater ICINDE repeater yasak
+				 * (schema.php).
 				 */
 				'hero' => array(
 					'label'  => 'Hero (Giriş Bölümü)',
 					'fields' => array(
 
-						// Sol buyuk kart: atolye fotografi + logo ve slogan.
-						// Logo ayri bir alan degil; global.header.logo_image okunuyor
-						// ki marka gorseli tek yerden yonetilsin.
-						'image'     => array( 'label' => 'Büyük Kart Görseli', 'type' => 'image', 'default' => 0 ),
-						'title'     => array( 'label' => 'Büyük Kart Başlığı', 'type' => 'text', 'default' => 'Ahşaptan ilham aldık' ),
-						'cta_label' => array( 'label' => 'Büyük Kart Buton Metni', 'type' => 'text', 'default' => 'Ürün Gruplarımız' ),
-						'cta_url'   => array( 'label' => 'Büyük Kart Buton Bağlantısı', 'type' => 'url', 'default' => '#katalog' ),
-
-						// Sag kart: slaytlar
-						'slides'    => array(
-							'label'   => 'Sağ Kart Slaytları',
-							'type'    => 'repeater',
-							'max'     => 8,
-							'fields'  => array(
-								'image'     => array( 'label' => 'Slayt Görseli', 'type' => 'image' ),
-								'title'     => array( 'label' => 'Slayt Başlığı', 'type' => 'text' ),
-								'text'      => array( 'label' => 'Slayt Metni', 'type' => 'textarea' ),
-								'cta_label' => array( 'label' => 'Slayt Buton Metni', 'type' => 'text' ),
-								'cta_url'   => array( 'label' => 'Slayt Buton Bağlantısı', 'type' => 'url' ),
-							),
-							'default' => array(
-								array(
-									'image'     => 0,
-									'title'     => 'Bahçe ve Dekorasyon Ürünleri',
-									'text'      => 'Kamelya, pergola, salıncak ve bank gruplarında kendi üretimimiz; montaja hazır teslim.',
-									'cta_label' => 'Dekorasyon Ürünlerini Gör',
-									'cta_url'   => '/#katalog',
-								),
-								array(
-									'image'     => 0,
-									'title'     => 'Plywood ve Kontrplak Levha',
-									'text'      => 'Huş ve çam plywood, kontrplak ve OSB levha gruplarında stoklu çalışıyoruz.',
-									'cta_label' => 'Levha Grubunu Gör',
-									'cta_url'   => '/#katalog',
-								),
-								array(
-									'image'     => 0,
-									'title'     => 'Ahşap Salıncak ve Oyun Grupları',
-									'text'      => 'Emprenyeli ahşaptan, dış mekâna dayanıklı çocuk oyun ve bahçe grupları.',
-									'cta_label' => 'Ürünleri İnceleyin',
-									'cta_url'   => '/#katalog',
-								),
-							),
-						),
+						// Video ustundeki slogan ve buton
+						'title'     => array( 'label' => 'Slogan', 'type' => 'text', 'default' => 'Ahşaptan ilham aldık' ),
+						'cta_label' => array( 'label' => 'Buton Metni', 'type' => 'text', 'default' => 'Ürün Gruplarımız' ),
+						'cta_url'   => array( 'label' => 'Buton Bağlantısı', 'type' => 'url', 'default' => '#katalog' ),
 
 						// Hero altindaki guven seridi
 						'trust'     => array(
