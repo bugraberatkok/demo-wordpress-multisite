@@ -332,7 +332,9 @@ function wk_specs( string $spec ): array {
 		$split = explode( ':', $part, 2 );
 
 		if ( 2 === count( $split ) && '' !== trim( $split[0] ) && '' !== trim( $split[1] ) ) {
-			$pairs[] = array( trim( $split[0] ), trim( $split[1] ) );
+			// "Ithal Cam ( Firinlanmis )" -> "Ithal Cam (Firinlanmis)": parantez ici bosluklar toplanir.
+			$value   = (string) preg_replace( array( '/\(\s+/u', '/\s+\)/u' ), array( '(', ')' ), trim( $split[1] ) );
+			$pairs[] = array( trim( $split[0] ), $value );
 		}
 	}
 

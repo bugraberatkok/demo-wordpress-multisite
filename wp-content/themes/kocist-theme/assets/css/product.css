@@ -284,6 +284,189 @@
 /* Betik yuklenmediyse (onizleme ya da hata) dugme hic gorunmesin. */
 html:not(.k-lb-ready) .k-zoom { display: none; }
 
+/* ---------- Urunun hikayesi (ust bolumun altinda) ---------- */
+/*
+ * Yalnizca urunun kendi icerigi: one cikan ozellikler buyuk; giris paragrafi
+ * buyuk ve orman yesili; kalan bolumler iki sutunda; ek fotograflar varsa
+ * bolumler onlarla yan yana, sirayla sag / sol. Teknik ozellikler acik yesil
+ * zeminli bir foy; urun tablolari en altta tam genislikte.
+ */
+.k-pstory {
+	margin-top: 40px;
+	padding: 44px 0 56px;
+	border-top: 1px solid var(--line);
+}
+
+.k-pstory .k-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(28px, 4vw, 48px); }
+
+.k-pstory__heading {
+	margin: 0;
+	font-size: clamp(22px, 2.2vw, 28px);
+	color: var(--forest);
+}
+
+/* One cikanlar: buyuk deger, kucuk etiket; aralarinda ince cizgi. */
+.k-facts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	margin: 0;
+	border-block: 1px solid var(--line);
+}
+
+@media (min-width: 768px) {
+	.k-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.k-facts__item {
+	display: flex;
+	flex-direction: column-reverse;
+	justify-content: flex-end;
+	gap: 6px;
+	padding: 20px 20px 20px 0;
+}
+
+.k-facts__item + .k-facts__item { padding-left: 20px; border-left: 1px solid var(--line); }
+
+@media (max-width: 767.98px) {
+	.k-facts__item:nth-child(3) { padding-left: 0; border-left: 0; }
+	.k-facts__item:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+
+.k-facts dt { font-size: 13.5px; color: var(--muted); }
+
+.k-facts dd {
+	margin: 0;
+	font-size: clamp(18px, 1.8vw, 23px);
+	font-stretch: 112%;
+	font-weight: 800;
+	line-height: 1.2;
+	color: var(--forest);
+}
+
+/* Metin ve foy */
+.k-pstory__top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; align-items: start; }
+
+@media (min-width: 900px) {
+	.k-pstory--specs .k-pstory__top { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: clamp(36px, 5vw, 72px); }
+	.k-pstory__specs { position: sticky; top: 88px; }
+	.k-pstory__top--solo { grid-template-columns: minmax(0, 1fr) !important; }
+	.k-pstory__top--solo .k-pstory__specs { position: static; }
+	.k-pstory__top--solo .k-specs-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; }
+}
+
+.k-pstory__lead {
+	max-width: 62ch;
+	font-size: clamp(18px, 1.6vw, 21px);
+	line-height: 1.6;
+	color: var(--forest-3);
+}
+
+.k-pstory__lead > * { margin: 0; }
+.k-pstory__lead > * + * { margin-top: .75em; }
+
+.k-pstory__cols { margin-top: 28px; font-size: 15.5px; line-height: 1.75; color: var(--text); }
+
+@media (min-width: 768px) {
+	.k-pstory__cols { columns: 2 16rem; column-gap: 40px; }
+}
+
+.k-pstory__chapter > * { margin: 0; }
+.k-pstory__chapter > * + * { margin-top: .85em; }
+.k-pstory__cols .k-pstory__chapter { break-inside: avoid-column; margin-bottom: 22px; }
+/* Madde listeleri: kucuk yaprak yesili isaret, satir araligi rahat. */
+.k-pstory__chapter ul, .k-pstory__note ul, .k-pstory__lead ul { list-style: none; padding-left: 0; }
+.k-pstory__chapter ul li, .k-pstory__note ul li, .k-pstory__lead ul li { position: relative; padding-left: 20px; }
+.k-pstory__chapter ul li + li, .k-pstory__note ul li + li, .k-pstory__lead ul li + li { margin-top: 6px; }
+.k-pstory__chapter ul li::before, .k-pstory__note ul li::before, .k-pstory__lead ul li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 2px; background: var(--leaf); }
+.k-pstory__chapter ol { padding-left: 20px; }
+
+.k-pstory__title {
+	margin: 0 0 8px;
+	font-size: 17px;
+	line-height: 1.3;
+	color: var(--forest);
+}
+
+.k-pstory__specs {
+	padding: 24px 24px 10px;
+	border-radius: 12px;
+	background: var(--leaf-soft);
+}
+
+.k-pstory__specs-title { margin: 0 0 6px; font-size: 17px; color: var(--forest); }
+.k-pstory__specs .k-specs-list { border-top: 0; }
+.k-pstory__specs .k-specs-list div { grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr); border-color: rgba(23, 84, 47, .14); }
+.k-pstory__specs .k-specs-list div:last-child { border-bottom: 0; }
+
+/* Fotografli bolumler: sirayla sag / sol; metin fotografin ortasina hizali. */
+.k-pstory__rows { display: grid; gap: clamp(36px, 6vw, 72px); }
+.k-pstory__row { display: grid; gap: 22px; align-items: center; }
+
+@media (min-width: 768px) {
+	.k-pstory__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); }
+	.k-pstory__row:nth-child(even) .k-pstory__photo { order: 2; }
+	.k-pstory__row--text { grid-template-columns: minmax(0, 1fr); max-width: 44rem; }
+}
+
+.k-pstory__photo {
+	display: block;
+	width: 100%;
+	padding: 0;
+	overflow: hidden;
+	border: 0;
+	border-radius: 12px;
+	background: var(--paper-2);
+	cursor: zoom-in;
+}
+
+.k-pstory__photo img { display: block; width: 100%; height: auto; max-height: 80vh; object-fit: cover; transition: transform .4s ease; }
+.k-pstory__photo:hover img { transform: scale(1.03); }
+.k-pstory__photo:focus-visible { outline: 3px solid var(--leaf); outline-offset: 3px; }
+.k-pstory__row .k-pstory__chapter { max-width: 34rem; font-size: 16px; line-height: 1.75; color: var(--text); }
+.k-pstory__row .k-pstory__title { font-size: clamp(20px, 2vw, 25px); margin-bottom: 12px; }
+
+.k-pstory__tables { display: grid; gap: 20px; min-width: 0; }
+
+/* Kisa metin (brief / table): tek sutun, okunur boyda. */
+.k-pstory__note { max-width: 68ch; font-size: 16.5px; line-height: 1.75; color: var(--text); }
+.k-pstory__note > * { margin: 0; }
+.k-pstory__note > * + * { margin-top: .8em; }
+.k-pstory__note .k-pstory__title { margin-top: 1.1em; }
+/* Kisa metin tek dar sutunda solda kalmasin: genis ekranda iki dengeli sutun. */
+@media (min-width: 900px) {
+	.k-pstory--brief .k-pstory__note { max-width: none; columns: 2 22rem; column-gap: 56px; }
+	.k-pstory--brief .k-pstory__note > * { break-inside: avoid-column; }
+}
+
+/* Bir iki ozellik: foy yerine metnin altinda satir icinde. */
+.k-pstory__inline { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
+.k-pstory__inline div { display: flex; gap: 8px; align-items: baseline; }
+.k-pstory__inline dt { font-size: 13.5px; color: var(--muted); }
+.k-pstory__inline dd { margin: 0; font-weight: 700; color: var(--forest); }
+
+/* Tablo one cikan urun (hirdavat, civi, vida...): tablo metnin hemen altinda, belirgin. */
+.k-pstory--table .k-pstory__tables .k-ptable { border-color: rgba(23, 84, 47, .22); }
+.k-pstory--table .k-ptable__table thead th,
+.k-pstory--table .k-ptable__table tr:first-child th { background: var(--forest); color: #fff; }
+.k-ptable__table tbody tr:nth-child(even) td { background: var(--paper-2); }
+.k-pstory--table .k-ptable__table th,
+.k-pstory--table .k-ptable__table td { padding-left: 14px; }
+
+/* Metin kisa, fotograf cok: fotograf seridi. */
+.k-pstory__strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.k-pstory__strip .k-pstory__photo img { aspect-ratio: 4 / 3; object-fit: cover; max-height: none; }
+
+/* Detay metninin icindeki tablo iki sutuna sikismaz: tam genislikte, dar ekranda kendi icinde kayar. */
+.k-pstory__cols .k-pstory__chapter:has(table) { column-span: all; }
+.k-pstory__chapter table,
+.k-pstory__lead table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 14.5px; }
+.k-pstory__chapter th, .k-pstory__chapter td { padding: 8px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.k-pstory__chapter th { color: var(--forest); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+	.k-pstory__photo img { transition: none; }
+}
+
 /* ---------- Detay metni ve urun tablolari ---------- */
 /*
  * Ust bolumun (galeri + bilgiler) altinda tam genislik. Metin ve tablo
@@ -306,6 +489,8 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 
 .k-pdetail__grid {
 	display: grid;
+	/* minmax(0, 1fr): genis urun tablosu sutunu telefonda ekrandan tasirmasin (tablo kendi icinde kayar). */
+	grid-template-columns: minmax(0, 1fr);
 	gap: 28px;
 	align-items: start;
 }

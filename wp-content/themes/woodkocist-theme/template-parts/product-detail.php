@@ -153,29 +153,150 @@ get_header();
 </article>
 
 <?php
-$has_body = '' !== trim( wp_strip_all_tags( (string) $product['body'] ) );
+/*
+ * Urunun hikayesi: gorselin altindaki bolum. Yalnizca urunun kendi icerigi
+ * (detay metni, ozellikler, galeri); hicbir sey uydurulmaz. Bolum urunun
+ * ayrinti seviyesine gore kurulur (nwcs_product_detail_level):
+ *  - rich:   bolumler ek fotograflarla yan yana, sirayla sag / sol.
+ *  - medium: buyuk giris + iki sutun metin + teknik ozellik foyu.
+ *  - table:  kisa not + metindeki olcu / model tablosu one cikar.
+ *  - brief:  kisa metin iki dengeli sutunda, sade.
+ * Foy yalnizca en az uc ozellikle; daha azi metnin altinda satir icinde.
+ */
+$split    = function_exists( 'nwcs_product_split_tables' ) ? nwcs_product_split_tables( wp_kses_post( wpautop( (string) $product['body'] ) ) ) : array( 'text' => wp_kses_post( wpautop( (string) $product['body'] ) ), 'tables' => array() );
+$sections = function_exists( 'nwcs_product_body_sections' ) ? nwcs_product_body_sections( $split['text'] ) : array( 'lead' => $split['text'], 'chapters' => array() );
+if ( function_exists( 'nwcs_product_demote_duplicate_lead' ) ) {
+	$sections = nwcs_product_demote_duplicate_lead( $sections, (string) $product['short'] );
+}
+// Urunun kendi ozellikleri yoksa detay metnindeki "Etiket: deger" satirlari.
+if ( ! $specs && ! empty( $sections['pairs'] ) ) {
+	$specs = $sections['pairs'];
+}
+$facts    = function_exists( 'nwcs_product_key_facts' ) && count( $specs ) >= 3 ? nwcs_product_key_facts( $specs ) : array();
+$story    = array_slice( $gallery, 1 );
+$text_len = mb_strlen( trim( wp_strip_all_tags( $split['text'] ) ) );
+$level    = function_exists( 'nwcs_product_detail_level' ) ? nwcs_product_detail_level( $text_len, count( $sections['chapters'] ), count( $story ), count( $specs ), (bool) $split['tables'] ) : 'medium';
+$pictured = 'rich' === $level;
+$has_text = '' !== $sections['lead'] || $sections['chapters'];
+$sheet    = count( $specs ) >= 3;
+// Ust satirda metin var mi: giris ya da (fotografsiz duzende) bolumler. Yoksa foy tek basina, iki sutun.
+$top_text = '' !== $sections['lead'] || ( ! $pictured && $sections['chapters'] );
 ?>
-<?php if ( $has_body || $specs ) : ?>
-	<?php // Detay metni ve teknik ozellikler gorselin altinda, kendi bolumunde: sol sutun uzayip sag bos kalmasin. ?>
-	<section class="wk-wrap wk-pdetail<?php echo $has_body && $specs ? ' wk-pdetail--split' : ''; ?>" aria-label="Ürün detayı">
-		<?php if ( $has_body ) : ?>
-			<div class="wk-pdetail__text wk-prose" <?php wk_product_src( $product, 'Detay metni' ); ?>>
-				<?php echo wp_kses_post( wpautop( (string) $product['body'] ) ); ?>
+<?php if ( $has_text || $specs || $split['tables'] ) : ?>
+	<section class="wk-wrap wk-story wk-story--<?php echo esc_attr( $level ); ?><?php echo $sheet ? ' wk-story--specs' : ''; ?>" aria-label="Ürün detayı">
+		<?php if ( count( $facts ) >= 3 ) : ?>
+			<dl class="wk-facts" <?php wk_product_src( $product, 'Teknik özellikler' ); ?>>
+				<?php foreach ( $facts as $fact ) : ?>
+					<div class="wk-facts__item">
+						<dt><?php echo esc_html( $fact[0] ); ?></dt>
+						<dd><?php echo esc_html( $fact[1] ); ?></dd>
+					</div>
+				<?php endforeach; ?>
+			</dl>
+		<?php endif; ?>
+
+		<?php if ( $top_text || $sheet ) : ?>
+			<div class="wk-story__top<?php echo $top_text ? '' : ' wk-story__top--solo'; ?>">
+				<?php if ( $top_text ) : ?>
+					<div class="wk-story__text" <?php wk_product_src( $product, 'Detay metni' ); ?>>
+						<?php if ( 'brief' === $level || 'table' === $level ) : ?>
+							<div class="wk-story__note">
+								<?php echo wp_kses_post( $sections['lead'] ); ?>
+								<?php foreach ( $sections['chapters'] as $chapter ) : ?>
+									<?php if ( '' !== $chapter['title'] ) : ?>
+										<h3 class="wk-story__title"><?php echo esc_html( $chapter['title'] ); ?></h3>
+									<?php endif; ?>
+									<?php echo wp_kses_post( $chapter['html'] ); ?>
+								<?php endforeach; ?>
+							</div>
+						<?php else : ?>
+							<?php if ( '' !== $sections['lead'] ) : ?>
+								<div class="wk-story__lead"><?php echo wp_kses_post( $sections['lead'] ); ?></div>
+							<?php endif; ?>
+
+							<?php if ( ! $pictured && $sections['chapters'] ) : ?>
+								<div class="wk-story__cols">
+									<?php foreach ( $sections['chapters'] as $chapter ) : ?>
+										<div class="wk-story__chapter">
+											<?php if ( '' !== $chapter['title'] ) : ?>
+												<h3 class="wk-story__title"><?php echo esc_html( $chapter['title'] ); ?></h3>
+											<?php endif; ?>
+											<?php echo wp_kses_post( $chapter['html'] ); ?>
+										</div>
+									<?php endforeach; ?>
+								</div>
+							<?php endif; ?>
+						<?php endif; ?>
+
+						<?php if ( $specs && ! $sheet ) : ?>
+							<?php // Bir iki ozellik icin foy acilmaz: metnin altinda satir icinde. ?>
+							<dl class="wk-story__inline" <?php wk_product_src( $product, 'Teknik özellikler' ); ?>>
+								<?php foreach ( $specs as $pair ) : ?>
+									<div><dt><?php echo esc_html( $pair[0] ); ?></dt><dd><?php echo esc_html( $pair[1] ); ?></dd></div>
+								<?php endforeach; ?>
+							</dl>
+						<?php endif; ?>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( $sheet ) : ?>
+					<aside class="wk-story__specs">
+						<h2 class="wk-story__specs-title" <?php nwcs_edit_attr( 'product', 'labels', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'labels', 'specs_title' ) ); ?></h2>
+						<dl class="wk-specs" <?php wk_product_src( $product, 'Teknik özellikler' ); ?>>
+							<?php foreach ( $specs as $pair ) : ?>
+								<div>
+									<dt><?php echo esc_html( $pair[0] ); ?></dt>
+									<dd><?php echo esc_html( $pair[1] ); ?></dd>
+								</div>
+							<?php endforeach; ?>
+						</dl>
+					</aside>
+				<?php endif; ?>
 			</div>
 		<?php endif; ?>
 
-		<?php if ( $specs ) : ?>
-			<aside class="wk-pdetail__specs">
-				<h2 class="wk-product__subtitle" <?php nwcs_edit_attr( 'product', 'labels', 'specs_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'labels', 'specs_title' ) ); ?></h2>
-				<dl class="wk-specs" <?php wk_product_src( $product, 'Teknik özellikler' ); ?>>
-					<?php foreach ( $specs as $pair ) : ?>
-						<div>
-							<dt><?php echo esc_html( $pair[0] ); ?></dt>
-							<dd><?php echo esc_html( $pair[1] ); ?></dd>
+		<?php if ( $split['tables'] ) : ?>
+			<div class="wk-story__tables" <?php wk_product_src( $product, 'Detay metni' ); ?>>
+				<?php foreach ( $split['tables'] as $table_html ) : ?>
+					<div class="wk-story__table" role="region" aria-label="<?php echo esc_attr( $product['title'] ); ?> tablosu" tabindex="0"><?php echo wp_kses_post( $table_html ); ?></div>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $pictured ) : ?>
+			<div class="wk-story__rows" <?php wk_product_src( $product, 'Detay metni' ); ?>>
+				<?php foreach ( $sections['chapters'] as $index => $chapter ) : ?>
+					<?php $picture = $story[ $index ] ?? null; ?>
+					<div class="wk-story__row<?php echo $picture ? '' : ' wk-story__row--text'; ?>">
+						<?php if ( $picture ) : ?>
+							<button type="button" class="wk-story__photo" data-wk-open="<?php echo (int) $index + 1; ?>"
+								aria-label="<?php echo esc_attr( $chapter['title'] ?: $product['title'] ); ?> görselini tam ekranda aç">
+								<img src="<?php echo esc_url( $picture['src'] ); ?>"
+									<?php if ( $picture['srcset'] ) : ?>srcset="<?php echo esc_attr( $picture['srcset'] ); ?>" sizes="(min-width: 960px) 50vw, 100vw"<?php endif; ?>
+									<?php if ( $picture['width'] && $picture['height'] ) : ?>width="<?php echo (int) $picture['width']; ?>" height="<?php echo (int) $picture['height']; ?>"<?php endif; ?>
+									alt="<?php echo esc_attr( $picture['alt'] ); ?>" loading="lazy" decoding="async" />
+							</button>
+						<?php endif; ?>
+						<div class="wk-story__chapter">
+							<?php if ( '' !== $chapter['title'] ) : ?>
+								<h3 class="wk-story__title"><?php echo esc_html( $chapter['title'] ); ?></h3>
+							<?php endif; ?>
+							<?php echo wp_kses_post( $chapter['html'] ); ?>
 						</div>
-					<?php endforeach; ?>
-				</dl>
-			</aside>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		<?php elseif ( count( $story ) >= 2 ) : ?>
+			<?php // Metin kisa ama fotograf cok: fotograf seridi; tiklayinca tam ekran. ?>
+			<ul class="wk-story__strip" aria-label="<?php echo esc_attr( $product['title'] ); ?> fotoğrafları">
+				<?php foreach ( array_slice( $story, 0, 6 ) as $index => $picture ) : ?>
+					<li>
+						<button type="button" class="wk-story__photo" data-wk-open="<?php echo (int) $index + 1; ?>" aria-label="<?php echo esc_attr( sprintf( '%d. fotoğrafı tam ekranda aç', $index + 2 ) ); ?>">
+							<img src="<?php echo esc_url( $picture['src'] ); ?>" <?php if ( $picture['srcset'] ) : ?>srcset="<?php echo esc_attr( $picture['srcset'] ); ?>" sizes="(min-width: 960px) 16vw, 45vw"<?php endif; ?> alt="<?php echo esc_attr( $picture['alt'] ); ?>" loading="lazy" decoding="async" />
+						</button>
+					</li>
+				<?php endforeach; ?>
+			</ul>
 		<?php endif; ?>
 	</section>
 <?php endif; ?>

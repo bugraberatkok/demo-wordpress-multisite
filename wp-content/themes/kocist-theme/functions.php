@@ -958,12 +958,13 @@ function kocist_product_attr( array $product, string $label ): void {
 
 /**
  * Havuzdaki olcu/ozellik metnini ("Boyut Sinifi: Mega Boy; Ahsap Cinsi: Cam")
- * etiket / deger ciftlerine ayirir. En az iki "Etiket: deger" parcasi yoksa
- * bos dizi: kisa metin ("80 x 120 cm") bilgi sutununda oldugu gibi kalir.
+ * etiket / deger ciftlerine ayirir. En az $min "Etiket: deger" parcasi yoksa
+ * (ya da bir parca etiketsizse) bos dizi: kisa metin ("80 x 120 cm") bilgi
+ * sutununda oldugu gibi kalir.
  *
  * @return array<int, array{0:string, 1:string}>
  */
-function kocist_spec_pairs( string $spec ): array {
+function kocist_spec_pairs( string $spec, int $min = 2 ): array {
 	$pairs = array();
 
 	foreach ( preg_split( '/\s*[;\n]\s*/u', trim( $spec ) ) ?: array() as $part ) {
@@ -971,10 +972,16 @@ function kocist_spec_pairs( string $spec ): array {
 			return array();
 		}
 
-		$pairs[] = array( trim( $match[1] ), trim( $match[2] ) );
+		// "0: Gizli Pence Aski" gibi aktarim artigi: etiketi sayi olan parca ozellik degil.
+		if ( preg_match( '/^\d+$/', trim( $match[1] ) ) ) {
+			continue;
+		}
+
+		// "Ithal Cam ( Firinlanmis )" -> "Ithal Cam (Firinlanmis)": parantez ici bosluklar toplanir.
+		$pairs[] = array( trim( $match[1] ), (string) preg_replace( array( '/\(\s+/u', '/\s+\)/u' ), array( '(', ')' ), trim( $match[2] ) ) );
 	}
 
-	return count( $pairs ) >= 2 ? $pairs : array();
+	return count( $pairs ) >= max( 1, $min ) ? $pairs : array();
 }
 
 /**

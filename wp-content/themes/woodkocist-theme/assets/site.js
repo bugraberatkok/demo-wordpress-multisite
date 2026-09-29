@@ -750,6 +750,14 @@
 			}
 		} );
 
+		// Urunun hikayesindeki fotograflar da ayni tam ekrani acar (galerideki sirasiyla).
+		doc.querySelectorAll( '[data-wk-open]' ).forEach( function ( button ) {
+			button.addEventListener( 'click', function () {
+				show( parseInt( button.getAttribute( 'data-wk-open' ), 10 ) || 0 );
+				dialog.showModal();
+			} );
+		} );
+
 		// Kapaninca sayfadaki buyuk gorsel, tam ekranda en son bakilan gorsel olsun.
 		dialog.addEventListener( 'close', function () {
 			setZoom( false );

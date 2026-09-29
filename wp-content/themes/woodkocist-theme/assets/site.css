@@ -410,7 +410,7 @@ p { margin: 0; }
  * kirpilmadan ve cercevesiz: 1280x1714 dikey fotograf genis ekranda ~760x1020
  * olur ve ekrandan uzun kalir, bu bilerek. Bilgi sutunu yapisik (sticky):
  * uzun gorsel kayarken fiyat ve "Sepete ekle" gozde kalir. Detay metni ve
- * teknik ozellikler altta kendi bolumunde (.wk-pdetail). 1100px altinda tek
+ * teknik ozellikler altta kendi bolumunde (.wk-story). 1100px altinda tek
  * sutun, galeri ustte (tablette 320px bilgi sutunu cok dar kaliyordu).
  */
 @media (min-width: 1100px) {
@@ -446,15 +446,103 @@ p { margin: 0; }
 
 .wk-product__info { display: flex; flex-direction: column; }
 
-/* Detay metni ve teknik ozellikler: gorselin altinda, iki sutun (metin genis). */
-.wk-pdetail { display: grid; gap: 2.5rem; padding-block: 0 clamp(3rem, 6vw, 4.5rem); }
-@media (min-width: 960px) {
-	.wk-pdetail { padding-top: 1rem; border-top: 1px solid var(--line); }
-	.wk-pdetail--split { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: clamp(2.5rem, 5vw, 5rem); align-items: start; }
-	.wk-pdetail__specs { position: sticky; top: calc(var(--header) + 1.25rem); }
+/*
+ * Urunun hikayesi (gorselin altindaki bolum). Yalnizca urunun kendi icerigi:
+ * one cikan ozellikler genis Archivo ile buyuk; giris paragrafi buyuk ve
+ * bordo; kalan bolumler iki sutunda; ek fotograflar varsa bolumler onlarla
+ * yan yana, sirayla sag / sol. Teknik ozellikler krem zeminli bir foy.
+ */
+.wk-story { display: grid; gap: clamp(2.5rem, 5vw, 4rem); padding-block: clamp(2.5rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem); border-top: 1px solid var(--line); }
+
+/* One cikanlar: buyuk deger, kucuk etiket; aralarinda ince cizgi. */
+.wk-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; border-block: 1px solid var(--line); }
+@media (min-width: 768px) { .wk-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.wk-facts__item { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.35rem; padding: 1.25rem 1.25rem 1.25rem 0; }
+.wk-facts__item + .wk-facts__item { padding-left: 1.25rem; border-left: 1px solid var(--line); }
+@media (max-width: 767px) {
+	.wk-facts__item:nth-child(3) { padding-left: 0; border-left: 0; }
+	.wk-facts__item:nth-child(n+3) { border-top: 1px solid var(--line); }
 }
-.wk-pdetail__text { padding-top: 1.25rem; }
-.wk-pdetail__specs .wk-product__subtitle { margin-top: 1.25rem; }
+.wk-facts dt { color: var(--muted); font-size: 0.875rem; }
+.wk-facts dd { margin: 0; color: var(--wine); font-size: clamp(1.125rem, 1.8vw, 1.5rem); font-stretch: var(--wide); font-weight: 700; line-height: 1.2; }
+
+/* Metin ve foy */
+.wk-story__top { display: grid; gap: 2.5rem; align-items: start; }
+@media (min-width: 960px) {
+	.wk-story--specs .wk-story__top { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: clamp(2.5rem, 5vw, 5rem); }
+	.wk-story__specs { position: sticky; top: calc(var(--header) + 1.25rem); }
+}
+.wk-story__lead { max-width: 60ch; color: var(--wine); font-size: clamp(1.1875rem, 1.6vw, 1.375rem); line-height: 1.55; }
+.wk-story__lead > * + * { margin-top: 0.75em; }
+.wk-story__cols { margin-top: 2rem; color: var(--ink); }
+@media (min-width: 768px) { .wk-story__cols { columns: 2 17rem; column-gap: 2.5rem; } }
+.wk-story__chapter > * + * { margin-top: 0.85em; }
+.wk-story__cols .wk-story__chapter { break-inside: avoid-column; margin-bottom: 1.5rem; }
+.wk-story__title { margin: 0 0 0.5rem; color: var(--wine); font-size: 1.125rem; font-stretch: var(--wide); line-height: 1.3; }
+/* Madde listeleri: kucuk maun rengi isaret. */
+.wk-story__chapter ul, .wk-story__note ul, .wk-story__lead ul { list-style: none; padding-left: 0; }
+.wk-story__chapter ul li, .wk-story__note ul li, .wk-story__lead ul li { position: relative; padding-left: 1.25rem; }
+.wk-story__chapter ul li + li, .wk-story__note ul li + li, .wk-story__lead ul li + li { margin-top: 0.35rem; }
+.wk-story__chapter ul li::before, .wk-story__note ul li::before, .wk-story__lead ul li::before { content: ""; position: absolute; left: 0.125rem; top: 0.62em; width: 0.4375rem; height: 0.4375rem; border-radius: 1px; background: var(--mahogany); }
+.wk-story__chapter ol { padding-left: 1.25rem; }
+
+.wk-story__specs { padding: 1.5rem 1.5rem 0.75rem; background: var(--frame); border-radius: var(--radius); }
+.wk-story__specs-title { margin: 0 0 0.25rem; color: var(--wine); font-size: 1.125rem; font-stretch: var(--wide); }
+.wk-story__specs .wk-specs { border-top: 0; }
+.wk-story__specs .wk-specs div { grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr); border-color: rgb(82 42 41 / 0.14); }
+.wk-story__specs .wk-specs div:last-child { border-bottom: 0; }
+/* Ust satirda metin yoksa foy tam genislikte, ozellikler iki sutun. */
+@media (min-width: 960px) {
+	.wk-story--specs .wk-story__top--solo { grid-template-columns: minmax(0, 1fr); }
+	.wk-story__top--solo .wk-story__specs { position: static; }
+	.wk-story__top--solo .wk-specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 3rem; }
+	.wk-story__top--solo .wk-specs div:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
+}
+
+/* Kisa metin (brief / table): okunur boyda; genis ekranda iki dengeli sutun (brief). */
+.wk-story__note { max-width: 68ch; }
+.wk-story__note > * + * { margin-top: 0.85em; }
+.wk-story__note .wk-story__title { margin-top: 1.1em; }
+@media (min-width: 960px) {
+	.wk-story--brief .wk-story__note { max-width: none; columns: 2 22rem; column-gap: 3.5rem; }
+	.wk-story--brief .wk-story__note > * { break-inside: avoid-column; }
+}
+
+/* Bir iki ozellik: foy yerine metnin altinda satir icinde. */
+.wk-story__inline { display: flex; flex-wrap: wrap; gap: 0.6rem 1.75rem; margin: 1.5rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); }
+.wk-story__inline div { display: flex; gap: 0.5rem; align-items: baseline; }
+.wk-story__inline dt { color: var(--muted); font-size: 0.875rem; }
+.wk-story__inline dd { margin: 0; color: var(--wine); font-weight: 700; }
+
+/* Metindeki olcu / model tablosu: tam genislikte, dar ekranda kendi icinde kayar. */
+.wk-story__tables { display: grid; gap: 1.25rem; min-width: 0; }
+.wk-story__table { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.wk-story__table table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.wk-story__table th, .wk-story__table td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.wk-story__table th, .wk-story__table tr:first-child td strong { color: #fff; }
+.wk-story__table thead th, .wk-story__table tr:first-child th { background: var(--wine); color: #fff; }
+.wk-story__table tbody tr:nth-child(even) td { background: var(--paper); }
+.wk-story__table:focus-visible { outline: 2px solid var(--mahogany); outline-offset: 2px; }
+
+/* Metin kisa, fotograf cok: fotograf seridi. */
+.wk-story__strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.875rem; margin: 0; padding: 0; list-style: none; }
+.wk-story__strip .wk-story__photo img { aspect-ratio: 4 / 3; object-fit: cover; max-height: none; }
+
+/* Fotografli bolumler: sirayla sag / sol; metin fotografin ortasina hizali. */
+.wk-story__rows { display: grid; gap: clamp(2.5rem, 6vw, 5rem); }
+.wk-story__row { display: grid; gap: 1.5rem; align-items: center; }
+@media (min-width: 768px) {
+	.wk-story__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); }
+	.wk-story__row:nth-child(even) .wk-story__photo { order: 2; }
+	.wk-story__row--text { grid-template-columns: minmax(0, 1fr); max-width: 44rem; }
+}
+.wk-story__photo { display: block; width: 100%; padding: 0; overflow: hidden; border: 0; border-radius: var(--radius); background: var(--frame); cursor: zoom-in; }
+.wk-story__photo img { display: block; width: 100%; height: auto; max-height: 80vh; object-fit: cover; transition: transform .4s ease; }
+.wk-story__photo:hover img { transform: scale(1.03); }
+.wk-story__photo:focus-visible { outline: 3px solid var(--mahogany); outline-offset: 3px; }
+.wk-story__row .wk-story__chapter { max-width: 34rem; font-size: 1.0625rem; }
+.wk-story__row .wk-story__title { font-size: clamp(1.25rem, 2vw, 1.625rem); margin-bottom: 0.75rem; }
+@media (prefers-reduced-motion: reduce) { .wk-story__photo img { transition: none; } }
 
 /* Tam ekran gorsel: koyu zemin; tiklayinca tiklanan yer buyur, yakinken fareyle gezilir. */
 .wk-lb { width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: #140b0b; color: #fff; overflow: hidden; }

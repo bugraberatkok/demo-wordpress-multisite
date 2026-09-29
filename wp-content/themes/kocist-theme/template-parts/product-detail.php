@@ -70,7 +70,8 @@ if ( $group ) {
 	);
 }
 
-$spec_pairs = kocist_spec_pairs( (string) $product['spec'] );
+// Etiketli ozellikler ("Etiket: deger; ..."): uc ve fazlasi foy, bir-iki tanesi satir icinde.
+$spec_pairs = kocist_spec_pairs( (string) $product['spec'], 1 );
 
 get_header();
 ?>
@@ -150,55 +151,176 @@ get_header();
 
 <?php
 /*
- * Detay metni ve urun tablolari: ust bolumun altinda, tam genislikte. Uzun
- * metin bilgi sutununu uzatip butonlari asagi itmesin diye buraya alindi.
+ * Urunun hikayesi: ust bolumun altinda. Yalnizca urunun kendi icerigi
+ * (detay metni, ozellikler, galeri, tablolar); hicbir sey uydurulmaz.
+ * Bolum urunun ayrinti seviyesine gore kurulur (nwcs_product_detail_level):
+ *  - rich:   bolumler ek fotograflarla yan yana, sirayla sag / sol.
+ *  - medium: buyuk giris + iki sutun metin + teknik ozellik foyu.
+ *  - table:  kisa not + olcu / model tablosu one cikar (hirdavat, civi...).
+ *  - brief:  kisa metin tek sutunda, sade.
+ * Foy yalnizca en az uc ozellikle; daha azi metnin altinda satir icinde.
+ * One cikanlar serit yalnizca en az uc kisa ozellikle.
  */
-$body_html = trim( (string) $product['body'] ) !== '' ? wp_kses_post( wpautop( $product['body'] ) ) : '';
-$tables    = kocist_product_tables( $product );
-$preview   = function_exists( 'nwcs_is_preview' ) && nwcs_is_preview();
+$body_html  = trim( (string) $product['body'] ) !== '' ? wp_kses_post( wpautop( $product['body'] ) ) : '';
+$split      = function_exists( 'nwcs_product_split_tables' ) ? nwcs_product_split_tables( $body_html ) : array( 'text' => $body_html, 'tables' => array() );
+$tables     = kocist_product_tables( $product );
+$preview    = function_exists( 'nwcs_is_preview' ) && nwcs_is_preview();
+$sections   = function_exists( 'nwcs_product_body_sections' ) ? nwcs_product_body_sections( $split['text'] ) : array( 'lead' => $split['text'], 'chapters' => array() );
+if ( function_exists( 'nwcs_product_demote_duplicate_lead' ) ) {
+	$sections = nwcs_product_demote_duplicate_lead( $sections, (string) $product['short'] );
+}
+$all_pairs  = $spec_pairs ?: ( $sections['pairs'] ?? array() );
+$facts      = function_exists( 'nwcs_product_key_facts' ) && count( $all_pairs ) >= 3 ? nwcs_product_key_facts( $all_pairs ) : array();
+$story      = array_values( array_filter( array_slice( $images, 1 ), static fn( array $image ): bool => ! empty( $image['url'] ) && ! kocist_is_placeholder_image( $image ) ) );
+$text_len   = mb_strlen( trim( wp_strip_all_tags( $split['text'] ) ) );
+$level      = function_exists( 'nwcs_product_detail_level' ) ? nwcs_product_detail_level( $text_len, count( $sections['chapters'] ), count( $story ), count( $all_pairs ), (bool) ( $split['tables'] || $tables ) ) : 'medium';
+$pictured   = 'rich' === $level;
+$has_text   = '' !== $sections['lead'] || $sections['chapters'];
+$sheet      = count( $all_pairs ) >= 3;
+$top_text   = '' !== $sections['lead'] || ( ! $pictured && $sections['chapters'] );
+$all_tables = $split['tables'] || $tables || $preview;
 
-if ( '' !== $body_html || $tables || $preview || $spec_pairs ) :
+// Tablolari metnin icindeki gibi degil, urun tablosu gorunumunde basar.
+$inline_table = static function ( string $html ): string {
+	return (string) preg_replace( '#<table\b(?![^>]*\bclass=)#i', '<table class="k-ptable__table"', $html, 1 );
+};
+
+if ( $has_text || $all_pairs || $all_tables ) :
 	?>
-	<?php // Metin solda, ozellik tablosu sagda; urun tablolari (cok sutunlu olabilir) altta tam genislikte. ?>
-	<section class="k-pdetail<?php echo ( '' !== $body_html && $spec_pairs ) ? ' k-pdetail--split' : ''; ?>" aria-labelledby="k-pdetail-title">
+	<section class="k-pstory k-pstory--<?php echo esc_attr( $level ); ?><?php echo $sheet ? ' k-pstory--specs' : ''; ?>" aria-labelledby="k-pstory-title">
 		<div class="k-wrap">
-			<h2 class="k-pdetail__title" id="k-pdetail-title" <?php nwcs_edit_attr( 'product', 'detail', 'body_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'detail', 'body_title' ) ?: 'Ürün Detayı' ); ?></h2>
+			<h2 class="k-pstory__heading" id="k-pstory-title" <?php nwcs_edit_attr( 'product', 'detail', 'body_title' ); ?>><?php echo esc_html( nwcs_field( 'product', 'detail', 'body_title' ) ?: 'Ürün Detayı' ); ?></h2>
 
-			<div class="k-pdetail__grid">
-				<?php if ( '' !== $body_html ) : ?>
-					<div class="k-pdetail__text k-product__desc--rich" <?php kocist_product_attr( $product, 'Detay metni' ); ?>><?php echo $body_html; // phpcs:ignore WordPress.Security.EscapingOutput -- wp_kses_post ile temizlendi. ?></div>
-				<?php endif; ?>
+			<?php if ( count( $facts ) >= 3 ) : ?>
+				<dl class="k-facts" <?php kocist_product_attr( $product, 'Özellikler' ); ?>>
+					<?php foreach ( $facts as $fact ) : ?>
+						<div class="k-facts__item">
+							<dt><?php echo esc_html( $fact[0] ); ?></dt>
+							<dd><?php echo esc_html( $fact[1] ); ?></dd>
+						</div>
+					<?php endforeach; ?>
+				</dl>
+			<?php endif; ?>
 
-				<?php if ( $spec_pairs ) : ?>
-					<div class="k-pdetail__specs" <?php kocist_product_attr( $product, 'Özellikler' ); ?>>
-						<h3 class="k-pdetail__subtitle">Teknik özellikler</h3>
-						<dl class="k-specs-list">
-							<?php foreach ( $spec_pairs as $pair ) : ?>
-								<div>
-									<dt><?php echo esc_html( $pair[0] ); ?></dt>
-									<dd><?php echo esc_html( $pair[1] ); ?></dd>
+			<?php if ( $top_text || $sheet ) : ?>
+				<div class="k-pstory__top<?php echo $top_text ? '' : ' k-pstory__top--solo'; ?>">
+					<?php if ( $top_text ) : ?>
+						<div class="k-pstory__text" <?php kocist_product_attr( $product, 'Detay metni' ); ?>>
+							<?php if ( 'brief' === $level || 'table' === $level ) : ?>
+								<?php // Kisa metin: tek sutun, okunur boyda; buyuk giris ve iki sutun yok. ?>
+								<div class="k-pstory__note">
+									<?php echo wp_kses_post( $sections['lead'] ); ?>
+									<?php foreach ( $sections['chapters'] as $chapter ) : ?>
+										<?php if ( '' !== $chapter['title'] ) : ?>
+											<h3 class="k-pstory__title"><?php echo esc_html( $chapter['title'] ); ?></h3>
+										<?php endif; ?>
+										<?php echo wp_kses_post( $chapter['html'] ); ?>
+									<?php endforeach; ?>
 								</div>
-							<?php endforeach; ?>
-						</dl>
-					</div>
-				<?php endif; ?>
+							<?php else : ?>
+								<?php if ( '' !== $sections['lead'] ) : ?>
+									<div class="k-pstory__lead"><?php echo wp_kses_post( $sections['lead'] ); ?></div>
+								<?php endif; ?>
 
-				<?php if ( $tables || $preview ) : ?>
-					<div class="k-pdetail__tables">
-						<?php foreach ( $tables as $table ) : ?>
-							<?php kocist_render_product_table( $table, $product ); ?>
-						<?php endforeach; ?>
+								<?php if ( ! $pictured && $sections['chapters'] ) : ?>
+									<div class="k-pstory__cols">
+										<?php foreach ( $sections['chapters'] as $chapter ) : ?>
+											<div class="k-pstory__chapter">
+												<?php if ( '' !== $chapter['title'] ) : ?>
+													<h3 class="k-pstory__title"><?php echo esc_html( $chapter['title'] ); ?></h3>
+												<?php endif; ?>
+												<?php echo wp_kses_post( $chapter['html'] ); ?>
+											</div>
+										<?php endforeach; ?>
+									</div>
+								<?php endif; ?>
+							<?php endif; ?>
 
-						<?php if ( ! $tables ) : ?>
-							<?php // Yalnizca panel onizlemesinde: tiklaninca urun Urun Havuzu'nda acilir. ?>
-							<div class="k-ptable k-ptable--empty" <?php kocist_product_attr( $product, 'Ürün tablosu' ); ?>>
-								<p class="k-ptable__empty-title">Bu ürüne tablo ekleyin</p>
-								<p class="k-ptable__empty-text">Tıklayın; ürün Ürün Havuzu'nda açılır. “Ürün Tabloları” bölümünden tabloyu hücre hücre doldurun. Bu kutu yalnızca panelde görünür.</p>
+							<?php if ( $all_pairs && ! $sheet ) : ?>
+								<?php // Bir iki ozellik icin foy acilmaz: metnin altinda satir icinde. ?>
+								<dl class="k-pstory__inline" <?php kocist_product_attr( $product, 'Özellikler' ); ?>>
+									<?php foreach ( $all_pairs as $pair ) : ?>
+										<div><dt><?php echo esc_html( $pair[0] ); ?></dt><dd><?php echo esc_html( $pair[1] ); ?></dd></div>
+									<?php endforeach; ?>
+								</dl>
+							<?php endif; ?>
+						</div>
+					<?php endif; ?>
+
+					<?php if ( $sheet ) : ?>
+						<aside class="k-pstory__specs" <?php kocist_product_attr( $product, 'Özellikler' ); ?>>
+							<h3 class="k-pstory__specs-title">Teknik özellikler</h3>
+							<dl class="k-specs-list">
+								<?php foreach ( $all_pairs as $pair ) : ?>
+									<div>
+										<dt><?php echo esc_html( $pair[0] ); ?></dt>
+										<dd><?php echo esc_html( $pair[1] ); ?></dd>
+									</div>
+								<?php endforeach; ?>
+							</dl>
+						</aside>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $all_tables ) : ?>
+				<div class="k-pdetail__tables k-pstory__tables">
+					<?php foreach ( $split['tables'] as $table_html ) : ?>
+						<div class="k-ptable" <?php kocist_product_attr( $product, 'Detay metni' ); ?>>
+							<div class="k-ptable__scroll" role="region" aria-label="<?php echo esc_attr( $product['title'] ); ?> tablosu" tabindex="0">
+								<?php echo wp_kses_post( $inline_table( $table_html ) ); ?>
 							</div>
-						<?php endif; ?>
-					</div>
-				<?php endif; ?>
-			</div>
+						</div>
+					<?php endforeach; ?>
+
+					<?php foreach ( $tables as $table ) : ?>
+						<?php kocist_render_product_table( $table, $product ); ?>
+					<?php endforeach; ?>
+
+					<?php if ( ! $tables && $preview ) : ?>
+						<?php // Yalnizca panel onizlemesinde: tiklaninca urun Urun Havuzu'nda acilir. ?>
+						<div class="k-ptable k-ptable--empty" <?php kocist_product_attr( $product, 'Ürün tablosu' ); ?>>
+							<p class="k-ptable__empty-title">Bu ürüne tablo ekleyin</p>
+							<p class="k-ptable__empty-text">Tıklayın; ürün Ürün Havuzu'nda açılır. “Ürün Tabloları” bölümünden tabloyu hücre hücre doldurun. Bu kutu yalnızca panelde görünür.</p>
+						</div>
+					<?php endif; ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $pictured ) : ?>
+				<div class="k-pstory__rows" <?php kocist_product_attr( $product, 'Detay metni' ); ?>>
+					<?php foreach ( $sections['chapters'] as $index => $chapter ) : ?>
+						<?php $picture = $story[ $index ] ?? null; ?>
+						<div class="k-pstory__row<?php echo $picture ? '' : ' k-pstory__row--text'; ?>">
+							<?php if ( $picture ) : ?>
+								<button type="button" class="k-pstory__photo" data-k-pstory-open="<?php echo (int) $index + 1; ?>"
+									aria-label="<?php echo esc_attr( $chapter['title'] ?: $product['title'] ); ?> görselini büyüt">
+									<img src="<?php echo esc_url( $picture['url'] ); ?>"
+										<?php if ( ! empty( $picture['srcset'] ) ) : ?>srcset="<?php echo esc_attr( $picture['srcset'] ); ?>" sizes="(min-width: 900px) 50vw, 100vw"<?php endif; ?>
+										alt="<?php echo esc_attr( $picture['alt'] ?? '' ); ?>" loading="lazy" decoding="async" />
+								</button>
+							<?php endif; ?>
+							<div class="k-pstory__chapter">
+								<?php if ( '' !== $chapter['title'] ) : ?>
+									<h3 class="k-pstory__title"><?php echo esc_html( $chapter['title'] ); ?></h3>
+								<?php endif; ?>
+								<?php echo wp_kses_post( $chapter['html'] ); ?>
+							</div>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			<?php elseif ( count( $story ) >= 2 ) : ?>
+				<?php // Metin kisa ama fotograf cok: fotograflar serit halinde; tiklayinca buyutme penceresi. ?>
+				<ul class="k-pstory__strip" aria-label="<?php echo esc_attr( $product['title'] ); ?> fotoğrafları">
+					<?php foreach ( array_slice( $story, 0, 6 ) as $index => $picture ) : ?>
+						<li>
+							<button type="button" class="k-pstory__photo" data-k-pstory-open="<?php echo (int) $index + 1; ?>" aria-label="<?php echo esc_attr( sprintf( '%d. fotoğrafı büyüt', $index + 2 ) ); ?>">
+								<img src="<?php echo esc_url( $picture['url'] ); ?>" alt="<?php echo esc_attr( $picture['alt'] ?? '' ); ?>" loading="lazy" decoding="async" />
+							</button>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
 		</div>
 	</section>
 <?php endif; ?>

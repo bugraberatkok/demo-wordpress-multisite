@@ -35,6 +35,26 @@
 		} );
 	}
 
+	/*
+	 * Urunun hikayesindeki fotograflar: galerideki o gorseli secer ve buyutme
+	 * penceresini acar (assets/js/lightbox.js galerinin secili gorselinden baslar).
+	 */
+	document.querySelectorAll( '[data-k-pstory-open]' ).forEach( function ( button ) {
+		button.addEventListener( 'click', function () {
+			var index = parseInt( button.getAttribute( 'data-k-pstory-open' ), 10 ) || 0;
+			var thumb = gallery ? gallery.querySelectorAll( '[data-k-thumb]' )[ index ] : null;
+			var zoom  = gallery ? gallery.querySelector( '[data-k-zoom]' ) : null;
+
+			if ( thumb ) {
+				thumb.click();
+			}
+
+			if ( zoom ) {
+				zoom.click();
+			}
+		} );
+	} );
+
 	if ( gallery ) {
 		var stage   = gallery.querySelector( '.k-product__stage' );
 		var photo   = gallery.querySelector( '.k-product__photo' );

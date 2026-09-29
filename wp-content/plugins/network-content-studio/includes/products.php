@@ -838,3 +838,291 @@ function nwcs_seed_new_site_product_settings( $site ): void {
 	add_blog_option( $blog_id, NWCS_OPTION_SELECTED, array() );
 	add_blog_option( $blog_id, NWCS_OPTION_OVERRIDES, array() );
 }
+
+/* ------------------------------------------------------------------ */
+/* Urun sayfasi alt bolumu: detay metni bolumleri ve one cikan ozellikler */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Urunun detay metnini (wp_kses_post'tan gecmis HTML) bolumlere ayirir.
+ *
+ * Bolum basligi sayilanlar:
+ *  - <h2>-<h4>, ya da yalnizca kalin yazidan olusan paragraf (<p><b>Baslik</b></p>);
+ *  - emojiyle baslayan kisa satir ("🔧 Teknik Ozellikler": eski sitelerden
+ *    gelen metinler boyle; emoji basliktan atilir);
+ *  - iki noktayla biten kisa satir ("Kullanim Alanlari:").
+ * Bir bolumdeki ardisik kisa satirlar (✔️ / • / - ile baslayan ya da noktasiz
+ * kisa cumleler) madde listesine cevrilir; en az uc ardisik "Etiket: deger"
+ * satiri ozellik cifti olarak ayrilir (pairs) ve metinden cikarilir.
+ * Basliksiz metinde her paragraf basliksiz bir bolum olur. Ilk basliktan
+ * onceki metin "giris" (lead) olarak ayrilir.
+ *
+ * @return array{lead: string, chapters: array<int, array{title: string, html: string}>, pairs: array<int, array{0:string, 1:string}>}
+ */
+function nwcs_product_body_sections( string $html ): array {
+	$html = trim( $html );
+	$out  = array( 'lead' => '', 'chapters' => array(), 'pairs' => array() );
+
+	if ( '' === $html ) {
+		return $out;
+	}
+
+	if ( false === stripos( $html, '<p' ) && false === stripos( $html, '<h' ) ) {
+		$html = wpautop( $html );
+	}
+
+	$emoji = '[\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{2B00}-\x{2BFF}\x{2190}-\x{21FF}\x{FE0F}\x{200D}\x{20E3}]';
+	$mark  = '/^(?:' . $emoji . '|[•·▪►▶✓✔\-–—*])+\s*/u';
+
+	preg_match_all( '#<(h[2-4]|p|ul|ol|blockquote|table)\b[^>]*>.*?</\1>#is', $html, $blocks );
+
+	// Once duz bloklar: [tur, baslik, html, duz metin].
+	$items = array();
+
+	foreach ( $blocks[0] as $block ) {
+		$inner = trim( (string) preg_replace( '#^<p\b[^>]*>|</p>$#i', '', $block ) );
+		$plain = trim( html_entity_decode( wp_strip_all_tags( $block ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+
+		if ( '' === $plain ) {
+			continue;
+		}
+
+		$title = '';
+
+		if ( preg_match( '#^<h[2-4]\b[^>]*>(.*?)</h[2-4]>$#is', $block, $match ) ) {
+			$title = trim( wp_strip_all_tags( $match[1] ) );
+		} elseif ( preg_match( '#^<(b|strong)>([^<]{2,140})</\1>$#i', $inner, $match ) ) {
+			$title = trim( $match[2] );
+		} elseif ( str_starts_with( strtolower( $block ), '<p' ) && mb_strlen( $plain ) <= 90 && preg_match( '/^' . $emoji . '/u', $plain ) && ! preg_match( '/^' . $emoji . '*\s*[✓✔]/u', $plain ) ) {
+			$title = trim( (string) preg_replace( $mark, '', $plain ) );
+		} elseif ( str_starts_with( strtolower( $block ), '<p' ) && mb_strlen( $plain ) <= 60 && str_ends_with( $plain, ':' ) ) {
+			$title = rtrim( $plain, ': ' );
+		}
+
+		// Emojili kisa satir, hemen bir basligin ardindan geliyorsa baslik degil
+		// o basligin madde satiridir ("🚛 Neden ...?" altindaki "🇹🇷 ..." satirlari).
+		$emoji_title = '' !== $title && ! preg_match( '#^<(h[2-4]|p><(b|strong))#i', $block ) && ! str_ends_with( $plain, ':' );
+
+		if ( $emoji_title && $items && 'title' === end( $items )[0] ) {
+			$items[] = array( 'text', '', $block, $plain, true );
+			continue;
+		}
+
+		if ( $emoji_title && $items && 'text' === end( $items )[0] && ! empty( end( $items )[4] ) ) {
+			$items[] = array( 'text', '', $block, $plain, true );
+			continue;
+		}
+
+		$items[] = '' !== $title ? array( 'title', $title, '', '' ) : array( 'text', '', $block, $plain, false );
+	}
+
+	// Bolumler: basliktan onceki metin giris; her baslik yeni bolum.
+	$current = null;
+	$lead    = array();
+	$groups  = array();
+
+	foreach ( $items as $item ) {
+		if ( 'title' === $item[0] ) {
+			if ( null !== $current ) {
+				$groups[] = $current;
+			}
+			$current = array( 'title' => $item[1], 'items' => array() );
+			continue;
+		}
+
+		if ( null === $current ) {
+			$lead[] = $item;
+		} else {
+			$current['items'][] = $item;
+		}
+	}
+
+	if ( null !== $current ) {
+		$groups[] = $current;
+	}
+
+	// Bir bolumun satirlarini HTML'e cevirir: ozellik ciftleri ayrilir, kisa satir dizileri liste olur.
+	$render = static function ( array $rows ) use ( $mark, &$out ): string {
+		$pair_re = '/^([^:.!?]{2,40}):\s*(\S.{0,120})$/u';
+		$pairs   = array_values( array_filter( $rows, static fn( array $row ): bool => (bool) preg_match( $pair_re, $row[3] ) && ! str_contains( strtolower( $row[2] ), '<ul' ) ) );
+
+		// Satirlarin cogu "Etiket: deger" ise bunlar ozellik; metinden cikar.
+		if ( count( $pairs ) >= 3 && count( $pairs ) >= 0.7 * count( $rows ) ) {
+			foreach ( $pairs as $row ) {
+				preg_match( $pair_re, (string) preg_replace( $mark, '', $row[3] ), $match );
+
+				if ( $match ) {
+					$out['pairs'][] = array( trim( $match[1] ), trim( $match[2] ) );
+				}
+			}
+
+			$rows = array_values( array_filter( $rows, static fn( array $row ): bool => ! in_array( $row, $pairs, true ) ) );
+		}
+
+		$html  = '';
+		$run   = array();
+		$flush = static function () use ( &$run, &$html ): void {
+			if ( count( $run ) >= 3 ) {
+				$html .= '<ul>' . implode( '', array_map( static fn( string $line ): string => '<li>' . esc_html( $line ) . '</li>', $run ) ) . "</ul>\n";
+			} else {
+				foreach ( $run as $line ) {
+					$html .= '<p>' . esc_html( $line ) . "</p>\n";
+				}
+			}
+			$run = array();
+		};
+
+		foreach ( $rows as $row ) {
+			$short = str_starts_with( strtolower( $row[2] ), '<p' ) && mb_strlen( $row[3] ) <= 110 && ( preg_match( $mark, $row[3] ) || ! preg_match( '/[.!?…]$/u', $row[3] ) );
+
+			if ( $short ) {
+				$run[] = trim( (string) preg_replace( $mark, '', $row[3] ) );
+				continue;
+			}
+
+			$flush();
+			$html .= $row[2] . "\n";
+		}
+
+		$flush();
+
+		return $html;
+	};
+
+	$out['lead'] = $lead ? $render( $lead ) : '';
+
+	foreach ( $groups as $group ) {
+		$body = $render( $group['items'] );
+
+		// Tamami ozellige donusen bolum (ornek: "Teknik Ozellikler") ayrica basilmaz.
+		if ( '' === trim( $body ) ) {
+			continue;
+		}
+
+		$out['chapters'][] = array( 'title' => $group['title'], 'html' => $body );
+	}
+
+	// Hic baslik yoksa: ilk paragraf giris, kalanlar basliksiz bolumler.
+	if ( ! $out['chapters'] && '' !== $out['lead'] ) {
+		preg_match_all( '#<(p|ul|ol|blockquote|table)\b[^>]*>.*?</\1>#is', $out['lead'], $parts );
+		$parts       = $parts[0] ?: array( $out['lead'] );
+		$out['lead'] = (string) array_shift( $parts );
+
+		foreach ( $parts as $part ) {
+			$out['chapters'][] = array( 'title' => '', 'html' => $part );
+		}
+	}
+
+	return $out;
+}
+
+/**
+ * Ozellik ciftlerinden (etiket, deger) sayfanin basinda one cikacak en fazla
+ * $limit tanesi: olcu, malzeme, kurulum ve teslimat once; uzun degerler
+ * (40 karakterden uzun) atlanir.
+ *
+ * @param array<int, array{0:string, 1:string}> $pairs
+ * @return array<int, array{0:string, 1:string}>
+ */
+function nwcs_product_key_facts( array $pairs, int $limit = 4 ): array {
+	$priority = array( 'boyut', 'ölçü', 'olcu', 'ebat', 'ahşap', 'ahsap', 'malzeme', 'kurulum', 'montaj', 'teslim', 'yüzey', 'yuzey' );
+	$scored   = array();
+
+	foreach ( array_values( $pairs ) as $index => $pair ) {
+		if ( mb_strlen( (string) $pair[1] ) > 40 ) {
+			continue;
+		}
+
+		$label = mb_strtolower( (string) $pair[0] );
+		$rank  = count( $priority ) + $index;
+
+		foreach ( $priority as $position => $needle ) {
+			if ( str_contains( $label, $needle ) ) {
+				$rank = $position;
+				break;
+			}
+		}
+
+		$scored[] = array( $rank, $index, $pair );
+	}
+
+	usort( $scored, static fn( array $a, array $b ): int => $a[0] <=> $b[0] ?: $a[1] <=> $b[1] );
+
+	// "Ithal Cam ( Firinlanmis )" gibi parantez ici bosluklar gorunumde toplanir.
+	$tidy = static fn( string $text ): string => (string) preg_replace( array( '/\(\s+/u', '/\s+\)/u' ), array( '(', ')' ), $text );
+
+	return array_map( static fn( array $row ): array => array( $tidy( (string) $row[2][0] ), $tidy( (string) $row[2][1] ) ), array_slice( $scored, 0, $limit ) );
+}
+
+/**
+ * Detay metnindeki tablolari metinden ayirir: urun sayfasi tabloyu (olcu ve
+ * model listesi) metnin icine sikistirmadan, kendi alaninda gosterebilsin.
+ *
+ * @return array{text: string, tables: string[]}
+ */
+function nwcs_product_split_tables( string $html ): array {
+	$tables = array();
+
+	$text = (string) preg_replace_callback(
+		'#<table\b[^>]*>.*?</table>#is',
+		static function ( array $match ) use ( &$tables ): string {
+			$tables[] = $match[0];
+			return '';
+		},
+		$html
+	);
+
+	// Tablo cikinca bos kalan paragraflar atilir.
+	$text = (string) preg_replace( '#<p>\s*(?:&nbsp;|<br\s*/?>|\s)*</p>#i', '', $text );
+
+	return array( 'text' => trim( $text ), 'tables' => $tables );
+}
+
+/**
+ * Urunun ayrinti seviyesi: sayfanin alt bolumu buna gore kurulur.
+ *   rich   - en az iki ek fotograf ve iki bolum: fotograflarla anlatim
+ *   table  - kisa metin + tablo (olcu / model listesi): tablo one cikar
+ *   brief  - kisa metin, tablo yok: tek sutun, sade
+ *   medium - uzun metin ya da en az uc ozellik: giris + iki sutun + foy
+ *
+ * @param int $text_length Tablolar cikarilmis metnin karakter sayisi.
+ */
+function nwcs_product_detail_level( int $text_length, int $chapters, int $extra_photos, int $spec_count, bool $has_tables ): string {
+	if ( $extra_photos >= 2 && $chapters >= 2 ) {
+		return 'rich';
+	}
+
+	if ( $text_length < 700 && $has_tables ) {
+		return 'table';
+	}
+
+	if ( $text_length < 700 && $spec_count < 3 ) {
+		return 'brief';
+	}
+
+	return 'medium';
+}
+
+/**
+ * Girisi, urunun kisa aciklamasini tekrar ediyorsa (kisa aciklama cogu urunde
+ * detay metninin ilk cumleleri) normal bolume indirir: ayni cumle sayfada iki
+ * kez vurgulanmasin.
+ *
+ * @param array{lead: string, chapters: array} $sections nwcs_product_body_sections()
+ */
+function nwcs_product_demote_duplicate_lead( array $sections, string $short ): array {
+	$fold  = static fn( string $text ): string => mb_strtolower( trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $text ) ) ) );
+	$short = (string) preg_replace( '/[\s.…]+$/u', '', $fold( $short ) );
+	$lead  = $fold( $sections['lead'] ?? '' );
+
+	if ( '' === $lead || mb_strlen( $short ) < 20 ) {
+		return $sections;
+	}
+
+	if ( str_starts_with( $lead, mb_substr( $short, 0, 60 ) ) ) {
+		array_unshift( $sections['chapters'], array( 'title' => '', 'html' => $sections['lead'] ) );
+		$sections['lead'] = '';
+	}
+
+	return $sections;
+}
