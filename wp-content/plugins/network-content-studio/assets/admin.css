@@ -823,6 +823,12 @@ textarea.nwcs-input { min-height: 76px; line-height: 1.55; }
 	display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .nwcs-mediacard__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.nwcs-mediacard__thumb { position: relative; }
+.nwcs-mediacard__check {
+	position: absolute; top: 8px; left: 8px; z-index: 1; margin: 0;
+	width: 18px; height: 18px; background: #fff;
+}
+.nwcs-mediacard__used a { color: inherit; }
 .nwcs-mediacard figcaption { padding: 10px 12px 12px; }
 .nwcs-mediacard .nwcs-input { font-size: 12.5px; padding: 6px 9px; }
 .nwcs-mediacard__meta { font-size: 11px; color: var(--nwcs-muted); margin: 8px 0 0; word-break: break-all; }

@@ -35,20 +35,66 @@ function nwcs_media_url( array $args = array() ): string {
 }
 
 /**
- * Hangi gorsel hangi urunlerde kullaniliyor.
+ * Hangi gorsel hangi urunlerde kullaniliyor. Cop kutusundaki urunler de
+ * sayilir: geri getirilen urunun galerisi bos kalmasin.
  *
- * @return array<int, string[]>
+ * @return array<int, array<int, array{id:int, title:string, trashed:bool}>>
  */
 function nwcs_media_usage(): array {
 	$usage = array();
 
 	foreach ( nwcs_pool_products() as $product ) {
 		foreach ( $product['gallery_ids'] as $attachment_id ) {
-			$usage[ $attachment_id ][] = $product['title'];
+			$usage[ $attachment_id ][] = array( 'id' => (int) $product['id'], 'title' => $product['title'], 'trashed' => false );
 		}
 	}
 
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	$trashed = get_posts(
+		array(
+			'post_type'      => NWCS_PRODUCT_TYPE,
+			'post_status'    => 'trash',
+			'posts_per_page' => -1,
+		)
+	);
+
+	foreach ( $trashed as $post ) {
+		$gallery = get_post_meta( $post->ID, '_nwcs_gallery', true );
+		$gallery = is_array( $gallery ) ? array_filter( array_map( 'absint', $gallery ) ) : array();
+		$thumb   = (int) get_post_thumbnail_id( $post->ID );
+
+		if ( ! $gallery && $thumb ) {
+			$gallery = array( $thumb );
+		}
+
+		foreach ( $gallery as $attachment_id ) {
+			$usage[ $attachment_id ][] = array( 'id' => (int) $post->ID, 'title' => $post->post_title, 'trashed' => true );
+		}
+	}
+
+	restore_current_blog();
+
 	return $usage;
+}
+
+/**
+ * Kullanim listesi: urun adlari, duzenleme sayfasina bagli.
+ */
+function nwcs_media_render_usage( array $used ): void {
+	$links = array();
+
+	foreach ( $used as $product ) {
+		$url     = $product['trashed'] ? nwcs_pool_url( array( 'cop' => 1 ) ) : nwcs_pool_url( array( 'urun' => $product['id'] ) );
+		$links[] = sprintf(
+			'<a href="%1$s">%2$s</a>%3$s',
+			esc_url( $url ),
+			esc_html( $product['title'] ),
+			$product['trashed'] ? ' <small>(çöp kutusunda)</small>' : ''
+		);
+	}
+
+	echo implode( ', ', $links ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- yukarida kacirildi.
 }
 
 /**
@@ -179,12 +225,28 @@ function nwcs_render_media(): void {
 					</div>
 				</div>
 
+				<?php if ( $result['items'] ) : ?>
+					<?php // Kartlarda tekli formlar var; kutular bu forma form="" ile baglanir (ic ice form olmaz). ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="nwcs-media-bulk" class="nwcs-bulkbar"
+						onsubmit="return confirm('Seçilen görseller kalıcı olarak silinsin mi? Bu işlem geri alınamaz.');">
+						<input type="hidden" name="action" value="nwcs_media_bulk_delete" />
+						<input type="hidden" name="ara" value="<?php echo esc_attr( $search ); ?>" />
+						<?php wp_nonce_field( 'nwcs_media_bulk_delete' ); ?>
+						<label class="nwcs-bulkbar__all">
+							<input type="checkbox" data-nwcs-check-all /> Tümünü seç
+						</label>
+						<button type="submit" class="button nwcs-row__delete">Seçilenleri sil</button>
+						<span class="nwcs-hint">Bir üründe kullanılan görsel seçilemez; önce ürünün galerisinden çıkarın.</span>
+					</form>
+				<?php endif; ?>
+
 				<?php if ( ! $result['items'] ) : ?>
 					<p class="nwcs-empty">Görsel bulunamadı.</p>
 				<?php elseif ( 'list' === $view ) : ?>
 					<table class="nwcs-medialist">
 						<thead>
 							<tr>
+								<th class="nwcs-table__check"><span class="screen-reader-text">Seç</span></th>
 								<th class="nwcs-medialist__pic"></th>
 								<th>Dosya</th>
 								<th>Başlık ve alt metin</th>
@@ -196,6 +258,12 @@ function nwcs_render_media(): void {
 							<?php foreach ( $result['items'] as $item ) : ?>
 								<?php $used = $usage[ $item['id'] ] ?? array(); ?>
 								<tr>
+									<td class="nwcs-table__check">
+										<?php if ( ! $used ) : ?>
+											<input type="checkbox" name="gorseller[]" value="<?php echo esc_attr( (string) $item['id'] ); ?>"
+												form="nwcs-media-bulk" data-nwcs-check aria-label="<?php echo esc_attr( $item['name'] ); ?>" />
+										<?php endif; ?>
+									</td>
 									<td class="nwcs-medialist__pic">
 										<?php if ( $item['thumb'] ) : ?>
 											<img src="<?php echo esc_url( $item['thumb'] ); ?>" alt="<?php echo esc_attr( $item['alt'] ); ?>" />
@@ -225,7 +293,11 @@ function nwcs_render_media(): void {
 									</td>
 
 									<td class="nwcs-medialist__used">
-										<?php echo $used ? esc_html( implode( ', ', $used ) ) : '—'; ?>
+										<?php if ( $used ) : ?>
+											<?php nwcs_media_render_usage( $used ); ?>
+										<?php else : ?>
+											—
+										<?php endif; ?>
 									</td>
 
 									<td>
@@ -249,6 +321,10 @@ function nwcs_render_media(): void {
 							<?php $used = $usage[ $item['id'] ] ?? array(); ?>
 							<figure class="nwcs-mediacard">
 								<div class="nwcs-mediacard__thumb">
+									<?php if ( ! $used ) : ?>
+										<input type="checkbox" class="nwcs-mediacard__check" name="gorseller[]" value="<?php echo esc_attr( (string) $item['id'] ); ?>"
+											form="nwcs-media-bulk" data-nwcs-check aria-label="<?php echo esc_attr( $item['name'] ); ?>" />
+									<?php endif; ?>
 									<?php if ( $item['thumb'] ) : ?>
 										<img src="<?php echo esc_url( $item['thumb'] ); ?>" alt="<?php echo esc_attr( $item['alt'] ); ?>" />
 									<?php endif; ?>
@@ -273,7 +349,8 @@ function nwcs_render_media(): void {
 										</p>
 
 										<?php if ( $used ) : ?>
-											<p class="nwcs-mediacard__used">Kullanımda: <?php echo esc_html( implode( ', ', $used ) ); ?></p>
+											<p class="nwcs-mediacard__used">Kullanımda: <?php nwcs_media_render_usage( $used ); ?></p>
+											<p class="nwcs-hint">Silmek için önce ürünün galerisinden çıkarın.</p>
 										<?php endif; ?>
 
 										<div class="nwcs-mediacard__actions">
@@ -316,7 +393,13 @@ function nwcs_render_media(): void {
 						<div class="nwcs-field">
 							<label class="nwcs-field__label" for="nwcs-media-files">Dosyalar</label>
 							<input class="nwcs-file" type="file" id="nwcs-media-files" name="files[]" accept="image/*" multiple />
-							<p class="nwcs-hint">Birden fazla dosya seçebilirsiniz. Dosyalar ağ ana sitesinin medya kitaplığına yüklenir.</p>
+							<p class="nwcs-hint">
+								Birden fazla dosya seçebilirsiniz. JPG, PNG, WebP ve iPhone (HEIC) fotoğrafları olur;
+								dosya başına en fazla <?php echo esc_html( size_format( wp_max_upload_size() ) ); ?>.
+								<?php if ( function_exists( 'nwcs_image_webp_supported' ) && nwcs_image_webp_supported() ) : ?>
+									Fotoğraflar yüklenirken sitede hızlı açılacak şekilde küçültülür ve WebP'ye çevrilir.
+								<?php endif; ?>
+							</p>
 						</div>
 
 						<div class="nwcs-field">
@@ -361,15 +444,30 @@ function nwcs_render_pagination( int $pages, int $current, callable $url_for ): 
 function nwcs_render_media_notices(): void {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- yalnizca bildirim.
 	$key   = isset( $_GET['nwcs_media'] ) ? sanitize_key( wp_unslash( $_GET['nwcs_media'] ) ) : '';
-	$count = isset( $_GET['adet'] ) ? absint( $_GET['adet'] ) : 0;
+	$count   = isset( $_GET['adet'] ) ? absint( $_GET['adet'] ) : 0;
+	$skipped = isset( $_GET['atlanan'] ) ? absint( $_GET['atlanan'] ) : 0;
+	$too_big = isset( $_GET['buyuk'] ) ? absint( $_GET['buyuk'] ) : 0;
+	$failed  = isset( $_GET['hatali'] ) ? absint( $_GET['hatali'] ) : 0;
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
+	$limit    = size_format( wp_max_upload_size() );
+	$problems = trim(
+		( $too_big ? sprintf( ' %1$d dosya çok büyük olduğu için yüklenmedi (dosya başına en fazla %2$s).', $too_big, $limit ) : '' )
+		. ( $failed ? sprintf( ' %d dosya yüklenemedi; dosya türü desteklenmiyor ya da dosya bozuk olabilir.', $failed ) : '' )
+	);
+
 	$map = array(
-		'uploaded' => array( 'success', sprintf( '%d görsel yüklendi.', $count ) ),
+		'uploaded' => array( $problems ? 'warning' : 'success', trim( sprintf( '%d görsel yüklendi. ', $count ) . $problems ) ),
 		'updated'  => array( 'success', 'Görsel bilgileri kaydedildi.' ),
 		'deleted'  => array( 'success', 'Görsel silindi.' ),
+		'bulk_deleted' => array(
+			'success',
+			sprintf( '%d görsel silindi.', $count ) . ( $skipped ? sprintf( ' %d görsel bir üründe kullanıldığı için silinmedi.', $skipped ) : '' ),
+		),
+		'bulk_empty' => array( 'error', 'Görsel seçilmedi.' ),
 		'in_use'   => array( 'error', 'Bu görsel bir üründe kullanılıyor; önce üründen çıkarın.' ),
-		'failed'   => array( 'error', 'Yükleme başarısız oldu. Dosya türü veya boyutu uygun olmayabilir.' ),
+		'failed'   => array( 'error', '' !== $problems ? 'Yükleme başarısız oldu.' . ' ' . $problems : 'Yükleme başarısız oldu. Dosya türü veya boyutu uygun olmayabilir.' ),
+		'too_big_total' => array( 'error', sprintf( 'Seçilen dosyaların toplamı çok büyük; sunucu hiçbirini almadı. Daha az dosyayla tekrar deneyin (dosya başına en fazla %s).', $limit ) ),
 	);
 
 	if ( isset( $map[ $key ] ) ) {
@@ -397,18 +495,29 @@ function nwcs_handle_media_upload(): void {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 
-	$alt   = isset( $_POST['alt'] ) ? nwcs_clean_text( wp_unslash( $_POST['alt'] ) ) : '';
-	$files = $_FILES['files'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- asagida tek tek islenir.
-	$count = 0;
+	$alt     = isset( $_POST['alt'] ) ? nwcs_clean_text( wp_unslash( $_POST['alt'] ) ) : '';
+	$files   = $_FILES['files'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- asagida tek tek islenir.
+	$count   = 0;
+	$too_big = 0;
+	$failed  = 0;
+	$limit   = wp_max_upload_size();
 
 	if ( ! is_array( $files ) || ! isset( $files['name'] ) || ! is_array( $files['name'] ) ) {
-		nwcs_media_redirect( 'failed', 0 );
+		// Secilenlerin toplami post_max_size'i asinca PHP $_FILES'i bos birakir.
+		nwcs_media_redirect( 'too_big_total', 0 );
 	}
 
 	switch_to_blog( nwcs_pool_blog_id() );
 
 	foreach ( array_keys( $files['name'] ) as $index ) {
-		if ( UPLOAD_ERR_NO_FILE === (int) $files['error'][ $index ] ) {
+		$error = (int) $files['error'][ $index ];
+
+		if ( UPLOAD_ERR_NO_FILE === $error ) {
+			continue;
+		}
+
+		if ( in_array( $error, array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) || (int) $files['size'][ $index ] > $limit ) {
+			++$too_big;
 			continue;
 		}
 
@@ -424,6 +533,7 @@ function nwcs_handle_media_upload(): void {
 		$attachment_id = media_handle_upload( 'nwcs_single', 0 );
 
 		if ( is_wp_error( $attachment_id ) ) {
+			++$failed;
 			continue;
 		}
 
@@ -439,7 +549,20 @@ function nwcs_handle_media_upload(): void {
 	restore_current_blog();
 
 	nwcs_pool_flush_cache();
-	nwcs_media_redirect( $count ? 'uploaded' : 'failed', $count );
+
+	wp_safe_redirect(
+		nwcs_media_url(
+			array_filter(
+				array(
+					'nwcs_media' => $count ? 'uploaded' : 'failed',
+					'adet'       => $count,
+					'buyuk'      => $too_big,
+					'hatali'     => $failed,
+				)
+			)
+		)
+	);
+	exit;
 }
 
 add_action( 'admin_post_nwcs_media_update', 'nwcs_handle_media_update' );
@@ -495,6 +618,62 @@ function nwcs_handle_media_delete(): void {
 	}
 
 	nwcs_media_redirect( 'deleted', 0 );
+}
+
+/**
+ * Secilen gorselleri siler. Bir urunde (cop dahil) kullanilanlar atlanir.
+ */
+add_action( 'admin_post_nwcs_media_bulk_delete', 'nwcs_handle_media_bulk_delete' );
+function nwcs_handle_media_bulk_delete(): void {
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
+	}
+
+	check_admin_referer( 'nwcs_media_bulk_delete' );
+
+	$ids = isset( $_POST['gorseller'] ) && is_array( $_POST['gorseller'] )
+		? array_values( array_unique( array_filter( array_map( 'absint', wp_unslash( $_POST['gorseller'] ) ) ) ) )
+		: array();
+
+	if ( ! $ids ) {
+		nwcs_media_redirect( 'bulk_empty', 0 );
+	}
+
+	$usage   = nwcs_media_usage();
+	$deleted = 0;
+	$skipped = 0;
+
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	foreach ( $ids as $attachment_id ) {
+		if ( isset( $usage[ $attachment_id ] ) ) {
+			++$skipped;
+			continue;
+		}
+
+		if ( 'attachment' === get_post_type( $attachment_id ) && wp_delete_attachment( $attachment_id, true ) ) {
+			++$deleted;
+		}
+	}
+
+	restore_current_blog();
+	nwcs_pool_flush_cache();
+
+	$search = isset( $_POST['ara'] ) ? sanitize_text_field( wp_unslash( $_POST['ara'] ) ) : '';
+
+	wp_safe_redirect(
+		nwcs_media_url(
+			array_filter(
+				array(
+					'nwcs_media' => 'bulk_deleted',
+					'adet'       => $deleted,
+					'atlanan'    => $skipped,
+					'ara'        => $search,
+				)
+			)
+		)
+	);
+	exit;
 }
 
 function nwcs_media_redirect( string $key, int $count ): void {

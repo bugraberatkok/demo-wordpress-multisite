@@ -202,12 +202,15 @@ girme ihtiyacı yoktur.
   değiştirme ve silme **Kategoriler** sayfasındadır.
 - **Arama, kategori filtresi ve sayfalama** listenin üstünde. Arama ürün adında ve kodunda
   yapılır; Türkçe harf ve büyük/küçük harf farkı gözetilmez ("civi" = "ÇİVİ").
-- **Toplu işlem**: birden çok ürünü seçip "şu sitede göster/gizle" ya da "kategoriye ekle".
-  İşlemden sonra liste aynı süzgeçle (kategori, arama) döner.
+- **Toplu işlem**: birden çok ürünü seçip "çöp kutusuna taşı", "şu sitede göster/gizle" ya da
+  "kategoriye ekle". İşlemden sonra liste aynı süzgeçle (kategori, arama) döner.
 - **Kategori bazlı Excel** (aşağıda): kategorinin dosyasını indir, düzenle, yükle. CSV ile giriş
   0.20.0'da, serbest Excel sihirbazı 0.21.0'da kaldırıldı.
 - **Çöp kutusu**: "Çöp kutusuna taşı" ürünü sitelerden kaldırır ama silmez; üst şeritteki
   "Çöp kutusu" görünümünden **Geri getir** (sitelerde eski yerine döner) ya da **Kalıcı sil**.
+  Çöp kutusunda da ürünler seçilip toplu geri getirilir ya da kalıcı silinir (onaylı). Toplu
+  kalıcı silmede site seçimleri sonda tek geçişte temizlenir. Yüzlerce ürünlük seçimlerde
+  sunucu zaman aşımına karşı işlemi sayfa sayfa yapın.
 - Kaydedilemeyen form (başka üründe kullanılan kod, boş ad) hiçbir şey yazmaz; girilenler
   formda geri gelir ve kodun hangi üründe kullanıldığı yazar.
 - **Görseller** ağ ana sitesinin WordPress medya kitaplığına yüklenir ve oradan silinir.
@@ -431,7 +434,20 @@ http://localhost:8080/wp-admin/network/admin.php?page=nwcs-media
 
 Görsellerin tek yerden yönetildiği sayfa: bir seferde birden fazla dosya yükleyin
 (isteğe bağlı ortak alt metinle), arayın, başlık ve alt metni düzenleyin, silin.
-Her görselin hangi üründe kullanıldığı kartında yazar; kullanımdaki görsel silinemez.
+Her görselin hangi üründe kullanıldığı kartında yazar (ürüne bağlantılı; çöp kutusundaki
+ürünler de sayılır); kullanımdaki görsel silinemez, önce ürünün galerisinden çıkarılır.
+Kullanılmayan görseller seçilip **Seçilenleri sil** ile toplu silinir (kalıcı, geri alınamaz);
+seçime kullanımdaki görsel karışırsa atlanır ve bildirimde sayısı yazar. Büyük seçimlerde
+sayfa sayfa silin.
+
+**WebP'ye çevirme (0.22.2, `includes/images.php`):** panelden yüklenen JPG, PNG ve HEIC
+fotoğraflar yükleme anında en fazla 2560 px'e küçültülür, yönü düzeltilir ve WebP olarak
+kaydedilir; orijinal saklanmaz (temalar "full" boyutu da kullanıyor), EXIF/konum düşer. Ara
+boyutlar da WebP. GIF ve SVG'ye, ziyaretci form eklerine dokunulmaz; sunucu WebP yazamazsa
+dosya olduğu gibi kalır. Eski görseller kendiliğinden çevrilmez.
+Yükleme sınırı: ağda **Ayarlar → En fazla yükleme dosya boyutu** varsayılanı 1500 KB; telefon
+fotoğrafları için 10240 KB yapın (PHP `upload_max_filesize` / `post_max_size` da en az bu kadar
+olmalı). Yükleme formu gerçek sınırı yazar; büyük ya da bozuk dosyada bildirim nedenini söyler.
 
 ### Ürün detay sayfası
 

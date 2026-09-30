@@ -180,7 +180,8 @@ function nwcs_render_pool_toolbar( string $search, string $category, array $cate
 function nwcs_render_pool_table( array $items, ?array $editing, array $categories, array $filters ): void {
 	$sites = nwcs_editable_sites();
 	?>
-	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="nwcs-bulkform">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="nwcs-bulkform"
+		onsubmit="return this.bulk_action.value !== 'trash:' || confirm('Seçilen ürünler çöp kutusuna taşınsın mı? Gösterildikleri bütün sitelerden kalkarlar. Çöp kutusundan geri getirebilirsiniz.');">
 		<input type="hidden" name="action" value="nwcs_pool_bulk" />
 		<?php wp_nonce_field( 'nwcs_pool_bulk' ); ?>
 		<?php foreach ( $filters as $key => $value ) : ?>
@@ -194,6 +195,7 @@ function nwcs_render_pool_table( array $items, ?array $editing, array $categorie
 
 			<select class="nwcs-input" name="bulk_action">
 				<option value="">Toplu işlem…</option>
+				<option value="trash:">Çöp kutusuna taşı</option>
 				<?php foreach ( $sites as $blog_id => $site ) : ?>
 					<option value="show:<?php echo esc_attr( (string) $blog_id ); ?>">
 						<?php echo esc_html( $site['label'] ); ?> sitesinde göster
@@ -467,6 +469,10 @@ function nwcs_render_pool_notices(): void {
 		'deleted'      => array( 'success', 'Ürün çöp kutusuna taşındı ve sitelerden kalktı. Çöp kutusundan geri getirebilirsiniz.' ),
 		'restored'     => array( 'success', 'Ürün geri getirildi; daha önce göründüğü sitelerde yeniden görünüyor.' ),
 		'purged'       => array( 'success', 'Ürün kalıcı olarak silindi.' ),
+		'bulk_trashed' => array( 'success', sprintf( '%d ürün çöp kutusuna taşındı ve sitelerden kalktı. Çöp kutusundan geri getirebilirsiniz.', $count ) ),
+		'bulk_restored' => array( 'success', sprintf( '%d ürün geri getirildi; daha önce göründükleri sitelerde yeniden görünüyor.', $count ) ),
+		'bulk_purged'  => array( 'success', sprintf( '%d ürün kalıcı olarak silindi.', $count ) ),
+		'trash_empty'  => array( 'error', 'Ürün seçilmedi.' ),
 		'trash_off'    => array( 'error', 'Bu sunucuda WordPress çöp kutusu kapalı (EMPTY_TRASH_DAYS = 0); ürün çöpe atılamaz, atılırsa kalıcı silinirdi. Sunucu yöneticisinden çöp kutusunu açmasını isteyin.' ),
 		'cat_added'    => array( 'success', 'Kategori eklendi.' ),
 		'cat_deleted'  => array( 'success', 'Kategori silindi.' ),
@@ -862,9 +868,25 @@ function nwcs_render_pool_trash(): void {
 		<?php if ( ! $rows ) : ?>
 			<p class="nwcs-empty">Çöp kutusu boş.</p>
 		<?php else : ?>
+			<?php // Satirlarda tekli formlar var; kutular bu forma form="" ile baglanir (ic ice form olmaz). ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="nwcs-trash-bulk" class="nwcs-bulkbar"
+				onsubmit="return this.trash_action.value !== 'purge' || confirm('Seçilen ürünler kalıcı olarak silinsin mi? Bu işlem geri alınamaz.');">
+				<input type="hidden" name="action" value="nwcs_pool_trash_bulk" />
+				<?php wp_nonce_field( 'nwcs_pool_trash_bulk' ); ?>
+				<label class="nwcs-bulkbar__all">
+					<input type="checkbox" data-nwcs-check-all /> Tümünü seç
+				</label>
+				<select class="nwcs-input" name="trash_action">
+					<option value="restore">Seçilenleri geri getir</option>
+					<option value="purge">Seçilenleri kalıcı sil</option>
+				</select>
+				<button type="submit" class="button">Uygula</button>
+			</form>
+
 			<table class="nwcs-table">
 				<thead>
 					<tr>
+						<th scope="col" class="nwcs-table__check"><span class="screen-reader-text">Seç</span></th>
 						<th scope="col">Ürün</th>
 						<th scope="col">Kategori</th>
 						<th scope="col">Çöpe atıldı</th>
@@ -874,6 +896,10 @@ function nwcs_render_pool_trash(): void {
 				<tbody>
 					<?php foreach ( $rows as $row ) : ?>
 						<tr>
+							<td class="nwcs-table__check">
+								<input type="checkbox" name="urunler[]" value="<?php echo esc_attr( (string) $row['id'] ); ?>"
+									form="nwcs-trash-bulk" data-nwcs-check aria-label="<?php echo esc_attr( $row['title'] ); ?>" />
+							</td>
 							<td>
 								<strong><?php echo esc_html( $row['title'] ); ?></strong>
 								<span class="nwcs-table__spec"><?php echo esc_html( $row['code'] ); ?></span>
@@ -959,6 +985,72 @@ function nwcs_handle_pool_purge(): void {
 }
 
 /**
+ * Cop kutusunda toplu "Geri getir" / "Kalıcı sil". Yalnizca coptekiler islenir.
+ */
+add_action( 'admin_post_nwcs_pool_trash_bulk', 'nwcs_handle_pool_trash_bulk' );
+function nwcs_handle_pool_trash_bulk(): void {
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
+	}
+
+	check_admin_referer( 'nwcs_pool_trash_bulk' );
+
+	$ids = isset( $_POST['urunler'] ) && is_array( $_POST['urunler'] )
+		? array_values( array_filter( array_map( 'absint', wp_unslash( $_POST['urunler'] ) ) ) )
+		: array();
+
+	$action = isset( $_POST['trash_action'] ) ? sanitize_key( wp_unslash( $_POST['trash_action'] ) ) : '';
+
+	if ( ! $ids || ! in_array( $action, array( 'restore', 'purge' ), true ) ) {
+		wp_safe_redirect( nwcs_pool_url( array( 'cop' => 1, 'nwcs_pool' => 'trash_empty' ) ) );
+		exit;
+	}
+
+	$done   = 0;
+	$purged = array();
+
+	// Kalici silmede site secimleri urun basina degil, sonda tek geciste temizlenir.
+	remove_action( 'deleted_post', 'nwcs_forget_deleted_product', 10 );
+
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	foreach ( $ids as $id ) {
+		if ( 'trash' !== get_post_status( $id ) || ! nwcs_sync_product_post( $id ) ) {
+			continue;
+		}
+
+		if ( 'restore' === $action ) {
+			nwcs_untrash_product( $id );
+		} elseif ( wp_delete_post( $id, true ) ) {
+			$purged[] = $id;
+		} else {
+			continue;
+		}
+
+		++$done;
+	}
+
+	restore_current_blog();
+
+	add_action( 'deleted_post', 'nwcs_forget_deleted_product', 10, 2 );
+	nwcs_forget_products( $purged );
+	nwcs_pool_flush_cache();
+
+	$args = array(
+		'nwcs_pool' => 'restore' === $action ? 'bulk_restored' : 'bulk_purged',
+		'adet'      => $done,
+	);
+
+	// Cop bosaldiysa urun listesine donulur.
+	if ( nwcs_pool_trashed_count() ) {
+		$args['cop'] = 1;
+	}
+
+	wp_safe_redirect( nwcs_pool_url( $args ) );
+	exit;
+}
+
+/**
  * Havuzdan kalici silinen urun (Kalıcı sil, WordPress'in 30 gunluk cop
  * temizligi, geri almada cop kutusu kapaliysa) sitelerin seciminden de cikar.
  * Cope atma bu kancayi tetiklemez: secim korunur, geri gelince yerine doner.
@@ -976,12 +1068,26 @@ function nwcs_forget_deleted_product( int $post_id, $post = null ): void {
  * Silinen urunu sitelerin secim ve istisnalarindan temizler.
  */
 function nwcs_forget_product( int $product_id ): void {
+	nwcs_forget_products( array( $product_id ) );
+}
+
+/**
+ * Birden cok urunu site basina tek geciste temizler (toplu kalici silme:
+ * urun basina 10 site gecisi yerine toplam 10).
+ *
+ * @param int[] $product_ids
+ */
+function nwcs_forget_products( array $product_ids ): void {
+	if ( ! $product_ids ) {
+		return;
+	}
+
 	foreach ( array_keys( nwcs_editable_sites() ) as $blog_id ) {
 		switch_to_blog( $blog_id );
 
-		$settings             = nwcs_site_product_settings();
-		$settings['selected'] = array_values( array_diff( $settings['selected'], array( $product_id ) ) );
-		unset( $settings['overrides'][ $product_id ] );
+		$settings              = nwcs_site_product_settings();
+		$settings['selected']  = array_values( array_diff( $settings['selected'], $product_ids ) );
+		$settings['overrides'] = array_diff_key( $settings['overrides'], array_flip( $product_ids ) );
 
 		update_option( NWCS_OPTION_SELECTED, $settings['selected'] );
 		update_option( NWCS_OPTION_OVERRIDES, $settings['overrides'] );
@@ -1024,6 +1130,41 @@ function nwcs_handle_pool_bulk(): void {
 	[ $verb, $target ] = array_pad( explode( ':', $action, 2 ), 2, '' );
 	$pool              = nwcs_pool_products();
 	$ids               = array_values( array_filter( $ids, static fn( int $id ): bool => isset( $pool[ $id ] ) ) );
+
+	if ( 'trash' === $verb ) {
+		// Tek urun silmeyle ayni: cope atilir, site secimleri korunur.
+		if ( ! nwcs_trash_enabled() ) {
+			nwcs_pool_redirect( 'trash_off' );
+		}
+
+		$trashed = 0;
+
+		switch_to_blog( nwcs_pool_blog_id() );
+
+		foreach ( $ids as $id ) {
+			if ( nwcs_sync_product_post( $id ) && wp_trash_post( $id ) ) {
+				++$trashed;
+			}
+		}
+
+		restore_current_blog();
+		nwcs_pool_flush_cache();
+
+		// Diger toplu islemler gibi ayni suzgecle (kategori, arama) donulur.
+		wp_safe_redirect(
+			nwcs_pool_url(
+				array_filter(
+					array(
+						'ara'       => isset( $_POST['ara'] ) ? nwcs_clean_text( wp_unslash( $_POST['ara'] ) ) : '',
+						'kategori'  => isset( $_POST['kategori'] ) ? sanitize_title( wp_unslash( $_POST['kategori'] ) ) : '',
+						'nwcs_pool' => 'bulk_trashed',
+						'adet'      => $trashed,
+					)
+				)
+			)
+		);
+		exit;
+	}
 
 	if ( 'cat' === $verb ) {
 		$term = get_term_by( 'slug', sanitize_title( $target ), NWCS_PRODUCT_TAX );
