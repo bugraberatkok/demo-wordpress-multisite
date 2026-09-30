@@ -77,11 +77,18 @@ function kr_assets(): void {
 
 		// (Tailwind derlemesi tema disinda; bu kurallar burada.)
 		// Urun sayfasi: solda bilgi, sagda buyuk galeri (firmanin istegi, eski
-		// woodkocist.com.tr urun sayfasi gibi). Gorsel kendi oraninda, kirpilmadan.
+		// woodkocist.com.tr urun sayfasi gibi). Olculer WOOD KOCIST ile ayni: sutunlar
+		// 472/728, arada 5rem; ana gorsel 1280x1714 dikey cercevede (firmanin
+		// istegi), yatay fotografin kenarlari kirpilir, tam hali buyutmede.
 		wp_add_inline_style(
 			'kr-tailwind',
-			'@media (max-width:68.74rem){.kr-pt-gallery,.kr-pt-info{width:100%;max-width:45rem;margin-inline:auto}}@media (min-width:40rem) and (max-width:68.74rem){.kr-product-shot>img{width:auto;max-width:100%;max-height:calc(100svh - 220px);margin-inline:auto}}@media (max-width:39.99rem){.kr-pt-gallery{width:auto;max-width:none;margin-inline:-1.25rem}}@media (min-width:68.75rem){.kr-product-top{grid-template-columns:minmax(0,.55fr) minmax(0,1fr);align-items:start}.kr-pt-gallery{grid-column:2;grid-row:1}.kr-pt-info{grid-column:1;grid-row:1;position:sticky;top:8rem}}'
+			'@media (max-width:68.74rem){.kr-pt-gallery,.kr-pt-info{width:100%;max-width:45rem;margin-inline:auto}}@media (max-width:39.99rem){.kr-pt-gallery{width:auto;max-width:none;margin-inline:-1.25rem}}@media (min-width:68.75rem){.kr-product-top{grid-template-columns:minmax(0,472fr) minmax(0,728fr);column-gap:5rem;align-items:start}.kr-pt-gallery{grid-column:2;grid-row:1}.kr-pt-info{grid-column:1;grid-row:1;position:sticky;top:8rem}}'
 			. '.kr-product-shot{aspect-ratio:auto;overflow:hidden}.kr-product-shot>img,.kr-product-shot>[role=img]{position:static;display:block;height:auto;object-fit:contain}'
+			. '.kr-product-shot>img{width:100%;aspect-ratio:1280/1714;object-fit:cover}'
+			// Gorsel yuklenmemisse yer tutucu da ayni dikey cercevede (eklentinin 4:3 satir ici oranini ezer).
+			. '.kr-product-shot>.nwcs-ph{width:100%;aspect-ratio:1280/1714!important}'
+			// Tablette dikey cerceve ekrani tek basina doldurmasin.
+			. '@media (min-width:40rem) and (max-width:68.74rem){.kr-product-shot>img,.kr-product-shot>.nwcs-ph{width:auto;max-width:100%;height:min(calc(100svh - 220px),60rem);margin-inline:auto}}'
 			// Fareyle uzerine gelince imlecin oldugu yer buyur (assets/site.js).
 			. '.kr-product-shot>img{transform-origin:var(--zx,50%) var(--zy,50%);transition:transform .25s ease}.kr-product-shot.is-lens>img{transform:scale(2.2);transition-duration:.12s}'
 			. '@media (prefers-reduced-motion:reduce){.kr-product-shot>img{transition:none}}'
