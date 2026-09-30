@@ -1330,3 +1330,216 @@ Kullanıcı kararı. Toplu Güncelleme kuralları genişletildi (`includes/admin
 
 Canlıda: Git deploy'dan sonra Ağ yönetimi → İçerik Stüdyosu → Toplu Güncelleme → Uygula
 (veritabanı Git ile taşınmaz).
+
+## Ürün Havuzu: detay başlıkları ve kategori bazlı Excel (0.21.0, 29 Eylül 2026)
+
+Plan: `PLAN-detay-basliklari.md` (mimar planı + kullanıcı kararları 14b).
+
+- **Veri:** teknik detaylar `_nwcs_details` (sıralı etiket/değer). `_nwcs_spec` ondan türetilir;
+  ikisini yalnızca `nwcs_product_write_details()` yazar. Okuma tembel (kayıt yoksa spec
+  ayrıştırılır), migrasyon yok. Havuz önbelleği `nwcs_pool_products_v3`.
+- **Başlık kaydı** ağ geneli site option `nwcs_product_headings` (anahtar = Türkçe harfleri
+  sadeleştirilmiş etiket). İlk açılışta spec metinlerinden kurulur; sıra, etiketin ürünlerdeki
+  ortalama yeri. **Hiçbiri kendiliğinden zorunlu değil:** zorunluluk globaldir ve Koçist'in
+  228 ürününde detay yok; kendiliğinden zorunluluk onların Excel satırlarını reddederdi.
+  Zorunluluk Detay başlıkları ekranından, "… üründe boş" sayısı görülerek verilir.
+- **Excel:** serbest sihirbaz kaldırıldı. Kategori taslağı indirilir, `_bilgi` gizli sayfası
+  kategoriyi taşır, sütun eşleştirmesi yok. Sistem sütunları büyük harfli başlıklarıyla
+  birebir tanınır ("FİYAT"), böylece "Fiyat" adlı bir detay başlığıyla karışmaz. Boş hücre =
+  temizle. Önizleme → uygula → tek seviyeli geri alma; hesap `admin/sync.php`, ekran
+  `admin/import.php`, JavaScript gerekmez (admin-post + transient).
+- **Çöp kutusu:** Excel'den düşen ürün ve formdaki "Çöp kutusuna taşı" artık silmez, çöpe
+  atar; site seçimleri korunur, geri getirilince ürün eski yerine döner. Kod araması çöpü de
+  kapsar (`nwcs_product_id_by_code`), aynı kodla ikinci ürün açılmaz. Geri getirme WordPress'in
+  "taslak" varsayılanı yerine önceki durumu kullanır (`nwcs_untrash_product`). Geri alma
+  `post_name` yazmaz: çöpteki ürünün adı `…__trashed` olur, yazılsaydı adres bozulurdu.
+- **Yeni ürün sitelerde:** planda yalnızca "eşlik eden kategori" vardı; aynı mantıkla yeni
+  ürün, kategorinin *bütün* ürünlerini gösteren sitelerde de seçilir (aksi hâlde Excel'den
+  eklenen ürün hiçbir sitede görünmezdi). Önizlemede yazar, geri alma seçimden çıkarır.
+- **Ürün açıklamaları ekranı:** HTML ↔ düz metin. Koçist'in 182 açıklamasında ölçü tablosu
+  var; planın "karmaşık HTML → işaret" kuralı bunların hepsini kilitlerdi. Tablolar dosyaya
+  girmez, metin yazılırken sona aynen eklenir; yalnızca görsel/bağlantı gibi içerik işaretlenir
+  (yerelde 0 ürün). Alıntı (`blockquote`, WK'da 9 ürün) "> " satırlarıyla taşınır.
+- **Açıklamasız ürün sayfası:** kullanıcı kararı "sayfa kapanmaz". Kural eklentide tek yerde
+  (`nwcs_product_has_page`), temalar manifestte `product_page_always` ile açar; yalnızca
+  WOOD KOCIST ve Koçist. Diğer siteler (İstanbul Keresteci vb.) eski kuralda: açıklamasız
+  ürün kartı teklife gider. Koçist'te açıklamasız 3 ürün vardı; sayfaları artık açık.
+- **Temalar:** `nwcs_product_pairs()` ürünün KENDİ sırasını döndürür (inceleme sonrası karar:
+  kayıt sırası sitedeki mevcut sayfaların sırasını değiştirmesin; blog 13 ve 8'de 0 fark ölçüldü).
+  Kayıt sırası yalnızca Excel sütunlarını ve formda eksik zorunlu satırın yerini belirler; tohum
+  sırası WK'nın olağan çekirdek sırasıyla başlar. Excel'den detayı değişen ürün sütun sırasıyla
+  yazılır, detayı değişmeyen ürüne dokunulmaz. Teknik detay föyünün ilk
+  satırı "Ürün kodu" (iki sütunlu düzende tam genişlik, kalın ayraç). Açıklaması olmayan
+  üründe föy 3'ten az özellikle de açılır (yoksa bir iki özellik hiç görünmezdi).
+- **Havuz Paketi v2:** `details` ve `headings` taşır; v1 kabul edilir (spec'ten okunur).
+- **xlsx yazıcı** kitaplıksız (ZipArchive): satır içi metin + "Metin" sayı biçimi, gizli sütun
+  ve sayfa, dondurulmuş kalın başlık. Okuyucu sayfa adıyla okur ve Excel'in sayı olarak
+  sakladığı hücreleri bildirir. `GLOB_BRACE` Alpine'de yok; kullanılmıyor.
+
+### İnceleme sonrası düzeltmeler (30 Eylül 2026)
+
+- Geri alma kaydı uygulamanın başında yazılır, her üründen sonra güncellenir (`complete`
+  bayrağı); açıklama uygulaması da öyle ve `set_time_limit(300)`.
+- Önizleme transient'i uygulamadan önce silinir; silme başarısızsa (ikinci basış) yazılmaz.
+- `_bilgi` → kaynak bu panelden değilse dosya reddedilir; kesilen (20.000+ satır) dosya reddedilir.
+- Çöpe gidecek ürünler için de önizleme sonrası değişiklik denetimi.
+- Kopyalanmış satır: farklı/boş kodla yeni ürün (not), aynı kodla hata.
+- Sistem sütunları `nwcs_heading_key` ile tanınır; ayrılmış anahtarlarla başlık açılmaz; eski
+  "Fiyat" başlığı Excel'de "Fiyat (detay)". Etiket temizliği (':' ';') tek fonksiyonda
+  (`nwcs_heading_clean_label`), değer temizliği `nwcs_detail_clean_value`; plan da onları kullanır.
+- `EMPTY_TRASH_DAYS = 0` ise çöpe atma yapılmaz. Kalıcı silme `deleted_post` kancasıyla
+  seçimlerden düşer. Site seçimi kaydedilince çöpteki ürün eski yerinde tutulur.
+- Yüklenen dosya `move_uploaded_file` ile eklentinin geçici klasörüne alınır, okunduktan sonra silinir.
+- Paylaşılan kategori listede ve önizlemede belirtilir; "hepsi" kipindeki siteler de "gösterilecek"
+  listesinde; önizlemede önceki yüklemenin "Geri al" şeridi gizlenir.
+- `scripts/import-kocist.php`, `import-woodkocist.php`, `seed-products.php` tek yazıcıyı kullanır.
+
+## Ürün Havuzu: kategori ↔ site yerleşimi, Kategoriler sayfası, Son işlemler (0.22.0, 30 Eylül 2026)
+
+Plan: `PLAN-faz2-kategoriler.md` (kullanıcı onayı: 5 açık sorunun hepsine evet, geçmiş derinliği 10).
+
+- **Yerleşim veridir.** "Hangi kategori hangi sitede hangi üst başlığın altında" havuz
+  kategorisinin terim meta'sında (`_nwcs_placement = { site_key => üst başlık }`). Taksonomi düz
+  kalır. Üst başlıklar sitenin kendi panel satırlarıdır (WK: Ana Sayfa → Seriler; Koçist: Üst
+  Menü'de "Ürün grubu anahtarı" dolu satırlar). Temalar kendi kategori listesini taşımaz.
+- **Kategori sayfaları eklentiden:** manifestteki `catalog` şablonundan `kat-<havuz-slug>` ve
+  `seri-`/`grp-<anahtar>` sayfaları üretilir (`nwcs_manifest_for_blog`, blog başına istek içi
+  önbellek; taksonomi kayıtlı değilken önbelleğe alınmaz). WK'nın 7 kategori sayfası birebir
+  aynı üretildi (manifest ve HTML karşılaştırması 0 fark).
+- **Koçist:** takma adlar kalktı; Köpek Kulübeleri, Kedi Yuvaları ve Piknik Masaları Dekorasyon
+  altında kendi alt başlığı. Dört alt adres havuz slug'ına geçti (301). Kategori adları eski menü
+  metinleriyle aynı kaldı (`catalog.defaults[*].name` → `kat-<slug>` sayfasının "Kategori adı"
+  alanı); `menu_*` bileşenlerinde yalnızca kategori olmayan bağlantılar (Klipsler, Bağlama
+  Telleri) kaldı. Grup kategorisinde (Kereste, Ahşap Ambalaj…) olan ürün doğrudan gruba düşer
+  (`catalog.parent_pool`).
+- **Görünürlük yalnızca ekler:** yerleşim, kategoriye ekleme, yaratma ve çöpten dönüş seçimin
+  sonuna ekler; kaldırma yalnızca o sitede başka yerleşik kategorisi olmayan ürünleri çıkarır
+  (sayı sorulur, geri alınabilir). "Eşlik eden kategori/site" kuralları kaldırıldı.
+- **Tohum** site başına bir kez (`nwcs_placement_seed_version = { site_key => 1 }`), `init`'te:
+  canlıya dağıtımdan sonraki ilk istekte kategori sayfaları boş kalmasın diye yönetici girişi
+  beklenmez. Yalnızca boş yerleşimi doldurur; seçimlere dokunmaz (blog 8/13 md5 aynı).
+- **Son işlemler:** `nwcs_pool_history` (son 10), yalnızca en üstteki geri alınır. Geri alınan
+  ürünün `post_modified` değeri de eski hâline konur (yoksa alttaki işlemin "elle düzenlendi"
+  denetimi yanlış alarm veriyordu — QA 4). Geri almada yalnızca gerçekten geri alınan ürünler
+  site seçiminden çıkar.
+- **Havuz Paketi v3** yerleşimleri taşır (hedefte boş olan kategori/site çiftine yazar); v1, v2
+  kabul edilir.
+- **Panel:** Ürün Havuzu alt sayfaları Ürünler · Kategoriler · Detay başlıkları · Ürün
+  açıklamaları · Havuz Paketi. Kategoriler sayfası tek ekranda ad, "nerede görünüyor" cümlesi,
+  Sitelerde, Excel, ürün listesi (son yüklemede değişenler vurgulu), Son işlemler. Yeni kategori
+  formunda benzer ad uyarısı (engellemez). Detay başlıklarında "Boş olduğu kategoriler" sütunu
+  ve zorunlu yapılınca takılacak kategoriler bildirimi.
+- **Bilinen, bu işin dışında:** havuz ürün önbelleği bir alt site isteğinde yeniden kurulursa
+  görsel adresleri `/woodkocist/wp-content/uploads/...` biçiminde yazılıyor (çalışıyor, adres
+  farklı); Koçist'in ek sayfaları site haritası işareti taşımıyor.
+
+### İnceleme sonrası düzeltmeler (0.22.0, 30 Eylül 2026)
+
+- **Site önbelleği:** havuz yazmalarından sonra LiteSpeed (site başına `litespeed_purge_all`) ve
+  isteğe bağlı Cloudflare (`NWCS_CF_ZONE_ID`, `NWCS_CF_API_TOKEN`) istek başına bir kez
+  temizlenir; sonuç panelde kısa not. LiteSpeed'in çoklu sitede site başına mı yoksa bütün
+  sunucuyu mu temizlediği canlıda doğrulanmalı (yerelde eklenti yok; Havuz Paketi ile aynı yol).
+- **Tohum ön denetimi:** yalnızca temasında `catalog` olan sitenin isteğinde ve anahtarı
+  tohumlanmamışsa; havuzu tüketmeyen sitelerde manifest taranmaz.
+- **Üst başlık anahtarı slug:** yerleşim anahtarı satır metninin slug'ı; başlığın havuz
+  kategorisi slug ile bulunur (Koçist `parent_pool` slug). Artık olmayan başlığa bağlı
+  yerleşim ("yetim") sessizce taşınmaz ya da silinmez; Kategoriler sayfası uyarır.
+- **Üst başlık kategorileri** (WOODPets, Dekorasyon…) etiketli, "görünmeyen" sayımına girmez,
+  yerleştirilemez, silinemez.
+- **Kategori silme** sunucu tarafı onaylı (kaç ürün hangi sitede görünmez olur) ve "Son
+  işlemler"den geri alınabilir (kategori, ürün bağları, yerleşim, site seçimleri). Toplu
+  budama yalnızca ürünü ve yeri olmayanları siler.
+- Kategori ekranı kendi son yüklemesini gösterir; üstte başka işlem varsa geri alma sırasını
+  söyler. WK'da ürünü olmayan yerleşik kategori için panel "bu sitede ürünü olunca görünür"
+  der (sitede 404 kalır; Koçist'te boş kategori sayfası mevcut davranış).
+
+
+## WOOD KOCIST ürün sayfası: canlı düzenin kopyası (30 Eylül 2026)
+
+Firma canlı woodkocist.com.tr ürün sayfasını seviyor ("değiştirmeyin"); plan
+`PLAN-wk-urun-sayfasi.md`. Yalnızca `woodkocist-theme` değişti; eklenti ve Koçist aynı.
+
+- **Tek iskelet, tüm ürünlerde:** konum → [özet | galeri] → özetin altında 4 başlıklı akordeon
+  (Teknik Detaylar açık, Ürün Açıklaması, Lojistik ve Teslimat, Müşteri Görüşleri) → İlgili ürünler.
+  Ayrıntı seviyesi (rich/medium/table/brief), özellik şeridi ve föy WK şablonundan çıktı
+  (eklentide duruyor, Koçist kullanıyor).
+- **Ölçüler canlının hesaplanmış stillerinden:** sütunlar 472:728, arası 80px, sticky yok;
+  h1 32/40 normal kalınlık (telefonda 24/30); fiyat 32/500 ve altında üç nokta; adet 128×50 +
+  "Sepete ekle" 50px; tam genişlik yeşil **Hızlı Sipariş** (#0b6f31, WhatsApp); akordeon başlığı
+  18/26 #ad4d3e (canlıdaki #b65545 krem zeminde 4.37:1 kalıyordu; #ad4d3e 4.89:1, gözle aynı);
+  tablo satırı 40px. Yazı tipi Archivo (normal genişlikte); sayfa zemini sitenin.
+- **h1 = kod + ad** (`wk_product_heading`; ad kodla başlıyorsa yalnızca ad). Konum satırının son
+  öğesi, JSON-LD `name` ve `<title>` da bu.
+- **Lojistik ve Teslimat:** panelde site geneli metin (`product.labels.delivery_text`); üründe
+  "Lojistik ve Teslimat" adlı detay satırı varsa o gösterilir, tablodan ve JSON-LD
+  özelliklerinden düşer. "Farklı ölçü mü lazım? Özel üretim isteyin" bu panelin altında.
+- **Müşteri Görüşleri:** yorum sistemi yok; dürüst boş metin ("Henüz değerlendirme yapılmadı.").
+- **Akordeon erişilebilirliği:** `h2 > button[aria-expanded][aria-controls]`, panel `role=region`;
+  aynı anda tek panel açık (açık başlık tekrar basılınca kapanır); JavaScript yoksa tüm paneller açık.
+- **Küçük resimler** görselin üstüne bindirilmiş, ortalı sıra (canlıda 60px, köşe 6px, pasif %30).
+  Telefonda 44px (dokunma hedefi) ve sığmazsa tek satırda yana kayar; canlıda 27px.
+- **Fotoğrafsız ürün:** kod plakası fotoğrafların oranında (1280×1714); düzen fotoğraflıyla aynı.
+  Tablette (600–1099px) plaka da fotoğraf gibi `100svh - 220px` ile sınırlı, oran korunur.
+- **İçerik Stüdyosu önizlemesi:** önizleme kipinde (`nwcs_is_preview()`) dört panel açık başlar;
+  kapalı paneldeki alanlar da tıklanıp vurgulanabilir. Ön yüz etkilenmez.
+- **1100–1279px:** küçük resimler 50px, aralık 8px (8 resim tek satırda kalsın).
+- **Arama açıklaması yedeği:** kısa açıklama ve detay metni boşsa ad + ilk üç teknik detay
+  (`wk_product_fallback_description`); yerelde böyle ürün yok.
+- Panelden kalkan alanlar: `wa_question`, `wa_price`, `ask_why` (yerlerini `wa_order` aldı).
+  Yeni alanlar: `wa_order`, `specs_empty`, `tab_desc`, `desc_empty`, `tab_delivery`,
+  `delivery_text`, `tab_reviews`, `reviews_empty`, `reviews_note`. `specs_title` → "Teknik
+  Detaylar", `related_title`/`related_all` → "İlgili ürünler".
+- **Bilerek farklı kalanlar:** konum satırında "Mağaza" (canlıda yok), renk seçimi yok (Teknik
+  Detaylar satırı), etiket ve favori yok, "Sepete ekle" tuğla renginde (canlıda varyasyon
+  seçilmeden gri), KDV notu `vat_mode`'a bağlı (canlıda "+ KDV"), sayfa zemini krem.
+
+## Koçist ürün sayfası: canlıdaki görsel + form, altta akordeon, dürüst fiyatsız durum (30 Eylül 2026)
+
+Plan `PLAN-kocist-urun-sayfasi.md` (kullanıcı kararları §6b, uygulama notları sonda). Eklenti
+0.22.1 (yalnızca `includes/product-headings.php`'ye üç yardımcı), Koçist teması, WOOD KOCIST'te
+küçük değişiklik.
+
+- **Veri yuvası modeli:** ürün sayfasının her yuvası (başlık, kod, fiyat, kısa açıklama, galeri,
+  Teknik Detaylar, Ürün Açıklaması, Lojistik ve Teslimat, ilgili ürünler) iki sitede aynı havuz
+  alanından dolar; işaretleme temaya ait. Ortak kural eklentide: `NWCS_DELIVERY_LABEL`,
+  `nwcs_product_is_delivery_pair`, `nwcs_product_table_specs` (detaylar − "Lojistik ve Teslimat";
+  detayı olmayan üründe serbest ölçü notu "Ölçü" satırı), `nwcs_product_delivery_row`. WK'nın
+  `wk_*` yardımcıları bunlara devreder (55 sayfanın HTML'i aynı kaldı).
+- **Koçist düzeni:** ≥1024 `[galeri + akordeon | ad, fiyat, kısa açıklama + yapışık teklif formu]`;
+  1024 altında galeri → ad/fiyat → akordeon → form, üstte "Teklif formuna git" bağlantısı
+  (forma kaydırır, ilk alanı odaklar). Kaynak sırası telefondaki sırayla aynı (okuma ve klavye
+  sırası bozulmaz). Form kartı yapışık, adın bulunduğu blok değil: ikisi birlikte ~950px ve
+  900px ekranda Gönder düğmesi görünmez oluyordu. Kartta alanlar iki sütun (Ad | Şirket,
+  Telefon | E-posta; telefonda tek sütun): kart ~550px, hata satırlarıyla ~680px; yüksekliği
+  `100svh - 100px` ile sınırlı, fazlası kartın içinde kayar. 1366×768 ve 1280×800'de Gönder
+  hata durumunda da görünür.
+- **Görsel:** kendi oranında, kırpılmadan; fotoğrafsız üründe yer tutucu WK plakasının oranında
+  (1280/1714, dikey), tablette `100svh - 220px` sınırı (WK kalıbı). 16:9 kullanılmadı.
+- **Akordeon:** Teknik Detaylar açık başlar; tabloda koddan başka satır yoksa (227 ürün) Ürün
+  Açıklaması. Tek panel açık, açık başlık tekrar basılınca kapanır, JavaScript yoksa hepsi açık,
+  panel önizlemesinde hepsi açık. Müşteri Görüşleri yok (veri yok; SSS var).
+- **Form:** `inc/form.php` iki formda ortak. Ürün formunda mesaj yerine zorunlu Adet / Ölçü
+  (`_kc_size`, e-postada "Ölçü ve adet"), isteğe bağlı Şirket (`_kc_company`, "Firma"). Onay
+  kutusu (`kc-consent`) iki formda zorunlu; KVKK sayfası gelene kadar bağlantısız metin, alt
+  şeritteki KVKK bağlantısı gerçek adrese dönünce bağlantı kendiliğinden çıkar. Sahte başarı yok.
+  Form alanlarının CSS'i `assets/css/form.css`'e taşındı (iletişim sayfası görünümü aynı).
+- **Fiyatsız durum (A + B; C ertelendi):** fiyat yerine "Fiyat teklifle" + nedeni. Neden ürüne
+  bağlı (stok durumu, ölçü, adet; WK'da sipariş üzerine üretim); "size özel fiyat" izlenimi yok.
+  Koçist: site geneli metin + grup bazlı ezme alanları (boş başlar). Ürün bazlı "fiyat notu"
+  Excel sütunu (C) şimdilik yok: plan/uygula/geri al zincirinin her halkasına dokunuyor ve
+  girilecek veri yok; gerekirse `kocist_price_reason()` önce ürün alanını okuyacak şekilde genişler.
+  "Aynı gün fiyat veriyoruz" notu (`product.main.note`) ve ürün SSS'sindeki aynı cümle
+  kaldırıldı. Kategori sayfası metinleri, iletişim alt başlığı ve footer şeridindeki "AYNI GÜN
+  FİYAT / TOPTAN FİYAT GARANTİSİ" ayrı içerik kararı (kullanıcıya soruldu). Ana sayfa kartlarına
+  dokunulmadı ("Koçist ana sayfasına dokunma" kuralı).
+- **JSON-LD:** `sku` ve yalnızca düz tutarda `offers` (`kocist_price_number`: "450 TL", "3.500 ₺";
+  "$" içeren fiyat USD). "…'den başlayan" ve çok tutarlı metinde `offers` yok (35/37 fiyatlı ürün).
+  Offer'da KDV bilgisi ve `availability` yok (veride yok; uydurulmaz). "0: BOŞ KULP 3 (75); 1: …"
+  gibi numaralı aktarım artığı ne tabloda ne JSON-LD'de "Ölçü" olur.
+- **Form dönüşü:** ürün formu gizli `kc_form=product` ve `kc_return` (ürün adresi,
+  `wp_validate_redirect`) taşır; Referer göndermeyen tarayıcıda da ürün sayfasına döner. Dönüşte
+  ilk hatalı alan, yoksa sonuç bandı odaklanır. Durum kaydı (transient) okununca silinir:
+  yenilemede ya da paylaşılan adreste girilen bilgiler görünmez.
+- **Akordeon ilk boyama:** `<html>`'e erken `k-js` sınıfı; kapalı paneller betik çalışmadan da
+  kapalı (sıçrama yok). Betik yoksa sınıf da yok, paneller açık.
+

@@ -193,12 +193,21 @@ http://localhost:8080/wp-admin/network/admin.php?page=nwcs-pool
 Ürünler burada **bir kez** girilir; siteler oradan beslenir. Her siteye tek tek ürün
 girme ihtiyacı yoktur.
 
-- Ürün alanları: ad, kart açıklaması, fiyat, ölçü/not, kategoriler, **görseller (galeri)**, detay metni.
-- **Kategoriler** listeden seçilir; yeni kategori havuz sayfasından eklenir/silinir.
+- Ürün alanları: ad, kart açıklaması, fiyat, **detay başlıkları** (teknik detaylar), kategoriler,
+  **görseller (galeri)**, ürün açıklaması (detay sayfası metni).
+- Havuzun alt sayfaları, sırayla: **Ürünler** (liste ve form), **Kategoriler** (yeni kategori,
+  sitelerde yerleşim, Excel, son işlemler), **Detay başlıkları**, **Ürün açıklamaları**,
+  **Havuz Paketi** (kurulumlar arası taşıma, ileri düzey).
+- Ürün formundaki **Kategoriler** kutusundan ürünün kategorileri seçilir; kategori açma, ad
+  değiştirme ve silme **Kategoriler** sayfasındadır.
 - **Arama, kategori filtresi ve sayfalama** listenin üstünde. Arama ürün adında ve kodunda
   yapılır; Türkçe harf ve büyük/küçük harf farkı gözetilmez ("civi" = "ÇİVİ").
 - **Toplu işlem**: birden çok ürünü seçip "şu sitede göster/gizle" ya da "kategoriye ekle".
-- **Excel'den toplu yükleme** (aşağıda). CSV ile giriş 0.20.0'da kaldırıldı.
+  İşlemden sonra liste aynı süzgeçle (kategori, arama) döner.
+- **Kategori bazlı Excel** (aşağıda): kategorinin dosyasını indir, düzenle, yükle. CSV ile giriş
+  0.20.0'da, serbest Excel sihirbazı 0.21.0'da kaldırıldı.
+- **Çöp kutusu**: "Çöp kutusuna taşı" ürünü sitelerden kaldırır ama silmez; üst şeritteki
+  "Çöp kutusu" görünümünden **Geri getir** (sitelerde eski yerine döner) ya da **Kalıcı sil**.
 - Kaydedilemeyen form (başka üründe kullanılan kod, boş ad) hiçbir şey yazmaz; girilenler
   formda geri gelir ve kodun hangi üründe kullanıldığı yazar.
 - **Görseller** ağ ana sitesinin WordPress medya kitaplığına yüklenir ve oradan silinir.
@@ -208,7 +217,40 @@ girme ihtiyacı yoktur.
 
 ### Hangi site neyi gösterir
 
-İçerik Stüdyosu'nda ürün bölümünü açtığınızda:
+**Kategori yerleşimi (0.22.0).** Bir havuz kategorisinin hangi sitede, hangi üst başlığın
+altında göründüğü veridir ve tek yerden yönetilir: **Ürün Havuzu → Kategoriler →
+kategori → Sitelerde**. Üst başlıklar sitenin kendi panel satırlarıdır:
+
+| Site | Üst başlık | Nereden gelir |
+| --- | --- | --- |
+| WOOD KOCIST | Seri (WOODPets, WOODGarden, WOODLiving) | İçerik Stüdyosu → Ana Sayfa → Seriler |
+| Koçist | Ürün grubu (Kereste, Ambalaj, Dekorasyon, Hırdavat) | Tüm Sayfalar → Üst Menü, "Ürün grubu anahtarı" dolu satırlar |
+
+- Yerleşim havuz kategorisinin terim meta'sında durur: `_nwcs_placement = { site_key => üst başlık }`.
+  Taksonomi düz kalır (hiyerarşi yok). Temalar kendi kategori listesini taşımaz; eklentinin
+  `nwcs_site_category_tree()` ve `nwcs_product_place()` fonksiyonlarını okur
+  (`includes/product-categories.php`).
+- Her yerleşik kategori için eklenti, temanın manifestindeki `catalog` şablonundan panel
+  sayfası üretir: `kat-<havuz-slug>` (WK'da görünür sekme, Koçist'te gizli), üst başlıklar için
+  `seri-<anahtar>` / `grp-<anahtar>`. Kategorinin sayfa metni (menüdeki ad, başlık, tanıtım
+  cümlesi) Kategoriler sayfasındaki **"Sayfa metni: … düzenle ↗"** bağlantısıyla açılır.
+- Adresler: WK `/urun-kategori/<seri>/<havuz-slug>/`, Koçist `/kategoriler/<grup>/<havuz-slug>/`.
+  Koçist'te adresi havuz slug'ına geçen dört eski adres 301 ile yönlenir (kamelya → kamelyalar,
+  cardak → cardaklar, ahsap-sezlong → ahsap-sezlonglar, adirondack-sandalye → adirondack).
+- WK menüsünde ve mağazada yalnızca **bu sitede ürünü olan** kategori görünür; Koçist menüsü
+  bütün yerleşik kategorileri gösterir (ürünü olmayan kategori "teklif alın" sayfasıdır).
+  Havuzda karşılığı olmayan metin kategoriler (Klipsler, Bağlama Telleri) Koçist'in
+  `menu_hirdavat` bileşeninde çapalı bağlantı olarak kalır.
+
+**Görünürlük.** Kategori bir siteye yerleşince ürünleri o sitede görünür. Site "Seçilenler"
+kipindeyse ürün kimlikleri seçim listesinin **sonuna** eklenir: yerleşim yapıldığında, ürün
+kategoriye eklendiğinde (form, toplu işlem), ürün yaratıldığında ya da çöp kutusundan geri
+geldiğinde (form, Excel, Havuz Paketi). "Hepsi" kipinde bir şey yazılmaz. Sürekli eşitleme
+yoktur: İçerik Stüdyosu'ndan çıkarılan ürün geri eklenmez. Yerleşim kaldırılırsa o sitede başka
+yerleşik kategorisi olmayan ürünler seçimden çıkar; önce kaç ürün olduğu sorulur ve işlem
+"Son işlemler"den geri alınabilir.
+
+İçerik Stüdyosu'nda ürün bölümünde sıra, siteye özel ad/fiyat ve gizleme aynen durur:
 
 | Ayar | Ne yapar |
 | --- | --- |
@@ -216,20 +258,40 @@ girme ihtiyacı yoktur.
 | **Seçilenler** | Yalnızca işaretledikleriniz; sırayı ↑↓ ile siz verirsiniz |
 | **İstisnalar** | Bu siteye özel ad, açıklama, görsel, fiyat; ya da ürünü bu sitede gizleme |
 
-Şu an ağdaki iki gerçek site ürünlerini kendi manifestlerinde tutuyor; havuzu kullanan
-bir site yok. Havuzu kullanacak bir tema, manifestine `products` türünde bir alan
-ekler; ancak o zaman site havuzdan ürün gösterebilir. Havuzu örnek ürünlerle doldurmak
-için (yalnızca geliştirmede): `wp eval-file /scripts/seed-products.php --url=http://localhost:8080/`.
+Havuzu kullanacak yeni bir tema manifestine `products` türünde bir alan, kategori yerleşimi
+için `catalog` bloğu ekler (örnek: `woodkocist-theme/content-manifest.php`). İlk kurulumda
+`catalog.seed` bir kez yerleşim yazar (site başına, `nwcs_placement_seed_version`). Havuzu
+örnek ürünlerle doldurmak için (yalnızca geliştirmede):
+`wp eval-file /scripts/seed-products.php --url=http://localhost:8080/`.
+
+### Site önbelleği (LiteSpeed, Cloudflare)
+
+Havuz verisini değiştiren her işlemden sonra (ürün, kategori, yerleşim, Excel, açıklama, geri
+alma, başlık) sitelerin sayfa önbelleği kendiliğinden temizlenir (`includes/cache-purge.php`):
+
+- **LiteSpeed Cache** eklentisi kuruluysa havuz ürünlerini gösteren her sitede
+  `litespeed_purge_all` çağrılır. Kurulu değilse hiçbir şey olmaz.
+- **Cloudflare** yalnızca `wp-config.php`'de iki sabit tanımlıysa temizlenir ("Purge Everything"):
+
+  ```php
+  define( 'NWCS_CF_ZONE_ID', 'bolge-kimligi' );   // birden çok alan adı: virgülle ayırın
+  define( 'NWCS_CF_API_TOKEN', '...' );           // yalnızca "Zone → Cache Purge" izinli API anahtarı
+  ```
+
+  Bölge kimliği Cloudflare'de alan adının Overview sayfasının sağ altındadır; anahtar
+  My Profile → API Tokens → Create Token ile yalnızca Cache Purge izniyle açılır. Anahtar
+  depoya konmaz, hiçbir yere yazılmaz. Temizlenemezse panel düz Türkçe uyarır ("Cloudflare
+  panelinden Purge Everything yapın").
 
 ## Ürün kodu
 
 Her ürünün kendine ait bir kodu vardır. Havuz formundan yazabilir, boş bırakırsanız
 `URN-0006` biçiminde kimliğinden üretilir. Aynı kod iki üründe kullanılamaz.
 
-Kod, Excel yüklemesinde eşleştirme anahtarıdır: yüklenen satırın kodu havuzdaki bir ürünle
-tutuyorsa o ürün güncellenir, tutmuyorsa yeni ürün eklenir. Kod sütunu yoksa ürün adıyla
-eşleştirilir. Güncellenen ürünün adresi (`/urun/…/`) değişmez; boş hücre mevcut bilgiyi
-silmez.
+Excel yüklemesinde eşleşme sırası: gizli **KİMLİK** sütunu, yoksa **ürün kodu**, ikisi de yoksa
+yeni ürün. Çöp kutusundaki ürünler de aranır: çöpteki bir ürünün kodu gelirse ürün geri
+getirilir, aynı koddan ikinci ürün açılmaz. Kod değişikliği ürünün adresini (`/urun/…/`)
+değiştirmez.
 
 ## Site bazlı özelleştirme (Özelleştirmeler)
 
@@ -244,44 +306,123 @@ açıklaması, fiyat ya da öne çıkan görsel isteniyorsa, Ürün Havuzu'nda �
 
 Ürünün hangi sitede görüneceği burada değil, İçerik Stüdyosu'ndaki ürün bölümünden seçilir.
 
-## Excel'den toplu ürün yükleme
+## Detay başlıkları
 
-Ürün Havuzu sayfasındaki **"Excel'den ürün yükle"** düğmesi üç adımlı bir pencere açar:
+Ürün sayfasındaki teknik detaylar (Ahşap Cinsi: Çam, Kurulum: …) her üründe
+`_nwcs_details` kaydında sıralı etiket/değer listesi olarak durur. Eski tek satırlık
+`_nwcs_spec` metni bundan türetilir; ikisini yazan tek fonksiyon
+`nwcs_product_write_details()`'tir (form, Excel, Havuz Paketi, başlık ekranı hep onu çağırır).
 
-1. **Dosya Seç** — `.xlsx` dosyası seçilir. İlk sayfası okunur, satırlar geçici bir dosyaya
-   alınır; havuza bu adımda hiçbir şey yazılmaz.
-2. **Eşleştirme** — Başlık satırı sistem alanlarıyla otomatik eşleştirilir ("Stok Kodu" →
-   Ürün Kodu, "Price" → Fiyat gibi), yanında dosyanın ilk satırından örnek değer gösterilir.
-   Yanlışsa açılır listeden düzeltirsiniz. **Ürün Adı** eşleştirilmeden devam edilemez.
-3. **Yükleme** — Satırlar 100'erli parçalar hâlinde işlenir, ilerleme çubuğu ilerler.
-   Sonunda kaç ürün eklendiği, kaç ürünün güncellendiği ve atlanan satırların sebebi yazılır.
+**Ürün Havuzu → Detay başlıkları** ekranı:
 
-Eşleştirilebilen alanlar: Ürün Adı (zorunlu), Ürün Kodu, Fiyat, Kısa Açıklama, Ölçü/Not,
-Kategoriler, Detay Metni. Eşleştirilmeyen sütunlar yoksayılır.
+- Her başlığın kaç üründe ve hangi kategorilerde kullanıldığı, kaç üründe boş olduğu.
+- **Sıra** (↑ ↓): kategori Excel'indeki sütunların sırası ve formda yeni satırların yeri.
+  Sitede her ürün **kendi** sırasıyla görünür; Excel'den detayı yazılan ürün sütun sırasını alır.
+  Taşımalar sayfa yenilenmeden yapılır, "Değişiklikleri kaydet" ile tek seferde yazılır.
+- **Zorunlu**: kategori Excel'inde her üründe dolu olmalı; boş satır yüklenmez. Formda yalnızca
+  "eksik" uyarısı verir. Kutu işaretlenince kaç üründe boş olduğu görünür.
+- Sistem sütunlarıyla aynı ad (Kimlik, Ürün kodu, Ürün adı, Fiyat, Kısa açıklama) yeni başlık
+  olamaz. Kayıtta zaten olan "Fiyat" (Koçist zımba verisi) Excel'de "Fiyat (detay)" sütunudur.
+- **Düzenle**: yeniden adlandır (kullanan ürünlerde de değişir), başka başlıkla birleştir,
+  hiçbir üründe kullanılmıyorsa sil.
 
-**Aynı ürün ikinci kez gelirse:** ürün kodundan (yoksa addan) türetilen kısa ad havuzdaki bir
-ürünle eşleşirse o ürün güncellenir, yenisi eklenmez. Böylece aynı dosyayı tekrar yüklemek
-ürünleri çiftlemez; fiyat listesi güncellemek için aynı dosyayı yeniden yüklemek yeterlidir.
+Ürün formundaki **Detay başlıkları** bloğunda zorunlular üstte, sabit adlı; diğerleri
+başlık + değer satırlarıdır. "+ Başlık ekle" yeni satır açar; yeni yazılan başlık listeye
+kendiliğinden eklenir. Kayıt ilk açılışta havuzdaki spec metinlerinden kurulur; hiçbir başlık
+kendiliğinden zorunlu olmaz.
 
-### Yüklemeyi geri alma
+Temalar değerleri `nwcs_product_pairs( $product )` ile okur (ürünün kendi sırasıyla).
 
-Yükleme bitince havuz sayfasının üstünde bir şerit belirir:
-**"Son Excel yüklemesi · dosya.xlsx · 342 yeni, 14 güncellenen · 22.09.2026 11:40"** ve yanında
-**"Bu yüklemeyi geri al"** düğmesi. Basınca o yüklemede eklenen ürünler silinir, güncellenenler
-yükleme öncesi hâline döner.
+## Kategori bazlı Excel
 
-Bir ürün yüklemeden sonra elle düzenlendiyse geri alma ona dokunmaz ve hangi ürünlere
-dokunmadığını size söyler. Yeni bir yükleme yapıldığında şerit yerini yeni yüklemeye bırakır,
-yani her an yalnızca son yükleme geri alınabilir.
+Ürün Havuzu → **Kategoriler** → kategori → **Ürünleri Excel ile girin** → **Excel indir**. İnen dosya
+(`urunler-<kategori>-<tarih>.xlsx`):
 
-### Sınırlar
+- **Ürünler** sayfası: `KİMLİK` (gizli) · `ÜRÜN KODU` · `ÜRÜN ADI *` · `FİYAT` · `KISA AÇIKLAMA` ·
+  zorunlu başlıklar (`*`) · kategorinin ürünlerinde kullanılan diğer başlıklar. Hücreler metin
+  biçiminde; başlık satırı dondurulmuş.
+- **Nasıl kullanılır** sayfası: numaralı 1–8 adım.
+- **_bilgi** (gizli): kategori ve indirme zamanı. Yükleme kategoriyi buradan okur; bu sayfa
+  yoksa dosya reddedilir ("Bu dosya panelden indirilen taslak değil").
 
-- Dosyanın **ilk sayfası** okunur, ilk satır başlık kabul edilir.
-- En fazla **20.000 satır**; üstü okunmaz ve pencerede uyarı çıkar.
+Düzenlenen dosya aynı yerdeki **Yükle** ile yüklenir (başka bir kategorinin dosyası
+yüklenirse önizleme o kategorinin sayfasında açılır). Sütun eşleştirmesi yoktur.
+Önce **önizleme** gelir, hiçbir şey yazılmaz: kaç ürün güncellenecek / eklenecek / çöp kutusuna
+gidecek / kaç satır hatalı, her ürünün alan alan farkı ve hatalı satırların nedeni.
+Önizleme ürünlerin hangi sitelerde görüneceğini yerleşimden söyler ("Koçist (Dekorasyon) ve
+WOOD KOCIST (WOODGarden) sitelerinde görünecek"); kategori hiçbir siteye yerleşmemişse
+uyarır. Yeni ürün satırlarında fiyat ve zorunlu başlık değerleri görünür. Hatalı satırların
+hepsi aynı zorunlu başlıkta takıldıysa Detay başlıkları'na bağlantılı ipucu çıkar.
+**Değişiklikleri uygula** yazar, **Vazgeç** iptal eder.
+
+Kurallar:
+
+- **Boş hücre = temizle.** Boş fiyat sitede "Teklif al" olur, boş başlık üründen çıkar.
+- Dosya yalnızca indirildiği panelde yüklenir (`_bilgi` → kaynak); başka panelden gelen dosya
+  reddedilir, çünkü KİMLİK'ler kuruluma özeldir. 20.000 satırı aşan dosya reddedilir.
+- Sistem sütunları harf farkı gözetmeden tanınır ("Fiyat" = "FİYAT").
+- **Zorunlu başlık boşsa** satır yüklenmez, ürün olduğu gibi kalır (satır numarası ve nedeni yazar).
+  Adı boş satır, dosyada iki kez geçen kod, başka üründe kullanılan kod de aynı şekilde reddedilir.
+  **Kopyalanmış satır** (aynı gizli KİMLİK): kodu farklıysa ya da boşsa yeni ürün sayılır
+  (önizlemede not düşülür); kodu da aynıysa hata verir.
+- **Dosyada olmayan ürün**: kategoride olup dosyada bulunmayan ürünler önizlemede kırmızı
+  kutuda, diğer kategorileri ve göründükleri sitelerle listelenir. "Evet, bu N ürünü çöp
+  kutusuna taşı" işaretlenirse çöp kutusuna gider; işaretlenmezse dokunulmaz.
+- **Yeni satır** yalnızca indirilen kategoriye eklenir ("eşlik eden kategori" kuralı 0.22.0'da
+  kalktı); kategorinin yerleştiği sitelerde seçilir (bkz. Görünürlük). Kodu boşsa kod
+  kendiliğinden verilir.
+- **Yeni sütun** (en az bir hücresi dolu) yeni detay başlığı olur.
+- Salt rakam fiyat (Excel'in sayı yaptığı ya da "3500" yazılan) "3.500 ₺" biçimine getirilir;
+  "48.500 ₺", "450 TL" gibi metne dokunulmaz.
+- Dosyada olmayan alanlara dokunulmaz: görseller, uzun açıklama, tablolar, sıra, diğer
+  kategoriler, sitelere özel ayarlar.
+- Dosyayı indirdikten sonra panelde değişen ürünler önizlemede uyarılır (Excel kazanır);
+  önizlemeden sonra değişen ürün (çöpe gidecek olanlar dahil) atlanır.
+- Ürünleri birden çok sitede görünen kategori önizlemede "Ortak kategori" uyarısıyla
+  belirtilir; güncellenecek her ürünün siteleri yazar.
+- "Uygula"ya iki kez basmak ikinci kez yazmaz. Geri alma kaydı her üründen sonra güncellenir:
+  istek yarıda kesilse de "Geri al" yapılanları geri alır (kayıt "yarıda kesildi" der).
+- Sunucuda çöp kutusu kapalıysa (`EMPTY_TRASH_DAYS = 0`) hiçbir şey çöpe atılmaz (kalıcı silme
+  olurdu); önizleme ve form bunu söyler.
+- Çöpteki ürün sitelerin seçiminde yerinde kalır (site kaydedilse de); kalıcı silinen ürün
+  (`deleted_post`) seçimlerden çıkar.
+
+**Son işlemler** (Kategoriler ve Ürün açıklamaları sayfalarında aynı kart): ürün Excel'i,
+açıklama Excel'i ve yerleşim değişiklikleri `nwcs_pool_history` yığınında tutulur (son 10
+işlem). Yalnızca **en üstteki** geri alınır; sıra en yeniden eskiye. Önizleme, uygulanırsa geri
+alma sırasını yazar. Geri alma: yeni ürünler çöp kutusuna gider (ve sitelerin seçiminden
+çıkar), güncellenenler eski hâline döner, çöpe gidenler geri gelir, bu yüklemede doğan
+başlıklar kaldırılır. Geri alınan ürünün değişiklik zamanı da eski hâline konur; böylece
+sıradaki işlemin "işlemden sonra elle düzenlendi" denetimi yalnızca gerçek elle düzenlemeyi
+yakalar (o ürüne dokunulmaz, raporlanır). Eski tek kayıtlar (`nwcs_sync_last`,
+`nwcs_desc_last`) ilk açılışta yığına taşınır.
+
+Paylaşılan kategorilere dikkat: Çardaklar, Kamelyalar ve Adirondack hem WOOD KOCIST hem Koçist
+ürünlerini içerir. Bu kategorinin dosyasından silinen satır iki sitede de ürünü kaldırır;
+önizlemedeki "Göründüğü siteler" bunu gösterir.
+
+## Ürün açıklamaları (toplu)
+
+**Ürün Havuzu → Ürün açıklamaları**: bir kategori (ya da tüm ürünler) seçilip Excel indirilir:
+`KİMLİK` (gizli) · `ÜRÜN KODU` · `ÜRÜN ADI` · `ÜRÜN AÇIKLAMASI` · `EK İÇERİK (bilgi)`.
+
+- Açıklama düz metne çevrilir: kalın alt başlıklar kendi satırında, paragraflar boş satırla
+  ayrılır, madde listesi "• ", alıntı "> " ile. Yüklemede tersine çevrilir (noktasız kısa tek
+  satır alt başlık olur).
+- Açıklamadaki **tablolar** dosyaya girmez ve hiç değişmez (EK İÇERİK sütununda yazar).
+- Görsel, bağlantı gibi özel içerikli hücre "[HTML içerik — panelden düzenleyin]" yazar;
+  dokunulmazsa değişmez.
+- Metni değişmeyen açıklamaya dokunulmaz. **Boş hücre açıklamayı siler; ürün sayfası
+  kapanmaz** (aşağıda). Önizleme ve "Son işlemler"den geri alma var.
+
+## Sınırlar (Excel)
+
+- En fazla **20.000 satır**.
 - Sunucu yükleme sınırı `docker/php-uploads.ini` ile 32 MB'a çıkarılmıştır (WordPress imajının
-  varsayılanı 2 MB'dır ve birkaç bin satırlık dosyaya yetmez).
-- Görsel sütunu bu sürümde aktarılmaz; görseller Medya Havuzu'ndan bağlanır.
+  varsayılanı 2 MB'dır).
+- Görseller Excel'le taşınmaz; Medya Havuzu'ndan bağlanır.
 - `.xls` (eski biçim) ve `.csv` yüklenmez; Excel'de "Farklı Kaydet → .xlsx" seçin.
+- Excel, "1/2" gibi değerleri tarihe çevirebilir; talimat sayfası uyarır.
 
 ## Medya Havuzu
 
@@ -294,10 +435,32 @@ Her görselin hangi üründe kullanıldığı kartında yazar; kullanımdaki gö
 
 ### Ürün detay sayfası
 
-Bir ürünün **detay sayfası metni** doldurulursa o ürün kendi sayfasını kazanır:
-`/<site>/urun/<ürün-adresi>/` — kart da oraya bağlanır. Metin boşsa
-ürünün sayfası yoktur (adres 404 verir) ve kart doğrudan teklif bölümüne gider.
-Detay sayfası da site istisnalarını uygular.
+Bir ürünün **açıklaması (detay sayfası metni)** doldurulursa o ürün kendi sayfasını kazanır:
+`/<site>/urun/<ürün-adresi>/` — kart da oraya bağlanır. Metin boşsa çoğu sitede ürünün
+sayfası yoktur (adres 404 verir) ve kart doğrudan teklif bölümüne gider.
+
+**WOOD KOCIST ve Koçist**te (manifestte `'product_page_always' => true`) açıklaması olmayan
+ürünün sayfası da açıktır: ad, görsel, fiyat ve teknik detaylar görünür, yalnızca açıklama
+bölümü olmaz; kartlar sayfaya bağlanır ve sayfa site haritasına girer. Kural tek yerde:
+`nwcs_product_has_page()`. Detay sayfası da site istisnalarını uygular.
+
+**WOOD KOCIST ürün sayfası** canlı woodkocist.com.tr düzeninin kopyasıdır: solda kod + ad,
+fiyat, adet + Sepete ekle, yeşil Hızlı Sipariş (WhatsApp) ve dört başlıklı akordeon (Teknik
+Detaylar, Ürün Açıklaması, Lojistik ve Teslimat, Müşteri Görüşleri); sağda büyük galeri, küçük
+resimler görselin üstünde. Sekme adları ve Lojistik metni İçerik Stüdyosu → Ürün Sayfaları'nda;
+üründe "Lojistik ve Teslimat" detay satırı varsa o ürün için o metin gösterilir.
+
+**Koçist ürün sayfası** üstte canlı kocist.com.tr düzenini izler: solda büyük galeri, sağda ad,
+fiyat ve sayfanın içindeki **teklif formu** (Ad Soyad, Şirket, Telefon, E-posta, Adet / Ölçü,
+onay kutusu, Gönder + WhatsApp). Galerinin altında WOOD KOCIST'teki üç başlıklı akordeon
+(Teknik Detaylar, Ürün Açıklaması, Lojistik ve Teslimat); veri yuvaları iki sitede aynı havuz
+alanlarından dolar, "Lojistik ve Teslimat" kuralı eklentide ortak (`nwcs_product_table_specs`,
+`nwcs_product_delivery_row`). Telefonda sıra: galeri → ad/fiyat → akordeon → form; üstteki
+"Teklif formuna git" bağlantısı forma kaydırır. Form gerçek gönderim yapar (Teklif Talepleri +
+info@kocist.com.tr bildirimi), başarı ve hata aynı sayfaya döner. Fiyatı olmayan üründe
+"Fiyat teklifle" ve **nedeni** yazar (site geneli metin; Ürün Sayfaları → WhatsApp ve Teklif'te
+grup bazlı metin girilebilir). WOOD KOCIST'te de fiyatsız üründe neden satırı var
+(Tüm Sayfalar → Ürün Kartları → "Fiyatı olmayan ürün: nedeni").
 
 ## Depoda ne var, ne yok
 
