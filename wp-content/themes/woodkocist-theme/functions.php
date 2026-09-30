@@ -342,13 +342,103 @@ function wk_specs( string $spec ): array {
 }
 
 /**
+ * Urunun teknik detaylari (etiket, deger). Eklentinin detay basliklari
+ * kaydindan, onun sirasiyla (nwcs_product_pairs); eski eklentide spec metni.
+ *
+ * @return array<int, array{0:string, 1:string}>
+ */
+function wk_product_specs( array $product ): array {
+	return function_exists( 'nwcs_product_pairs' ) ? nwcs_product_pairs( $product ) : wk_specs( (string) ( $product['spec'] ?? '' ) );
+}
+
+/**
+ * Urun sayfasinin basligi (h1, konum satirinin son ogesi, SEO adi):
+ * canlidaki gibi kod + ad ("W-SEZ-2 Kompakt Seri, ..."). Ad zaten kodla
+ * basliyorsa ya da kod yoksa yalnizca ad.
+ */
+function wk_product_heading( array $product ): string {
+	$title = trim( (string) $product['title'] );
+	$code  = trim( (string) ( $product['code'] ?? '' ) );
+
+	if ( '' === $code || 0 === mb_stripos( $title, $code ) ) {
+		return $title;
+	}
+
+	return $code . ' ' . $title;
+}
+
+/** Urun detaylarinda Lojistik sekmesine giden satirin adi (eklentide NWCS_DELIVERY_LABEL). */
+const WK_DELIVERY_LABEL = 'Lojistik ve Teslimat';
+
+/**
+ * Detay satiri Lojistik sekmesinin satiri mi? Kural eklentide ortak
+ * (Kocist ile ayni); eski eklentide buradaki kopya.
+ */
+function wk_is_delivery_pair( array $pair ): bool {
+	if ( function_exists( 'nwcs_product_is_delivery_pair' ) ) {
+		return nwcs_product_is_delivery_pair( $pair );
+	}
+
+	return 0 === strcmp( mb_strtolower( trim( (string) preg_replace( '/\s+/u', ' ', $pair[0] ) ) ), mb_strtolower( WK_DELIVERY_LABEL ) );
+}
+
+/**
+ * Teknik Detaylar tablosunun satirlari: urunun detaylari, Lojistik satiri haric
+ * (o satir kendi sekmesinde gosterilir). Eklentideki ortak yardimciya devreder.
+ *
+ * @return array<int, array{0:string, 1:string}>
+ */
+function wk_product_table_specs( array $product ): array {
+	if ( function_exists( 'nwcs_product_table_specs' ) ) {
+		return nwcs_product_table_specs( $product );
+	}
+
+	return array_values( array_filter( wk_product_specs( $product ), static fn( array $pair ): bool => ! wk_is_delivery_pair( $pair ) ) );
+}
+
+/**
+ * Lojistik ve Teslimat sekmesinin metni: urunde "Lojistik ve Teslimat" detay
+ * satiri varsa o, yoksa paneldeki site geneli metin.
+ *
+ * @return array{text:string, own:bool} own: metin urunun kendi satirindan.
+ */
+function wk_product_delivery_text( array $product ): array {
+	$own = '';
+
+	if ( function_exists( 'nwcs_product_delivery_row' ) ) {
+		$own = nwcs_product_delivery_row( $product );
+	} else {
+		foreach ( wk_product_specs( $product ) as $pair ) {
+			if ( wk_is_delivery_pair( $pair ) && '' !== trim( $pair[1] ) ) {
+				$own = trim( $pair[1] );
+				break;
+			}
+		}
+	}
+
+	if ( '' !== $own ) {
+		return array( 'text' => $own, 'own' => true );
+	}
+
+	return array( 'text' => trim( (string) nwcs_field( 'product', 'labels', 'delivery_text' ) ), 'own' => false );
+}
+
+/**
+ * Urunun kendi sayfasi var mi? Bu temada aciklamasiz urunun sayfasi da
+ * acik (manifest 'product_page_always'); eski eklentide detay metni sart.
+ */
+function wk_product_has_page( array $product ): bool {
+	return function_exists( 'nwcs_product_has_page' ) ? nwcs_product_has_page( $product ) : '' !== trim( (string) ( $product['body'] ?? '' ) );
+}
+
+/**
  * Karttaki kisa ozellikler: urunu ayirt eden birkac deger.
  */
 function wk_card_specs( array $product ): array {
 	$wanted = array( 'Boyut Sınıfı', 'Kapasite', 'Zemin Ölçüsü', 'Ahşap Cinsi' );
 	$out    = array();
 
-	foreach ( wk_specs( (string) $product['spec'] ) as $pair ) {
+	foreach ( wk_product_specs( $product ) as $pair ) {
 		if ( in_array( $pair[0], $wanted, true ) && count( $out ) < 2 ) {
 			$out[] = $pair;
 		}
@@ -534,16 +624,16 @@ function wk_product_by_ref( string $ref ): ?array {
 add_filter( 'nwcs_seo_extra_pages', 'wk_seo_product_pages' );
 function wk_seo_product_pages( array $pages ): array {
 	foreach ( wk_products() as $product ) {
-		if ( '' === trim( (string) $product['body'] ) ) {
-			continue; // Detay metni olmayan urunun sayfasi yok (eklenti 404 verir).
+		if ( ! wk_product_has_page( $product ) ) {
+			continue; // Sayfasi olmayan urun (eklenti 404 verir).
 		}
 
 		$image = wk_image( $product );
 
 		$pages[] = array(
 			'url'         => $product['url'],
-			'name'        => $product['title'],
-			'description' => '' !== trim( (string) $product['short'] ) ? $product['short'] : wp_strip_all_tags( (string) $product['body'] ),
+			'name'        => wk_product_heading( $product ), // h1 ile ayni: kod + ad (canlidaki gibi).
+			'description' => '' !== trim( (string) $product['short'] ) ? $product['short'] : ( '' !== trim( (string) $product['body'] ) ? wp_strip_all_tags( (string) $product['body'] ) : wk_product_fallback_description( $product ) ),
 			'image'       => ! empty( $image['id'] ) ? (int) $image['id'] : 0,
 			'type'        => 'Product',
 			'sitemap'     => true,
@@ -552,12 +642,26 @@ function wk_seo_product_pages( array $pages ): array {
 			'currency'    => 'TRY',
 			'properties'  => array_map(
 				static fn( array $pair ): array => array( 'name' => $pair[0], 'value' => $pair[1] ),
-				array_merge( array( array( 'Ürün kodu', $product['code'] ) ), wk_specs( (string) $product['spec'] ) )
+				array_merge( array( array( 'Ürün kodu', $product['code'] ) ), wk_product_table_specs( $product ) )
 			),
 		);
 	}
 
 	return $pages;
+}
+
+/**
+ * Kisa aciklamasi ve detay metni olmayan urunun arama aciklamasi: ad ve ilk
+ * uc teknik detay ("W-CAR-400K Klasik Seri ... Boyut Sınıfı: Mega Boy, ...").
+ * Detay da yoksa yalnizca ad.
+ */
+function wk_product_fallback_description( array $product ): string {
+	$pairs = array_map(
+		static fn( array $pair ): string => $pair[0] . ': ' . $pair[1],
+		array_slice( wk_product_table_specs( $product ), 0, 3 )
+	);
+
+	return wk_product_heading( $product ) . ( $pairs ? '. ' . implode( ', ', $pairs ) . '.' : '' );
 }
 
 /**

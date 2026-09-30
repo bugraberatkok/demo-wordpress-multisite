@@ -161,7 +161,7 @@ foreach ( $menu as $menu_index => $menu_item ) {
 									<?php endif; ?>
 									<?php foreach ( $children as $child ) : ?>
 										<li class="k-dropdown__item">
-											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $item['url'] ) ); ?>" <?php nwcs_edit_attr( 'global', $child['edit'][0], 'items', $child['edit'][1], 'label' ); ?>>
+											<a class="k-dropdown__link" href="<?php echo esc_url( kocist_link( $child['url'], $item['url'] ) ); ?>" <?php nwcs_edit_attr( ...$child['edit'] ); ?>>
 												<?php echo esc_html( $child['label'] ); ?>
 											</a>
 										</li>
@@ -211,7 +211,7 @@ foreach ( $menu as $menu_index => $menu_item ) {
 												class="k-dropdown__link<?php echo kocist_is_current_menu_item( $child_href ) ? ' is-current' : ''; ?>"
 												href="<?php echo esc_url( $child_href ); ?>"
 												<?php echo kocist_is_current_menu_item( $child_href ) ? 'aria-current="page"' : ''; ?>
-												<?php nwcs_edit_attr( 'global', $child['edit'][0], 'items', $child['edit'][1], 'label' ); ?>
+												<?php nwcs_edit_attr( ...$child['edit'] ); ?>
 											>
 												<?php echo esc_html( $child['label'] ); ?>
 											</a>

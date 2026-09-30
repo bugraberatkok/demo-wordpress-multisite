@@ -1,5 +1,7 @@
 /**
- * Urun sayfasi: galeri degistirici ve sikca sorulan sorular akordiyonu.
+ * Urun sayfasi: galeri degistirici, urun akordeonu (Teknik Detaylar, Urun
+ * Aciklamasi, Lojistik ve Teslimat), telefondaki "forma git" baglantisi ve
+ * sikca sorulan sorular akordiyonu.
  */
 ( function () {
 	'use strict';
@@ -34,26 +36,6 @@
 			lensStage.classList.remove( 'is-lens' );
 		} );
 	}
-
-	/*
-	 * Urunun hikayesindeki fotograflar: galerideki o gorseli secer ve buyutme
-	 * penceresini acar (assets/js/lightbox.js galerinin secili gorselinden baslar).
-	 */
-	document.querySelectorAll( '[data-k-pstory-open]' ).forEach( function ( button ) {
-		button.addEventListener( 'click', function () {
-			var index = parseInt( button.getAttribute( 'data-k-pstory-open' ), 10 ) || 0;
-			var thumb = gallery ? gallery.querySelectorAll( '[data-k-thumb]' )[ index ] : null;
-			var zoom  = gallery ? gallery.querySelector( '[data-k-zoom]' ) : null;
-
-			if ( thumb ) {
-				thumb.click();
-			}
-
-			if ( zoom ) {
-				zoom.click();
-			}
-		} );
-	} );
 
 	if ( gallery ) {
 		var stage   = gallery.querySelector( '.k-product__stage' );
@@ -164,6 +146,94 @@
 
 				startX = null;
 			}, { passive: true } );
+		}
+	}
+
+	/*
+	 * ---------- urun akordeonu ----------
+	 * Ayni anda en fazla bir panel acik; acik basliga basinca o da kapanir.
+	 * Baslangic durumu sunucudan (aria-expanded): on yuzde tek panel, panel
+	 * onizlemesinde hepsi acik. Betik yoksa hidden hic konmaz: paneller acik.
+	 */
+	document.querySelectorAll( '[data-k-acc]' ).forEach( function ( group ) {
+		var buttons = Array.prototype.slice.call( group.querySelectorAll( '[data-k-acc-btn]' ) );
+
+		var set = function ( button, open ) {
+			var panel = document.getElementById( button.getAttribute( 'aria-controls' ) );
+
+			button.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+
+			if ( panel ) {
+				panel.hidden = ! open;
+				panel.classList.toggle( 'is-open', open );
+			}
+		};
+
+		buttons.forEach( function ( button ) {
+			set( button, 'true' === button.getAttribute( 'aria-expanded' ) );
+
+			button.addEventListener( 'click', function () {
+				var open = 'true' !== button.getAttribute( 'aria-expanded' );
+
+				buttons.forEach( function ( other ) {
+					set( other, other === button && open );
+				} );
+			} );
+		} );
+	} );
+
+	/*
+	 * ---------- telefonda "Teklif formuna git" ----------
+	 * Forma kaydirir ve ilk alani odaklar; betik yoksa capa ayni yere gider.
+	 */
+	document.querySelectorAll( '[data-k-form-jump]' ).forEach( function ( link ) {
+		link.addEventListener( 'click', function ( event ) {
+			var target = document.getElementById( ( link.getAttribute( 'href' ) || '' ).replace( '#', '' ) );
+			var field  = target ? target.querySelector( 'input:not([type="hidden"]):not([tabindex="-1"]), textarea' ) : null;
+
+			if ( ! target ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			var still = window.matchMedia && window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+
+			target.scrollIntoView( { behavior: still ? 'auto' : 'smooth', block: 'start' } );
+
+			if ( field ) {
+				field.focus( { preventScroll: true } );
+			}
+
+			if ( window.history && window.history.replaceState ) {
+				window.history.replaceState( null, '', '#' + target.id );
+			}
+		} );
+	} );
+
+	/*
+	 * ---------- form donusu ----------
+	 * Gonderimden sonra sayfa ?kc=...#teklif-formu ile acilir: ilk hatali
+	 * alan, yoksa sonuc bandi odaklanir (ekran okuyucu sonucu hemen okur).
+	 */
+	if ( /[?&]kc=[a-f0-9]{20}(?:&|$)/.test( window.location.search ) ) {
+		var form   = document.getElementById( 'teklif-formu' );
+		var target = form ? ( form.querySelector( '[aria-invalid="true"]' ) || form.querySelector( '[data-k-form-notice]' ) ) : null;
+
+		if ( target ) {
+			// Sayfa yuklenip #teklif-formu capasina gidildikten sonra: capa odagi ezmesin.
+			var focusTarget = function () {
+				target.focus( { preventScroll: true } );
+				form.scrollIntoView( { block: 'start' } );
+			};
+
+			if ( 'complete' === document.readyState ) {
+				window.setTimeout( focusTarget, 0 );
+			} else {
+				window.addEventListener( 'load', function () {
+					window.setTimeout( focusTarget, 0 );
+				} );
+			}
 		}
 	}
 

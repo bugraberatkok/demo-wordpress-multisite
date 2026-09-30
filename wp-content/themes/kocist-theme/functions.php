@@ -281,11 +281,19 @@ function kocist_assets(): void {
 
 	// Iletisim sayfasi varliklari yalnizca o sayfada. Betik yok: form duz POST,
 	// harita kendi iframe'i icinde calisiyor.
+	// Form alanlari (assets/css/form.css) iletisim ve urun sayfasinda ortak.
+	wp_register_style(
+		'kocist-form',
+		get_theme_file_uri( 'assets/css/form.css' ),
+		array( 'kocist-style' ),
+		(string) filemtime( get_theme_file_path( 'assets/css/form.css' ) )
+	);
+
 	if ( is_page( 'iletisim' ) ) {
 		wp_enqueue_style(
 			'kocist-contact',
 			get_theme_file_uri( 'assets/css/contact.css' ),
-			array( 'kocist-style' ),
+			array( 'kocist-style', 'kocist-form' ),
 			wp_get_theme()->get( 'Version' )
 		);
 	}
@@ -371,12 +379,13 @@ function kocist_assets(): void {
 		);
 	}
 
-	// Urun sayfasi varliklari: ornek urun sayfasi ve havuz urunu detayi.
+	// Urun sayfasi varliklari: ornek urun sayfasi ve havuz urunu detayi
+	// (havuz urununde teklif formu sayfada: form alanlari da yuklenir).
 	if ( is_page( 'urun' ) || $is_product_detail ) {
 		wp_enqueue_style(
 			'kocist-product',
 			get_theme_file_uri( 'assets/css/product.css' ),
-			array( 'kocist-style' ),
+			$is_product_detail ? array( 'kocist-style', 'kocist-form' ) : array( 'kocist-style' ),
 			(string) filemtime( get_theme_file_path( 'assets/css/product.css' ) )
 		);
 
@@ -419,6 +428,18 @@ function kocist_assets(): void {
 }
 
 /**
+ * Urun detayinda akordeonun kapali panelleri ilk boyamada da kapali olsun:
+ * betik yuklenecek sayfada <html>'e erken "k-js" sinifi. Betik yoksa sinif da
+ * yok, paneller acik kalir (assets/css/product.css).
+ */
+add_action( 'wp_head', 'kocist_product_js_flag', 1 );
+function kocist_product_js_flag(): void {
+	if ( get_query_var( 'nwcs_product' ) ) {
+		echo "<script>document.documentElement.classList.add('k-js');</script>" . PHP_EOL;
+	}
+}
+
+/**
  * Ana menuyu alt menuleriyle birlikte kurar.
  *
  * Ust seviye 'global.header.menu' repeater'indan gelir. Bir satirin 'submenu'
@@ -452,15 +473,24 @@ function kocist_menu_items(): array {
 
 		// Urun grubuysa (inc/catalog.php) alt ogeler kategori sayfalarina,
 		// ust oge de panelde hala varsayilan katalog capasi yaziyorsa grup
-		// sayfasina gider. Grup menu metninden degil satirdan bulunur (grup
-		// anahtari, bkz. kocist_catalog_group_key): ad degisse de bag kopmaz.
+		// sayfasina gider. Grup menu metninden degil satirdan bulunur ("Urun
+		// grubu anahtari"): ad degisse de bag kopmaz.
 		$group = kocist_catalog_group_for_row( (int) $row_index );
 
 		if ( $group && kocist_is_catalog_placeholder( $url ) ) {
 			$url = $group['url'];
 		}
 
-		if ( '' !== $submenu ) {
+		if ( $group ) {
+			// Urun grubu: yerlesik kategoriler ve grubun ek baglantilari (inc/catalog.php).
+			foreach ( $group['subs'] as $sub ) {
+				$children[] = array(
+					'label' => $sub['name'],
+					'url'   => $sub['menu_url'],
+					'edit'  => $sub['edit'],
+				);
+			}
+		} elseif ( '' !== $submenu ) {
 			foreach ( nwcs_rows( 'global', $submenu, 'items' ) as $child_index => $child ) {
 				$child_label = trim( (string) ( $child['label'] ?? '' ) );
 
@@ -468,17 +498,11 @@ function kocist_menu_items(): array {
 					continue;
 				}
 
-				$child_url = (string) ( $child['url'] ?? '' );
-
-				if ( $group && kocist_is_dead_anchor( $child_url ) ) {
-					$child_url = $group['subs'][ sanitize_title( substr( trim( $child_url ), 1 ) ) ]['url'] ?? $child_url;
-				}
-
 				$children[] = array(
 					'label' => $child_label,
-					'url'   => $child_url,
+					'url'   => (string) ( $child['url'] ?? '' ),
 					// Panelde hangi satir (onizlemede tiklaninca o satir acilir).
-					'edit'  => array( $submenu, (int) $child_index ),
+					'edit'  => array( 'global', $submenu, 'items', (int) $child_index, 'label' ),
 				);
 			}
 		}
@@ -954,6 +978,75 @@ function kocist_product_attr( array $product, string $label ): void {
 	if ( function_exists( 'nwcs_product_attr' ) && ! empty( $product['id'] ) ) {
 		nwcs_product_attr( (int) $product['id'], $label );
 	}
+}
+
+/**
+ * Urunun kendi sayfasi var mi? Bu temada aciklamasiz urunun sayfasi da acik
+ * (manifest 'product_page_always'); eski eklentide detay metni sart.
+ */
+function kocist_product_has_page( array $product ): bool {
+	return function_exists( 'nwcs_product_has_page' ) ? nwcs_product_has_page( $product ) : '' !== trim( (string) ( $product['body'] ?? '' ) );
+}
+
+/**
+ * Urunun teknik detaylari (etiket, deger): eklentinin detay basliklari
+ * kaydindan, onun sirasiyla (nwcs_product_pairs). Serbest not ("80 × 120
+ * cm") cift degildir: bos dizi, not bilgi satirinda oldugu gibi kalir.
+ *
+ * @return array<int, array{0:string, 1:string}>
+ */
+function kocist_product_pairs( array $product ): array {
+	return function_exists( 'nwcs_product_pairs' ) ? nwcs_product_pairs( $product ) : kocist_spec_pairs( (string) ( $product['spec'] ?? '' ), 1 );
+}
+
+/**
+ * Havuzdaki fiyat metninden arama motoruna bildirilecek tutar. Yalnizca
+ * duz tutar ayrilir: "450 TL", "450 tl", "3.500 ₺", "24,50 $", "2.80 $".
+ * "1.250 TL'den başlayan" gibi aralik/baslangic ya da birden cok tutar
+ * iceren metinde 0 doner; o urunde JSON-LD "offers" yazilmaz.
+ */
+function kocist_price_number( string $price ): float {
+	if ( ! preg_match( '/^\s*([0-9][0-9.,]*)\s*(?:TL|₺|\$)\s*$/iu', $price, $match ) ) {
+		return 0.0;
+	}
+
+	$number = $match[1];
+
+	if ( preg_match( '/^\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?$/', $number ) ) {
+		// Binlik noktali: "3.500", "48.500,00".
+		$number = str_replace( array( '.', ',' ), array( '', '.' ), $number );
+	} elseif ( preg_match( '/^\d+(?:,\d{1,2})?$/', $number ) ) {
+		$number = str_replace( ',', '.', $number );
+	} elseif ( ! preg_match( '/^\d+\.\d{1,2}$/', $number ) ) {
+		return 0.0;
+	}
+
+	return (float) $number;
+}
+
+/**
+ * Fiyat metninin para birimi (ISO 4217): "$" iceren USD, digerleri TRY.
+ */
+function kocist_price_currency( string $price ): string {
+	return str_contains( $price, '$' ) ? 'USD' : 'TRY';
+}
+
+/**
+ * Urun sayfasindaki "Teknik Detaylar" satirlari: detaylar, "Lojistik ve
+ * Teslimat" satiri haric; detayi olmayan urunde serbest olcu notu "Ölçü"
+ * satiri olur. Kural eklentide WOOD KOCIST ile ortak (nwcs_product_table_specs).
+ *
+ * @return array<int, array{0:string, 1:string}>
+ */
+function kocist_product_table_specs( array $product ): array {
+	if ( function_exists( 'nwcs_product_table_specs' ) ) {
+		return nwcs_product_table_specs( $product );
+	}
+
+	$pairs = kocist_product_pairs( $product );
+	$spec  = trim( (string) ( $product['spec'] ?? '' ) );
+
+	return $pairs ? $pairs : ( '' !== $spec ? array( array( 'Ölçü', $spec ) ) : array() );
 }
 
 /**

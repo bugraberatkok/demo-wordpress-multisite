@@ -112,7 +112,14 @@ foreach ( $items as $index => $item ) {
 	update_post_meta( $id, '_nwcs_code', $code );
 	update_post_meta( $id, '_nwcs_short', sanitize_textarea_field( $clean_text( (string) ( $item['short_description'] ?? '' ) ) ) );
 	update_post_meta( $id, '_nwcs_price', sanitize_text_field( $format_price( (array) ( $item['prices'] ?? array() ) ) ) );
-	update_post_meta( $id, '_nwcs_spec', sanitize_text_field( implode( '; ', $spec ) ) );
+	// Detaylar ve spec eklentinin tek yazicisiyla (0.21.0+).
+	$spec_text = sanitize_text_field( implode( '; ', $spec ) );
+
+	if ( function_exists( 'nwcs_product_write_details' ) ) {
+		nwcs_product_write_details( $id, nwcs_parse_spec_pairs( $spec_text ), nwcs_spec_is_note( $spec_text ) ? $spec_text : '' );
+	} else {
+		update_post_meta( $id, '_nwcs_spec', $spec_text );
+	}
 
 	$term_ids = array();
 	foreach ( (array) ( $item['categories'] ?? array() ) as $category ) {

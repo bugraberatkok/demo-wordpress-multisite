@@ -1,560 +1,124 @@
 <?php
 /**
- * Excel'den toplu urun yukleme sihirbazi.
+ * Ürün Havuzu -> kategori Excel'i: indirme, yukleme, onizleme, uygulama,
+ * geri alma ekranlari ve admin-post islemleri.
  *
- * Akis:
- *   1. Dosya Sec   -> .xlsx yuklenir, ilk sayfasi okunur, satirlar gecici bir
- *                     JSON dosyasina yazilir. Havuza henuz hicbir sey yazilmaz.
- *   2. Eslestirme  -> Basliklar sistem alanlariyla tahmini olarak eslestirilir,
- *                     kullanici duzeltir. Ornek deger ilk veri satirindan gelir.
- *   3. Yukleme     -> Satirlar parcalar halinde islenir. Her yukleme bir "parti"
- *                     olarak kaydedilir; parti geri alinabilir.
+ * Hesap ve yazma sync.php'de; burada yalnizca istekler ve arayuz. JavaScript
+ * gerekmez: her adim bir form, sonuc gecici kayitla (transient) sayfaya
+ * tasinir.
+ *
+ * 0.21.0'a kadar burada serbest Excel icin sutun eslestirme sihirbazi vardi;
+ * kaldirildi (PLAN-detay-basliklari.md, 8. bolum).
  */
 
 defined( 'ABSPATH' ) || exit;
 
-const NWCS_IMPORT_OPTION = 'nwcs_import_last';
-const NWCS_IMPORT_CHUNK  = 100;
-
 /**
- * Eslestirilebilecek sistem alanlari.
+ * Ortak yetki denetimi.
  */
-function nwcs_import_targets(): array {
-	return array(
-		'name'       => array( 'label' => 'Ürün Adı', 'required' => true ),
-		'code'       => array( 'label' => 'Ürün Kodu', 'required' => false ),
-		'price'      => array( 'label' => 'Fiyat', 'required' => false ),
-		'short'      => array( 'label' => 'Kısa Açıklama', 'required' => false ),
-		'spec'       => array( 'label' => 'Ölçü / Not', 'required' => false ),
-		'categories' => array( 'label' => 'Kategoriler', 'required' => false ),
-		'body'       => array( 'label' => 'Detay Metni', 'required' => false ),
-	);
-}
-
-/**
- * Baslik metnini karsilastirmaya uygun hale getirir (kucuk harf, Turkce
- * karakterler sadelestirilmis, harf/rakam disi atilmis).
- */
-function nwcs_import_normalize( string $value ): string {
-	$value = mb_strtolower( trim( $value ), 'UTF-8' );
-
-	$map = array( 'ı' => 'i', 'İ' => 'i', 'ş' => 's', 'ğ' => 'g', 'ü' => 'u', 'ö' => 'o', 'ç' => 'c', 'â' => 'a', 'î' => 'i', 'û' => 'u' );
-	$value = strtr( $value, $map );
-
-	return preg_replace( '/[^a-z0-9]/', '', $value ) ?? '';
-}
-
-/**
- * Basliklari sistem alanlariyla tahmini olarak eslestirir.
- * Sira onemlidir: "aciklama" hem kisa aciklamaya hem detaya benzer, once
- * kisa aciklama denenir.
- *
- * @return array<int, string> sutun sirasi => alan anahtari
- */
-function nwcs_import_guess( array $header ): array {
-	$synonyms = array(
-		'name'       => array( 'ad', 'adi', 'urunadi', 'urun', 'name', 'productname', 'product', 'baslik', 'title' ),
-		'code'       => array( 'kod', 'urunkodu', 'stokkodu', 'sku', 'slug', 'barkod', 'code', 'stokkod', 'id' ),
-		'price'      => array( 'fiyat', 'price', 'tutar', 'birimfiyat', 'satisfiyati', 'amount' ),
-		'short'      => array( 'kisaaciklama', 'ozet', 'short', 'summary', 'aciklama', 'description', 'desc' ),
-		'spec'       => array( 'olcu', 'ebat', 'boyut', 'olcunot', 'spec', 'not', 'ozellik', 'size' ),
-		'categories' => array( 'kategori', 'kategoriler', 'category', 'categories', 'grup', 'tur' ),
-		'body'       => array( 'detay', 'detaymetni', 'uzunaciklama', 'icerik', 'body', 'content', 'detail' ),
-	);
-
-	$guess = array();
-	$taken = array();
-
-	foreach ( $header as $index => $label ) {
-		$needle = nwcs_import_normalize( (string) $label );
-
-		if ( '' === $needle ) {
-			continue;
-		}
-
-		foreach ( $synonyms as $target => $words ) {
-			if ( isset( $taken[ $target ] ) ) {
-				continue;
-			}
-
-			if ( in_array( $needle, $words, true ) ) {
-				$guess[ $index ]  = $target;
-				$taken[ $target ] = true;
-				break;
-			}
-		}
-	}
-
-	return $guess;
-}
-
-/**
- * Gecici dosyalarin tutuldugu klasor. Web'den erisime kapali degildir; bu
- * yuzden icine yalnizca kullanicinin kendi yukledigi veri, kisa sureligine
- * konur ve is bitince silinir.
- */
-function nwcs_import_dir(): string {
-	$uploads = wp_upload_dir();
-	$dir     = trailingslashit( $uploads['basedir'] ) . 'nwcs-import';
-
-	if ( ! file_exists( $dir ) ) {
-		wp_mkdir_p( $dir );
-		// Dizin listelemeyi ve dogrudan erisimi engelle.
-		file_put_contents( $dir . '/.htaccess', "Deny from all\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-		file_put_contents( $dir . '/index.php', "<?php // sessiz\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-	}
-
-	return $dir;
-}
-
-/**
- * Token'a ait gecici veri dosyasinin yolu.
- */
-function nwcs_import_data_path( string $token ): string {
-	return nwcs_import_dir() . '/' . $token . '.json';
-}
-
-/**
- * Bir gun once kalmis gecici dosyalari temizler.
- */
-function nwcs_import_sweep(): void {
-	$files = glob( nwcs_import_dir() . '/*.json' );
-
-	foreach ( $files ?: array() as $file ) {
-		if ( filemtime( $file ) < time() - DAY_IN_SECONDS ) {
-			wp_delete_file( $file );
-		}
-	}
-}
-
-/**
- * Ortak yetki ve nonce denetimi.
- */
-function nwcs_import_guard(): void {
+function nwcs_sync_guard( string $nonce_action ): void {
 	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
-		wp_send_json_error( array( 'message' => 'Bu işlem için yetkiniz yok.' ), 403 );
+		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
 	}
 
-	if ( ! check_ajax_referer( 'nwcs_panel', 'nonce', false ) ) {
-		wp_send_json_error( array( 'message' => 'Oturum doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin.' ), 400 );
-	}
-}
-
-/* ====================================================================== *
- * 1. Adim: dosya yukleme ve onizleme
- * ====================================================================== */
-
-add_action( 'wp_ajax_nwcs_import_upload', 'nwcs_import_ajax_upload' );
-function nwcs_import_ajax_upload(): void {
-	nwcs_import_guard();
-	nwcs_import_sweep();
-
-	if ( empty( $_FILES['file']['tmp_name'] ) || ! is_uploaded_file( $_FILES['file']['tmp_name'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		wp_send_json_error( array( 'message' => 'Dosya alınamadı. Boyut sınırını aşmış olabilir.' ) );
-	}
-
-	$name      = sanitize_file_name( (string) ( $_FILES['file']['name'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	$extension = strtolower( pathinfo( $name, PATHINFO_EXTENSION ) );
-
-	if ( 'xlsx' !== $extension ) {
-		wp_send_json_error( array( 'message' => 'Yalnızca .xlsx dosyası yükleyebilirsiniz. Excel’de “Farklı Kaydet → Excel Çalışma Kitabı (.xlsx)” seçin.' ) );
-	}
-
-	$temp = $_FILES['file']['tmp_name']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	$read = nwcs_xlsx_read_rows( $temp );
-
-	if ( is_wp_error( $read ) ) {
-		wp_send_json_error( array( 'message' => $read->get_error_message() ) );
-	}
-
-	$rows = $read['rows'];
-
-	if ( count( $rows ) < 2 ) {
-		wp_send_json_error( array( 'message' => 'Dosyada başlık satırından sonra veri bulunamadı.' ) );
-	}
-
-	$header = array_map( 'strval', array_shift( $rows ) );
-	$sample = $rows[0] ?? array();
-
-	// Yalnizca kucuk harf onaltilik: sanitize_key() bunu degistirmez.
-	$token = bin2hex( random_bytes( 10 ) );
-
-	file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions
-		nwcs_import_data_path( $token ),
-		wp_json_encode( array( 'header' => $header, 'rows' => $rows ) )
-	);
-
-	$columns = array();
-
-	foreach ( $header as $index => $label ) {
-		$columns[] = array(
-			'index'  => $index,
-			'label'  => '' !== trim( $label ) ? $label : sprintf( '(%d. sütun)', $index + 1 ),
-			'sample' => (string) ( $sample[ $index ] ?? '' ),
-		);
-	}
-
-	wp_send_json_success(
-		array(
-			'token'     => $token,
-			'file'      => $name,
-			'columns'   => $columns,
-			'guess'     => nwcs_import_guess( $header ),
-			'total'     => count( $rows ),
-			'truncated' => $read['truncated'],
-			'chunk'     => NWCS_IMPORT_CHUNK,
-		)
-	);
-}
-
-/* ====================================================================== *
- * 3. Adim: parcali yukleme
- * ====================================================================== */
-
-add_action( 'wp_ajax_nwcs_import_run', 'nwcs_import_ajax_run' );
-function nwcs_import_ajax_run(): void {
-	nwcs_import_guard();
-
-	$token = (string) wp_unslash( $_POST['token'] ?? '' );
-	$token = preg_match( '/^[a-f0-9]{20}$/', $token ) ? $token : '';
-	$path  = $token ? nwcs_import_data_path( $token ) : '';
-
-	if ( ! $token || ! file_exists( $path ) ) {
-		wp_send_json_error( array( 'message' => 'Yükleme oturumu bulunamadı. Dosyayı yeniden seçin.' ) );
-	}
-
-	$mapping_raw = wp_unslash( $_POST['mapping'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	$mapping_in  = json_decode( is_string( $mapping_raw ) ? $mapping_raw : '', true );
-
-	if ( ! is_array( $mapping_in ) ) {
-		wp_send_json_error( array( 'message' => 'Sütun eşleştirmesi okunamadı.' ) );
-	}
-
-	$targets = nwcs_import_targets();
-	$mapping = array();
-
-	foreach ( $mapping_in as $index => $target ) {
-		$target = sanitize_key( (string) $target );
-
-		if ( isset( $targets[ $target ] ) ) {
-			$mapping[ (int) $index ] = $target;
-		}
-	}
-
-	if ( ! in_array( 'name', $mapping, true ) ) {
-		wp_send_json_error( array( 'message' => 'Ürün Adı sütunu eşleştirilmeden yükleme yapılamaz.' ) );
-	}
-
-	$offset = max( 0, (int) ( $_POST['offset'] ?? 0 ) );
-	$data   = json_decode( (string) file_get_contents( $path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-	$rows   = is_array( $data['rows'] ?? null ) ? $data['rows'] : array();
-	$total  = count( $rows );
-
-	$batch = get_site_option( NWCS_IMPORT_OPTION . '_draft_' . $token, array(
-		'created' => array(),
-		'updated' => array(),
-		'skipped' => array(),
-		'terms'   => array(),
-	) );
-
-	$slice = array_slice( $rows, $offset, NWCS_IMPORT_CHUNK, true );
-
-	switch_to_blog( nwcs_pool_blog_id() );
-
-	foreach ( $slice as $line => $row ) {
-		$values = array();
-
-		foreach ( $mapping as $index => $target ) {
-			$values[ $target ] = trim( (string) ( $row[ $index ] ?? '' ) );
-		}
-
-		$title = $values['name'] ?? '';
-
-		if ( '' === $title ) {
-			$batch['skipped'][] = array( 'line' => $line + 2, 'reason' => 'Ürün adı boş' );
-			continue;
-		}
-
-		// Once urun koduyla eslestirilir. Kod sutunu yoksa ya da hucre bossa
-		// urun adiyla (adres adi) eslestirilir; kod verilip bulunamazsa yeni urun.
-		$code = nwcs_normalize_product_code( $values['code'] ?? '' );
-		$slug = sanitize_title( $title );
-
-		if ( '' !== $code ) {
-			$match    = nwcs_product_id_by_code( $code );
-			$existing = $match ? array( $match ) : array();
-		} else {
-			$existing = get_posts(
-				array(
-					'post_type'      => NWCS_PRODUCT_TYPE,
-					'post_status'    => 'any',
-					'name'           => $slug,
-					'posts_per_page' => 1,
-					'fields'         => 'ids',
-				)
-			);
-		}
-
-		// Bos hucre mevcut urundeki bilgiyi silmez; yalnizca dolu hucreler yazilir.
-		$filled = static fn( string $key ): bool => isset( $values[ $key ] ) && '' !== $values[ $key ];
-
-		// wp_insert_post ters egik cizgiyi siler; metin aynen kalsin.
-		$postarr = array(
-			'post_type'   => NWCS_PRODUCT_TYPE,
-			'post_status' => 'publish',
-			'post_title'  => wp_slash( nwcs_clean_text( $title ) ),
-		);
-
-		if ( $filled( 'body' ) ) {
-			$postarr['post_content'] = wp_slash( wp_kses_post( $values['body'] ) );
-		}
-
-		if ( $existing ) {
-			$id = (int) $existing[0];
-
-			// Geri alabilmek icin yukleme oncesi hali bir kez saklanir.
-			if ( ! isset( $batch['updated'][ $id ] ) ) {
-				$batch['updated'][ $id ] = nwcs_import_snapshot( $id );
-			}
-
-			// Adres (post_name) degismez: urun sayfasinin baglantilari ve
-			// arama motorundaki kaydi korunur.
-			$postarr['ID'] = $id;
-			wp_update_post( $postarr );
-		} else {
-			$postarr['post_name'] = $slug;
-			$id                   = (int) wp_insert_post( $postarr );
-
-			if ( ! $id ) {
-				$batch['skipped'][] = array( 'line' => $line + 2, 'reason' => 'Kayıt oluşturulamadı' );
-				continue;
-			}
-
-			$batch['created'][] = $id;
-		}
-
-		if ( '' !== $code && ! nwcs_product_id_by_code( $code, $id ) ) {
-			update_post_meta( $id, '_nwcs_code', $code );
-		} else {
-			nwcs_ensure_product_code( $id );
-		}
-
-		if ( $filled( 'short' ) ) {
-			update_post_meta( $id, '_nwcs_short', wp_slash( nwcs_clean_text( $values['short'], true ) ) );
-		}
-
-		if ( $filled( 'price' ) ) {
-			update_post_meta( $id, '_nwcs_price', wp_slash( nwcs_clean_text( $values['price'] ) ) );
-		}
-
-		if ( $filled( 'spec' ) ) {
-			update_post_meta( $id, '_nwcs_spec', wp_slash( nwcs_clean_text( $values['spec'] ) ) );
-		}
-
-		if ( $filled( 'categories' ) ) {
-			$names = array_values(
-				array_filter(
-					array_map(
-						static fn( string $name ): string => trim( html_entity_decode( $name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ),
-						preg_split( '/[|,;]/', $values['categories'] ) ?: array()
-					)
-				)
-			);
-
-			// Bu yukleme sirasinda dogan kategoriler not edilir; geri alinirken
-			// bos kalanlar silinebilsin diye.
-			foreach ( $names as $name ) {
-				if ( ! term_exists( $name, NWCS_PRODUCT_TAX ) ) {
-					$made = wp_insert_term( $name, NWCS_PRODUCT_TAX );
-
-					if ( ! is_wp_error( $made ) ) {
-						$batch['terms'][] = (int) $made['term_id'];
-					}
-				}
-			}
-
-			wp_set_object_terms( $id, $names, NWCS_PRODUCT_TAX, false );
-		}
-	}
-
-	restore_current_blog();
-
-	$next = $offset + NWCS_IMPORT_CHUNK;
-	$done = $next >= $total;
-
-	if ( $done ) {
-		delete_site_option( NWCS_IMPORT_OPTION . '_draft_' . $token );
-		wp_delete_file( $path );
-
-		$record = array(
-			'time'    => time(),
-			'user'    => get_current_user_id(),
-			'file'    => sanitize_file_name( (string) ( $_POST['file'] ?? '' ) ),
-			'created' => array_values( $batch['created'] ),
-			'updated' => $batch['updated'],
-			'skipped' => array_slice( $batch['skipped'], 0, 50 ),
-			'terms'   => array_values( array_unique( $batch['terms'] ?? array() ) ),
-			'counts'  => array(
-				'created' => count( $batch['created'] ),
-				'updated' => count( $batch['updated'] ),
-				'skipped' => count( $batch['skipped'] ),
-			),
-		);
-
-		update_site_option( NWCS_IMPORT_OPTION, $record );
-		nwcs_pool_flush_cache();
-
-		wp_send_json_success(
-			array(
-				'done'    => true,
-				'counts'  => $record['counts'],
-				'skipped' => $record['skipped'],
-			)
-		);
-	}
-
-	update_site_option( NWCS_IMPORT_OPTION . '_draft_' . $token, $batch );
-
-	wp_send_json_success(
-		array(
-			'done'      => false,
-			'offset'    => $next,
-			'total'     => $total,
-			'processed' => min( $next, $total ),
-		)
-	);
+	check_admin_referer( $nonce_action );
 }
 
 /**
- * Bir urunun geri alma icin gereken hali.
+ * Kullanicinin bekleyen onizlemesi.
  */
-function nwcs_import_snapshot( int $id ): array {
-	$post = get_post( $id );
+function nwcs_sync_pending(): ?array {
+	$plan = get_site_transient( NWCS_SYNC_PLAN . get_current_user_id() );
 
-	if ( ! $post ) {
-		return array();
-	}
+	return is_array( $plan ) ? $plan : null;
+}
 
-	return array(
-		'title'      => $post->post_title,
-		'content'    => $post->post_content,
-		'name'       => $post->post_name,
-		'code'       => (string) get_post_meta( $id, '_nwcs_code', true ),
-		'short'      => (string) get_post_meta( $id, '_nwcs_short', true ),
-		'price'      => (string) get_post_meta( $id, '_nwcs_price', true ),
-		'spec'       => (string) get_post_meta( $id, '_nwcs_spec', true ),
-		'categories' => wp_get_object_terms( $id, NWCS_PRODUCT_TAX, array( 'fields' => 'names' ) ),
-	);
+/**
+ * Kategoriler sayfasina (kategori acik), Excel adimi bilgisiyle doner.
+ */
+function nwcs_sync_redirect( string $step, string $slug = '' ): void {
+	wp_safe_redirect( nwcs_pool_categories_url( array_filter( array( 'kategori' => $slug, 'excel' => $step ) ) ) . '#nwcs-excel-result' );
+	exit;
 }
 
 /* ====================================================================== *
- * Geri alma
+ * Istekler
  * ====================================================================== */
 
-/**
- * Geri alinabilir son yukleme.
- */
-function nwcs_import_last(): ?array {
-	$record = get_site_option( NWCS_IMPORT_OPTION, null );
+add_action( 'admin_post_nwcs_sync_download', 'nwcs_handle_sync_download' );
+function nwcs_handle_sync_download(): void {
+	nwcs_sync_guard( 'nwcs_sync_download' );
 
-	return is_array( $record ) ? $record : null;
+	$slug   = isset( $_GET['kategori'] ) ? sanitize_title( wp_unslash( $_GET['kategori'] ) ) : '';
+	$result = nwcs_sync_build_template( $slug );
+
+	if ( is_wp_error( $result ) ) {
+		wp_die( esc_html( $result->get_error_message() ) );
+	}
+
+	nwcs_xlsx_send( $result['path'], $result['filename'] );
 }
 
-add_action( 'wp_ajax_nwcs_import_undo', 'nwcs_import_ajax_undo' );
-function nwcs_import_ajax_undo(): void {
-	nwcs_import_guard();
+add_action( 'admin_post_nwcs_sync_upload', 'nwcs_handle_sync_upload' );
+function nwcs_handle_sync_upload(): void {
+	nwcs_sync_guard( 'nwcs_sync_upload' );
 
-	$record = nwcs_import_last();
+	$key  = NWCS_SYNC_PLAN . get_current_user_id();
+	$from = isset( $_POST['kategori'] ) ? sanitize_title( wp_unslash( $_POST['kategori'] ) ) : '';
+	$path = nwcs_import_uploaded_xlsx( 'dosya' );
 
-	if ( ! $record ) {
-		wp_send_json_error( array( 'message' => 'Geri alınacak bir yükleme yok.' ) );
+	if ( is_wp_error( $path ) ) {
+		set_site_transient( $key . '_hata', $path->get_error_message(), 10 * MINUTE_IN_SECONDS );
+		nwcs_sync_redirect( 'hata', $from );
 	}
 
-	$time    = (int) ( $record['time'] ?? 0 );
-	$removed = 0;
-	$restored = 0;
-	$kept    = array();
+	$name = sanitize_file_name( (string) ( $_FILES['dosya']['name'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	$plan = nwcs_sync_plan( $path, $name );
+	wp_delete_file( $path );
 
-	switch_to_blog( nwcs_pool_blog_id() );
-
-	foreach ( $record['created'] ?? array() as $id ) {
-		$post = get_post( (int) $id );
-
-		if ( ! $post ) {
-			continue;
-		}
-
-		// Yuklemeden sonra elle duzenlenmisse dokunma.
-		if ( strtotime( $post->post_modified_gmt . ' UTC' ) > $time + 5 ) {
-			$kept[] = $post->post_title;
-			continue;
-		}
-
-		wp_delete_post( (int) $id, true );
-		++$removed;
+	if ( is_wp_error( $plan ) ) {
+		set_site_transient( $key . '_hata', $plan->get_error_message(), 10 * MINUTE_IN_SECONDS );
+		nwcs_sync_redirect( 'hata', $from );
 	}
 
-	foreach ( $record['updated'] ?? array() as $id => $snapshot ) {
-		$post = get_post( (int) $id );
+	// Dosya baska bir kategorinin taslagiysa onizleme o kategorinin sayfasinda acilir.
+	set_site_transient( $key, $plan, HOUR_IN_SECONDS );
+	nwcs_sync_redirect( 'onizleme', (string) $plan['slug'] );
+}
 
-		if ( ! $post || ! is_array( $snapshot ) || ! $snapshot ) {
-			continue;
-		}
+add_action( 'admin_post_nwcs_sync_apply', 'nwcs_handle_sync_apply' );
+function nwcs_handle_sync_apply(): void {
+	nwcs_sync_guard( 'nwcs_sync_apply' );
 
-		if ( strtotime( $post->post_modified_gmt . ' UTC' ) > $time + 5 ) {
-			$kept[] = $post->post_title;
-			continue;
-		}
+	$plan = nwcs_sync_pending();
 
-		wp_update_post(
-			array(
-				'ID'           => (int) $id,
-				'post_title'   => wp_slash( $snapshot['title'] ?? '' ),
-				'post_content' => wp_slash( $snapshot['content'] ?? '' ),
-				'post_name'    => $snapshot['name'] ?? '',
-			)
-		);
-
-		update_post_meta( (int) $id, '_nwcs_short', wp_slash( $snapshot['short'] ?? '' ) );
-		update_post_meta( (int) $id, '_nwcs_price', wp_slash( $snapshot['price'] ?? '' ) );
-		update_post_meta( (int) $id, '_nwcs_spec', wp_slash( $snapshot['spec'] ?? '' ) );
-
-		// Eski yuklemelerin kayitlarinda kod yok; onlarda kod oldugu gibi kalir.
-		if ( isset( $snapshot['code'] ) && '' !== $snapshot['code'] ) {
-			update_post_meta( (int) $id, '_nwcs_code', $snapshot['code'] );
-		}
-		wp_set_object_terms( (int) $id, $snapshot['categories'] ?? array(), NWCS_PRODUCT_TAX, false );
-
-		++$restored;
+	// Baska sekmede yeni bir dosya yuklendiyse eski onizlemenin dugmesi calismaz.
+	if ( ! $plan || (int) ( $_POST['plan'] ?? 0 ) !== (int) $plan['time'] ) {
+		set_site_transient( NWCS_SYNC_PLAN . get_current_user_id() . '_hata', 'Önizlemenin süresi doldu ya da başka bir dosya yüklendi. Dosyayı yeniden yükleyin.', 10 * MINUTE_IN_SECONDS );
+		nwcs_sync_redirect( 'hata' );
 	}
 
-	// Bu yuklemede dogan kategorilerden urunu kalmayanlar silinir.
-	$terms_removed = 0;
-
-	foreach ( $record['terms'] ?? array() as $term_id ) {
-		$term = get_term( (int) $term_id, NWCS_PRODUCT_TAX );
-
-		if ( ! $term || is_wp_error( $term ) || (int) $term->count > 0 ) {
-			continue;
-		}
-
-		wp_delete_term( (int) $term_id, NWCS_PRODUCT_TAX );
-		++$terms_removed;
+	// Once onizleme silinir: "Uygula"ya iki kez basilirsa ikinci istek bos doner,
+	// yeni urunler iki kez eklenmez (silme veritabaninda tek istege basarili olur).
+	if ( ! delete_site_transient( NWCS_SYNC_PLAN . get_current_user_id() ) ) {
+		nwcs_sync_redirect( 'uygulandi', (string) $plan['slug'] );
 	}
 
-	restore_current_blog();
+	nwcs_sync_apply( $plan, ! empty( $_POST['cope_tasi'] ) );
 
-	delete_site_option( NWCS_IMPORT_OPTION );
-	nwcs_pool_flush_cache();
+	nwcs_sync_redirect( 'uygulandi', (string) $plan['slug'] );
+}
 
-	wp_send_json_success(
-		array(
-			'removed'  => $removed,
-			'restored' => $restored,
-			'terms'    => $terms_removed,
-			'kept'     => array_slice( $kept, 0, 20 ),
-		)
-	);
+add_action( 'admin_post_nwcs_sync_cancel', 'nwcs_handle_sync_cancel' );
+function nwcs_handle_sync_cancel(): void {
+	nwcs_sync_guard( 'nwcs_sync_cancel' );
+
+	$plan = nwcs_sync_pending();
+
+	delete_site_transient( NWCS_SYNC_PLAN . get_current_user_id() );
+
+	wp_safe_redirect( nwcs_pool_categories_url( array_filter( array( 'kategori' => (string) ( $plan['slug'] ?? '' ) ) ) ) );
+	exit;
 }
 
 /* ====================================================================== *
@@ -562,117 +126,366 @@ function nwcs_import_ajax_undo(): void {
  * ====================================================================== */
 
 /**
- * Sayfanin ustunde beliren "son yuklemeyi geri al" seridi.
+ * Kategori listesindeki "Excel indir" baglantisi.
  */
-function nwcs_render_import_undo_bar(): void {
-	$record = nwcs_import_last();
+function nwcs_sync_download_url( string $slug ): string {
+	return wp_nonce_url(
+		add_query_arg( array( 'action' => 'nwcs_sync_download', 'kategori' => $slug ), admin_url( 'admin-post.php' ) ),
+		'nwcs_sync_download'
+	);
+}
 
-	if ( ! $record ) {
-		return;
+/**
+ * Kategoriler sayfasinin basinda Excel adiminin sonucu: onizleme, hata ya da
+ * uygulama ozeti. Onizleme varken sayfanin geri kalani gosterilmez (true doner).
+ * Geri almanin sonucu "Son işlemler"dedir (admin/history.php).
+ */
+function nwcs_render_sync_step(): bool {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca gosterim.
+	$step = isset( $_GET['excel'] ) ? sanitize_key( wp_unslash( $_GET['excel'] ) ) : '';
+	$key  = NWCS_SYNC_PLAN . get_current_user_id();
+
+	if ( 'hata' === $step ) {
+		$message = get_site_transient( $key . '_hata' );
+		delete_site_transient( $key . '_hata' );
+
+		if ( is_string( $message ) ) {
+			?>
+			<div class="nwcs-sync nwcs-sync--error" id="nwcs-excel-result" role="alert">
+				<h2 class="nwcs-sync__title">Excel yüklenemedi</h2>
+				<p><?php echo esc_html( $message ); ?></p>
+				<p class="nwcs-sync__muted">Havuzda hiçbir şey değişmedi.</p>
+			</div>
+			<?php
+		}
+
+		return false;
 	}
 
-	$counts = $record['counts'] ?? array();
-	$when   = (int) ( $record['time'] ?? 0 );
-	?>
-	<div class="nwcs-undo" data-nwcs-undo-bar>
-		<div class="nwcs-undo__text">
-			<strong>Son Excel yüklemesi</strong>
-			<span>
-				<?php
-				printf(
-					'%s · %d yeni, %d güncellenen%s · %s',
-					esc_html( $record['file'] ?: 'dosya' ),
-					(int) ( $counts['created'] ?? 0 ),
-					(int) ( $counts['updated'] ?? 0 ),
-					( $counts['skipped'] ?? 0 ) ? esc_html( sprintf( ', %d atlanan', (int) $counts['skipped'] ) ) : '',
-					esc_html( $when ? wp_date( 'd.m.Y H:i', $when ) : '' )
-				);
-				?>
-			</span>
-		</div>
+	if ( 'uygulandi' === $step ) {
+		$record = nwcs_sync_last();
 
-		<button type="button" class="button" data-nwcs-undo>Bu yüklemeyi geri al</button>
-	</div>
+		if ( $record ) {
+			$counts = $record['counts'];
+			?>
+			<div class="nwcs-sync nwcs-sync--done" id="nwcs-excel-result" role="status">
+				<h2 class="nwcs-sync__title">Değişiklikler uygulandı: <?php echo esc_html( $record['category'] ); ?></h2>
+				<?php $labels = nwcs_placement_labels( (string) ( $record['slug'] ?? '' ) ); ?>
+				<ul class="nwcs-sync__facts">
+					<li><?php echo (int) $counts['updated']; ?> ürün güncellendi</li>
+					<li><?php echo (int) $counts['created']; ?> yeni ürün eklendi</li>
+					<li><?php echo (int) $counts['trashed']; ?> ürün çöp kutusuna taşındı</li>
+					<?php if ( $counts['errors'] ) : ?>
+						<li class="is-warn"><?php echo (int) $counts['errors']; ?> hatalı satır yüklenmedi</li>
+					<?php endif; ?>
+				</ul>
+				<?php if ( $record['skipped'] ) : ?>
+					<p class="nwcs-sync__warn">
+						Önizlemeden sonra panelde değiştiği için atlanan ürünler: <?php echo esc_html( implode( ', ', $record['skipped'] ) ); ?>.
+						Bu ürünler için dosyayı yeniden indirip tekrar deneyin.
+					</p>
+				<?php endif; ?>
+				<?php if ( $counts['created'] && $labels ) : ?>
+					<p><?php echo esc_html( sprintf( 'Yeni ürünler %s sitelerinde görünüyor.', nwcs_join_and( array_values( $labels ) ) ) ); ?></p>
+				<?php elseif ( $counts['created'] ) : ?>
+					<p class="nwcs-sync__warn">Bu kategori hiçbir siteye yerleşmedi; yeni ürünler sitede görünmez. Aşağıdaki “Sitelerde” kutusundan yerleştirin.</p>
+				<?php endif; ?>
+				<p class="nwcs-sync__muted">Bir yanlışlık varsa aşağıdaki “Son işlemler”den bu yüklemenin tamamını geri alabilirsiniz.</p>
+			</div>
+			<?php
+		}
+
+		return false;
+	}
+
+	if ( 'onizleme' !== $step ) {
+		return false;
+	}
+
+	$plan = nwcs_sync_pending();
+
+	if ( ! $plan ) {
+		echo '<div class="nwcs-sync nwcs-sync--error"><p>Önizlemenin süresi doldu. Dosyayı yeniden yükleyin.</p></div>';
+
+		return false;
+	}
+
+	nwcs_render_sync_preview( $plan );
+
+	return true;
+}
+
+/**
+ * Deger gosterimi: bos hucre acikca "(boş)" yazar.
+ */
+function nwcs_sync_value( string $value, string $field = '', bool $is_new = false ): string {
+	if ( '' !== $value ) {
+		return esc_html( $value );
+	}
+
+	// Yeni deger bossa silme demektir: kirmizi. Eski deger bossa yalnizca bilgi.
+	$class = $is_new ? 'nwcs-sync__empty' : 'nwcs-sync__none';
+
+	// $field alan anahtari ('price', 'detail'...): etiket degil; "Fiyat" adli detay basligi karismaz.
+	return 'price' === $field ? '<em class="' . $class . '">boş (“Teklif al”)</em>' : '<em class="' . $class . '">' . ( $is_new ? 'boş (silinir)' : 'boş' ) . '</em>';
+}
+
+/**
+ * Onizleme karti.
+ */
+function nwcs_render_sync_preview( array $plan ): void {
+	$update  = (array) $plan['update'];
+	$create  = (array) $plan['create'];
+	$trash   = (array) $plan['trash'];
+	$errors  = (array) $plan['errors'];
+	$same    = (array) $plan['same'];
+	$nothing = ! $update && ! $create && ( ! $trash || ! empty( $plan['trash_off'] ) );
+	$labels  = array_values( (array) ( $plan['sites'] ?? array() ) );
+	$order   = nwcs_history_order_note();
+	?>
+	<section class="nwcs-sync" id="nwcs-excel-result" aria-labelledby="nwcs-sync-title">
+		<header class="nwcs-sync__head">
+			<h2 class="nwcs-sync__title" id="nwcs-sync-title">Önizleme: <?php echo esc_html( $plan['term_name'] ); ?></h2>
+			<p class="nwcs-sync__muted">
+				<?php echo esc_html( $plan['file'] ); ?>
+				<?php if ( $plan['downloaded'] ) : ?>
+					— <?php echo esc_html( wp_date( 'd.m.Y H:i', (int) $plan['downloaded'] ) ); ?> tarihinde indirilen taslak
+				<?php endif; ?>
+			</p>
+			<p class="nwcs-sync__lead">Henüz hiçbir şey değişmedi. Aşağıyı kontrol edin, doğruysa <strong>Değişiklikleri uygula</strong>’ya basın.</p>
+			<?php if ( $labels ) : ?>
+				<p class="nwcs-sync__sites"><?php echo esc_html( sprintf( 'Bu ürünler %s sitelerinde görünecek.', nwcs_join_and( $labels ) ) ); ?></p>
+			<?php else : ?>
+				<p class="nwcs-sync__warn">Bu kategori hiçbir siteye yerleşmedi; ürünler yüklenir ama sitede görünmez. Yükledikten sonra kategorinin “Sitelerde” kutusundan yerleştirin.</p>
+			<?php endif; ?>
+			<?php if ( '' !== $order && ! $nothing ) : ?>
+				<p class="nwcs-sync__muted"><?php echo esc_html( $order ); ?></p>
+			<?php endif; ?>
+		</header>
+
+		<ul class="nwcs-sync__sum">
+			<li class="nwcs-sync__chip nwcs-sync__chip--update"><b><?php echo count( $update ); ?></b> ürün güncellenecek</li>
+			<li class="nwcs-sync__chip nwcs-sync__chip--new"><b><?php echo count( $create ); ?></b> yeni ürün</li>
+			<li class="nwcs-sync__chip nwcs-sync__chip--trash"><b><?php echo count( $trash ); ?></b> ürün çöp kutusuna</li>
+			<li class="nwcs-sync__chip nwcs-sync__chip--error"><b><?php echo count( $errors ); ?></b> satırda hata</li>
+			<li class="nwcs-sync__chip"><b><?php echo count( $same ); ?></b> ürün aynı kalacak</li>
+		</ul>
+
+		<?php if ( ! empty( $plan['shared'] ) ) : ?>
+			<p class="nwcs-sync__warn">
+				<strong>Ortak kategori:</strong> bu kategorideki ürünler birden çok sitede görünüyor
+				(<?php echo esc_html( implode( ', ', $plan['shared'] ) ); ?>). Yaptığınız değişiklikler bu sitelerin hepsinde geçerli olur.
+			</p>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $plan['notes'] ) ) : ?>
+			<ul class="nwcs-sync__notes">
+				<?php foreach ( $plan['notes'] as $note ) : ?>
+					<li><?php echo esc_html( $note ); ?></li>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+
+		<?php if ( $plan['stale'] ) : ?>
+			<p class="nwcs-sync__warn">
+				Bu dosyayı indirdikten sonra panelde değişen <?php echo count( $plan['stale'] ); ?> ürün var:
+				<?php echo esc_html( implode( ', ', $plan['stale'] ) ); ?>.
+				Uygularsanız Excel’deki hâli geçerli olur; paneldeki son değişiklikler kaybolur.
+			</p>
+		<?php endif; ?>
+
+		<?php if ( $errors ) : ?>
+			<div class="nwcs-sync__group nwcs-sync__group--error">
+				<h3>Yüklenmeyecek satırlar (<?php echo count( $errors ); ?>)</h3>
+				<?php $cause = nwcs_sync_common_missing( $errors ); ?>
+				<?php if ( '' !== $cause ) : ?>
+					<p class="nwcs-sync__warn">
+						<?php echo esc_html( sprintf( '%d satırın hepsinde “%s” boş. Bu başlık bu kategoride kullanılmıyorsa', count( $errors ), $cause ) ); ?>
+						<a href="<?php echo esc_url( nwcs_headings_url() ); ?>" target="_blank" rel="noopener">Detay başlıkları’ndan zorunlu işaretini kaldırın<span class="screen-reader-text"> (yeni sekmede açılır)</span> ↗</a>,
+						sonra dosyayı yeniden yükleyin.
+					</p>
+				<?php endif; ?>
+				<p class="nwcs-sync__muted">Bu satırlardaki ürünler olduğu gibi kalır. Excel’de düzeltip dosyayı yeniden yükleyebilirsiniz.</p>
+				<ul class="nwcs-sync__list">
+					<?php foreach ( $errors as $error ) : ?>
+						<li>
+							<span class="nwcs-sync__line"><?php echo (int) $error['line']; ?>. satır</span>
+							<strong><?php echo esc_html( $error['name'] ); ?></strong>
+							<span><?php echo esc_html( $error['message'] ); ?></span>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $update ) : ?>
+			<div class="nwcs-sync__group nwcs-sync__group--update">
+				<h3>Güncellenecek ürünler (<?php echo count( $update ); ?>)</h3>
+				<ul class="nwcs-sync__list">
+					<?php foreach ( $update as $item ) : ?>
+						<li>
+							<details class="nwcs-sync__item">
+								<summary>
+									<strong><?php echo esc_html( $item['title'] ); ?></strong>
+									<span class="nwcs-sync__muted">
+										<?php echo $item['restore'] ? 'çöp kutusundan geri gelecek, ' : ''; ?>
+										<?php echo count( $item['changes'] ); ?> değişiklik<?php echo ! empty( $item['sites'] ) ? ', ' . esc_html( implode( ', ', $item['sites'] ) ) . ' sitesinde' : ''; ?>
+									</span>
+								</summary>
+								<?php if ( $item['changes'] ) : ?>
+									<table class="nwcs-sync__diff">
+										<thead><tr><th scope="col">Alan</th><th scope="col">Şimdi</th><th scope="col">Excel’deki</th></tr></thead>
+										<tbody>
+											<?php foreach ( $item['changes'] as $change ) : ?>
+												<tr>
+													<th scope="row"><?php echo esc_html( $change[0] ); ?></th>
+													<td><?php echo nwcs_sync_value( (string) $change[1], (string) ( $change[3] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapingOutput -- kacisli. ?></td>
+													<td><?php echo nwcs_sync_value( (string) $change[2], (string) ( $change[3] ?? '' ), true ); // phpcs:ignore WordPress.Security.EscapingOutput -- kacisli. ?></td>
+												</tr>
+											<?php endforeach; ?>
+										</tbody>
+									</table>
+								<?php endif; ?>
+							</details>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $create ) : ?>
+			<div class="nwcs-sync__group nwcs-sync__group--new">
+				<h3>Eklenecek yeni ürünler (<?php echo count( $create ); ?>)</h3>
+				<p class="nwcs-sync__muted">
+					Yalnızca “<?php echo esc_html( $plan['term_name'] ); ?>” kategorisine eklenir.
+					<?php echo $labels ? esc_html( sprintf( 'Görüneceği siteler: %s.', nwcs_join_and( $labels ) ) ) : 'Kategori hiçbir siteye yerleşmediği için sitede görünmez.'; ?>
+				</p>
+				<ul class="nwcs-sync__list">
+					<?php foreach ( $create as $item ) : ?>
+						<li>
+							<span class="nwcs-sync__line"><?php echo (int) $item['line']; ?>. satır</span>
+							<strong><?php echo esc_html( $item['data']['title'] ); ?></strong>
+							<span class="nwcs-sync__muted"><?php echo '' !== (string) $item['data']['code'] ? esc_html( (string) $item['data']['code'] ) : 'kod kendiliğinden verilecek'; ?></span>
+							<span class="nwcs-sync__newfacts"><?php echo esc_html( nwcs_sync_new_facts( (array) $item['data'] ) ); ?></span>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $plan['headings'] || $plan['ignored'] ) : ?>
+			<div class="nwcs-sync__group">
+				<?php if ( $plan['headings'] ) : ?>
+					<h3>Yeni detay başlığı</h3>
+					<p>
+						<?php echo esc_html( implode( ', ', $plan['headings'] ) ); ?> —
+						başlık listesine eklenecek; bu kategorinin sonraki Excel dosyasında sütun olarak gelir.
+					</p>
+				<?php endif; ?>
+				<?php if ( $plan['ignored'] ) : ?>
+					<p class="nwcs-sync__muted">Hücreleri boş olduğu için atlanan yeni sütunlar: <?php echo esc_html( implode( ', ', $plan['ignored'] ) ); ?>.</p>
+				<?php endif; ?>
+			</div>
+		<?php endif; ?>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="nwcs-sync__form">
+			<input type="hidden" name="action" value="nwcs_sync_apply" />
+			<input type="hidden" name="plan" value="<?php echo esc_attr( (string) $plan['time'] ); ?>" />
+			<?php wp_nonce_field( 'nwcs_sync_apply' ); ?>
+
+			<?php if ( $trash && ! empty( $plan['trash_off'] ) ) : ?>
+				<p class="nwcs-sync__warn">
+					Dosyada olmayan <?php echo count( $trash ); ?> ürün var, ama bu sunucuda WordPress çöp kutusu kapalı (EMPTY_TRASH_DAYS = 0).
+					Çöpe atmak kalıcı silmek olacağı için bu ürünlere dokunulmayacak.
+				</p>
+			<?php elseif ( $trash ) : ?>
+				<div class="nwcs-sync__danger" role="group" aria-labelledby="nwcs-sync-trash">
+					<h3 id="nwcs-sync-trash">Dikkat: <?php echo count( $trash ); ?> ürün dosyada yok</h3>
+					<p>
+						Bu ürünler “<?php echo esc_html( $plan['term_name'] ); ?>” kategorisinde ama yüklediğiniz dosyada yoklar.
+						Onay verirseniz <strong>çöp kutusuna</strong> taşınır ve gösterildikleri <strong>bütün sitelerden kalkar</strong>
+						(diğer kategorilerindeki listeler dahil). Çöp kutusundan geri getirilebilirler.
+					</p>
+					<ul class="nwcs-sync__list">
+						<?php foreach ( $trash as $item ) : ?>
+							<li>
+								<strong><?php echo esc_html( $item['title'] ); ?></strong>
+								<span class="nwcs-sync__muted"><?php echo esc_html( $item['code'] ); ?></span>
+								<span>
+									<?php echo $item['others'] ? 'Diğer kategorileri: ' . esc_html( implode( ', ', $item['others'] ) ) . '. ' : 'Başka kategorisi yok. '; ?>
+									<?php echo $item['sites'] ? 'Göründüğü siteler: ' . esc_html( implode( ', ', $item['sites'] ) ) . '.' : 'Hiçbir sitede görünmüyor.'; ?>
+								</span>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+					<label class="nwcs-sync__confirm">
+						<input type="checkbox" name="cope_tasi" value="1" />
+						Evet, bu <?php echo count( $trash ); ?> ürünü çöp kutusuna taşı
+					</label>
+					<p class="nwcs-sync__muted">İşaretlemezseniz bu ürünlere dokunulmaz; yalnızca diğer değişiklikler uygulanır.</p>
+				</div>
+			<?php endif; ?>
+
+			<div class="nwcs-sync__actions">
+				<?php if ( ! $nothing ) : ?>
+					<button type="submit" class="button button-primary button-hero">Değişiklikleri uygula</button>
+				<?php else : ?>
+					<p class="nwcs-sync__muted">Uygulanacak bir değişiklik yok: dosya havuzla aynı<?php echo $errors ? ' ya da değişen satırlar hatalı' : ''; ?>.</p>
+				<?php endif; ?>
+				<button type="submit" class="button" form="nwcs-sync-cancel">Vazgeç</button>
+			</div>
+		</form>
+
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="nwcs-sync-cancel" hidden>
+			<input type="hidden" name="action" value="nwcs_sync_cancel" />
+			<?php wp_nonce_field( 'nwcs_sync_cancel' ); ?>
+		</form>
+	</section>
 	<?php
 }
 
 /**
- * Uc adimli yukleme penceresi.
+ * "A, B ve C" bicimi.
  */
-function nwcs_render_import_modal(): void {
-	$targets = nwcs_import_targets();
-	?>
-	<dialog class="nwcs-modal nwcs-wizard" id="nwcs-import-modal" data-nwcs-import
-		data-targets="<?php echo esc_attr( wp_json_encode( $targets ) ); ?>">
+function nwcs_join_and( array $items ): string {
+	$items = array_values( array_filter( array_map( 'strval', $items ), 'strlen' ) );
+	$last  = array_pop( $items );
 
-		<div class="nwcs-modal__head">
-			<div>
-				<h2 class="nwcs-pool__title">Excel'den Ürün Yükle</h2>
-				<p class="nwcs-wizard__sub" data-nwcs-step-sub>Dosyanızı seçin</p>
-			</div>
-			<button type="button" class="nwcs-modal__close" data-nwcs-import-close aria-label="Kapat">×</button>
-		</div>
+	return $items ? implode( ', ', $items ) . ' ve ' . $last : (string) $last;
+}
 
-		<ol class="nwcs-steps" data-nwcs-steps>
-			<li class="is-active" data-step="1"><span>1</span> Dosya Seç</li>
-			<li data-step="2"><span>2</span> Eşleştirme</li>
-			<li data-step="3"><span>3</span> Yükleme</li>
-		</ol>
+/**
+ * Hatali satirlarin hepsi ayni zorunlu baslikta takildiysa o baslik; yoksa bos.
+ */
+function nwcs_sync_common_missing( array $errors ): string {
+	$common = null;
 
-		<div class="nwcs-wizard__body">
+	foreach ( $errors as $error ) {
+		$missing = (array) ( $error['missing'] ?? array() );
 
-			<!-- 1. adim -->
-			<section data-nwcs-panel="1">
-				<label class="nwcs-drop" for="nwcs-import-file">
-					<strong>Excel dosyasını seçin</strong>
-					<span>.xlsx · ilk sayfa okunur · en fazla <?php echo esc_html( number_format_i18n( NWCS_XLSX_MAX_ROWS ) ); ?> satır</span>
-					<input type="file" id="nwcs-import-file" accept=".xlsx" data-nwcs-import-file />
-				</label>
+		if ( ! $missing ) {
+			return '';
+		}
 
-				<p class="nwcs-hint">
-					İlk satır başlık satırı olmalıdır. Sütunların hangi alana karşılık geldiğini
-					bir sonraki adımda siz seçeceksiniz; şimdilik havuza hiçbir şey yazılmaz.
-				</p>
-				<p class="nwcs-hint">
-					<strong>Ürün kodu</strong> havuzdaki bir ürünle aynıysa o ürün güncellenir, değilse yeni ürün eklenir.
-					Kod sütunu yoksa ürün adıyla eşleştirilir. Boş hücreler mevcut bilgiyi silmez.
-					Yüklemeyi sonradan tek tıkla geri alabilirsiniz.
-				</p>
-			</section>
+		$common = null === $common ? $missing : array_intersect_key( $common, $missing );
+	}
 
-			<!-- 2. adim -->
-			<section data-nwcs-panel="2" hidden>
-				<h3 class="nwcs-wizard__title">Kolon Eşleştirme</h3>
+	return $common ? (string) reset( $common ) : '';
+}
 
-				<table class="nwcs-maptable">
-					<thead>
-						<tr>
-							<th>EXCEL KOLONU</th>
-							<th>SİSTEM ALANI</th>
-							<th>ÖRNEK DEĞER</th>
-						</tr>
-					</thead>
-					<tbody data-nwcs-map-rows></tbody>
-				</table>
+/**
+ * Yeni urun satirinin ozeti: fiyat ve zorunlu basliklarin degerleri.
+ */
+function nwcs_sync_new_facts( array $data ): string {
+	$parts = array( '' !== (string) ( $data['price'] ?? '' ) ? (string) $data['price'] : 'fiyat yok (“Teklif al”)' );
 
-				<p class="nwcs-hint" data-nwcs-map-warning hidden></p>
-			</section>
+	foreach ( nwcs_required_headings() as $key => $label ) {
+		$value = (string) ( $data['details'][ $key ] ?? '' );
 
-			<!-- 3. adim -->
-			<section data-nwcs-panel="3" hidden>
-				<div class="nwcs-progress">
-					<div class="nwcs-progress__bar" data-nwcs-progress-bar></div>
-				</div>
-				<p class="nwcs-wizard__status" data-nwcs-progress-text>Hazırlanıyor…</p>
-				<div class="nwcs-wizard__report" data-nwcs-report hidden></div>
-			</section>
-		</div>
+		if ( '' !== $value ) {
+			$parts[] = $label . ': ' . $value;
+		}
+	}
 
-		<footer class="nwcs-wizard__foot">
-			<button type="button" class="button" data-nwcs-back hidden>← Geri</button>
-			<span class="nwcs-wizard__count" data-nwcs-count></span>
-			<button type="button" class="button button-primary" data-nwcs-next disabled>Devam</button>
-		</footer>
-	</dialog>
-	<?php
+	return implode( ' · ', $parts );
 }

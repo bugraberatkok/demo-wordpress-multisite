@@ -2,6 +2,10 @@
 /**
  * Iletisim / teklif formu gonderimi.
  *
+ * Iki form ayni isleyiciye gelir: iletisim sayfasindaki form ve havuz urun
+ * sayfasindaki teklif formu (gizli kc_product; mesaj yerine Adet / Olcu,
+ * Sirket istege bagli). Ikisinde de onay kutusu (kc-consent) zorunlu.
+ *
  * Gonderilen form kaydedilir (yonetimde "Teklif Talepleri"), Network Content
  * Studio bildirim e-postasini gonderir (includes/forms.php; alici
  * info@kocist.com.tr, kocist_form_recipient). Urunden gelinmisse ?urun= slug'i
@@ -69,7 +73,11 @@ add_action( 'admin_post_kc_quote', 'kocist_handle_quote' );
 add_action( 'admin_post_nopriv_kc_quote', 'kocist_handle_quote' );
 function kocist_handle_quote(): void {
 	$fallback = home_url( '/iletisim/' );
-	$referer  = wp_get_referer();
+	// Donus adresi: formun kendi bildirdigi sayfa (urun formu kc_return tasir;
+	// Referer gondermeyen tarayicida da ayni sayfaya donulur), yoksa Referer,
+	// o da yoksa iletisim sayfasi. Yalnizca bu sitenin adresi kabul edilir.
+	$return   = esc_url_raw( wp_unslash( $_POST['kc_return'] ?? '' ) );
+	$referer  = '' !== $return ? $return : wp_get_referer();
 	$redirect = $referer ? wp_validate_redirect( $referer, $fallback ) : $fallback;
 	$redirect = strtok( remove_query_arg( 'kc', '' !== $redirect ? $redirect : $fallback ), '#' );
 
@@ -81,12 +89,18 @@ function kocist_handle_quote(): void {
 
 	$values = array(
 		'name'    => sanitize_text_field( wp_unslash( $_POST['kc-name'] ?? '' ) ),
+		'company' => sanitize_text_field( wp_unslash( $_POST['kc-company'] ?? '' ) ),
 		'phone'   => sanitize_text_field( wp_unslash( $_POST['kc-phone'] ?? '' ) ),
 		// Ham deger: gecersiz adres sessizce silinmesin; asagida is_email ile reddedilir.
 		'email'   => trim( sanitize_text_field( wp_unslash( $_POST['kc-email'] ?? '' ) ) ),
 		'subject' => sanitize_text_field( wp_unslash( $_POST['kc-subject'] ?? '' ) ),
+		'qty'     => trim( sanitize_textarea_field( wp_unslash( $_POST['kc-qty'] ?? '' ) ) ),
 		'message' => sanitize_textarea_field( wp_unslash( $_POST['kc-detail'] ?? '' ) ),
+		'consent' => ! empty( $_POST['kc-consent'] ),
 	);
+
+	// Urun sayfasindaki form (gizli kc_form=product): mesaj alani yok; yerine Adet / Olcu sorulur.
+	$from_product = 'product' === sanitize_key( wp_unslash( $_POST['kc_form'] ?? '' ) );
 
 	$errors = array();
 
@@ -105,8 +119,16 @@ function kocist_handle_quote(): void {
 		$errors['phone'] = 'Size dönebilmemiz için telefon ya da e-posta yazın.';
 	}
 
-	if ( '' === $values['message'] ) {
+	if ( $from_product ) {
+		if ( '' === $values['qty'] ) {
+			$errors['qty'] = 'Adet ya da ölçü yazın.';
+		}
+	} elseif ( '' === $values['message'] ) {
 		$errors['message'] = 'Aradığınız ürünü veya sorunuzu yazın.';
+	}
+
+	if ( ! $values['consent'] ) {
+		$errors['consent'] = 'Onay kutusunu işaretleyin.';
 	}
 
 	if ( $errors ) {
@@ -133,20 +155,28 @@ function kocist_handle_quote(): void {
 			'post_status'  => 'private',
 			'post_title'   => sprintf( '%s — %s', $values['name'], '' !== $product ? $product : ( $values['subject'] ?: 'İletişim formu' ) ),
 			'post_content' => sprintf(
-				"Telefon: %s\nE-posta: %s\nKonu: %s\nÜrün: %s\n\nMesaj:\n%s",
+				"Telefon: %s\nE-posta: %s\n%sKonu: %s\nÜrün: %s\n%s\nMesaj:\n%s\n\nOnay kutusu: işaretli",
 				$values['phone'] ?: '—',
 				$values['email'] ?: '—',
+				'' !== $values['company'] ? 'Şirket: ' . $values['company'] . "\n" : '',
 				$values['subject'] ?: '—',
 				$product ?: '—',
-				$values['message']
+				'' !== $values['qty'] ? 'Adet / Ölçü: ' . $values['qty'] . "\n" : '',
+				'' !== $values['message'] ? $values['message'] : '—'
 			),
-			'meta_input'   => array(
-				'_kc_name'    => $values['name'],
-				'_kc_phone'   => $values['phone'],
-				'_kc_email'   => $values['email'],
-				'_kc_subject' => $values['subject'],
-				'_kc_product' => $product,
-				'_kc_message' => $values['message'],
+			// Sirket ve Adet / Olcu yalnizca yazildiysa; bildirim e-postasinda
+			// "Firma" ve "Ölçü ve adet" olarak cikar (eklenti forms.php etiketleri).
+			'meta_input'   => array_merge(
+				array(
+					'_kc_name'    => $values['name'],
+					'_kc_phone'   => $values['phone'],
+					'_kc_email'   => $values['email'],
+					'_kc_subject' => $values['subject'],
+					'_kc_product' => $product,
+					'_kc_message' => $values['message'],
+				),
+				'' !== $values['company'] ? array( '_kc_company' => $values['company'] ) : array(),
+				'' !== $values['qty'] ? array( '_kc_size' => $values['qty'] ) : array()
 			),
 		),
 		true
@@ -169,7 +199,14 @@ function kocist_handle_quote(): void {
  * Yonlendirme sonrasi form durumu: hatalar, girilen degerler, basari.
  */
 function kocist_quote_state(): array {
+	static $cache = null;
+
+	if ( null !== $cache ) {
+		return $cache;
+	}
+
 	$empty = array( 'errors' => array(), 'values' => array(), 'success' => false );
+	$cache = $empty;
 	$token = isset( $_GET['kc'] ) ? sanitize_key( wp_unslash( $_GET['kc'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 	if ( ! preg_match( '/^[a-f0-9]{20}$/', $token ) ) {
@@ -182,9 +219,56 @@ function kocist_quote_state(): array {
 		return $empty;
 	}
 
-	return array(
+	// Tek kullanimlik: sayfa yenilenince ya da adres paylasilinca girilen bilgiler bir daha gorunmez.
+	delete_transient( 'kc_quote_' . $token );
+
+	$cache = array(
 		'errors'  => $state['errors'] ?? array(),
 		'values'  => $state['values'] ?? array(),
 		'success' => ! empty( $state['success'] ),
 	);
+
+	return $cache;
+}
+
+/**
+ * Onay kutusu: iki formda ayni alan (kc-consent) ve ayni metin (Urun
+ * Sayfalari > Havuz Urun Sayfalari > "Onay kutusu metni"). Alt seritteki
+ * KVKK baglantisi gercek bir adrese cozuluyorsa metnin altinda baglanti
+ * olur; "#kvkk" gibi hedefsiz capa iken yalnizca metin.
+ *
+ * @param string $error   Alanin hata metni (bos: hata yok).
+ * @param bool   $checked Hata sonrasi geri donuste isaretli miydi.
+ */
+function kocist_consent_field( string $error = '', bool $checked = false ): void {
+	$kvkk_url   = '';
+	$kvkk_label = '';
+
+	foreach ( nwcs_rows( 'global', 'footer', 'legal' ) as $row ) {
+		if ( false !== mb_stripos( (string) ( $row['label'] ?? '' ), 'kvkk' ) ) {
+			$url = kocist_link( $row['url'] ?? '' );
+
+			if ( str_starts_with( $url, 'http' ) ) {
+				$kvkk_url   = $url;
+				$kvkk_label = (string) $row['label'];
+			}
+			break;
+		}
+	}
+
+	$described = '' !== $error ? ' aria-invalid="true" aria-describedby="kc-consent-error"' : '';
+	?>
+	<div class="k-field k-field--wide k-consent">
+		<label class="k-consent__label" for="kc-consent">
+			<input type="checkbox" id="kc-consent" name="kc-consent" value="1" required<?php echo $checked ? ' checked' : ''; ?><?php echo $described; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit metin. ?> />
+			<span <?php nwcs_edit_attr( 'product', 'detail', 'consent_label' ); ?>><?php echo esc_html( nwcs_field( 'product', 'detail', 'consent_label' ) ); ?></span>
+		</label>
+		<?php if ( '' !== $kvkk_url ) : ?>
+			<a class="k-consent__link" href="<?php echo esc_url( $kvkk_url ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $kvkk_label ); ?></a>
+		<?php endif; ?>
+		<?php if ( '' !== $error ) : ?>
+			<span class="k-field__error" id="kc-consent-error" role="alert"><?php echo esc_html( $error ); ?></span>
+		<?php endif; ?>
+	</div>
+	<?php
 }

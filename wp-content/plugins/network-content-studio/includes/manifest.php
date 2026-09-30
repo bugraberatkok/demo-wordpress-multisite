@@ -38,18 +38,57 @@ function nwcs_manifest_for_theme( string $theme_slug ): array {
 
 /**
  * Belirtilen sitenin manifesti. Site baglamina gecmeden calisir.
+ *
+ * Temasi havuzu kategori yerlesimiyle tuketen sitede ('catalog' blogu)
+ * yerlesik kategorilerin ve ust basliklarin panel sayfalari eklenir
+ * (includes/product-categories.php). Sonuc blog basina istek icinde saklanir;
+ * havuz taksonomisi henuz kayitli degilse (init oncesi) saklanmaz.
  */
 function nwcs_manifest_for_blog( int $blog_id ): array {
-	$theme = get_blog_option( $blog_id, 'stylesheet', '' );
+	$cache = &nwcs_manifest_cache();
 
-	return $theme ? nwcs_manifest_for_theme( (string) $theme ) : array();
+	if ( isset( $cache[ $blog_id ] ) ) {
+		return $cache[ $blog_id ];
+	}
+
+	$theme    = get_blog_option( $blog_id, 'stylesheet', '' );
+	$manifest = $theme ? nwcs_manifest_for_theme( (string) $theme ) : array();
+
+	if ( ! empty( $manifest['catalog'] ) && function_exists( 'nwcs_catalog_augment_manifest' ) ) {
+		if ( ! taxonomy_exists( NWCS_PRODUCT_TAX ) ) {
+			return $manifest;
+		}
+
+		$manifest = nwcs_catalog_augment_manifest( $manifest, $blog_id );
+	}
+
+	$cache[ $blog_id ] = $manifest;
+
+	return $manifest;
+}
+
+/**
+ * Blog basina manifest saklama alani (referansla).
+ */
+function &nwcs_manifest_cache(): array {
+	static $cache = array();
+
+	return $cache;
+}
+
+/**
+ * Kategori yerlesimi degisince uretilen sayfalar yeniden kurulsun.
+ */
+function nwcs_manifest_reset(): void {
+	$cache = &nwcs_manifest_cache();
+	$cache = array();
 }
 
 /**
  * Aktif sitenin manifesti (tema tarafinda kullanilir).
  */
 function nwcs_manifest(): array {
-	return nwcs_manifest_for_theme( (string) get_option( 'stylesheet' ) );
+	return nwcs_manifest_for_blog( get_current_blog_id() );
 }
 
 /**

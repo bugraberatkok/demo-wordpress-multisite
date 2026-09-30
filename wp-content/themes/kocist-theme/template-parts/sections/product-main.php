@@ -112,8 +112,6 @@ $features   = nwcs_rows( 'product', 'main', 'features' );
 					<?php echo esc_html( nwcs_field( 'product', 'main', 'secondary_label' ) ); ?>
 				</a>
 			</div>
-
-			<p class="k-product__note" <?php nwcs_edit_attr( 'product', 'main', 'note' ); ?>><?php echo esc_html( nwcs_field( 'product', 'main', 'note' ) ); ?></p>
 		</div>
 	</div>
 </section>

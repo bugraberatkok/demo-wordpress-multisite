@@ -2,23 +2,24 @@
 /**
  * Kategori sayfalari ve site ici gezinme.
  *
- * Kategori agaci ayri bir yerde tutulmaz; panelde zaten duzenlenen ust menuden
- * turetilir. Alt menusu olan ve alt ogelerinden en az biri yalin capa
- * (#ahsap-kalas) olan menu ogesi bir urun grubudur (Kereste, Ambalaj...);
- * alt ogeleri o grubun kategorileridir. Panelde menuye eklenen her alt oge
- * kendi sayfasini kendiliginden alir.
+ * Urun gruplari (Kereste, Ambalaj...) ust menunun "Urun grubu anahtari" dolu
+ * satirlaridir. Hangi havuz kategorisinin hangi grubun altinda gorundugu
+ * veridir: Ürün Havuzu -> Kategoriler'de "Sitelerde" kutusundan secilir
+ * (eklenti, nwcs_site_category_tree). Grubun alt menusu yerlesik kategoriler
+ * ile, varsa grubun acilir menu bilesenindeki (menu_hirdavat...) ek
+ * baglantilardan olusur; sira manifestteki 'catalog' => 'defaults' sirasidir.
  *
  * Adresler:
  *   /kategoriler/                      tum gruplar
  *   /kategoriler/<grup>/               grubun butun urunleri
  *   /kategoriler/<grup>/<kategori>/    tek kategori
  *
- * Urunler merkezi havuzdan gelir. Hangi havuz kategorisinin hangi sayfaya
- * dustugu manifestteki kategori sayfalarinda yazilidir (kat-<kategori>,
- * grp-<grup>: 'products' alaninin 'category' degeri, havuzdaki kategori adi).
- * Orada yoksa eski kural: havuzdaki kategori adres adi (slug) menudeki capayla
- * ayniysa (ahsap-kalas) urun o kategoriye, grubun adiyla ayniysa (kereste)
- * dogrudan gruba duser.
+ * Urunler merkezi havuzdan gelir; urunun yeri eklentiden (nwcs_product_place):
+ * yerlesik bir kategorisi varsa o kategori, yoksa grubun kendi havuz
+ * kategorisindeyse (Kereste, Ahşap Ambalaj...) dogrudan grup.
+ *
+ * Adresi havuz slug'ina gecen dort eski kategori ('catalog' => 'legacy':
+ * kamelya, cardak, ahsap-sezlong, adirondack-sandalye) 301 ile yenisine gider.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -63,9 +64,13 @@ function kocist_is_catalog_request(): bool {
 /* ------------------------------------------------------------------ */
 
 /**
- * Menuden turetilen urun gruplari.
+ * Urun gruplari ve alt kategorileri.
  *
- * @return array<string, array{slug:string, name:string, url:string, image:array, subs:array<string, array{slug:string, name:string, url:string, link:string}>}>
+ * Her alt oge: slug, name, url (kategori sayfasi), link (menude gidilecek yer),
+ * menu_url (menuye yazilan ham adres), edit (onizlemede tiklaninca acilan alan:
+ * nwcs_edit_attr argumanlari).
+ *
+ * @return array<string, array{slug:string, name:string, url:string, image:array, subs:array<string, array>, menu_row:int}>
  */
 function kocist_catalog_groups(): array {
 	static $groups = null;
@@ -74,41 +79,44 @@ function kocist_catalog_groups(): array {
 		return $groups;
 	}
 
-	$groups = array();
+	$groups  = array();
+	$tree    = function_exists( 'nwcs_site_category_tree' ) ? nwcs_site_category_tree( get_current_blog_id() ) : array();
+	$catalog = function_exists( 'nwcs_manifest' ) ? (array) ( nwcs_manifest()['catalog'] ?? array() ) : array();
+	$rank    = array_flip( array_map( 'strval', array_keys( (array) ( $catalog['defaults'] ?? array() ) ) ) );
+	$rows    = nwcs_rows( 'global', 'header', 'menu' );
 
-	foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $row_index => $row ) {
-		$label   = trim( (string) ( $row['label'] ?? '' ) );
+	// Eskiden menude capa olan kategoriler: kayitli eski menude kalmis olsalar
+	// da ek baglanti sayilmaz (kategori listesinden gelirler).
+	$known = array_fill_keys( array_map( 'strval', array_keys( (array) ( $catalog['seed'] ?? array() ) ) ), true )
+		+ array_fill_keys( array_map( 'strval', array_keys( (array) ( $catalog['legacy'] ?? array() ) ) ), true );
+
+	foreach ( $tree as $slug => $parent ) {
+		$row     = (array) ( $rows[ $parent['row'] ] ?? array() );
+		$label   = trim( (string) ( $row['label'] ?? $parent['label'] ) );
 		$submenu = trim( (string) ( $row['submenu'] ?? '' ) );
+		$entries = array();
 
-		if ( '' === $label || '' === $submenu ) {
-			continue;
+		foreach ( $parent['children'] as $sub_slug => $child ) {
+			$page    = 'kat-' . $sub_slug;
+			$name    = trim( (string) nwcs_field( $page, 'head', 'name' ) );
+			$sub_url = home_url( "/kategoriler/{$slug}/{$sub_slug}/" );
+
+			$entries[] = array(
+				'rank' => $rank[ (string) $sub_slug ] ?? 100000,
+				'sub'  => array(
+					'slug'     => (string) $sub_slug,
+					'name'     => '' !== $name ? $name : (string) $child['name'],
+					'url'      => $sub_url,
+					'link'     => $sub_url,
+					'menu_url' => $sub_url,
+					'edit'     => array( $page, 'head', 'name' ),
+				),
+			);
 		}
 
-		$children = nwcs_rows( 'global', $submenu, 'items' );
-		$is_group = false;
-
-		foreach ( $children as $child ) {
-			if ( kocist_is_dead_anchor( $child['url'] ?? '' ) ) {
-				$is_group = true;
-				break;
-			}
-		}
-
-		// Kurumsal gibi alt ogeleri gercek sayfalara giden menuler grup degil.
-		if ( ! $is_group ) {
-			continue;
-		}
-
-		$slug = kocist_catalog_group_key( $row, $label, $submenu );
-
-		// Iki satir ayni gruba cikarsa ilki gecerli.
-		if ( '' === $slug || isset( $groups[ $slug ] ) ) {
-			continue;
-		}
-
-		$subs = array();
-
-		foreach ( $children as $child_index => $child ) {
+		// Grubun acilir menu bilesenindeki ek baglantilar (havuzda karsiligi olmayan
+		// metin kategorileri ya da baska sayfaya giden satirlar).
+		foreach ( '' !== $submenu ? nwcs_rows( 'global', $submenu, 'items' ) : array() as $child_index => $child ) {
 			$name = trim( (string) ( $child['label'] ?? '' ) );
 			$url  = trim( (string) ( $child['url'] ?? '' ) );
 
@@ -116,34 +124,45 @@ function kocist_catalog_groups(): array {
 				continue;
 			}
 
-			// Capa adres adi olur (#ahsap-kalas -> ahsap-kalas); capa yoksa addan.
-			$sub_slug = kocist_is_dead_anchor( $url ) ? sanitize_title( substr( $url, 1 ) ) : sanitize_title( $name );
+			$anchor   = kocist_is_dead_anchor( $url );
+			$sub_slug = $anchor ? sanitize_title( substr( $url, 1 ) ) : sanitize_title( $name );
 
-			if ( '' === $sub_slug || isset( $subs[ $sub_slug ] ) ) {
+			if ( '' === $sub_slug || isset( $known[ $sub_slug ] ) || isset( $parent['children'][ $sub_slug ] ) ) {
 				continue;
 			}
 
 			$sub_url = home_url( "/kategoriler/{$slug}/{$sub_slug}/" );
 
-			$subs[ $sub_slug ] = array(
-				'slug' => $sub_slug,
-				'name' => $name,
-				'url'  => $sub_url,
-				// Menude gidilecek yer: panelde gercek bir adres yazildiysa o
-				// (Hayvan Barinaklari -> /urun/), yalin capaysa kategori sayfasi.
-				'link' => kocist_is_dead_anchor( $url ) ? $sub_url : kocist_link( $url ),
-				// Paneldeki satir: onizlemede adina tiklaninca menunun o satiri acilir.
-				'edit' => array( $submenu, (int) $child_index ),
+			$entries[] = array(
+				'rank' => $rank[ $sub_slug ] ?? 200000 + (int) $child_index,
+				'sub'  => array(
+					'slug'     => $sub_slug,
+					'name'     => $name,
+					'url'      => $sub_url,
+					// Panelde gercek bir adres yazildiysa menu oraya gider.
+					'link'     => $anchor ? $sub_url : kocist_link( $url ),
+					'menu_url' => $anchor ? $sub_url : $url,
+					'edit'     => array( 'global', $submenu, 'items', (int) $child_index, 'label' ),
+				),
 			);
 		}
 
+		// Kararli siralama (PHP 8): ayni sirada olanlar eklendikleri sirayla.
+		usort( $entries, static fn( array $a, array $b ): int => $a['rank'] <=> $b['rank'] );
+
+		$subs = array();
+
+		foreach ( $entries as $entry ) {
+			$subs[ $entry['sub']['slug'] ] ??= $entry['sub'];
+		}
+
 		$groups[ $slug ] = array(
-			'slug'  => $slug,
-			'name'  => $label,
-			'url'   => home_url( "/kategoriler/{$slug}/" ),
-			'image'    => kocist_catalog_group_image( $slug, $label ),
+			'slug'     => (string) $slug,
+			'name'     => '' !== $label ? $label : (string) $parent['label'],
+			'url'      => home_url( "/kategoriler/{$slug}/" ),
+			'image'    => kocist_catalog_group_image( (string) $slug, $label ),
 			'subs'     => $subs,
-			'menu_row' => (int) $row_index,
+			'menu_row' => (int) $parent['row'],
 		);
 	}
 
@@ -151,40 +170,13 @@ function kocist_catalog_groups(): array {
 }
 
 /**
- * Menu satirinin urun grubu anahtari (adres, urun eslemesi ve grp-<anahtar>
- * panel sayfasi buna baglidir).
- *
- * Sirasiyla:
- *   1. panelde yazilan "Grup anahtari" (menu satirinin 'key' alani),
- *      manifestte boyle bir grup varsa;
- *   2. menu metninden turetilen ad, manifestte boyle bir grup varsa
- *      (anahtar alani eklenmeden once kaydedilmis menuler: eski davranis);
- *   3. alt menu anahtarindan (menu_kereste -> kereste), manifestte boyle bir
- *      grup varsa: anahtar bos ama menu metni degistirilmisse grup kaybolmaz;
- *   4. manifestte olmayan yeni grup: yazilan anahtar, o da bossa menu metni.
+ * Alt kategorinin onizleme isareti: tiklaninca adinin duzenlendigi alan
+ * (yerlesik kategoride kat-<slug> sayfasi, ek baglantida menu satiri).
  */
-function kocist_catalog_group_key( array $row, string $label, string $submenu ): string {
-	$key   = sanitize_title( (string) ( $row['key'] ?? '' ) );
-	$pages = function_exists( 'nwcs_manifest' ) ? ( nwcs_manifest()['pages'] ?? array() ) : array();
-	$slug  = sanitize_title( $label );
-
-	// Anahtar yalnizca bilinen bir grubu gosteriyorsa kullanilir: panelde
-	// yanlis yazilan anahtar grubun adresini tasiyip sayfasini bosaltmasin.
-	if ( '' !== $key && isset( $pages[ 'grp-' . $key ] ) ) {
-		return $key;
+function kocist_sub_edit_attr( array $sub ): void {
+	if ( ! empty( $sub['edit'] ) ) {
+		nwcs_edit_attr( ...$sub['edit'] );
 	}
-
-	if ( isset( $pages[ 'grp-' . $slug ] ) ) {
-		return $slug;
-	}
-
-	$from_submenu = sanitize_title( (string) preg_replace( '/^menu_/', '', $submenu ) );
-
-	if ( '' !== $from_submenu && isset( $pages[ 'grp-' . $from_submenu ] ) ) {
-		return $from_submenu;
-	}
-
-	return '' !== $key ? $key : $slug;
 }
 
 /**
@@ -258,91 +250,17 @@ function kocist_catalog_products(): array {
 	}
 
 	$groups = kocist_catalog_groups();
-	$map    = kocist_catalog_pool_map();
 
 	foreach ( nwcs_site_products() as $product ) {
-		$product['group'] = '';
-		$product['sub']   = '';
-
-		// Once manifestteki eslesme (havuz kategori adi -> grup/kategori);
-		// alt kategori, gruba dogrudan baglanan kategoriden once gelir.
-		foreach ( (array) ( $product['categories'] ?? array() ) as $name ) {
-			$place = $map[ (string) $name ] ?? null;
-
-			if ( ! $place || ! isset( $groups[ $place[0] ] ) ) {
-				continue;
-			}
-
-			if ( '' !== $place[1] && isset( $groups[ $place[0] ]['subs'][ $place[1] ] ) ) {
-				$product['group'] = $place[0];
-				$product['sub']   = $place[1];
-				break;
-			}
-
-			if ( '' === $place[1] ) {
-				$product['group'] = $place[0];
-			}
-		}
-
-		// Manifest bir yer verdiyse (alt kategori ya da yalnizca grup) eski kurala bakilmaz.
-		if ( '' !== $product['group'] ) {
-			$products[] = $product;
-			continue;
-		}
-
-		foreach ( array_keys( (array) ( $product['categories'] ?? array() ) ) as $term ) {
-			foreach ( $groups as $group ) {
-				if ( isset( $group['subs'][ $term ] ) ) {
-					$product['group'] = $group['slug'];
-					$product['sub']   = $term;
-					break 2;
-				}
-
-				if ( $term === $group['slug'] && '' === $product['group'] ) {
-					$product['group'] = $group['slug'];
-				}
-			}
-		}
-
-		$products[] = $product;
+		$place            = function_exists( 'nwcs_product_place' ) ? nwcs_product_place( $product, get_current_blog_id() ) : array( 'parent' => null, 'child' => null );
+		$group            = (string) $place['parent'];
+		$sub              = (string) $place['child'];
+		$product['group'] = isset( $groups[ $group ] ) ? $group : '';
+		$product['sub']   = '' !== $product['group'] && isset( $groups[ $group ]['subs'][ $sub ] ) ? $sub : '';
+		$products[]       = $product;
 	}
 
 	return $products;
-}
-
-/**
- * Manifestteki kategori sayfalarindan: havuz kategori adi => array( grup, kategori ).
- *
- * Grup sayfasi (grp-<grup>) kategori bos doner; o havuz kategorisindeki urun
- * dogrudan gruba duser.
- *
- * @return array<string, array{0:string, 1:string}>
- */
-function kocist_catalog_pool_map(): array {
-	static $map = null;
-
-	if ( null !== $map ) {
-		return $map;
-	}
-
-	$map   = array();
-	$pages = function_exists( 'nwcs_manifest' ) ? ( nwcs_manifest()['pages'] ?? array() ) : array();
-
-	foreach ( $pages as $key => $page ) {
-		$category = trim( (string) ( $page['components']['products']['fields']['pool']['category'] ?? '' ) );
-		$place    = $page['catalog'] ?? null;
-
-		if ( '' === $category || ! is_array( $place ) ) {
-			continue;
-		}
-
-		// Ek adlar: baska sitenin kategorisindeki ortak urunler (WOODPets gibi).
-		foreach ( array_merge( array( $category ), (array) ( $place['aliases'] ?? array() ) ) as $name ) {
-			$map[ (string) $name ] ??= array( (string) ( $place['group'] ?? '' ), (string) ( $place['sub'] ?? '' ) );
-		}
-	}
-
-	return $map;
 }
 
 /**
@@ -475,7 +393,7 @@ function kocist_catalog_trail( string $group = '', string $sub = '', string $pro
 			$trail[] = array(
 				'name' => $item['name'],
 				'url'  => $item['url'],
-				'edit' => array( 'global', $item['edit'][0], 'items', $item['edit'][1], 'label' ),
+				'edit' => $item['edit'],
 			);
 		}
 	}
@@ -562,6 +480,19 @@ function kocist_catalog_template(): void {
 	$current = kocist_catalog_current();
 
 	if ( null === $current ) {
+		// Adresi degisen eski kategori (kamelya -> kamelyalar): kalici yonlendirme.
+		$legacy = (array) ( nwcs_manifest()['catalog']['legacy'] ?? array() );
+		$old    = sanitize_title( (string) get_query_var( 'kocist_sub' ) );
+
+		if ( '' !== $old && isset( $legacy[ $old ] ) ) {
+			foreach ( kocist_catalog_groups() as $group ) {
+				if ( isset( $group['subs'][ $legacy[ $old ] ] ) ) {
+					wp_safe_redirect( $group['subs'][ $legacy[ $old ] ]['url'], 301 );
+					exit;
+				}
+			}
+		}
+
 		global $wp_query;
 
 		$wp_query->set_404();
@@ -762,7 +693,7 @@ function kocist_catalog_seo_pages( array $pages ): array {
 
 	// Urun detay sayfalari: WordPress sorgusu bunlari yazi listesi sanmasin.
 	foreach ( kocist_catalog_products() as $product ) {
-		if ( '' === trim( (string) $product['body'] ) ) {
+		if ( ! kocist_product_has_page( $product ) ) {
 			continue;
 		}
 
@@ -770,10 +701,15 @@ function kocist_catalog_seo_pages( array $pages ): array {
 		$pages[] = array(
 			'url'         => $product['url'],
 			'name'        => $product['title'],
-			'description' => $product['short'] ?: wp_strip_all_tags( $product['body'] ),
+			'description' => $product['short'] ?: ( trim( (string) $product['body'] ) ? wp_strip_all_tags( $product['body'] ) : $product['title'] ),
 			'image'       => $image['url'] ? array( 'url' => $image['url'], 'alt' => $image['alt'] ) : 0,
 			'type'        => 'Product',
-			'properties'  => $product['spec'] ? array( array( 'name' => 'Ölçü', 'value' => $product['spec'] ) ) : array(),
+			'sku'         => (string) ( $product['code'] ?? '' ),
+			// Yalnizca duz tutar (kocist_price_number); fiyatsiz ya da "...'den baslayan" urunde 0: offers yazilmaz.
+			'price'       => $product['has_price'] ? kocist_price_number( (string) $product['price'] ) : 0,
+			'currency'    => kocist_price_currency( (string) $product['price'] ),
+			// Sayfadaki Teknik Detaylar ile ayni kural (serbest not "Ölçü"; numarali aktarim artigi yok).
+			'properties'  => array_map( static fn( array $pair ): array => array( 'name' => $pair[0], 'value' => $pair[1] ), kocist_product_table_specs( $product ) ),
 		);
 	}
 

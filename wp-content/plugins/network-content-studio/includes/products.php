@@ -74,17 +74,25 @@ function nwcs_register_product_type(): void {
 
 // Anahtar surumlu: urun verisinin sekli degistiginde eski onbellek kendiliginden
 // gecersiz olur, elle temizlemek gerekmez.
-const NWCS_POOL_CACHE_KEY = 'nwcs_pool_products_v2';
+const NWCS_POOL_CACHE_KEY = 'nwcs_pool_products_v4';
 
 /**
  * Havuz onbellegini temizler. Urun/gorsel degisikliklerinden sonra cagrilir.
  */
 function nwcs_pool_flush_cache(): void {
+	// Sitelerin sayfa onbellegi (LiteSpeed, Cloudflare) istek sonunda: includes/cache-purge.php.
+	nwcs_cache_mark_dirty();
+
 	switch_to_blog( nwcs_pool_blog_id() );
 	delete_transient( NWCS_POOL_CACHE_KEY );
 	restore_current_blog();
 
 	nwcs_pool_products( true );
+
+	// Kategori sayilari (cope atma, geri getirme) ve kategori agaclari da.
+	if ( function_exists( 'nwcs_pool_categories_flush' ) ) {
+		nwcs_pool_categories_flush();
+	}
 }
 
 /**
@@ -148,6 +156,28 @@ function nwcs_pool_products( bool $reset = false ): array {
 }
 
 /**
+ * Cop kutusundaki havuz urunlerinin kimlikleri.
+ *
+ * @return int[]
+ */
+function nwcs_pool_trashed_ids(): array {
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	$ids = get_posts(
+		array(
+			'post_type'      => NWCS_PRODUCT_TYPE,
+			'post_status'    => 'trash',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		)
+	);
+
+	restore_current_blog();
+
+	return array_map( 'intval', $ids );
+}
+
+/**
  * Aramada Turkce harf ve buyuk/kucuk harf farki gozetilmesin diye metni
  * sadelestirir: "ÇİVİ", "çivi", "civi" ayni sonucu verir.
  */
@@ -206,38 +236,10 @@ function nwcs_pool_query( array $args = array() ): array {
 	);
 }
 
-/**
- * Havuzdaki kategoriler (slug => [name, count]).
+/*
+ * Havuzdaki kategoriler (yerlesimleriyle): nwcs_pool_categories(),
+ * includes/product-categories.php.
  */
-function nwcs_pool_categories(): array {
-	switch_to_blog( nwcs_pool_blog_id() );
-
-	$terms = get_terms(
-		array(
-			'taxonomy'   => NWCS_PRODUCT_TAX,
-			'hide_empty' => false,
-			'orderby'    => 'name',
-		)
-	);
-
-	restore_current_blog();
-
-	$out = array();
-
-	if ( is_wp_error( $terms ) ) {
-		return $out;
-	}
-
-	foreach ( $terms as $term ) {
-		$out[ $term->slug ] = array(
-			'id'    => (int) $term->term_id,
-			'name'  => $term->name,
-			'count' => (int) $term->count,
-		);
-	}
-
-	return $out;
-}
 
 /**
  * Tek urunun havuzdaki hali. Havuz baglaminda cagrilmalidir.
@@ -275,6 +277,7 @@ function nwcs_pool_product_data( WP_Post $post ): array {
 		'body'        => $post->post_content,
 		'price'       => (string) get_post_meta( $post->ID, '_nwcs_price', true ),
 		'spec'        => (string) get_post_meta( $post->ID, '_nwcs_spec', true ),
+		'details'     => nwcs_product_details( (int) $post->ID ),
 		'image_id'    => $gallery ? (int) $gallery[0] : 0,
 		'image'       => $images ? $images[0] : nwcs_image_by_id( 0 ),
 		'gallery_ids' => $gallery,
@@ -349,6 +352,9 @@ function nwcs_normalize_product_code( string $code ): string {
 /**
  * Bu kod baska bir urunde kullaniliyor mu? Kullaniliyorsa o urunun kimligi.
  * Havuz sitesi baglaminda cagrilmalidir.
+ *
+ * Cop kutusundaki urunler de aranir ('any' onlari kapsamaz): aksi halde cope
+ * atilmis bir urunun kodu yeniden gelince ayni kodla ikinci urun acilirdi.
  */
 function nwcs_product_id_by_code( string $code, int $ignore_id = 0 ): int {
 	$code = nwcs_normalize_product_code( $code );
@@ -360,7 +366,7 @@ function nwcs_product_id_by_code( string $code, int $ignore_id = 0 ): int {
 	$found = get_posts(
 		array(
 			'post_type'      => NWCS_PRODUCT_TYPE,
-			'post_status'    => 'any',
+			'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future', 'trash' ),
 			'posts_per_page' => 1,
 			'fields'         => 'ids',
 			'exclude'        => $ignore_id ? array( $ignore_id ) : array(),
@@ -443,7 +449,9 @@ function nwcs_site_product_settings( ?int $blog_id = null ): array {
  * Site ayarlarini yazar. Aktif site baglaminda cagrilir.
  */
 function nwcs_save_site_product_settings( array $settings ): void {
-	$pool = nwcs_pool_products();
+	// Cop kutusundaki urunler de gecerli: secimde yerinde kalir, geri
+	// getirilince sitede eski yerine doner (nwcs_pool_products yalnizca yayindakiler).
+	$pool = nwcs_pool_products() + array_fill_keys( nwcs_pool_trashed_ids(), true );
 
 	$mode = in_array( $settings['mode'] ?? 'all', array( 'all', 'selected' ), true ) ? $settings['mode'] : 'all';
 
@@ -453,6 +461,32 @@ function nwcs_save_site_product_settings( array $settings ): void {
 		if ( $id && isset( $pool[ $id ] ) && ! in_array( $id, $selected, true ) ) {
 			$selected[] = $id;
 		}
+	}
+
+	// Paneldeki urun secicisi cop kutusundakileri gostermez, gonderilen listede
+	// olmazlar. Onceki secimdeki cop kutusu urunleri eski yerlerine (onceki
+	// komsusunun arkasina) geri konur; boylece geri getirilen urun sitede yerini bulur.
+	$trashed  = nwcs_pool_trashed_ids();
+	$previous = get_option( NWCS_OPTION_SELECTED, array() );
+	$previous = is_array( $previous ) ? array_values( array_map( 'absint', $previous ) ) : array();
+
+	foreach ( $previous as $index => $id ) {
+		if ( ! in_array( $id, $trashed, true ) || in_array( $id, $selected, true ) ) {
+			continue;
+		}
+
+		$at = 0;
+
+		for ( $back = $index - 1; $back >= 0; $back-- ) {
+			$found = array_search( $previous[ $back ], $selected, true );
+
+			if ( false !== $found ) {
+				$at = $found + 1;
+				break;
+			}
+		}
+
+		array_splice( $selected, $at, 0, array( $id ) );
 	}
 
 	$overrides = array();
@@ -714,6 +748,8 @@ function nwcs_site_products( ?int $blog_id = null ): array {
 			'short'       => $short,
 			'body'        => $product['body'],
 			'spec'        => $product['spec'],
+			'details'     => $product['details'] ?? array(),
+			'code'        => $product['code'] ?? '',
 			'price'       => $price,
 			'has_price'   => '' !== trim( $price ),
 			'price_label' => '' !== trim( $price ) ? $price : 'Teklif al',
@@ -726,6 +762,27 @@ function nwcs_site_products( ?int $blog_id = null ): array {
 	}
 
 	return $out;
+}
+
+/**
+ * Urunun bu sitede kendi sayfasi var mi?
+ *
+ * Detay metni (aciklama) olan her urunun sayfasi vardir. Aciklamasi olmayan
+ * urunun sayfasi, temasi manifestinde 'product_page_always' diyen sitelerde
+ * de acilir (WOOD KOCIST, Kocist): ad, gorsel ve teknik detaylar gosterilir,
+ * yalnizca aciklama bolumu olmaz. Diger temalar karti yalnizca detay metni
+ * olan urunde sayfaya baglar; onlarda eski kural surer.
+ */
+function nwcs_product_has_page( array $product, ?int $blog_id = null ): bool {
+	if ( '' === (string) ( $product['slug'] ?? '' ) ) {
+		return false;
+	}
+
+	if ( '' !== trim( (string) ( $product['body'] ?? '' ) ) ) {
+		return true;
+	}
+
+	return ! empty( nwcs_manifest_for_blog( $blog_id ?? get_current_blog_id() )['product_page_always'] );
 }
 
 /**
@@ -778,9 +835,10 @@ function nwcs_product_template(): void {
 
 	$product = nwcs_site_product_by_slug( sanitize_title( (string) $slug ) );
 
-	// Bu sitede gosterilmeyen ya da detay metni girilmemis urunun sayfasi yoktur.
-	// Aksi halde /urun/<slug>/ adresleri bos sayfa ya da ana sayfa dondururdu.
-	if ( ! $product || '' === trim( (string) $product['body'] ) ) {
+	// Bu sitede gosterilmeyen urunun sayfasi yoktur; detay metni girilmemis
+	// urunun sayfasi yalnizca temasi bunu isteyen sitede acilir
+	// (nwcs_product_has_page). Aksi halde /urun/<slug>/ bos sayfa donerdi.
+	if ( ! $product || ! nwcs_product_has_page( $product ) ) {
 		global $wp_query;
 
 		$wp_query->set_404();

@@ -30,66 +30,49 @@ $head = static function ( string $title, string $lead ): array {
 };
 
 /*
- * Kategori sayfalari (/urun-kategori/<seri>/<kategori>/): panelde her biri ayri
- * sekme. Onizleme o kategorinin sayfasini acar; "Ürünler" bolumunde yalnizca o
- * kategorinin urunleri listelenir (secim, sira ve bu siteye ozel ad/fiyat).
- * 'category' havuzdaki kategori adiyla birebir ayni olmali.
+ * Kategori sayfalari (/urun-kategori/<seri>/<kategori>/) ve seri sayfalari
+ * (/urun-kategori/<seri>/): hangi havuz kategorisinin hangi serinin altinda
+ * gorundugu veridir, Ürün Havuzu -> Kategoriler'den yonetilir (eklenti,
+ * includes/product-categories.php). Eklenti her yerlesik kategori icin
+ * asagidaki sablondan 'kat-<havuz-slug>' panel sayfasini, her seri icin gizli
+ * 'seri-<seri>' sayfasini uretir. Seriler Ana Sayfa -> Seriler satirlaridir.
+ *
+ * 'defaults': eski sabit listedeki metinler (panelde bos kalan alanlarda
+ * gorunur). 'seed': ilk kurulumdaki yerlesim; bir kez yazilir, sonra panelden
+ * degisir.
  */
-$categories = array(
-	// kisaltma => array( havuzdaki ad, seri kisaltmasi, sayfa basligi, one cikan cumle )
-	'kopek-kulubeleri' => array( 'Köpek Kulübeleri', 'woodpets', 'Ahşap köpek kulübeleri', 'Verandalı, bölmeli ve farklı boylarda ahşap köpek kulübeleri. Ölçü, ahşap cinsi ve KDV dahil fiyatlarıyla.' ),
-	'kedi-yuvalari'    => array( 'Kedi Yuvaları', 'woodpets', 'Ahşap kedi yuvaları', 'Tekli, üçlü ve altılı ahşap kedi yuvaları; farklı renk seçenekleriyle.' ),
-	'kamelyalar'       => array( 'Kamelyalar', 'woodgarden', 'Ahşap kamelyalar', 'Klasik, Prestij ve Master seri ahşap kamelyalar; zemin platformlu ve kuşluklu modeller.' ),
-	'cardaklar'        => array( 'Çardaklar', 'woodgarden', 'Ahşap çardaklar', 'Kompakt, orta ve büyük boy ahşap çardaklar.' ),
-	'piknik-masalari'  => array( 'Piknik Masaları', 'woodgarden', 'Ahşap piknik masaları', 'Bahçe ve teras için oturaklı ahşap piknik masaları.' ),
-	'ahsap-sezlonglar' => array( 'Şezlonglar', 'woodgarden', 'Ahşap şezlonglar', 'Bahçe, havuz başı ve teras için ahşap şezlonglar.' ),
-	'adirondack'       => array( 'Adirondack', 'woodliving', 'Adirondack ahşap sandalyeler', 'Katlanır ve sabit, küçük ve büyük boy Adirondack sandalyeler.' ),
-);
-
-$category_pages = array();
-
-foreach ( $categories as $slug => $c ) {
-	$category_pages[ 'kat-' . $slug ] = array(
-		'label'      => $c[0] . ' (Mağaza)',
-		'path'       => '/urun-kategori/' . $c[1] . '/' . $slug . '/',
-		'seo_source' => array(
+$catalog = array(
+	'parents'       => array( 'rows' => array( 'home', 'catalog', 'lines' ), 'key' => 'category', 'label' => 'label' ),
+	'parent_prefix' => 'seri-',
+	// Seri icindeki kategori sirasi: magazadaki urun sirasinda ilk gorunus.
+	'order'         => 'first_product',
+	// Bu sitede urunu olmayan kategori menude ve magazada yok, adresi 404;
+	// panel "bu sitede urunu olunca gorunur" der.
+	'hide_empty'    => true,
+	// Panelde sekmeler Magaza'dan sonra.
+	'after'         => 'shop',
+	'page'          => array(
+		'label'          => '{name} (Mağaza)',
+		'path'           => '/urun-kategori/{parent}/{slug}/',
+		'seo_source'     => array(
 			'title'       => 'head.title',
 			'description' => 'head.lead',
 		),
-		'components' => array(
-			'head'     => array(
+		'components'     => array(
+			'head' => array(
 				'label'  => 'Sayfa Başı ve Menü Adı',
 				'fields' => array(
-					'name'  => array( 'label' => 'Kategori adı (menü, kenar listesi, ana sayfa kutuları)', 'type' => 'text', 'default' => $c[0], 'hint' => 'Yalnızca bu sitede görünen ad; Ürün Havuzu’ndaki kategori adı değişmez.' ),
-					'title' => array( 'label' => 'Sayfa başlığı', 'type' => 'text', 'default' => $c[2] ),
-					'lead'  => array( 'label' => 'Öne çıkan cümle', 'type' => 'textarea', 'default' => $c[3] ),
-				),
-			),
-			'products' => array(
-				'label'  => 'Ürünler',
-				'fields' => array(
-					'pool' => array(
-						'label'    => $c[0] . ': ürünler (seçin, sıralayın, bu siteye özel ad ve fiyat)',
-						'type'     => 'products',
-						'category' => $c[0],
-					),
+					'name'  => array( 'label' => 'Kategori adı (menü, kenar listesi, ana sayfa kutuları)', 'type' => 'text', 'default' => '{name}', 'hint' => 'Yalnızca bu sitede görünen ad; Ürün Havuzu’ndaki kategori adı değişmez.' ),
+					'title' => array( 'label' => 'Sayfa başlığı', 'type' => 'text', 'default' => '{name}' ),
+					'lead'  => array( 'label' => 'Öne çıkan cümle', 'type' => 'textarea', 'default' => '' ),
 				),
 			),
 		),
-	);
-}
-
-/*
- * Seri sayfalari (/urun-kategori/<seri>/): sekme listesinde gorunmez
- * ('hidden'), panelin "Sayfa bul" kutusunda cikar. Seri adi ve kisa aciklama
- * Ana Sayfa -> Seriler'de; burada yalnizca bu sayfaya ozel alt metin.
- */
-$serie_pages = array();
-
-foreach ( array( 'woodpets' => 'WOODPets', 'woodgarden' => 'WOODGarden', 'woodliving' => 'WOODLiving' ) as $slug => $label ) {
-	$serie_pages[ 'seri-' . $slug ] = array(
-		'label'      => 'Seri: ' . $label,
-		'path'       => '/urun-kategori/' . $slug . '/',
+		'products_label' => '{name}: ürünler (seçin, sıralayın, bu siteye özel ad ve fiyat)',
+	),
+	'parent_page'   => array(
+		'label'      => 'Seri: {name}',
+		'path'       => '/urun-kategori/{parent}/',
 		'hidden'     => true,
 		'components' => array(
 			'head' => array(
@@ -104,11 +87,34 @@ foreach ( array( 'woodpets' => 'WOODPets', 'woodgarden' => 'WOODGarden', 'woodli
 				),
 			),
 		),
-	);
-}
+	),
+	'defaults'      => array(
+		'kopek-kulubeleri' => array( 'title' => 'Ahşap köpek kulübeleri', 'lead' => 'Verandalı, bölmeli ve farklı boylarda ahşap köpek kulübeleri. Ölçü, ahşap cinsi ve KDV dahil fiyatlarıyla.' ),
+		'kedi-yuvalari'    => array( 'title' => 'Ahşap kedi yuvaları', 'lead' => 'Tekli, üçlü ve altılı ahşap kedi yuvaları; farklı renk seçenekleriyle.' ),
+		'kamelyalar'       => array( 'title' => 'Ahşap kamelyalar', 'lead' => 'Klasik, Prestij ve Master seri ahşap kamelyalar; zemin platformlu ve kuşluklu modeller.' ),
+		'cardaklar'        => array( 'title' => 'Ahşap çardaklar', 'lead' => 'Kompakt, orta ve büyük boy ahşap çardaklar.' ),
+		'piknik-masalari'  => array( 'title' => 'Ahşap piknik masaları', 'lead' => 'Bahçe ve teras için oturaklı ahşap piknik masaları.' ),
+		'ahsap-sezlonglar' => array( 'title' => 'Ahşap şezlonglar', 'lead' => 'Bahçe, havuz başı ve teras için ahşap şezlonglar.' ),
+		'adirondack'       => array( 'title' => 'Adirondack ahşap sandalyeler', 'lead' => 'Katlanır ve sabit, küçük ve büyük boy Adirondack sandalyeler.' ),
+	),
+	'seed'          => array(
+		'kopek-kulubeleri' => 'woodpets',
+		'kedi-yuvalari'    => 'woodpets',
+		'kamelyalar'       => 'woodgarden',
+		'cardaklar'        => 'woodgarden',
+		'piknik-masalari'  => 'woodgarden',
+		'ahsap-sezlonglar' => 'woodgarden',
+		'adirondack'       => 'woodliving',
+	),
+);
 
 return array(
 	'site_key'          => 'woodkocist',
+	// Kategori yerlesimi ve kategori sayfalarinin sablonu (yukarida).
+	'catalog'           => $catalog,
+	// Aciklamasi (detay metni) olmayan havuz urununun sayfasi da acik kalir:
+	// ad, gorsel ve teknik detaylar gosterilir (eklenti: nwcs_product_has_page).
+	'product_page_always' => true,
 	// Havuz urunlerinin sayfalarindaki (/urun/<urun>/) ortak metinler bu panel sayfasinda.
 	'product_page'      => 'product',
 	'site_label'        => 'Koçist · woodkocist.com.tr',
@@ -229,7 +235,8 @@ return array(
 				'card'   => array(
 					'label'  => 'Ürün Kartları ve Fiyat Yazıları (tüm sayfalar)',
 					'fields' => array(
-						'price_ask'    => array( 'label' => 'Fiyatı olmayan ürün: fiyat yerine', 'type' => 'text', 'default' => 'Fiyat için sorun' ),
+						'price_ask'    => array( 'label' => 'Fiyatı olmayan ürün: fiyat yerine', 'type' => 'text', 'default' => 'Fiyat teklifle' ),
+						'price_reason' => array( 'label' => 'Fiyatı olmayan ürün: nedeni (ürün sayfasında, tüm ürünler)', 'type' => 'textarea', 'default' => 'Bu ürün sipariş üzerine üretildiği için sitede sabit fiyat gösterilmiyor; fiyat ölçü, donanım ve teslim şekline göre belirlenir. Hızlı Sipariş’ten ya da formla sorun.', 'hint' => 'Fiyatın neden gösterilmediğini ürüne bağlı anlatın; kişiye özel fiyat izlenimi veren ifade kullanmayın.' ),
 						'ask_button'   => array( 'label' => 'Fiyatı olmayan ürün: kart düğmesi', 'type' => 'text', 'default' => 'Fiyat sor' ),
 						'add_button'   => array( 'label' => 'Sepete ekle düğmesi', 'type' => 'text', 'default' => 'Sepete ekle' ),
 						'vat_included' => array( 'label' => 'Fiyat yanındaki not (KDV dahil)', 'type' => 'text', 'default' => 'KDV dahil' ),
@@ -431,7 +438,7 @@ return array(
 							'max'     => 6,
 							'fields'  => array(
 								'label'    => array( 'label' => 'Seri Adı', 'type' => 'text' ),
-								'category' => array( 'label' => 'Havuzdaki Kategori Adı (birebir)', 'type' => 'text' ),
+								'category' => array( 'label' => 'Seri anahtarı (değiştirmeyin)', 'type' => 'text', 'hint' => 'Ürün Havuzu’ndaki seri kategorisinin adı (WOODPets gibi). Kategoriler bu anahtarla serinin altına yerleşir; değiştirirseniz bu serideki kategoriler menüden ve mağazadan düşer. Görünen adı "Seri Adı" alanından değiştirin.' ),
 								'text'     => array( 'label' => 'Kısa Açıklama', 'type' => 'text' ),
 							),
 							'default' => array(
@@ -570,7 +577,7 @@ return array(
 				),
 			),
 		),
-	) + $category_pages + $serie_pages + array(
+	) + array(
 
 		'about' => array(
 			'label'      => 'Hakkımızda (Şirketimiz)',
@@ -775,15 +782,21 @@ return array(
 					'label'  => 'Ürün Sayfası Yazıları',
 					'fields' => array(
 						'code_label'      => array( 'label' => 'Ürün kodu etiketi', 'type' => 'text', 'default' => 'Ürün kodu' ),
-						'wa_question'     => array( 'label' => 'Fiyatlı üründe WhatsApp bağlantısı', 'type' => 'text', 'default' => 'Sorunuz mu var? WhatsApp’tan yazın' ),
-						'ask_why'         => array( 'label' => 'Fiyatsız üründe açıklama', 'type' => 'textarea', 'default' => 'Bu ürünün fiyatını size ayrıca bildiriyoruz. WhatsApp mesajına ürün kodu kendiliğinden eklenir.' ),
-						'wa_price'        => array( 'label' => 'Fiyatsız üründe WhatsApp düğmesi', 'type' => 'text', 'default' => 'WhatsApp’tan fiyat sor' ),
 						'form_ask'        => array( 'label' => 'Fiyatsız üründe form düğmesi', 'type' => 'text', 'default' => 'Formla sor' ),
 						'custom_question' => array( 'label' => 'Özel ölçü satırı', 'type' => 'text', 'default' => 'Farklı ölçü mü lazım?' ),
 						'custom_link'     => array( 'label' => 'Özel ölçü satırı: bağlantı', 'type' => 'text', 'default' => 'Özel üretim isteyin' ),
-						'specs_title'     => array( 'label' => 'Teknik özellikler başlığı', 'type' => 'text', 'default' => 'Teknik özellikler' ),
-						'related_title'   => array( 'label' => 'Benzer ürünler başlığı', 'type' => 'text', 'default' => 'Diğer {kategori}', 'hint' => '{kategori} ürünün kategorisidir (küçük harfle); silmeyin.' ),
-						'related_all'     => array( 'label' => 'Benzer ürünler başlığı (kategorisiz ürün)', 'type' => 'text', 'default' => 'Diğer ürünler' ),
+						'wa_order'        => array( 'label' => 'Hızlı Sipariş düğmesi (WhatsApp)', 'type' => 'text', 'default' => 'Hızlı Sipariş', 'hint' => 'WhatsApp mesajına ürünün adı ve kodu kendiliğinden eklenir.' ),
+						'specs_title'     => array( 'label' => '1. sekme: teknik detaylar', 'type' => 'text', 'default' => 'Teknik Detaylar' ),
+						'specs_empty'     => array( 'label' => '1. sekme: detay girilmemişse', 'type' => 'text', 'default' => 'Bu ürünün teknik detayları henüz girilmedi. Ölçü ve malzeme bilgisi için bize yazın.' ),
+						'tab_desc'        => array( 'label' => '2. sekme: ürün açıklaması', 'type' => 'text', 'default' => 'Ürün Açıklaması' ),
+						'desc_empty'      => array( 'label' => '2. sekme: açıklama girilmemişse', 'type' => 'text', 'default' => 'Açıklama henüz girilmedi.' ),
+						'tab_delivery'    => array( 'label' => '3. sekme: lojistik ve teslimat', 'type' => 'text', 'default' => 'Lojistik ve Teslimat' ),
+						'delivery_text'   => array( 'label' => '3. sekme: metin (tüm ürünler)', 'type' => 'textarea', 'default' => "Küçük ürünler anlaşmalı lojistikle, büyük ve kurulum gerektiren ürünler saha ekibimizle gelir. Standart modellerde üretim ve kalite kontrol ortalama 7–14 iş günü sürer.\n\nİsterseniz ürününüzü fabrikamızdan teslim alabilirsiniz.", 'hint' => 'Üründe "Lojistik ve Teslimat" adlı bir detay satırı varsa o ürünün sayfasında bu metin yerine o satır gösterilir.' ),
+						'tab_reviews'     => array( 'label' => '4. sekme: müşteri görüşleri', 'type' => 'text', 'default' => 'Müşteri Görüşleri' ),
+						'reviews_empty'   => array( 'label' => '4. sekme: görüş yokken', 'type' => 'text', 'default' => 'Henüz değerlendirme yapılmadı.' ),
+						'reviews_note'    => array( 'label' => '4. sekme: açıklama', 'type' => 'text', 'default' => 'Görüşünüzü WhatsApp’tan ya da formla iletebilirsiniz.' ),
+						'related_title'   => array( 'label' => 'İlgili ürünler başlığı', 'type' => 'text', 'default' => 'İlgili ürünler', 'hint' => 'İsterseniz {kategori} yazın: ürünün kategorisi (küçük harfle) gelir.' ),
+						'related_all'     => array( 'label' => 'İlgili ürünler başlığı (kategorisiz ürün)', 'type' => 'text', 'default' => 'İlgili ürünler' ),
 					),
 				),
 			),

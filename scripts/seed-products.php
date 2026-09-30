@@ -58,7 +58,14 @@ function nwcs_seed_product( array $data ): int {
 
 	update_post_meta( $id, '_nwcs_short', $data['short'] ?? '' );
 	update_post_meta( $id, '_nwcs_price', $data['price'] ?? '' );
-	update_post_meta( $id, '_nwcs_spec', $data['spec'] ?? '' );
+	// Detaylar ve spec eklentinin tek yazicisiyla (0.21.0+).
+	$spec = (string) ( $data['spec'] ?? '' );
+
+	if ( function_exists( 'nwcs_product_write_details' ) ) {
+		nwcs_product_write_details( $id, nwcs_parse_spec_pairs( $spec ), nwcs_spec_is_note( $spec ) ? $spec : '' );
+	} else {
+		update_post_meta( $id, '_nwcs_spec', $spec );
+	}
 
 	wp_set_object_terms( $id, $data['categories'] ?? array(), NWCS_PRODUCT_TAX, false );
 

@@ -1,8 +1,13 @@
 /*
- * Urun sayfasi: solda bilgiler, sagda buyuk galeri; altinda teknik
- * ozellikler ve sikca sorulan sorular. Gorsel kendi oraninda, kirpilmadan
- * gosterilir; dikey fotograf ekrandan uzun olabilir (firmanin istegi, eski
- * woodkocist.com.tr urun sayfasi gibi). Telefonda galeri en ustte.
+ * Urun sayfalari.
+ *
+ * Havuz urunu (/urun/<slug>/, .k-pp): solda buyuk galeri ve altinda akordeon
+ * (Teknik Detaylar, Urun Aciklamasi, Lojistik ve Teslimat), sagda ad, fiyat
+ * ve yapisik teklif formu. Gorsel kendi oraninda, kirpilmadan; fotografsiz
+ * urunde yer tutucu WOOD KOCIST plakasinin oraninda (1280 / 1714, dikey).
+ * 1024 altinda tek sutun: galeri, ad, akordeon, form.
+ *
+ * Ornek urun sayfasi (/urun/, .k-product__grid): solda bilgiler, sagda galeri.
  */
 
 /* ---------- Ust bolum ---------- */
@@ -284,235 +289,7 @@
 /* Betik yuklenmediyse (onizleme ya da hata) dugme hic gorunmesin. */
 html:not(.k-lb-ready) .k-zoom { display: none; }
 
-/* ---------- Urunun hikayesi (ust bolumun altinda) ---------- */
-/*
- * Yalnizca urunun kendi icerigi: one cikan ozellikler buyuk; giris paragrafi
- * buyuk ve orman yesili; kalan bolumler iki sutunda; ek fotograflar varsa
- * bolumler onlarla yan yana, sirayla sag / sol. Teknik ozellikler acik yesil
- * zeminli bir foy; urun tablolari en altta tam genislikte.
- */
-.k-pstory {
-	margin-top: 40px;
-	padding: 44px 0 56px;
-	border-top: 1px solid var(--line);
-}
-
-.k-pstory .k-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(28px, 4vw, 48px); }
-
-.k-pstory__heading {
-	margin: 0;
-	font-size: clamp(22px, 2.2vw, 28px);
-	color: var(--forest);
-}
-
-/* One cikanlar: buyuk deger, kucuk etiket; aralarinda ince cizgi. */
-.k-facts {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	margin: 0;
-	border-block: 1px solid var(--line);
-}
-
-@media (min-width: 768px) {
-	.k-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
-.k-facts__item {
-	display: flex;
-	flex-direction: column-reverse;
-	justify-content: flex-end;
-	gap: 6px;
-	padding: 20px 20px 20px 0;
-}
-
-.k-facts__item + .k-facts__item { padding-left: 20px; border-left: 1px solid var(--line); }
-
-@media (max-width: 767.98px) {
-	.k-facts__item:nth-child(3) { padding-left: 0; border-left: 0; }
-	.k-facts__item:nth-child(n+3) { border-top: 1px solid var(--line); }
-}
-
-.k-facts dt { font-size: 13.5px; color: var(--muted); }
-
-.k-facts dd {
-	margin: 0;
-	font-size: clamp(18px, 1.8vw, 23px);
-	font-stretch: 112%;
-	font-weight: 800;
-	line-height: 1.2;
-	color: var(--forest);
-}
-
-/* Metin ve foy */
-.k-pstory__top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; align-items: start; }
-
-@media (min-width: 900px) {
-	.k-pstory--specs .k-pstory__top { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: clamp(36px, 5vw, 72px); }
-	.k-pstory__specs { position: sticky; top: 88px; }
-	.k-pstory__top--solo { grid-template-columns: minmax(0, 1fr) !important; }
-	.k-pstory__top--solo .k-pstory__specs { position: static; }
-	.k-pstory__top--solo .k-specs-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 48px; }
-}
-
-.k-pstory__lead {
-	max-width: 62ch;
-	font-size: clamp(18px, 1.6vw, 21px);
-	line-height: 1.6;
-	color: var(--forest-3);
-}
-
-.k-pstory__lead > * { margin: 0; }
-.k-pstory__lead > * + * { margin-top: .75em; }
-
-.k-pstory__cols { margin-top: 28px; font-size: 15.5px; line-height: 1.75; color: var(--text); }
-
-@media (min-width: 768px) {
-	.k-pstory__cols { columns: 2 16rem; column-gap: 40px; }
-}
-
-.k-pstory__chapter > * { margin: 0; }
-.k-pstory__chapter > * + * { margin-top: .85em; }
-.k-pstory__cols .k-pstory__chapter { break-inside: avoid-column; margin-bottom: 22px; }
-/* Madde listeleri: kucuk yaprak yesili isaret, satir araligi rahat. */
-.k-pstory__chapter ul, .k-pstory__note ul, .k-pstory__lead ul { list-style: none; padding-left: 0; }
-.k-pstory__chapter ul li, .k-pstory__note ul li, .k-pstory__lead ul li { position: relative; padding-left: 20px; }
-.k-pstory__chapter ul li + li, .k-pstory__note ul li + li, .k-pstory__lead ul li + li { margin-top: 6px; }
-.k-pstory__chapter ul li::before, .k-pstory__note ul li::before, .k-pstory__lead ul li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 7px; height: 7px; border-radius: 2px; background: var(--leaf); }
-.k-pstory__chapter ol { padding-left: 20px; }
-
-.k-pstory__title {
-	margin: 0 0 8px;
-	font-size: 17px;
-	line-height: 1.3;
-	color: var(--forest);
-}
-
-.k-pstory__specs {
-	padding: 24px 24px 10px;
-	border-radius: 12px;
-	background: var(--leaf-soft);
-}
-
-.k-pstory__specs-title { margin: 0 0 6px; font-size: 17px; color: var(--forest); }
-.k-pstory__specs .k-specs-list { border-top: 0; }
-.k-pstory__specs .k-specs-list div { grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr); border-color: rgba(23, 84, 47, .14); }
-.k-pstory__specs .k-specs-list div:last-child { border-bottom: 0; }
-
-/* Fotografli bolumler: sirayla sag / sol; metin fotografin ortasina hizali. */
-.k-pstory__rows { display: grid; gap: clamp(36px, 6vw, 72px); }
-.k-pstory__row { display: grid; gap: 22px; align-items: center; }
-
-@media (min-width: 768px) {
-	.k-pstory__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); }
-	.k-pstory__row:nth-child(even) .k-pstory__photo { order: 2; }
-	.k-pstory__row--text { grid-template-columns: minmax(0, 1fr); max-width: 44rem; }
-}
-
-.k-pstory__photo {
-	display: block;
-	width: 100%;
-	padding: 0;
-	overflow: hidden;
-	border: 0;
-	border-radius: 12px;
-	background: var(--paper-2);
-	cursor: zoom-in;
-}
-
-.k-pstory__photo img { display: block; width: 100%; height: auto; max-height: 80vh; object-fit: cover; transition: transform .4s ease; }
-.k-pstory__photo:hover img { transform: scale(1.03); }
-.k-pstory__photo:focus-visible { outline: 3px solid var(--leaf); outline-offset: 3px; }
-.k-pstory__row .k-pstory__chapter { max-width: 34rem; font-size: 16px; line-height: 1.75; color: var(--text); }
-.k-pstory__row .k-pstory__title { font-size: clamp(20px, 2vw, 25px); margin-bottom: 12px; }
-
-.k-pstory__tables { display: grid; gap: 20px; min-width: 0; }
-
-/* Kisa metin (brief / table): tek sutun, okunur boyda. */
-.k-pstory__note { max-width: 68ch; font-size: 16.5px; line-height: 1.75; color: var(--text); }
-.k-pstory__note > * { margin: 0; }
-.k-pstory__note > * + * { margin-top: .8em; }
-.k-pstory__note .k-pstory__title { margin-top: 1.1em; }
-/* Kisa metin tek dar sutunda solda kalmasin: genis ekranda iki dengeli sutun. */
-@media (min-width: 900px) {
-	.k-pstory--brief .k-pstory__note { max-width: none; columns: 2 22rem; column-gap: 56px; }
-	.k-pstory--brief .k-pstory__note > * { break-inside: avoid-column; }
-}
-
-/* Bir iki ozellik: foy yerine metnin altinda satir icinde. */
-.k-pstory__inline { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
-.k-pstory__inline div { display: flex; gap: 8px; align-items: baseline; }
-.k-pstory__inline dt { font-size: 13.5px; color: var(--muted); }
-.k-pstory__inline dd { margin: 0; font-weight: 700; color: var(--forest); }
-
-/* Tablo one cikan urun (hirdavat, civi, vida...): tablo metnin hemen altinda, belirgin. */
-.k-pstory--table .k-pstory__tables .k-ptable { border-color: rgba(23, 84, 47, .22); }
-.k-pstory--table .k-ptable__table thead th,
-.k-pstory--table .k-ptable__table tr:first-child th { background: var(--forest); color: #fff; }
-.k-ptable__table tbody tr:nth-child(even) td { background: var(--paper-2); }
-.k-pstory--table .k-ptable__table th,
-.k-pstory--table .k-ptable__table td { padding-left: 14px; }
-
-/* Metin kisa, fotograf cok: fotograf seridi. */
-.k-pstory__strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
-.k-pstory__strip .k-pstory__photo img { aspect-ratio: 4 / 3; object-fit: cover; max-height: none; }
-
-/* Detay metninin icindeki tablo iki sutuna sikismaz: tam genislikte, dar ekranda kendi icinde kayar. */
-.k-pstory__cols .k-pstory__chapter:has(table) { column-span: all; }
-.k-pstory__chapter table,
-.k-pstory__lead table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 14.5px; }
-.k-pstory__chapter th, .k-pstory__chapter td { padding: 8px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-.k-pstory__chapter th { color: var(--forest); font-weight: 700; }
-
-@media (prefers-reduced-motion: reduce) {
-	.k-pstory__photo img { transition: none; }
-}
-
-/* ---------- Detay metni ve urun tablolari ---------- */
-/*
- * Ust bolumun (galeri + bilgiler) altinda tam genislik. Metin ve tablo
- * birlikteyse masaustunde yan yana: metin okuma genisliginde, tablo genis
- * sutunda. Tek basina olan tam genislige yayilir, metin 70ch ile sinirli.
- */
-.k-pdetail {
-	margin-top: 34px;
-	padding: 40px 0 44px;
-	background: var(--paper-2);
-	border-top: 1px solid var(--line);
-	border-bottom: 1px solid var(--line);
-}
-
-.k-pdetail__title {
-	margin: 0 0 20px;
-	font-size: clamp(21px, 2.1vw, 26px);
-	color: var(--forest);
-}
-
-.k-pdetail__grid {
-	display: grid;
-	/* minmax(0, 1fr): genis urun tablosu sutunu telefonda ekrandan tasirmasin (tablo kendi icinde kayar). */
-	grid-template-columns: minmax(0, 1fr);
-	gap: 28px;
-	align-items: start;
-}
-
-/* Metin solda, teknik ozellikler sagda; urun tablolari (cok sutunlu olabilir) altta tam genislikte. */
-@media (min-width: 900px) {
-	.k-pdetail--split .k-pdetail__grid {
-		grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-		column-gap: clamp(32px, 5vw, 72px);
-		row-gap: 32px;
-	}
-
-	.k-pdetail--split .k-pdetail__tables { grid-column: 1 / -1; }
-	.k-pdetail__specs { position: sticky; top: 88px; }
-}
-
-.k-pdetail__subtitle {
-	margin: 0 0 12px;
-	font-size: 17px;
-	color: var(--forest);
-}
-
+/* ---------- Teknik detaylar listesi ve urun tablolari ---------- */
 .k-specs-list {
 	margin: 0;
 	border-top: 2px solid var(--forest);
@@ -534,18 +311,7 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	.k-specs-list div { grid-template-columns: 1fr; gap: 2px; }
 }
 
-.k-pdetail__text {
-	max-width: 70ch;
-	font-size: 15.5px;
-	line-height: 1.75;
-	color: var(--text);
-}
-
-.k-pdetail__tables {
-	display: grid;
-	gap: 20px;
-	min-width: 0;
-}
+.k-specs-list__code dd { letter-spacing: .04em; font-variant-numeric: tabular-nums; }
 
 .k-ptable {
 	min-width: 0;
@@ -615,6 +381,8 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	border-top: 1px solid var(--line);
 	color: var(--text);
 }
+
+.k-ptable__table tbody tr:nth-child(even) td { background: var(--paper-2); }
 
 .k-ptable__table thead + tbody tr:first-child td,
 .k-ptable__table tbody:first-child tr:first-child td { border-top: 0; }
@@ -771,8 +539,349 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	color: var(--muted);
 }
 
+/* ---------- Havuz urunu: galeri + akordeon | ad + teklif formu ---------- */
+/*
+ * Kaynak sirasi telefondaki sira: galeri, ad, akordeon, form. Masaustunde
+ * ad ve form sag sutunda; form adin altindan baslar ve akordeon boyunca
+ * yapisik kalir (alani: "gallery form" + "details form").
+ */
+.k-pp {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 28px;
+	align-items: start;
+}
+
+.k-pp__gallery,
+.k-pp__head,
+.k-pp__details,
+.k-pp__form { min-width: 0; }
+
+/* Ornek sayfanin galeri yerlesimi (2. sutun, 720px) burada gecmez. */
+.k-pp > .k-product__gallery { grid-column: auto; grid-row: auto; width: auto; max-width: none; margin-inline: 0; }
+
+@media (min-width: 1024px) {
+	.k-pp {
+		grid-template-columns: minmax(0, 1fr) 400px;
+		grid-template-areas:
+			"gallery head"
+			"gallery form"
+			"details form";
+		grid-template-rows: auto auto 1fr;
+		gap: 0 40px;
+	}
+
+	.k-pp > .k-pp__gallery { grid-area: gallery; }
+	.k-pp__head { grid-area: head; padding-bottom: 24px; }
+	.k-pp__details { grid-area: details; margin-top: 40px; }
+
+	/*
+	 * Yapisik form ekrandan uzun olabilir (768px ekran, hata satirlari):
+	 * yuksekligi ekranla sinirli, fazlasi kartin icinde kayar; Gonder her
+	 * zaman erisilebilir. Alan odaklaninca tarayici kutuyu o alana kaydirir.
+	 */
+	.k-pp__form {
+		grid-area: form;
+		align-self: start;
+		position: sticky;
+		top: 88px;
+		max-height: calc(100svh - 100px);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		scrollbar-width: thin;
+	}
+
+	/* Masaustunde form hemen yaninda: "forma git" baglantisi gereksiz. */
+	.k-pp .k-pp__jump { display: none; }
+}
+
+
+/* Fotografsiz urun: WOOD KOCIST plakasiyla ayni dikey oran; duzen fotografli urunle ayni kalir. */
+.k-pp .k-product__stage .k-placeholder {
+	display: flex;
+	width: 100%;
+	aspect-ratio: 1280 / 1714;
+}
+
+/* Tablette dikey gorsel ve yer tutucu ekran boyunu asmaz; oran korunur, genislik daralir. */
+@media (min-width: 600px) and (max-width: 1023.98px) {
+	.k-pp .k-product__stage { width: fit-content; max-width: 100%; margin-inline: auto; }
+	.k-pp .k-product__photo { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
+	.k-pp .k-product__stage .k-placeholder { width: min(100%, calc((100svh - 220px) * 1280 / 1714)); margin-inline: auto; }
+	.k-pp .k-product__stage:has(.k-placeholder) { width: 100%; }
+}
+
+/* Dokunmatikte oklar 44px. */
+.k-pp .k-product__arrow { width: 44px; height: 44px; margin-top: -22px; }
+
+/* ---------- Ad, fiyat, kisa aciklama ---------- */
+/* Kategori baglantisi kucuk yazi: dokunma alani gorunumu bozmadan 44px. */
+.k-pp .k-product__category a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	margin: -16px 0 -14px;
+}
+
+.k-pp__title {
+	margin: 0;
+	font-size: clamp(26px, 2.3vw, 31px);
+	line-height: 1.15;
+	letter-spacing: -.015em;
+	overflow-wrap: anywhere;
+}
+
+.k-pp__price { margin: 18px 0 0; }
+
+.k-pp__amount {
+	margin: 0;
+	font-size: 28px;
+	font-weight: 800;
+	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
+	color: var(--forest);
+}
+
+.k-pp__badge {
+	display: inline-flex;
+	margin: 0;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: var(--leaf-soft);
+	color: var(--forest);
+	font-size: 13.5px;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+/* Neden: urune bagli, sade metin; vurgu yok. */
+.k-pp__reason {
+	max-width: 52ch;
+	margin: 10px 0 0;
+	font-size: 14.5px;
+	line-height: 1.6;
+	color: var(--muted);
+}
+
+.k-pp .k-pp__short {
+	margin: 18px 0 0;
+	padding: 18px 0 0;
+	border-top: 1px solid var(--line);
+	border-bottom: 0;
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+/* Telefonda: formun asagida oldugunu soyleyen baglanti. */
+.k-pp__jump {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 14px;
+	margin: 20px 0 0;
+}
+
+.k-pp__jump-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 10px 20px;
+	border: 1.5px solid var(--forest);
+	border-radius: 999px;
+	color: var(--forest);
+	font-size: 14px;
+	font-weight: 800;
+	text-decoration: none;
+	transition: background .2s ease, color .2s ease;
+}
+
+.k-pp__jump-link:hover { background: var(--forest); color: #fff; }
+
+.k-pp__jump-link:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 2px;
+}
+
+.k-pp__jump-note { font-size: 13.5px; color: var(--muted); }
+
+/* ---------- Akordeon ---------- */
+.k-acc { border-bottom: 1px solid var(--line); }
+
+.k-acc__head { margin: 0; font: inherit; }
+
+.k-acc__btn {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	width: 100%;
+	min-height: 44px;
+	padding: 20px 0;
+	border: 0;
+	border-top: 1px solid var(--line);
+	background: none;
+	color: var(--forest);
+	font-family: inherit;
+	font-size: 18px;
+	font-weight: 700;
+	line-height: 1.3;
+	text-align: left;
+	cursor: pointer;
+	transition: color .2s ease;
+}
+
+.k-acc__btn:hover { color: var(--leaf-dark); }
+
+.k-acc__btn:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: -3px;
+	border-radius: 4px;
+}
+
+/* Arti / eksi: acik panelde dikey cizgi yatar. */
+.k-acc__icon {
+	position: relative;
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+
+.k-acc__icon::before,
+.k-acc__icon::after {
+	content: "";
+	position: absolute;
+	top: 7px;
+	left: 0;
+	width: 16px;
+	height: 2px;
+	border-radius: 2px;
+	background: var(--leaf-dark);
+	transition: transform .2s ease;
+}
+
+.k-acc__icon::after { transform: rotate(90deg); }
+.k-acc__btn[aria-expanded="true"] .k-acc__icon::after { transform: rotate(0deg); }
+
+.k-acc__panel { padding: 0 0 24px; }
+
+/* Betik yoksa paneller acik; betik kapali paneli hidden ile gizler. */
+.k-acc__panel[hidden] { display: none; }
+
+/* Betik yuklenecekse (head'de erken k-js) kapali panel ilk boyamada da kapali: sicrama yok. */
+.k-js .k-acc__panel:not(.is-open) { display: none; }
+
+.k-acc .k-specs-list { border-top: 0; }
+.k-acc .k-specs-list div { grid-template-columns: minmax(0, 12rem) minmax(0, 1fr); }
+.k-acc .k-specs-list div:last-child { border-bottom: 0; }
+.k-acc .k-specs-list .k-specs-list__code { border-bottom: 2px solid rgba(23, 84, 47, .3); }
+
+.k-acc__text {
+	max-width: 70ch;
+	font-size: 15.5px;
+	line-height: 1.75;
+	color: var(--text);
+	overflow-wrap: anywhere;
+}
+
+.k-acc__text > * { margin: 0; }
+.k-acc__text > * + * { margin-top: .85em; }
+
+.k-acc__text h2,
+.k-acc__text h3,
+.k-acc__text h4 {
+	margin-top: 1.3em;
+	font-size: 16.5px;
+	line-height: 1.35;
+	color: var(--forest);
+}
+
+.k-acc__text ul { list-style: none; padding-left: 0; }
+.k-acc__text ul li { position: relative; padding-left: 20px; }
+.k-acc__text ul li + li { margin-top: 6px; }
+.k-acc__text ul li::before { content: ""; position: absolute; left: 2px; top: .66em; width: 7px; height: 7px; border-radius: 2px; background: var(--leaf); }
+.k-acc__text ol { padding-left: 20px; }
+
+.k-acc__tables { display: grid; gap: 16px; min-width: 0; }
+.k-acc__text + .k-acc__tables { margin-top: 22px; }
+
+.k-acc__empty { margin: 0; font-size: 15px; color: var(--muted); }
+
+/* ---------- Teklif formu karti ---------- */
+.k-pp__form { scroll-margin-top: 100px; }
+.k-contact__notice[tabindex="-1"]:focus { outline: 3px solid var(--leaf); outline-offset: 2px; }
+
+.k-qform {
+	padding: 24px;
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.k-qform__title {
+	margin: 0;
+	font-size: 21px;
+	line-height: 1.25;
+	color: var(--forest);
+}
+
+.k-qform__for {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin: 6px 0 18px;
+	font-size: 13.5px;
+	line-height: 1.45;
+	color: var(--muted);
+}
+
+.k-qform__for-name { font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+
+/* Iki sutun (ad | sirket, telefon | e-posta): kart 768px ekranda da tek seferde sigsin. */
+.k-qform__form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px 12px; }
+.k-qform__actions { grid-column: 1 / -1; }
+
+.k-qform .k-field input:not([type="checkbox"]),
+.k-qform .k-field textarea { padding: 11px 14px; font-size: 15px; }
+
+.k-qform .k-field textarea { min-height: 76px; }
+
+.k-qform .k-consent__label { padding: 4px 0; }
+
+.k-qform__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 2px;
+}
+
+.k-qform__submit,
+.k-qform__wa { min-height: 46px; }
+
+.k-qform__submit { flex: 1 1 auto; padding: 12px 26px; }
+
+.k-qform__wa {
+	flex: 1 1 auto;
+	gap: 8px;
+	padding: 11px 20px;
+	border-color: var(--leaf);
+}
+
+.k-qform__wa:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: 2px;
+}
+
+.k-qform__wa-icon { flex: none; color: var(--leaf-dark); }
+
 @media (max-width: 1023.98px) {
-	.k-pdetail--split .k-pdetail__grid { gap: 28px; }
+	.k-pp__form { width: 100%; max-width: 640px; justify-self: center; }
+}
+
+@media (max-width: 599.98px) {
+	.k-qform { padding: 20px 18px; }
+	.k-qform__form { grid-template-columns: minmax(0, 1fr); }
+	.k-acc__btn { font-size: 17px; }
 }
 
 /* 1100px altinda tek sutun, galeri ustte: dar bir bilgi sutunu yerine. */
@@ -785,14 +894,14 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 }
 
 /* Tablette dikey fotograf ekrani tek basina doldurmasin: ad ve fiyat ilk ekrana yakin kalsin (kirpma yok). */
+/* Ornek urun sayfasi (/urun/); havuz urununun kurali yukarida (.k-pp). */
 @media (min-width: 600px) and (max-width: 1099.98px) {
 	/* Sahne gorsel kadar: buyutme dugmesi gorselin kosesinde kalsin. */
-	.k-product__stage { width: fit-content; max-width: 100%; margin-inline: auto; }
-	.k-product__photo { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
+	.k-product:not(.k-product--pool) .k-product__stage { width: fit-content; max-width: 100%; margin-inline: auto; }
+	.k-product:not(.k-product--pool) .k-product__photo { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
 }
 
 @media (max-width: 899.98px) {
-	.k-pdetail { margin-top: 26px; padding: 30px 0 34px; }
 	.k-ptable { padding: 18px 18px 6px; }
 	.k-ptable__scroll { margin: 0 -18px; padding: 0 18px; }
 	.k-ptable__table { font-size: 14.5px; }
@@ -822,7 +931,11 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	.k-product__btn,
 	.k-faq__question,
 	.k-faq__chevron,
-	.k-faq__list.is-ready .k-faq__panel {
+	.k-faq__list.is-ready .k-faq__panel,
+	.k-acc__btn,
+	.k-acc__icon::before,
+	.k-acc__icon::after,
+	.k-pp__jump-link {
 		transition-duration: .01ms !important;
 	}
 }

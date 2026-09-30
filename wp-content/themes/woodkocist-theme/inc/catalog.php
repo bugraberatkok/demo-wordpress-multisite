@@ -2,10 +2,11 @@
 /**
  * Katalog: seriler ve alt kategoriler, kategori adresleri, magaza suzgeci.
  *
- * Kategoriler Urun Havuzu'ndaki urunlerden turetilir: seri (WOODGarden...)
- * panelde tanimli; alt kategori (Kamelyalar...) o serinin urunlerinde gecen
- * diger kategoriler. Havuza yeni kategori eklenince menude ve magazada
- * kendiliginden gorunur.
+ * Seriler (WOODGarden...) panelde Ana Sayfa -> Seriler satirlaridir. Hangi
+ * havuz kategorisinin hangi serinin altinda gorundugu veridir: Ürün Havuzu ->
+ * Kategoriler'de "Sitelerde" kutusundan secilir (eklenti,
+ * nwcs_site_category_tree). Bu sitede urunu olan kategori menude, magazada ve
+ * kendi adresinde gorunur; tema kendi kategori listesini tasimaz.
  *
  * Adresler gercek sitedeki gibi: /urun-kategori/woodgarden/kamelyalar/
  * (canliya gecerken eski adresler aynen calisir). Sayfayi page-magaza.php cizer.
@@ -47,7 +48,8 @@ add_filter(
 );
 
 /**
- * Seri agaci: her seri ve altindaki kategoriler (urun sayisiyla).
+ * Seri agaci: her seri ve altindaki kategoriler (urun sayisiyla). Yalnizca bu
+ * sitede urunu olan kategoriler listelenir.
  *
  * @return array<int, array{slug:string, label:string, text:string, count:int, url:string, children:array<int, array{slug:string, label:string, count:int, url:string}>}>
  */
@@ -58,38 +60,27 @@ function wk_category_tree(): array {
 		return $tree;
 	}
 
-	$tree = array();
-	$seen = array();
+	$tree   = array();
+	$placed = function_exists( 'nwcs_site_category_tree' ) ? nwcs_site_category_tree( get_current_blog_id() ) : array();
 
 	foreach ( wk_lines() as $line ) {
 		$children = array();
 
-		foreach ( wk_products() as $product ) {
-			if ( ! isset( $product['categories'][ $line['slug'] ] ) ) {
+		foreach ( $placed[ $line['slug'] ]['children'] ?? array() as $slug => $child ) {
+			if ( $child['count'] < 1 ) {
 				continue;
 			}
-
-			foreach ( $product['categories'] as $slug => $name ) {
-				if ( $slug === $line['slug'] || isset( $seen[ $slug ] ) && $seen[ $slug ] !== $line['slug'] ) {
-					continue;
-				}
-
-				$seen[ $slug ]       = $line['slug'];
-				$children[ $slug ] ??= array( 'slug' => (string) $slug, 'label' => (string) $name, 'count' => 0 );
-				++$children[ $slug ]['count'];
-			}
-		}
-
-		foreach ( $children as $slug => $child ) {
-			$children[ $slug ]['url'] = home_url( '/urun-kategori/' . $line['slug'] . '/' . $slug . '/' );
 
 			// Panelde kategori sekmesinde verilen ad (yalnizca bu sitede); bossa havuzdaki ad.
 			$page = wk_category_page_key( (string) $slug );
 			$name = $page ? trim( (string) nwcs_field( $page, 'head', 'name' ) ) : '';
 
-			if ( '' !== $name ) {
-				$children[ $slug ]['label'] = $name;
-			}
+			$children[] = array(
+				'slug'  => (string) $slug,
+				'label' => '' !== $name ? $name : (string) $child['name'],
+				'count' => (int) $child['count'],
+				'url'   => home_url( '/urun-kategori/' . $line['slug'] . '/' . $slug . '/' ),
+			);
 		}
 
 		$tree[] = array(
@@ -97,9 +88,10 @@ function wk_category_tree(): array {
 			'slug'     => $line['slug'],
 			'label'    => $line['label'],
 			'text'     => $line['text'],
-			'count'    => $line['count'],
+			// Seride ya da altindaki bir kategoride olan urunler.
+			'count'    => (int) ( $placed[ $line['slug'] ]['count'] ?? $line['count'] ),
 			'url'      => home_url( '/urun-kategori/' . $line['slug'] . '/' ),
-			'children' => array_values( $children ),
+			'children' => $children,
 		);
 	}
 
@@ -170,18 +162,21 @@ function wk_shop_url(): string {
 }
 
 /**
- * Urunun serisi (ilk eslesen) ve alt kategorisi.
+ * Urunun serisi ve alt kategorisi (eklentinin yerlesiminden: agac sirasiyla
+ * ilk eslesen alt kategori; yoksa urunun dogrudan bagli oldugu seri).
  *
  * @return array{line:?array, child:?array}
  */
 function wk_product_place( array $product ): array {
+	$place = function_exists( 'nwcs_product_place' ) ? nwcs_product_place( $product, get_current_blog_id() ) : array( 'parent' => null, 'child' => null );
+
 	foreach ( wk_category_tree() as $line ) {
-		if ( ! isset( $product['categories'][ $line['slug'] ] ) ) {
+		if ( $line['slug'] !== $place['parent'] ) {
 			continue;
 		}
 
 		foreach ( $line['children'] as $child ) {
-			if ( isset( $product['categories'][ $child['slug'] ] ) ) {
+			if ( $child['slug'] === $place['child'] ) {
 				return array( 'line' => $line, 'child' => $child );
 			}
 		}
@@ -201,7 +196,16 @@ function wk_filter_products( string $category = '', string $search = '', string 
 	$products = wk_products();
 
 	if ( '' !== $category ) {
-		$products = array_filter( $products, static fn( array $p ): bool => isset( $p['categories'][ $category ] ) );
+		// Seri secildiyse seride ya da altindaki bir kategoride olan urunler.
+		$within = array( $category => true );
+
+		foreach ( wk_category_tree() as $line ) {
+			if ( $line['slug'] === $category ) {
+				$within += array_fill_keys( wp_list_pluck( $line['children'], 'slug' ), true );
+			}
+		}
+
+		$products = array_filter( $products, static fn( array $p ): bool => (bool) array_intersect_key( (array) $p['categories'], $within ) );
 	}
 
 	$search = trim( $search );

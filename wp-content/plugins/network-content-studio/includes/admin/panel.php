@@ -47,9 +47,11 @@ function nwcs_admin_assets( string $hook ): void {
 	wp_enqueue_style( 'nwcs-admin', NWCS_URL . 'assets/admin.css', array(), NWCS_VERSION );
 	wp_enqueue_script( 'nwcs-admin', NWCS_URL . 'assets/admin.js', array(), NWCS_VERSION, true );
 
-	// Excel sihirbazi yalnizca Urun Havuzu sayfasinda gerekir.
+	// Urun formu (detay basliklari, tablolar, site istisnalari) ve Excel
+	// adimlari yalnizca Urun Havuzu sayfalarinda gerekir.
 	if ( str_contains( $hook, NWCS_POOL_SLUG ) ) {
-		wp_enqueue_script( 'nwcs-import', NWCS_URL . 'assets/import.js', array( 'nwcs-admin' ), NWCS_VERSION, true );
+		wp_enqueue_script( 'nwcs-import', NWCS_URL . 'assets/import.js', array(), NWCS_VERSION, true );
+		wp_enqueue_script( 'nwcs-pool-details', NWCS_URL . 'assets/pool-details.js', array(), NWCS_VERSION, true );
 		wp_enqueue_script( 'nwcs-overrides', NWCS_URL . 'assets/overrides.js', array( 'nwcs-admin' ), NWCS_VERSION, true );
 		wp_enqueue_script( 'nwcs-pool-tables', NWCS_URL . 'assets/pool-tables.js', array(), NWCS_VERSION, true );
 	}
@@ -84,7 +86,7 @@ function nwcs_fold_admin_menu( string $classes ): string {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- yalnizca gorunum.
 	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
-	$ours = in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG, NWCS_SEO_SLUG, 'nwcs-redirects', 'nwcs-bulk-update', 'nwcs-placeholders', 'nwcs-pool-package', 'nwcs-mail-test' ), true );
+	$ours = in_array( $page, array( NWCS_MENU_SLUG, NWCS_POOL_SLUG, NWCS_MEDIA_SLUG, NWCS_SEO_SLUG, 'nwcs-redirects', 'nwcs-bulk-update', 'nwcs-placeholders', 'nwcs-pool-package', 'nwcs-pool-categories', 'nwcs-pool-headings', 'nwcs-pool-descriptions', 'nwcs-mail-test' ), true );
 
 	if ( $ours && 'o' !== get_user_setting( 'mfold' ) ) {
 		$classes .= ' folded';
@@ -462,7 +464,7 @@ function nwcs_render_page_picker( int $blog_id, array $manifest, string $page_ke
 	if ( '' !== $product_page_key && function_exists( 'nwcs_site_products' ) && nwcs_site_supports_products( $blog_id ) ) {
 		switch_to_blog( $blog_id );
 		foreach ( nwcs_site_products() as $product ) {
-			if ( '' !== trim( (string) $product['body'] ) && '' !== (string) $product['slug'] ) {
+			if ( nwcs_product_has_page( $product, $blog_id ) ) {
 				$sample_product = '/urun/' . $product['slug'] . '/';
 				break;
 			}
@@ -521,7 +523,7 @@ function nwcs_render_page_picker( int $blog_id, array $manifest, string $page_ke
 
 		foreach ( $products as $product ) {
 			// Detay sayfasi olmayan urunun acilacak sayfasi yok.
-			if ( '' === trim( (string) $product['body'] ) || '' === (string) $product['slug'] ) {
+			if ( ! nwcs_product_has_page( $product, $blog_id ) ) {
 				continue;
 			}
 

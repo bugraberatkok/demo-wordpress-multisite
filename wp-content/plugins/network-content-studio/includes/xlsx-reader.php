@@ -4,12 +4,13 @@
  *
  * Bir .xlsx dosyasi, icinde XML dosyalari bulunan bir ZIP paketidir. PHP'de
  * hazir bulunan ZipArchive ve XMLReader ile okundugundan disaridan hicbir
- * kitaplik gerekmez. Dosyanin ilk sayfasi okunur.
+ * kitaplik gerekmez. Varsayilan olarak ilk sayfa okunur; adi verilen sayfa
+ * da okunabilir (panelden indirilen taslaklarin "Ürünler" ve "_bilgi"
+ * sayfalari).
  *
  * Kapsam disi (bu kullanim icin gerekmiyor):
  *   - Tarih bicimleri: hucre ham degeriyle (Excel seri numarasi) okunur.
  *   - Formul iceren hucrelerde Excel'in kaydettigi son deger okunur.
- *   - Birden cok sayfa: yalnizca ilk sayfa islenir.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -36,9 +37,11 @@ function nwcs_xlsx_column_index( string $ref ): int {
 }
 
 /**
- * Paketin ilk sayfasinin ic yolunu bulur (orn. xl/worksheets/sheet1.xml).
+ * Adi verilen sayfanin (ad yoksa ilk sayfanin) ic yolu (orn.
+ * xl/worksheets/sheet1.xml); bulunamazsa ''.
+ * Ad, buyuk/kucuk harf ve bosluk farki gozetilmeden karsilastirilir.
  */
-function nwcs_xlsx_first_sheet_path( ZipArchive $zip ): string {
+function nwcs_xlsx_sheet_path( ZipArchive $zip, string $name = '' ): string {
 	$workbook = $zip->getFromName( 'xl/workbook.xml' );
 	$rels     = $zip->getFromName( 'xl/_rels/workbook.xml.rels' );
 
@@ -56,7 +59,25 @@ function nwcs_xlsx_first_sheet_path( ZipArchive $zip ): string {
 		return '';
 	}
 
-	$attributes = $book->sheets->sheet[0]->attributes( 'http://schemas.openxmlformats.org/officeDocument/2006/relationships' );
+	$sheet = $book->sheets->sheet[0];
+
+	if ( '' !== $name ) {
+		$sheet = null;
+		$want  = mb_strtolower( trim( $name ), 'UTF-8' );
+
+		foreach ( $book->sheets->sheet as $candidate ) {
+			if ( mb_strtolower( trim( (string) $candidate['name'] ), 'UTF-8' ) === $want ) {
+				$sheet = $candidate;
+				break;
+			}
+		}
+
+		if ( ! $sheet ) {
+			return '';
+		}
+	}
+
+	$attributes = $sheet->attributes( 'http://schemas.openxmlformats.org/officeDocument/2006/relationships' );
 	$id         = isset( $attributes['id'] ) ? (string) $attributes['id'] : '';
 
 	foreach ( $relation->Relationship as $item ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName
@@ -114,9 +135,13 @@ function nwcs_xlsx_shared_strings( string $path ): array {
  * Dosyayi satir dizisine cevirir. Her satir, sutun sirasina gore dizilmis
  * metinlerden olusur; bos hucreler '' olarak doldurulur.
  *
- * @return array{rows: array<int, array<int, string>>, truncated: bool}|WP_Error
+ * $sheet_name verilirse o sayfa okunur; yoksa 'nwcs_xlsx_nosheet' hatasi.
+ * 'numeric': Excel'in sayi olarak sakladigi hucreler [satir][sutun] => true
+ * (ornek: metin olarak indirilen fiyati kullanici sayi olarak yazdiysa).
+ *
+ * @return array{rows: array<int, array<int, string>>, truncated: bool, numeric: array<int, array<int, bool>>}|WP_Error
  */
-function nwcs_xlsx_read_rows( string $path ) {
+function nwcs_xlsx_read_rows( string $path, string $sheet_name = '' ) {
 	if ( ! class_exists( 'ZipArchive' ) ) {
 		return new WP_Error( 'nwcs_xlsx_zip', 'Sunucuda ZipArchive eklentisi yok; .xlsx okunamıyor.' );
 	}
@@ -127,8 +152,12 @@ function nwcs_xlsx_read_rows( string $path ) {
 		return new WP_Error( 'nwcs_xlsx_open', 'Dosya açılamadı. Geçerli bir .xlsx dosyası olduğundan emin olun.' );
 	}
 
-	$sheet = nwcs_xlsx_first_sheet_path( $zip );
+	$sheet = nwcs_xlsx_sheet_path( $zip, $sheet_name );
 	$zip->close();
+
+	if ( '' === $sheet && '' !== $sheet_name ) {
+		return new WP_Error( 'nwcs_xlsx_nosheet', sprintf( 'Dosyada “%s” sayfası yok.', $sheet_name ) );
+	}
 
 	if ( '' === $sheet ) {
 		return new WP_Error( 'nwcs_xlsx_sheet', 'Dosyada okunabilir bir sayfa bulunamadı.' );
@@ -143,6 +172,7 @@ function nwcs_xlsx_read_rows( string $path ) {
 	}
 
 	$rows      = array();
+	$numeric   = array();
 	$truncated = false;
 
 	// Ilk <row> ogesine kadar ilerle; sonrasi yalnizca next() ile yurur.
@@ -166,7 +196,14 @@ function nwcs_xlsx_read_rows( string $path ) {
 			$value = '';
 
 			if ( 'inlineStr' === $type ) {
-				$value = isset( $cell->is->t ) ? (string) $cell->is->t : '';
+				// Bicimli satir ici metin <is><r><t>..</t></r>... parcalardan olusur.
+				if ( isset( $cell->is->t ) ) {
+					$value = (string) $cell->is->t;
+				} elseif ( isset( $cell->is->r ) ) {
+					foreach ( $cell->is->r as $run ) {
+						$value .= (string) $run->t;
+					}
+				}
 			} elseif ( isset( $cell->v ) ) {
 				$raw = (string) $cell->v;
 
@@ -176,6 +213,10 @@ function nwcs_xlsx_read_rows( string $path ) {
 					$value = '1' === $raw ? 'EVET' : 'HAYIR';
 				} else {
 					$value = $raw;
+
+					if ( '' === $type || 'n' === $type ) {
+						$numeric[ count( $rows ) ][ $index ] = true;
+					}
 				}
 			}
 
@@ -209,5 +250,6 @@ function nwcs_xlsx_read_rows( string $path ) {
 	return array(
 		'rows'      => $rows,
 		'truncated' => $truncated,
+		'numeric'   => $numeric,
 	);
 }

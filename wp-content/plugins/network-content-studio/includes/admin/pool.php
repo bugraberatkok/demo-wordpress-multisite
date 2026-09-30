@@ -37,7 +37,8 @@ function nwcs_pool_url( array $args = array() ): string {
 }
 
 /**
- * Sayfa govdesi: arac cubugu + liste + urun formu + kategori yonetimi.
+ * Sayfa govdesi: arac cubugu + liste + urun formu. Kategoriler, yerlesim ve
+ * Excel ayri sayfada (Ürün Havuzu -> Kategoriler, admin/pool-categories.php).
  */
 function nwcs_render_pool(): void {
 	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
@@ -64,6 +65,7 @@ function nwcs_render_pool(): void {
 	);
 
 	$editing = $edit_id && isset( $all[ $edit_id ] ) ? $all[ $edit_id ] : null;
+	$trashed = nwcs_pool_trashed_count();
 
 	// Kaydedilemeyen form: girilenler geri gelir.
 	if ( isset( $_GET['taslak'] ) && ( $editing || $is_new ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -80,21 +82,35 @@ function nwcs_render_pool(): void {
 			</div>
 			<div class="nwcs-bar__tools">
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_pool_url( array( 'yeni' => 1 ) ) ); ?>">+ Yeni ürün</a>
-				<button type="button" class="nwcs-linkout nwcs-linkout--accent" data-nwcs-import-open>Excel'den ürün yükle</button>
+				<a class="nwcs-linkout nwcs-linkout--accent" href="<?php echo esc_url( nwcs_pool_categories_url() ); ?>">Kategoriler ve Excel</a>
+				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_headings_url() ); ?>">Detay başlıkları</a>
+				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_descriptions_url() ); ?>">Ürün açıklamaları</a>
+				<?php if ( $trashed ) : ?>
+					<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_pool_url( array( 'cop' => 1 ) ) ); ?>">Çöp kutusu (<?php echo (int) $trashed; ?>)</a>
+				<?php endif; ?>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_media_url() ); ?>">Medya Havuzu ↗</a>
 				<a class="nwcs-linkout" href="<?php echo esc_url( nwcs_panel_url( 0 ) ); ?>">İçerik Stüdyosu ↗</a>
 			</div>
 		</header>
+		<?php // WordPress bildirimleri bu isaretin altina tasir (ust seridin icine degil). ?>
+		<hr class="wp-header-end" />
 
 		<p class="nwcs-help">
-			<span class="nwcs-help__step"><b>1</b> Ürünü burada bir kez girin</span>
-			<span class="nwcs-help__step"><b>2</b> Görseller WordPress medya kitaplığına yüklenir</span>
-			<span class="nwcs-help__step"><b>3</b> Hangi sitede görüneceğini İçerik Stüdyosu'ndan seçin</span>
+			<span class="nwcs-help__step"><b>1</b> <a href="<?php echo esc_url( nwcs_pool_categories_url() ); ?>">Kategoriyi aç ve sitelere yerleştir</a></span>
+			<span class="nwcs-help__step"><b>2</b> Excel’i indir, doldur, yükle</span>
+			<span class="nwcs-help__step"><b>3</b> <a href="<?php echo esc_url( nwcs_media_url() ); ?>">Görselleri Medya Havuzu’ndan ekle</a></span>
 		</p>
 
-		<?php nwcs_render_import_undo_bar(); ?>
-
 		<?php nwcs_render_pool_notices(); ?>
+		<?php nwcs_render_cache_note(); ?>
+
+		<?php
+		if ( isset( $_GET['cop'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- gorunum secimi.
+			nwcs_render_pool_trash();
+			echo '</div>';
+			return;
+		}
+		?>
 
 		<div class="nwcs-pool">
 			<section class="nwcs-pool__list">
@@ -119,11 +135,8 @@ function nwcs_render_pool(): void {
 
 			<section class="nwcs-pool__form">
 				<?php nwcs_render_pool_form( $editing, $categories, $is_new ); ?>
-				<?php nwcs_render_category_manager( $categories ); ?>
 			</section>
 		</div>
-
-		<?php nwcs_render_import_modal(); ?>
 	</div>
 	<?php
 }
@@ -229,11 +242,14 @@ function nwcs_render_pool_table( array $items, ?array $editing, array $categorie
 						</td>
 						<td>
 							<strong><?php echo esc_html( $product['title'] ); ?></strong>
-							<?php if ( $product['spec'] ) : ?>
+							<?php $labels = array_column( (array) $product['details'], 'label' ); ?>
+							<?php if ( $labels ) : ?>
+								<span class="nwcs-table__spec"><?php echo esc_html( sprintf( '%d detay: %s%s', count( $labels ), implode( ', ', array_slice( $labels, 0, 3 ) ), count( $labels ) > 3 ? ', …' : '' ) ); ?></span>
+							<?php elseif ( $product['spec'] ) : ?>
 								<span class="nwcs-table__spec"><?php echo esc_html( $product['spec'] ); ?></span>
 							<?php endif; ?>
 						</td>
-						<td>
+						<td class="nwcs-nowrap">
 							<?php if ( '' !== trim( $product['price'] ) ) : ?>
 								<?php echo esc_html( $product['price'] ); ?>
 							<?php else : ?>
@@ -259,27 +275,8 @@ function nwcs_render_pool_table( array $items, ?array $editing, array $categorie
  * Urunun hangi sitelerde gorundugunu ozetler.
  */
 function nwcs_product_usage_label( int $product_id ): string {
-	$labels = array();
-
-	foreach ( nwcs_editable_sites() as $blog_id => $site ) {
-		// Temasinda urun alani olmayan site urun gosteremez; sayilmaz.
-		if ( ! nwcs_site_supports_products( (int) $blog_id ) ) {
-			continue;
-		}
-
-		$settings = nwcs_site_product_settings( $blog_id );
-		$override = $settings['overrides'][ $product_id ] ?? array();
-
-		if ( ! empty( $override['hidden'] ) ) {
-			continue;
-		}
-
-		$visible = 'all' === $settings['mode'] || in_array( $product_id, $settings['selected'], true );
-
-		if ( $visible ) {
-			$labels[] = $site['label'];
-		}
-	}
+	// Temasinda urun alani olmayan site urun gosteremez; sayilmaz (nwcs_product_site_labels).
+	$labels = nwcs_product_site_labels( $product_id );
 
 	return $labels ? implode( ', ', $labels ) : '—';
 }
@@ -352,11 +349,7 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 				<p class="nwcs-hint"><strong>Boş bırakırsanız</strong> sitede fiyat yerine <em>“Teklif al”</em> görünür.</p>
 			</div>
 
-			<div class="nwcs-field">
-				<label class="nwcs-field__label" for="nwcs-p-spec">Ölçü / not</label>
-				<input class="nwcs-input" type="text" id="nwcs-p-spec" name="spec"
-					value="<?php echo esc_attr( $product['spec'] ?? '' ); ?>" placeholder="örn. 80 × 120 cm" />
-			</div>
+			<?php nwcs_render_product_details_field( $product ); ?>
 
 			<?php nwcs_render_product_customizations( $product, $media ); ?>
 
@@ -364,7 +357,7 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 				<span class="nwcs-field__label">Kategoriler</span>
 
 				<?php if ( ! $categories ) : ?>
-					<p class="nwcs-hint">Henüz kategori yok. Aşağıdaki “Kategoriler” kutusundan ekleyebilirsiniz.</p>
+					<p class="nwcs-hint">Henüz kategori yok. <a href="<?php echo esc_url( nwcs_pool_categories_url( array( 'yeni' => 1 ) ) ); ?>">Kategoriler</a> sayfasından açın.</p>
 				<?php else : ?>
 					<div class="nwcs-tags">
 						<?php foreach ( $categories as $slug => $term ) : ?>
@@ -381,6 +374,7 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 				<input class="nwcs-input" type="text" id="nwcs-p-newcat" name="new_category"
 					value="<?php echo esc_attr( $product['new_category'] ?? '' ); ?>"
 					placeholder="Yazıp kaydedin; bu ürüne de eklenir" />
+				<p class="nwcs-hint">Ürün, kategorilerinin yerleştiği sitelerde görünür. Yerleşim <a href="<?php echo esc_url( nwcs_pool_categories_url() ); ?>">Kategoriler</a> sayfasından seçilir.</p>
 			</div>
 
 			<div class="nwcs-field">
@@ -422,11 +416,12 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 			</div>
 
 			<div class="nwcs-field">
-				<label class="nwcs-field__label" for="nwcs-p-body">Detay sayfası metni</label>
+				<label class="nwcs-field__label" for="nwcs-p-body">Ürün açıklaması (detay sayfası metni)</label>
 				<textarea class="nwcs-input" id="nwcs-p-body" name="body" rows="5"><?php echo esc_textarea( $product['body'] ?? '' ); ?></textarea>
 				<p class="nwcs-hint">
-					Doldurulursa ürünün kendi sayfası oluşur:
-					<code>/urun/<?php echo esc_html( $product['slug'] ?? 'urun-adi' ); ?>/</code>
+					Ürün sayfasında (<code>/urun/<?php echo esc_html( $product['slug'] ?? 'urun-adi' ); ?>/</code>) açıklama bölümü olarak görünür.
+					Boş bırakılırsa WOOD KOCIST ve Koçist’te sayfa yine açılır (ad, görsel, teknik detaylar); diğer sitelerde ürünün kendi sayfası olmaz.
+					Toplu düzenleme için <a href="<?php echo esc_url( nwcs_descriptions_url() ); ?>">Ürün açıklamaları</a>.
 				</p>
 			</div>
 
@@ -444,79 +439,18 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 
 		<?php if ( $id ) : ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="nwcs-danger"
-				onsubmit="return confirm('Bu ürün havuzdan silinsin mi? Ürünü gösteren sitelerden de kalkar.');">
+				onsubmit="return confirm('Ürün çöp kutusuna taşınsın mı? Gösterildiği bütün sitelerden kalkar. Çöp kutusundan geri getirebilirsiniz.');">
 				<input type="hidden" name="action" value="nwcs_pool_delete" />
 				<input type="hidden" name="urun" value="<?php echo esc_attr( (string) $id ); ?>" />
 				<?php wp_nonce_field( 'nwcs_pool_delete_' . $id ); ?>
-				<button type="submit" class="button button-small nwcs-row__delete">Ürünü sil</button>
+				<button type="submit" class="button button-small nwcs-row__delete">Çöp kutusuna taşı</button>
+				<span class="nwcs-hint">Sitelerden kalkar; çöp kutusundan geri getirilebilir.</span>
 			</form>
 		<?php endif; ?>
 	</div>
 	<?php
 }
 
-
-/**
- * Kategori yonetimi kutusu.
- */
-function nwcs_render_category_manager( array $categories ): void {
-	?>
-	<div class="nwcs-pool__card">
-		<h2 class="nwcs-pool__title">Kategoriler <span><?php echo (int) count( $categories ); ?></span></h2>
-
-		<?php if ( $categories ) : ?>
-			<ul class="nwcs-catlist">
-				<?php foreach ( $categories as $slug => $term ) : ?>
-					<li>
-						<span><?php echo esc_html( $term['name'] ); ?> <small><?php echo (int) $term['count']; ?> ürün</small></span>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
-							onsubmit="return confirm('Kategori silinsin mi? Ürünler silinmez, yalnızca bu etiket kalkar.');">
-							<input type="hidden" name="action" value="nwcs_pool_category_delete" />
-							<input type="hidden" name="kategori" value="<?php echo esc_attr( (string) $term['id'] ); ?>" />
-							<?php wp_nonce_field( 'nwcs_pool_category_delete_' . $term['id'] ); ?>
-							<button type="submit" class="button button-small nwcs-row__delete">Sil</button>
-						</form>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-		<?php else : ?>
-			<p class="nwcs-empty">Henüz kategori yok.</p>
-		<?php endif; ?>
-
-		<?php
-		$orphans = array_filter( $categories, static fn( array $term ): bool => 0 === (int) $term['count'] );
-		?>
-
-		<?php if ( count( $orphans ) > 1 ) : ?>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
-				onsubmit="return confirm('Ürünü olmayan <?php echo (int) count( $orphans ); ?> kategori silinecek. Devam edilsin mi?');">
-				<input type="hidden" name="action" value="nwcs_pool_category_prune" />
-				<?php wp_nonce_field( 'nwcs_pool_category_prune' ); ?>
-
-				<div class="nwcs-actions">
-					<button type="submit" class="button">
-						Ürünü olmayan <?php echo (int) count( $orphans ); ?> kategoriyi sil
-					</button>
-				</div>
-			</form>
-		<?php endif; ?>
-
-		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-			<input type="hidden" name="action" value="nwcs_pool_category_add" />
-			<?php wp_nonce_field( 'nwcs_pool_category_add' ); ?>
-
-			<div class="nwcs-field">
-				<label class="nwcs-sublabel" for="nwcs-newcat">Yeni kategori</label>
-				<input class="nwcs-input" type="text" id="nwcs-newcat" name="isim" placeholder="örn. Ahşap Ambalaj" required />
-			</div>
-
-			<div class="nwcs-actions">
-				<button type="submit" class="button">Kategori ekle</button>
-			</div>
-		</form>
-	</div>
-	<?php
-}
 
 /**
  * Havuz bildirimleri.
@@ -529,7 +463,11 @@ function nwcs_render_pool_notices(): void {
 
 	$map = array(
 		'saved'        => array( 'success', 'Ürün kaydedildi.' ),
-		'deleted'      => array( 'success', 'Ürün havuzdan silindi.' ),
+		'saved_missing' => array( 'warning', sprintf( 'Ürün kaydedildi, ama %d zorunlu detay başlığı boş. Excel yüklemesinde bu ürünün satırı hata verir; formdaki “eksik” satırları doldurun.', $count ) ),
+		'deleted'      => array( 'success', 'Ürün çöp kutusuna taşındı ve sitelerden kalktı. Çöp kutusundan geri getirebilirsiniz.' ),
+		'restored'     => array( 'success', 'Ürün geri getirildi; daha önce göründüğü sitelerde yeniden görünüyor.' ),
+		'purged'       => array( 'success', 'Ürün kalıcı olarak silindi.' ),
+		'trash_off'    => array( 'error', 'Bu sunucuda WordPress çöp kutusu kapalı (EMPTY_TRASH_DAYS = 0); ürün çöpe atılamaz, atılırsa kalıcı silinirdi. Sunucu yöneticisinden çöp kutusunu açmasını isteyin.' ),
 		'cat_added'    => array( 'success', 'Kategori eklendi.' ),
 		'cat_deleted'  => array( 'success', 'Kategori silindi.' ),
 		'cats_pruned'  => array( 'success', sprintf( 'Ürünü olmayan %d kategori silindi.', $count ) ),
@@ -610,7 +548,18 @@ function nwcs_handle_pool_save(): void {
 
 	update_post_meta( $id, '_nwcs_short', wp_slash( isset( $_POST['short'] ) ? nwcs_clean_text( wp_unslash( $_POST['short'] ), true ) : '' ) );
 	update_post_meta( $id, '_nwcs_price', wp_slash( isset( $_POST['price'] ) ? nwcs_clean_text( wp_unslash( $_POST['price'] ) ) : '' ) );
-	update_post_meta( $id, '_nwcs_spec', wp_slash( isset( $_POST['spec'] ) ? nwcs_clean_text( wp_unslash( $_POST['spec'] ) ) : '' ) );
+	// Detaylar ve turetilmis spec tek yaziciyla. Serbest not ("Ölçü / not")
+	// yalnizca formda gosterildiyse gelir (urunde eski bir not varsa).
+	$details = nwcs_posted_details();
+
+	foreach ( $details as $row ) {
+		nwcs_heading_ensure( $row['label'] );
+	}
+
+	nwcs_product_write_details( $id, $details, isset( $_POST['spec'] ) ? nwcs_clean_text( wp_unslash( $_POST['spec'] ) ) : null );
+
+	$have    = array_flip( array_map( static fn( array $row ): string => nwcs_heading_key( $row['label'] ), $details ) );
+	$missing = count( array_diff_key( nwcs_required_headings(), $have ) );
 
 	// Kategoriler: listeden secilenler + varsa yeni olusturulan.
 	$slugs = isset( $_POST['categories'] ) && is_array( $_POST['categories'] )
@@ -618,6 +567,7 @@ function nwcs_handle_pool_save(): void {
 		: array();
 
 	$term_ids = array();
+	$before   = $id ? wp_get_object_terms( $id, NWCS_PRODUCT_TAX, array( 'fields' => 'slugs' ) ) : array();
 
 	foreach ( $slugs as $slug ) {
 		$term = get_term_by( 'slug', $slug, NWCS_PRODUCT_TAX );
@@ -640,6 +590,8 @@ function nwcs_handle_pool_save(): void {
 	}
 
 	wp_set_object_terms( $id, $term_ids, NWCS_PRODUCT_TAX, false );
+
+	$gained = array_values( array_diff( wp_get_object_terms( $id, NWCS_PRODUCT_TAX, array( 'fields' => 'slugs' ) ), is_array( $before ) ? $before : array() ) );
 
 	// Galeri: formdaki sira + yeni yuklenenler sona eklenir.
 	$gallery = isset( $_POST['gallery'] ) && is_array( $_POST['gallery'] )
@@ -669,6 +621,17 @@ function nwcs_handle_pool_save(): void {
 	restore_current_blog();
 	nwcs_pool_flush_cache();
 
+	// Gorunurluk: yeni urun ya da yeni eklenen kategori, o kategorinin yerlestigi
+	// sitelerin secimine girer ("secilenler" kipi; sona). Cikarilan geri eklenmez.
+	if ( $gained ) {
+		nwcs_placement_reveal( array( $id ), $gained );
+	}
+
+	if ( $missing ) {
+		wp_safe_redirect( nwcs_pool_url( array( 'nwcs_pool' => 'saved_missing', 'urun' => $id, 'adet' => $missing ) ) );
+		exit;
+	}
+
 	nwcs_pool_redirect( 'saved', $id );
 }
 
@@ -691,6 +654,7 @@ function nwcs_pool_keep_draft( int $id, string $error, string $taken_by = '' ): 
 		'short'        => nwcs_clean_text( $field( 'short' ), true ),
 		'price'        => nwcs_clean_text( $field( 'price' ) ),
 		'spec'         => nwcs_clean_text( $field( 'spec' ) ),
+		'details'      => nwcs_posted_details(),
 		'body'         => wp_kses_post( $field( 'body' ) ),
 		'new_category' => nwcs_clean_text( $field( 'new_category' ) ),
 		'categories'   => isset( $_POST['categories'] ) && is_array( $_POST['categories'] ) ? array_map( 'sanitize_title', array_filter( wp_unslash( $_POST['categories'] ), 'is_scalar' ) ) : array(),
@@ -753,6 +717,7 @@ function nwcs_pool_take_draft( ?array $product ): ?array {
 			'short'        => $draft['short'],
 			'price'        => $draft['price'],
 			'spec'         => $draft['spec'],
+			'details'      => $draft['details'] ?? array(),
 			'body'         => $draft['body'],
 			'categories'   => $categories,
 			'images'       => $images,
@@ -820,16 +785,191 @@ function nwcs_handle_pool_delete(): void {
 	$id = isset( $_POST['urun'] ) ? absint( $_POST['urun'] ) : 0;
 	check_admin_referer( 'nwcs_pool_delete_' . $id );
 
-	if ( $id ) {
-		switch_to_blog( nwcs_pool_blog_id() );
-		wp_delete_post( $id, true );
-		restore_current_blog();
+	// Cop kutusu kapaliysa (EMPTY_TRASH_DAYS = 0) wp_trash_post kalici siler.
+	if ( ! nwcs_trash_enabled() ) {
+		nwcs_pool_redirect( 'trash_off', $id );
+	}
 
-		nwcs_forget_product( $id );
+	if ( $id ) {
+		// Cop kutusuna: site secimleri korunur; geri getirilince urun sitelerde
+		// eski yerine doner. Kalici silme cop kutusu gorunumunden.
+		switch_to_blog( nwcs_pool_blog_id() );
+
+		if ( nwcs_sync_product_post( $id ) ) {
+			wp_trash_post( $id );
+		}
+
+		restore_current_blog();
 		nwcs_pool_flush_cache();
 	}
 
 	nwcs_pool_redirect( 'deleted', 0 );
+}
+
+/**
+ * Cop kutusundaki urun sayisi.
+ */
+function nwcs_pool_trashed_count(): int {
+	switch_to_blog( nwcs_pool_blog_id() );
+	$count = (int) ( wp_count_posts( NWCS_PRODUCT_TYPE )->trash ?? 0 );
+	restore_current_blog();
+
+	return $count;
+}
+
+/**
+ * Cop kutusu gorunumu: her urunde "Geri getir" ve "Kalıcı sil".
+ */
+function nwcs_render_pool_trash(): void {
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	$posts = get_posts(
+		array(
+			'post_type'      => NWCS_PRODUCT_TYPE,
+			'post_status'    => 'trash',
+			'posts_per_page' => -1,
+			'orderby'        => 'modified',
+			'order'          => 'DESC',
+		)
+	);
+
+	$rows = array();
+
+	foreach ( $posts as $post ) {
+		$trashed = (int) get_post_meta( $post->ID, '_wp_trash_meta_time', true );
+		$rows[]  = array(
+			'id'         => (int) $post->ID,
+			'title'      => $post->post_title,
+			'code'       => (string) get_post_meta( $post->ID, '_nwcs_code', true ),
+			'categories' => wp_get_object_terms( $post->ID, NWCS_PRODUCT_TAX, array( 'fields' => 'names' ) ),
+			'when'       => $trashed,
+			'left'       => $trashed ? max( 0, (int) ceil( ( $trashed + EMPTY_TRASH_DAYS * DAY_IN_SECONDS - time() ) / DAY_IN_SECONDS ) ) : 0,
+		);
+	}
+
+	restore_current_blog();
+	?>
+	<section class="nwcs-pool__card nwcs-trash" aria-labelledby="nwcs-trash-title">
+		<div class="nwcs-trash__head">
+			<h2 class="nwcs-pool__title" id="nwcs-trash-title">Çöp kutusu <span><?php echo count( $rows ); ?></span></h2>
+			<a class="button" href="<?php echo esc_url( nwcs_pool_url() ); ?>">Ürün listesine dön</a>
+		</div>
+		<p class="nwcs-hint">
+			Çöp kutusundaki ürünler hiçbir sitede görünmez. <strong>Geri getir</strong>, ürünü daha önce göründüğü sitelerde
+			aynı yerine koyar. WordPress çöp kutusunu <?php echo (int) EMPTY_TRASH_DAYS; ?> gün sonra kendiliğinden boşaltır.
+		</p>
+
+		<?php if ( ! $rows ) : ?>
+			<p class="nwcs-empty">Çöp kutusu boş.</p>
+		<?php else : ?>
+			<table class="nwcs-table">
+				<thead>
+					<tr>
+						<th scope="col">Ürün</th>
+						<th scope="col">Kategori</th>
+						<th scope="col">Çöpe atıldı</th>
+						<th scope="col"><span class="screen-reader-text">İşlemler</span></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $rows as $row ) : ?>
+						<tr>
+							<td>
+								<strong><?php echo esc_html( $row['title'] ); ?></strong>
+								<span class="nwcs-table__spec"><?php echo esc_html( $row['code'] ); ?></span>
+							</td>
+							<td><?php echo esc_html( implode( ', ', $row['categories'] ) ); ?></td>
+							<td>
+								<?php echo esc_html( $row['when'] ? wp_date( 'd.m.Y H:i', $row['when'] ) : '—' ); ?>
+								<?php if ( $row['when'] ) : ?>
+									<span class="nwcs-table__spec"><?php echo (int) $row['left']; ?> gün sonra kendiliğinden silinir</span>
+								<?php endif; ?>
+							</td>
+							<td>
+								<div class="nwcs-table__actions">
+									<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+										<input type="hidden" name="action" value="nwcs_pool_restore" />
+										<input type="hidden" name="urun" value="<?php echo esc_attr( (string) $row['id'] ); ?>" />
+										<?php wp_nonce_field( 'nwcs_pool_restore_' . $row['id'] ); ?>
+										<button type="submit" class="button button-small">Geri getir</button>
+									</form>
+									<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+										onsubmit="return confirm('Ürün kalıcı olarak silinsin mi? Bu işlem geri alınamaz.');">
+										<input type="hidden" name="action" value="nwcs_pool_purge" />
+										<input type="hidden" name="urun" value="<?php echo esc_attr( (string) $row['id'] ); ?>" />
+										<?php wp_nonce_field( 'nwcs_pool_purge_' . $row['id'] ); ?>
+										<button type="submit" class="button button-small nwcs-row__delete">Kalıcı sil</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+	</section>
+	<?php
+}
+
+add_action( 'admin_post_nwcs_pool_restore', 'nwcs_handle_pool_restore' );
+function nwcs_handle_pool_restore(): void {
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
+	}
+
+	$id = isset( $_POST['urun'] ) ? absint( $_POST['urun'] ) : 0;
+	check_admin_referer( 'nwcs_pool_restore_' . $id );
+
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	if ( $id && 'trash' === get_post_status( $id ) && nwcs_sync_product_post( $id ) ) {
+		nwcs_untrash_product( $id );
+	}
+
+	restore_current_blog();
+	nwcs_pool_flush_cache();
+
+	nwcs_pool_redirect( 'restored', $id );
+}
+
+add_action( 'admin_post_nwcs_pool_purge', 'nwcs_handle_pool_purge' );
+function nwcs_handle_pool_purge(): void {
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
+	}
+
+	$id = isset( $_POST['urun'] ) ? absint( $_POST['urun'] ) : 0;
+	check_admin_referer( 'nwcs_pool_purge_' . $id );
+
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	// Yalnizca cop kutusundaki urun kalici silinir.
+	$purge = $id && 'trash' === get_post_status( $id ) && nwcs_sync_product_post( $id );
+
+	if ( $purge ) {
+		wp_delete_post( $id, true );
+	}
+
+	restore_current_blog();
+
+	// Sitelerin seciminden cikarma: nwcs_forget_deleted_product (deleted_post kancasi).
+
+	wp_safe_redirect( nwcs_pool_url( array( 'cop' => 1, 'nwcs_pool' => 'purged' ) ) );
+	exit;
+}
+
+/**
+ * Havuzdan kalici silinen urun (Kalıcı sil, WordPress'in 30 gunluk cop
+ * temizligi, geri almada cop kutusu kapaliysa) sitelerin seciminden de cikar.
+ * Cope atma bu kancayi tetiklemez: secim korunur, geri gelince yerine doner.
+ */
+add_action( 'deleted_post', 'nwcs_forget_deleted_product', 10, 2 );
+function nwcs_forget_deleted_product( int $post_id, $post = null ): void {
+	if ( ! $post instanceof WP_Post || NWCS_PRODUCT_TYPE !== $post->post_type || get_current_blog_id() !== nwcs_pool_blog_id() ) {
+		return;
+	}
+
+	nwcs_forget_product( $post_id );
 }
 
 /**
@@ -867,7 +1007,18 @@ function nwcs_handle_pool_bulk(): void {
 	$action = isset( $_POST['bulk_action'] ) ? sanitize_text_field( wp_unslash( $_POST['bulk_action'] ) ) : '';
 
 	if ( ! $ids || '' === $action ) {
-		nwcs_pool_redirect( 'bulk_empty', 0 );
+		wp_safe_redirect(
+			nwcs_pool_url(
+				array_filter(
+					array(
+						'ara'       => isset( $_POST['ara'] ) ? nwcs_clean_text( wp_unslash( $_POST['ara'] ) ) : '',
+						'kategori'  => isset( $_POST['kategori'] ) ? sanitize_title( wp_unslash( $_POST['kategori'] ) ) : '',
+						'nwcs_pool' => 'bulk_empty',
+					)
+				)
+			)
+		);
+		exit;
 	}
 
 	[ $verb, $target ] = array_pad( explode( ':', $action, 2 ), 2, '' );
@@ -885,6 +1036,9 @@ function nwcs_handle_pool_bulk(): void {
 			}
 
 			restore_current_blog();
+
+			// Kategori bir siteye yerlesmisse urunler o sitede de gorunur.
+			nwcs_placement_reveal( $ids, array( (string) $term->slug ) );
 		}
 	} elseif ( in_array( $verb, array( 'show', 'hide' ), true ) ) {
 		$blog_id = absint( $target );
@@ -918,48 +1072,20 @@ function nwcs_handle_pool_bulk(): void {
 	}
 
 	nwcs_pool_flush_cache();
-	nwcs_pool_redirect( 'bulk', count( $ids ), true );
+
+	// Suzgec (kategori, arama) korunur: ayni listeye donulur.
+	$filters = array_filter(
+		array(
+			'ara'      => isset( $_POST['ara'] ) ? nwcs_clean_text( wp_unslash( $_POST['ara'] ) ) : '',
+			'kategori' => isset( $_POST['kategori'] ) ? sanitize_title( wp_unslash( $_POST['kategori'] ) ) : '',
+		)
+	);
+
+	wp_safe_redirect( nwcs_pool_url( $filters + array( 'nwcs_pool' => 'bulk', 'adet' => count( $ids ) ) ) );
+	exit;
 }
 
 /* ---------------- Kategoriler ---------------- */
-
-add_action( 'admin_post_nwcs_pool_category_add', 'nwcs_handle_category_add' );
-function nwcs_handle_category_add(): void {
-	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
-		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
-	}
-
-	check_admin_referer( 'nwcs_pool_category_add' );
-
-	$name = isset( $_POST['isim'] ) ? nwcs_clean_text( wp_unslash( $_POST['isim'] ) ) : '';
-
-	if ( '' !== $name ) {
-		switch_to_blog( nwcs_pool_blog_id() );
-		wp_insert_term( $name, NWCS_PRODUCT_TAX );
-		restore_current_blog();
-	}
-
-	nwcs_pool_redirect( 'cat_added', 0 );
-}
-
-add_action( 'admin_post_nwcs_pool_category_delete', 'nwcs_handle_category_delete' );
-function nwcs_handle_category_delete(): void {
-	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
-		wp_die( esc_html__( 'Bu işlem için yetkiniz yok.' ), '', array( 'response' => 403 ) );
-	}
-
-	$term_id = isset( $_POST['kategori'] ) ? absint( $_POST['kategori'] ) : 0;
-	check_admin_referer( 'nwcs_pool_category_delete_' . $term_id );
-
-	if ( $term_id ) {
-		switch_to_blog( nwcs_pool_blog_id() );
-		wp_delete_term( $term_id, NWCS_PRODUCT_TAX );
-		restore_current_blog();
-		nwcs_pool_flush_cache();
-	}
-
-	nwcs_pool_redirect( 'cat_deleted', 0 );
-}
 
 /**
  * Urunu kalmamis kategorileri toplu siler. Excel yuklemesi geri alindiginda
@@ -973,22 +1099,23 @@ function nwcs_handle_pool_category_prune(): void {
 
 	check_admin_referer( 'nwcs_pool_category_prune' );
 
-	switch_to_blog( nwcs_pool_blog_id() );
-
-	$terms   = get_terms( array( 'taxonomy' => NWCS_PRODUCT_TAX, 'hide_empty' => false ) );
+	// Yalnizca urunu olmayan, hicbir sitede yeri olmayan ve ust baslik olmayanlar:
+	// yeni acilip yerlestirilmis (henuz bos) kategori silinmez.
+	$prune   = nwcs_prunable_categories();
 	$removed = 0;
 
-	foreach ( is_array( $terms ) ? $terms : array() as $term ) {
-		if ( 0 === (int) $term->count ) {
-			wp_delete_term( (int) $term->term_id, NWCS_PRODUCT_TAX );
-			++$removed;
-		}
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	foreach ( $prune as $term ) {
+		wp_delete_term( (int) $term['id'], NWCS_PRODUCT_TAX );
+		++$removed;
 	}
 
 	restore_current_blog();
 	nwcs_pool_flush_cache();
 
-	nwcs_pool_redirect( 'cats_pruned', $removed, true );
+	wp_safe_redirect( nwcs_pool_categories_url( array( 'sonuc' => 'budandi', 'adet' => $removed ) ) );
+	exit;
 }
 
 /**

@@ -64,7 +64,7 @@ function kocist_product_context( array $product ): array {
 	$groups = kocist_catalog_groups();
 	$group  = $groups[ $product['group'] ?? '' ] ?? null;
 	$sub    = $group['subs'][ $product['sub'] ?? '' ] ?? null;
-	$url    = '' !== trim( (string) ( $product['body'] ?? '' ) ) ? (string) ( $product['url'] ?? '' ) : '';
+	$url    = kocist_product_has_page( $product ) ? (string) ( $product['url'] ?? '' ) : '';
 
 	return array(
 		'name'     => (string) ( $product['title'] ?? '' ),
@@ -292,4 +292,30 @@ function kocist_quote_prefill(): array {
 		'subject' => kocist_fill_template( '' !== $subject ? $subject : '{urun} ({kategori})', $vars ),
 		'message' => kocist_fill_template( '' !== $message ? $message : "Merhaba, {urun} ({kategori}) için fiyat teklifi almak istiyorum.\nÖzellik: {ozellik}\nÖlçü ve adet: ", $vars ),
 	);
+}
+
+/* ------------------------------------------------------------------ */
+/* Fiyati olmayan urun: neden                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Fiyati gosterilmeyen urunde nedeni anlatan metin. Oncelik: grubun metni
+ * (WhatsApp ve Teklif > "Fiyat gösterilmeme nedeni: <grup>"), bossa site
+ * geneli metin (Havuz Urun Sayfalari > "Fiyatı olmayan ürün: nedeni").
+ * Ileride urune ozel bir alan gelirse ilk once o okunur (tek nokta).
+ *
+ * @return array{text:string, field:string} field: metnin panel alani (onizleme icin).
+ */
+function kocist_price_reason( array $product ): array {
+	$group = kocist_product_context( $product )['group'];
+
+	if ( in_array( $group, array( 'kereste', 'ambalaj', 'hirdavat', 'dekorasyon' ), true ) ) {
+		$text = trim( (string) nwcs_field( 'product', 'whatsapp', 'reason_' . $group ) );
+
+		if ( '' !== $text ) {
+			return array( 'text' => $text, 'field' => 'whatsapp.reason_' . $group );
+		}
+	}
+
+	return array( 'text' => trim( (string) nwcs_field( 'product', 'detail', 'price_reason' ) ), 'field' => 'detail.price_reason' );
 }

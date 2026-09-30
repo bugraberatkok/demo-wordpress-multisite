@@ -389,12 +389,22 @@ foreach ( $data['products'] as $index => $item ) {
 		'_nwcs_code'   => $code,
 		'_nwcs_short'  => sanitize_textarea_field( $short_text( $item ) ),
 		'_nwcs_price'  => sanitize_text_field( (string) ( $item['price'] ?? '' ) ),
-		'_nwcs_spec'   => sanitize_text_field( $spec_line( $item ) ),
 	);
 
 	foreach ( $meta as $key => $value ) {
 		if ( '' === (string) get_post_meta( $id, $key, true ) ) {
 			update_post_meta( $id, $key, wp_slash( $value ) );
+		}
+	}
+
+	// Ozellikler: detaylar ve spec eklentinin tek yazicisiyla (0.21.0+); bossa yazilir.
+	if ( '' === (string) get_post_meta( $id, '_nwcs_spec', true ) ) {
+		$spec = sanitize_text_field( $spec_line( $item ) );
+
+		if ( function_exists( 'nwcs_product_write_details' ) ) {
+			nwcs_product_write_details( $id, nwcs_parse_spec_pairs( $spec ), nwcs_spec_is_note( $spec ) ? $spec : '' );
+		} else {
+			update_post_meta( $id, '_nwcs_spec', wp_slash( $spec ) );
 		}
 	}
 

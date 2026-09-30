@@ -68,7 +68,13 @@ $form_value  = static function ( string $key, string $fallback = '' ) use ( $for
 };
 $form_error  = static function ( string $key ) use ( $form_errors ): void {
 	if ( ! empty( $form_errors[ $key ] ) ) {
-		echo '<span class="k-field__error" role="alert">' . esc_html( $form_errors[ $key ] ) . '</span>';
+		echo '<span class="k-field__error" id="kc-' . esc_attr( $key ) . '-error" role="alert">' . esc_html( $form_errors[ $key ] ) . '</span>';
+	}
+};
+// Hatali alan: ekran okuyucu hatayi alanla birlikte okusun.
+$form_field  = static function ( string $key ) use ( $form_errors ): void {
+	if ( ! empty( $form_errors[ $key ] ) ) {
+		echo ' aria-invalid="true" aria-describedby="kc-' . esc_attr( $key ) . '-error"';
 	}
 };
 ?>
@@ -169,19 +175,19 @@ $form_error  = static function ( string $key ) use ( $form_errors ): void {
 					</div>
 					<div class="k-field">
 						<label for="kc-name" <?php nwcs_edit_attr( 'contact', 'form', 'name_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'name_label' ) ); ?></label>
-						<input type="text" id="kc-name" name="kc-name" autocomplete="name" <?php nwcs_edit_attr( 'contact', 'form', 'name_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'name_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'name' ) ); ?>" />
+						<input type="text" id="kc-name" name="kc-name" autocomplete="name" <?php nwcs_edit_attr( 'contact', 'form', 'name_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'name_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'name' ) ); ?>"<?php $form_field( 'name' ); ?> />
 						<?php $form_error( 'name' ); ?>
 					</div>
 
 					<div class="k-field">
 						<label for="kc-phone" <?php nwcs_edit_attr( 'contact', 'form', 'phone_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'phone_label' ) ); ?></label>
-						<input type="tel" id="kc-phone" name="kc-phone" autocomplete="tel" <?php nwcs_edit_attr( 'contact', 'form', 'phone_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'phone_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'phone' ) ); ?>" />
+						<input type="tel" id="kc-phone" name="kc-phone" autocomplete="tel" <?php nwcs_edit_attr( 'contact', 'form', 'phone_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'phone_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'phone' ) ); ?>"<?php $form_field( 'phone' ); ?> />
 						<?php $form_error( 'phone' ); ?>
 					</div>
 
 					<div class="k-field">
 						<label for="kc-email" <?php nwcs_edit_attr( 'contact', 'form', 'email_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'email_label' ) ); ?></label>
-						<input type="email" id="kc-email" name="kc-email" autocomplete="email" <?php nwcs_edit_attr( 'contact', 'form', 'email_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'email_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'email' ) ); ?>" />
+						<input type="email" id="kc-email" name="kc-email" autocomplete="email" <?php nwcs_edit_attr( 'contact', 'form', 'email_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'email_ph' ) ); ?>" value="<?php echo esc_attr( $form_value( 'email' ) ); ?>"<?php $form_field( 'email' ); ?> />
 						<?php $form_error( 'email' ); ?>
 					</div>
 
@@ -192,9 +198,14 @@ $form_error  = static function ( string $key ) use ( $form_errors ): void {
 
 					<div class="k-field k-field--wide">
 						<label for="kc-detail" <?php nwcs_edit_attr( 'contact', 'form', 'detail_label' ); ?>><?php echo esc_html( nwcs_field( 'contact', 'form', 'detail_label' ) ); ?></label>
-						<textarea id="kc-detail" name="kc-detail" rows="5" <?php nwcs_edit_attr( 'contact', 'form', 'detail_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'detail_ph' ) ); ?>"><?php echo esc_textarea( $form_value( 'message', $prefill['message'] ) ); ?></textarea>
+						<textarea id="kc-detail" name="kc-detail" rows="5" <?php nwcs_edit_attr( 'contact', 'form', 'detail_ph' ); ?> placeholder="<?php echo esc_attr( nwcs_field( 'contact', 'form', 'detail_ph' ) ); ?>"<?php $form_field( 'message' ); ?>><?php echo esc_textarea( $form_value( 'message', $prefill['message'] ) ); ?></textarea>
 						<?php $form_error( 'message' ); ?>
 					</div>
+
+					<?php
+					// Onay kutusu urun sayfasindaki formla ortak (inc/form.php).
+					kocist_consent_field( (string) ( $form_errors['consent'] ?? '' ), ! empty( $form_state['values']['consent'] ) );
+					?>
 
 					<div class="k-field k-field--wide k-contact__submit-row">
 						<?php

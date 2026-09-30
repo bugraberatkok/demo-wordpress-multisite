@@ -40,7 +40,7 @@ if ( ! $items ) {
 	<ul class="k-latest__track" data-k-latest-track tabindex="0" aria-label="<?php echo esc_attr( nwcs_field( 'home', 'latest', 'title' ) ); ?>" <?php nwcs_edit_attr( 'home', 'latest', 'count' ); ?>>
 		<?php
 		foreach ( $items as $item ) :
-			$has_page = '' !== trim( (string) $item['body'] );
+			$has_page = kocist_product_has_page( $item );
 			$kind_sub = $groups[ $item['group'] ]['subs'][ $item['sub'] ] ?? null;
 			$kind     = $kind_sub['name'] ?? ( $groups[ $item['group'] ]['name'] ?? '' );
 			$spec     = kocist_product_first_spec( $item );
@@ -53,7 +53,7 @@ if ( ! $items ) {
 
 					<span class="k-latest__body">
 						<?php if ( '' !== $kind ) : ?>
-							<span class="k-latest__cat" <?php $kind_sub ? nwcs_edit_attr( 'global', $kind_sub['edit'][0], 'items', $kind_sub['edit'][1], 'label' ) : nwcs_edit_attr( 'global', 'header', 'menu', $groups[ $item['group'] ]['menu_row'], 'label' ); ?>><?php echo esc_html( $kind ); ?></span>
+							<span class="k-latest__cat" <?php $kind_sub ? kocist_sub_edit_attr( $kind_sub ) : nwcs_edit_attr( 'global', 'header', 'menu', $groups[ $item['group'] ]['menu_row'], 'label' ); ?>><?php echo esc_html( $kind ); ?></span>
 						<?php endif; ?>
 
 						<span class="k-latest__title" <?php nwcs_edit_attr( 'home', 'products', 'pool' ); ?>><?php echo esc_html( $item['title'] ); ?></span>

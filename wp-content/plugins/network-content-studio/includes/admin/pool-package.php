@@ -16,13 +16,21 @@
  *   secimi ve sirasi korunur, pakette olup sitede olmayanlar sona eklenir.
  *   Pakette secimi olan ama hedefte ayni anahtarla bulunmayan site atlanir.
  * - Once "yalnizca dene" ile ne olacagi raporlanir; yazma ayri bir adimdir.
+ * - Surum 2 (0.21.0): urunlerin detay basliklari ('details') ve baslik kaydi
+ *   ('headings') da tasinir. Hedefte olmayan basliklar eklenir; olanlara
+ *   dokunulmaz. Surum 1 paketleri de kabul edilir (spec metninden okunur).
+ * - Surum 3 (0.22.0): kategori yerlesimleri ('placements': hangi kategori hangi
+ *   sitede hangi ust basligin altinda) da tasinir. Hedefte yerlesimi olmayan
+ *   kategori/site ciftine yazilir; olan yerlesime dokunulmaz. Yeni acilan
+ *   urunler kategorilerinin yerlestigi sitelerde de secilir. Surum 1 ve 2 de
+ *   kabul edilir.
  */
 
 defined( 'ABSPATH' ) || exit;
 
 const NWCS_PACKAGE_SLUG    = 'nwcs-pool-package';
 const NWCS_PACKAGE_FORMAT  = 'nwcs-pool-package';
-const NWCS_PACKAGE_VERSION = 1;
+const NWCS_PACKAGE_VERSION = 3;
 const NWCS_PACKAGE_REPORT  = 'nwcs_pool_package_report';
 
 add_action( 'network_admin_menu', 'nwcs_register_package_menu', 20 );
@@ -71,6 +79,7 @@ function nwcs_package_build(): array {
 			'body'       => (string) $product['body'],
 			'price'      => (string) $product['price'],
 			'spec'       => (string) $product['spec'],
+			'details'    => (array) ( $product['details'] ?? array() ),
 			'order'      => (int) $product['order'],
 			'categories' => $terms,
 			'tables'     => (array) ( $product['tables'] ?? array() ),
@@ -103,13 +112,27 @@ function nwcs_package_build(): array {
 		);
 	}
 
+	$placements = array();
+
+	foreach ( nwcs_pool_categories() as $slug => $term ) {
+		if ( $term['placement'] ) {
+			$placements[] = array(
+				'slug'      => (string) $slug,
+				'name'      => (string) $term['name'],
+				'placement' => $term['placement'],
+			);
+		}
+	}
+
 	return array(
-		'format'   => NWCS_PACKAGE_FORMAT,
-		'version'  => NWCS_PACKAGE_VERSION,
-		'created'  => gmdate( 'c' ),
-		'from'     => network_home_url( '/' ),
-		'products' => $products,
-		'sites'    => $sites,
+		'format'     => NWCS_PACKAGE_FORMAT,
+		'version'    => NWCS_PACKAGE_VERSION,
+		'created'    => gmdate( 'c' ),
+		'from'       => network_home_url( '/' ),
+		'headings'   => nwcs_product_headings(),
+		'products'   => $products,
+		'sites'      => $sites,
+		'placements' => $placements,
 	);
 }
 
@@ -142,17 +165,41 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 		'skipped'  => 0,
 		'terms'    => 0,
 		'tables'   => 0,
+		'headings' => 0,
+		'placements' => 0,
 		'sites'    => array(),
 		'warnings' => array(),
 	);
 
-	if ( NWCS_PACKAGE_FORMAT !== ( $package['format'] ?? '' ) || (int) ( $package['version'] ?? 0 ) !== NWCS_PACKAGE_VERSION || ! is_array( $package['products'] ?? null ) ) {
+	if ( NWCS_PACKAGE_FORMAT !== ( $package['format'] ?? '' ) || ! in_array( (int) ( $package['version'] ?? 0 ), array( 1, 2, NWCS_PACKAGE_VERSION ), true ) || ! is_array( $package['products'] ?? null ) ) {
 		$report['warnings'][] = 'Dosya bir Havuz Paketi değil ya da sürümü uyumsuz.';
 
 		return $report;
 	}
 
-	$map = array(); // paket anahtari => hedefteki urun kimligi
+	// Detay basliklari: hedefte olmayanlar eklenir (zorunluluguyla); olanlar degismez.
+	$headings = nwcs_product_headings();
+	$last     = $headings ? max( array_column( $headings, 'order' ) ) : 0;
+
+	foreach ( (array) ( $package['headings'] ?? array() ) as $row ) {
+		$label = nwcs_clean_text( (string) ( $row['label'] ?? '' ) );
+		$key   = nwcs_heading_key( $label );
+
+		if ( ! nwcs_heading_is_valid( $label ) || isset( $headings[ $key ] ) ) {
+			continue;
+		}
+
+		$last            += 10;
+		$headings[ $key ] = array( 'label' => $label, 'required' => ! empty( $row['required'] ), 'order' => $last );
+		++$report['headings'];
+	}
+
+	if ( $apply && $report['headings'] ) {
+		nwcs_save_product_headings( $headings );
+	}
+
+	$map     = array(); // paket anahtari => hedefteki urun kimligi
+	$created = array(); // yeni acilan urun => kategori slug'lari
 
 	switch_to_blog( nwcs_pool_blog_id() );
 
@@ -241,7 +288,11 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 		update_post_meta( $id, '_nwcs_source', wp_slash( $source ) );
 		update_post_meta( $id, '_nwcs_short', wp_slash( nwcs_clean_text( $item['short'] ?? '', true ) ) );
 		update_post_meta( $id, '_nwcs_price', wp_slash( nwcs_clean_text( $item['price'] ?? '' ) ) );
-		update_post_meta( $id, '_nwcs_spec', wp_slash( nwcs_clean_text( $item['spec'] ?? '' ) ) );
+
+		// Detaylar ve spec tek yaziciyla: surum 2'de 'details', surum 1'de spec metni.
+		$spec    = nwcs_clean_text( $item['spec'] ?? '' );
+		$details = is_array( $item['details'] ?? null ) && $item['details'] ? $item['details'] : nwcs_parse_spec_pairs( $spec );
+		nwcs_product_write_details( $id, $details, nwcs_spec_is_note( $spec ) ? $spec : '' );
 
 		if ( $tables ) {
 			update_post_meta( $id, '_nwcs_tables', wp_slash( $tables ) );
@@ -272,7 +323,8 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 			wp_set_object_terms( $id, $term_ids, NWCS_PRODUCT_TAX, false );
 		}
 
-		$map[ $key ] = $id;
+		$map[ $key ]    = $id;
+		$created[ $id ] = wp_get_object_terms( $id, NWCS_PRODUCT_TAX, array( 'fields' => 'slugs' ) );
 	}
 
 	restore_current_blog();
@@ -280,6 +332,48 @@ function nwcs_package_apply( array $package, bool $apply ): array {
 	if ( $apply ) {
 		nwcs_pool_flush_cache();
 		nwcs_pool_products( true );
+	}
+
+	// Kategori yerlesimleri (surum 3): hedefte bos olan kategori/site cifti yazilir.
+	$site_keys = array_flip( array_column( nwcs_catalog_sites(), 'site_key' ) );
+	$targets   = nwcs_pool_categories();
+
+	foreach ( (array) ( $package['placements'] ?? array() ) as $row ) {
+		$slug = sanitize_title( (string) ( $row['slug'] ?? '' ) );
+		$name = nwcs_clean_text( (string) ( $row['name'] ?? '' ) );
+
+		if ( ! isset( $targets[ $slug ] ) ) {
+			$slug = '';
+
+			foreach ( $targets as $target_slug => $target ) {
+				if ( '' !== $name && $target['name'] === $name ) {
+					$slug = (string) $target_slug;
+				}
+			}
+		}
+
+		if ( '' === $slug ) {
+			continue;
+		}
+
+		foreach ( nwcs_clean_placement( (array) ( $row['placement'] ?? array() ) ) as $site_key => $parent ) {
+			if ( ! isset( $site_keys[ $site_key ] ) || '' !== ( $targets[ $slug ]['placement'][ $site_key ] ?? '' ) ) {
+				continue;
+			}
+
+			++$report['placements'];
+
+			if ( $apply ) {
+				nwcs_set_placement( $slug, $site_key, $parent );
+			}
+		}
+	}
+
+	// Yeni urunler kategorilerinin yerlestigi sitelerde de gorunur.
+	if ( $apply ) {
+		foreach ( $created as $id => $slugs ) {
+			nwcs_placement_reveal( array( (int) $id ), is_array( $slugs ) ? $slugs : array() );
+		}
 	}
 
 	// Site secimleri: site anahtariyla.
@@ -395,9 +489,11 @@ function nwcs_render_package(): void {
 		<header class="nwcs-bar">
 			<div class="nwcs-bar__brand">
 				<button type="button" class="nwcs-bar__mark" data-nwcs-menu aria-label="Yönetim menüsünü aç/kapat" title="Yönetim menüsünü aç/kapat"></button>
-				<h1>Havuz Paketi</h1>
+				<h1>Havuz Paketi: kurulumlar arası taşıma (ileri düzey)</h1>
 			</div>
 		</header>
+		<hr class="wp-header-end" />
+		<?php nwcs_render_cache_note(); ?>
 
 		<?php if ( is_array( $report ) ) : ?>
 			<section class="nwcs-pool__card">
@@ -411,8 +507,14 @@ function nwcs_render_package(): void {
 						<?php if ( $report['terms'] ) : ?>
 							<?php echo (int) $report['terms']; ?> yeni kategori açıldı.
 						<?php endif; ?>
+						<?php if ( ! empty( $report['headings'] ) ) : ?>
+							<?php echo (int) $report['headings']; ?> yeni detay başlığı <?php echo esc_html( $report['apply'] ? 'eklendi' : 'eklenecek' ); ?>.
+						<?php endif; ?>
 						<?php if ( ! empty( $report['tables'] ) ) : ?>
 							Tablosu olmayan <?php echo (int) $report['tables']; ?> mevcut ürüne paketteki tablolar <?php echo esc_html( $report['apply'] ? 'eklendi' : 'eklenecek' ); ?>.
+						<?php endif; ?>
+						<?php if ( ! empty( $report['placements'] ) ) : ?>
+							<?php echo (int) $report['placements']; ?> kategori yerleşimi (hangi sitede hangi başlığın altında) <?php echo esc_html( $report['apply'] ? 'yazıldı' : 'yazılacak' ); ?>.
 						<?php endif; ?>
 					</p>
 
@@ -436,7 +538,7 @@ function nwcs_render_package(): void {
 					<p class="nwcs-badge nwcs-badge--warn"><?php echo esc_html( $warning ); ?></p>
 				<?php endforeach; ?>
 
-				<?php if ( ! $report['apply'] && ( ! empty( $report['new'] ) || ! empty( $report['tables'] ) || array_sum( array_column( (array) ( $report['sites'] ?? array() ), 'added' ) ) ) ) : ?>
+				<?php if ( ! $report['apply'] && ( ! empty( $report['new'] ) || ! empty( $report['tables'] ) || ! empty( $report['headings'] ) || ! empty( $report['placements'] ) || array_sum( array_column( (array) ( $report['sites'] ?? array() ), 'added' ) ) ) ) : ?>
 					<p class="nwcs-seo__lead">Sonuç doğruysa aynı dosyayı aşağıdan <strong>Aktar</strong> seçeneğiyle yükleyin.</p>
 				<?php elseif ( ! $report['apply'] && isset( $report['new'] ) ) : ?>
 					<p class="nwcs-seo__lead">Aktarılacak yeni bir şey yok: bu havuz paketle aynı.</p>
@@ -466,7 +568,7 @@ function nwcs_render_package(): void {
 		<section class="nwcs-pool__card">
 			<h2 class="nwcs-pool__title">Bu havuzun paketini indir</h2>
 			<p class="nwcs-seo__lead">
-				Bu havuzdaki <?php echo (int) $count; ?> ürün, kategorileri ve her sitenin ürün seçimi tek dosyada.
+				Bu havuzdaki <?php echo (int) $count; ?> ürün, kategorileri, detay başlıkları ve her sitenin ürün seçimi tek dosyada.
 				Dosyada kişisel veri ya da parola yoktur; ürün metinleri ve seçimler vardır.
 			</p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

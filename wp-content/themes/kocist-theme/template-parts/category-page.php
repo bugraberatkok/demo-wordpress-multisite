@@ -63,7 +63,7 @@ if ( ! $group ) :
 
 							<ul class="k-shelf__subs">
 								<?php foreach ( $item['subs'] as $sub_item ) : ?>
-									<li><a href="<?php echo esc_url( $sub_item['url'] ); ?>" <?php nwcs_edit_attr( 'global', $sub_item['edit'][0], 'items', $sub_item['edit'][1], 'label' ); ?>><?php echo esc_html( $sub_item['name'] ); ?></a></li>
+									<li><a href="<?php echo esc_url( $sub_item['url'] ); ?>" <?php kocist_sub_edit_attr( $sub_item ); ?>><?php echo esc_html( $sub_item['name'] ); ?></a></li>
 								<?php endforeach; ?>
 							</ul>
 
@@ -89,7 +89,7 @@ else :
 			<?php kocist_the_trail( kocist_catalog_trail( $group['slug'], $sub['slug'] ?? '' ), 'k-crumbs--on-dark' ); ?>
 			<?php
 			// Baslik menudeki addir; tiklaninca menudeki satir acilir.
-			$title_edit = $sub ? array( 'global', $sub['edit'][0], 'items', $sub['edit'][1], 'label' ) : array( 'global', 'header', 'menu', $group['menu_row'], 'label' );
+			$title_edit = $sub ? $sub['edit'] + array( 3 => null, 4 => '' ) : array( 'global', 'header', 'menu', $group['menu_row'], 'label' );
 
 			// Alt metin: sayfaya ozel yazildiysa o, yoksa ortak metin. Sayfanin
 			// kendi alani varsa tiklama oraya gider: orada yazilan metin ortak
@@ -124,7 +124,7 @@ else :
 				<details class="k-cats" data-k-cats open>
 					<summary class="k-cats__summary">
 						<span class="k-cats__summary-label" <?php nwcs_edit_attr( 'kategoriler', 'texts', 'category_label' ); ?>><?php echo esc_html( nwcs_field( 'kategoriler', 'texts', 'category_label' ) ); ?></span>
-						<span class="k-cats__summary-value" <?php $sub ? nwcs_edit_attr( 'global', $sub['edit'][0], 'items', $sub['edit'][1], 'label' ) : nwcs_edit_attr( 'kategoriler', 'texts', 'all_label' ); ?>><?php echo esc_html( $current_row ); ?></span>
+						<span class="k-cats__summary-value" <?php $sub ? kocist_sub_edit_attr( $sub ) : nwcs_edit_attr( 'kategoriler', 'texts', 'all_label' ); ?>><?php echo esc_html( $current_row ); ?></span>
 						<svg class="k-cats__chevron" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
 					</summary>
 
@@ -146,7 +146,7 @@ else :
 								?>
 								<li>
 									<a class="k-cats__link<?php echo $is_here ? ' is-current' : ''; ?><?php echo $sub_count ? '' : ' is-empty'; ?>" href="<?php echo esc_url( $sub_item['url'] ); ?>" <?php echo $is_here ? 'aria-current="page"' : ''; ?>>
-										<span <?php nwcs_edit_attr( 'global', $sub_item['edit'][0], 'items', $sub_item['edit'][1], 'label' ); ?>><?php echo esc_html( $sub_item['name'] ); ?></span>
+										<span <?php kocist_sub_edit_attr( $sub_item ); ?>><?php echo esc_html( $sub_item['name'] ); ?></span>
 										<?php if ( $sub_count ) : ?>
 											<span class="k-cats__count"><?php echo (int) $sub_count; ?></span>
 										<?php endif; ?>
@@ -182,7 +182,7 @@ else :
 				<ul class="k-plist" <?php if ( $page_key ) { nwcs_edit_attr( $page_key, 'products', 'pool' ); } ?>>
 					<?php foreach ( $products as $product ) : ?>
 						<?php
-						$has_page = '' !== trim( (string) $product['body'] );
+						$has_page = kocist_product_has_page( $product );
 						$href     = $has_page ? $product['url'] : kocist_quote_url( $product );
 						$sub_name = $group['subs'][ $product['sub'] ]['name'] ?? '';
 						?>
@@ -194,7 +194,7 @@ else :
 
 								<span class="k-pcard__body">
 									<?php if ( '' !== $sub_name && ! $sub ) : ?>
-										<span class="k-pcard__kind" <?php nwcs_edit_attr( 'global', $group['subs'][ $product['sub'] ]['edit'][0], 'items', $group['subs'][ $product['sub'] ]['edit'][1], 'label' ); ?>><?php echo esc_html( $sub_name ); ?></span>
+										<span class="k-pcard__kind" <?php kocist_sub_edit_attr( $group['subs'][ $product['sub'] ] ); ?>><?php echo esc_html( $sub_name ); ?></span>
 									<?php endif; ?>
 
 									<span class="k-pcard__title" <?php kocist_product_attr( $product, 'Ürün adı' ); ?>><?php echo esc_html( $product['title'] ); ?></span>

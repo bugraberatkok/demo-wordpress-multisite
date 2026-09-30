@@ -765,4 +765,37 @@
 			stage.focus();
 		} );
 	} );
+
+	/* ---------------------------------------------------------------- */
+	/* Urun sayfasi akordeonu (Teknik Detaylar, Urun Aciklamasi, ...):   */
+	/* ayni anda tek panel acik; acik basliga basinca o da kapanir.      */
+	/* JavaScript yoksa CSS tum panelleri acik gosterir.                 */
+	/* ---------------------------------------------------------------- */
+
+	doc.querySelectorAll( '[data-wk-tabs]' ).forEach( function ( group ) {
+		var buttons = Array.prototype.slice.call( group.querySelectorAll( '[data-wk-tab]' ) );
+
+		var set = function ( button, open ) {
+			var panel = doc.getElementById( button.getAttribute( 'aria-controls' ) );
+
+			button.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+
+			if ( panel ) {
+				panel.hidden = ! open;
+				panel.classList.toggle( 'is-open', open );
+			}
+		};
+
+		buttons.forEach( function ( button ) {
+			set( button, 'true' === button.getAttribute( 'aria-expanded' ) );
+
+			button.addEventListener( 'click', function () {
+				var open = 'true' !== button.getAttribute( 'aria-expanded' );
+
+				buttons.forEach( function ( other ) {
+					set( other, other === button && open );
+				} );
+			} );
+		} );
+	} );
 }() );
