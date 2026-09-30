@@ -1045,6 +1045,54 @@ function nwcs_seo_faq( string $page_key ): array {
 }
 
 /**
+ * SSS sayfasinda gorunecek satirlar: temalarin ortak okuyucusu.
+ *
+ * Yalnizca sorusu VE cevabi dolu satirlar doner (FAQPage isaretiyle ayni
+ * kural): cevabi bos soru ne sayfada ne arama verisinde gorunur; firmadan
+ * cevap gelince panelden doldurulur. `_row` satirin paneldeki sirasi,
+ * onizlemede tiklaninca dogru satir acilsin diye.
+ *
+ * @return array<int, array{group:string, question:string, answer:string, _row:int}>
+ */
+function nwcs_faq_rows( string $page_key, string $component = 'items', string $field = 'rows' ): array {
+	$rows = array();
+
+	foreach ( nwcs_rows( $page_key, $component, $field ) as $index => $row ) {
+		$question = trim( (string) ( $row['question'] ?? '' ) );
+		$answer   = trim( (string) ( $row['answer'] ?? '' ) );
+
+		if ( '' === $question || '' === $answer ) {
+			continue;
+		}
+
+		$rows[] = array(
+			'group'    => trim( (string) ( $row['group'] ?? '' ) ),
+			'question' => $question,
+			'answer'   => $answer,
+			'_row'     => (int) $index,
+		);
+	}
+
+	return $rows;
+}
+
+/**
+ * SSS satirlari grup adina gore; bos grup adi $other altinda toplanir.
+ * Sira panel sirasidir (grubun ilk sorusu grubun yerini belirler).
+ *
+ * @return array<string, array<int, array{group:string, question:string, answer:string, _row:int}>>
+ */
+function nwcs_faq_groups( string $page_key, string $other = 'Genel' ): array {
+	$groups = array();
+
+	foreach ( nwcs_faq_rows( $page_key ) as $row ) {
+		$groups[ '' !== $row['group'] ? $row['group'] : $other ][] = $row;
+	}
+
+	return $groups;
+}
+
+/**
  * Blog yazisi.
  */
 function nwcs_seo_article( array $context, string $org_id, string $page_id, string $language ): array {

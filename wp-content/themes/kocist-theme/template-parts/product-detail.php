@@ -282,6 +282,8 @@ get_header();
 					<?php endif; ?>
 				</div>
 			<?php endforeach; ?>
+
+			<?php kocist_section( 'product-faq-link', array( 'group' => $group['slug'] ?? '' ) ); ?>
 		</div>
 
 		<div class="k-pp__form" id="teklif-formu">
@@ -400,7 +402,4 @@ get_header();
 <?php endif; ?>
 
 <?php
-// Sik sorulan sorular urun sayfasiyla ortak; panelden tek yerde duzenlenir.
-kocist_section( 'product-faq' );
-
 get_footer();

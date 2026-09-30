@@ -236,46 +236,4 @@
 			}
 		}
 	}
-
-	/* ---------- sikca sorulan sorular ---------- */
-
-	var faq = document.querySelector( '[data-k-faq]' );
-
-	if ( ! faq ) {
-		return;
-	}
-
-	// Kapali hal CSS'te bu sinifa bagli: betik calismazsa cevaplar acik kalir.
-	faq.classList.add( 'is-ready' );
-
-	var items = Array.prototype.slice.call( faq.querySelectorAll( '[data-k-faq-item]' ) );
-
-	items.forEach( function ( item ) {
-		var toggle = item.querySelector( '[data-k-faq-toggle]' );
-
-		if ( ! toggle ) {
-			return;
-		}
-
-		toggle.addEventListener( 'click', function () {
-			var isOpen = item.classList.contains( 'is-open' );
-
-			// Tek seferde tek soru acik: liste uzun, hepsi acilirsa
-			// kullanici nerede oldugunu kaybediyor.
-			items.forEach( function ( other ) {
-				other.classList.remove( 'is-open' );
-
-				var otherToggle = other.querySelector( '[data-k-faq-toggle]' );
-
-				if ( otherToggle ) {
-					otherToggle.setAttribute( 'aria-expanded', 'false' );
-				}
-			} );
-
-			if ( ! isOpen ) {
-				item.classList.add( 'is-open' );
-				toggle.setAttribute( 'aria-expanded', 'true' );
-			}
-		} );
-	} );
 }() );

@@ -245,6 +245,7 @@ $manifest_data = array(
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/', 'submenu' => '' ),
 								array( 'label' => 'Ürünlerimiz', 'url' => '/urunlerimiz/', 'submenu' => 'urunler' ),
 								array( 'label' => 'Blog', 'url' => '/blog/', 'submenu' => '' ),
+								array( 'label' => 'SSS', 'url' => '/sss/', 'submenu' => '' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/', 'submenu' => '' ),
 							),
 						),
@@ -279,7 +280,7 @@ $manifest_data = array(
 				'footer' => array(
 					'label'  => 'Sayfa Altı (Footer)',
 					'fields' => array(
-						'about_text'     => array( 'label' => 'Tanıtım Metni', 'type' => 'textarea', 'default' => 'Kereste, tomruk, plaka ve ahşap ambalaj. Çatalca’daki depomuzdan İstanbul’un her yerine teslim ediyoruz. Koçist Grup kuruluşudur.' ),
+						'about_text'     => array( 'label' => 'Tanıtım Metni', 'type' => 'textarea', 'default' => 'Kereste, tomruk, plaka ve ahşap ambalaj. Çatalca’daki depomuzdan satış ve sevkiyat yapıyoruz. Koçist Grup kuruluşudur.' ),
 						'products_title' => array( 'label' => 'Ürünler Başlığı', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
 						'pages_title'    => array( 'label' => 'Sayfalar Başlığı', 'type' => 'text', 'default' => 'Kurumsal' ),
 						'links'          => array(
@@ -294,6 +295,7 @@ $manifest_data = array(
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
 								array( 'label' => 'Ürünlerimiz', 'url' => '/urunlerimiz/' ),
 								array( 'label' => 'Blog', 'url' => '/blog/' ),
+								array( 'label' => 'Sık sorulan sorular', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -390,7 +392,7 @@ $manifest_data = array(
 					'label'  => 'Fiyat Şeridi',
 					'fields' => array(
 						'title'           => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Güncel fiyatı telefonda söyleyelim' ),
-						'text'            => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Kereste fiyatı ağaç türüne, ölçüye ve miktara göre değişir. Arayın ya da yazın; stok ve fiyatı aynı gün iletelim.' ),
+						'text'            => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Kereste fiyatı ağaç türüne, ölçüye ve miktara göre değişir. Arayın ya da yazın; stok durumunu ve fiyatı bildirelim.' ),
 						'primary_label'   => array( 'label' => 'Birinci Düğme Metni', 'type' => 'text', 'default' => $phone_label ),
 						'primary_url'     => array( 'label' => 'Birinci Düğme Bağlantısı', 'type' => 'url', 'default' => $phone_url ),
 						'secondary_label' => array( 'label' => 'WhatsApp Düğmesi Metni', 'type' => 'text', 'default' => 'WhatsApp’tan yazın' ),
@@ -489,7 +491,7 @@ $manifest_data = array(
 					'fields' => array(
 						'image'        => array( 'label' => 'Arka Plan Fotoğrafı', 'type' => 'image', 'default' => 0 ),
 						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Yardım mı lazım?' ),
-						'text'         => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'WhatsApp destek hattımız üzerinden 7/24 bize yazabilirsiniz.' ),
+						'text'         => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'WhatsApp destek hattımız üzerinden bize yazabilirsiniz.' ),
 						'number_label' => array( 'label' => 'Numara Metni', 'type' => 'text', 'default' => $whatsapp_label ),
 						'number_url'   => array( 'label' => 'WhatsApp Bağlantısı', 'type' => 'url', 'default' => $whatsapp_url ),
 					),
@@ -528,7 +530,7 @@ $manifest_data = array(
 					'label'  => 'Mesaj Formu',
 					'fields' => array(
 						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sipariş ve fiyat formu' ),
-						'text'         => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Ürünü, ölçüyü ve adedi yazın. Aynı gün size dönüyoruz.' ),
+						'text'         => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Ürünü, ölçüyü ve adedi yazın; size dönüş yapalım.' ),
 						'label_name'    => array( 'label' => 'Ad Soyad Kutusunun Adı', 'type' => 'text', 'default' => 'Adınız soyadınız' ),
 						'label_phone'   => array( 'label' => 'Telefon Kutusunun Adı', 'type' => 'text', 'default' => 'Telefonunuz' ),
 						'label_email'   => array( 'label' => 'E-posta Kutusunun Adı', 'type' => 'text', 'default' => 'E-posta' ),
@@ -536,7 +538,7 @@ $manifest_data = array(
 						'label_product' => array( 'label' => 'Ürün Seçim Kutusunun Adı', 'type' => 'text', 'default' => 'Ürün', 'hint' => 'Seçenekler Ürünlerimiz sayfasındaki ürün listesinden gelir.' ),
 						'label_message' => array( 'label' => 'Mesaj Kutusunun Adı', 'type' => 'text', 'default' => 'Ölçü, adet ve teslim yeri' ),
 						'button_label' => array( 'label' => 'Düğme Metni', 'type' => 'text', 'default' => 'Mesajı gönder' ),
-						'success'      => array( 'label' => 'Gönderildi Mesajı', 'type' => 'textarea', 'default' => 'Mesajınız bize ulaştı. Aynı gün içinde telefonla ya da e-postayla size dönüyoruz.' ),
+						'success'      => array( 'label' => 'Gönderildi Mesajı', 'type' => 'textarea', 'default' => 'Mesajınız bize ulaştı. Telefonla ya da e-postayla size dönüş yapacağız.' ),
 					),
 				),
 				'map'  => array(
@@ -544,6 +546,65 @@ $manifest_data = array(
 					'fields' => array(
 						'query'            => array( 'label' => 'Harita Adresi', 'type' => 'text', 'default' => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca, İstanbul' ),
 						'directions_label' => array( 'label' => 'Yol Tarifi Düğmesi', 'type' => 'text', 'default' => 'Yol tarifi alın' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Sik sorulan sorular (/sss/). Cevaplar yalnizca sitenin mevcut
+		 * metinlerinden (urun metinleri, Hakkimizda, fiyat seridi). Cevabi bos
+		 * soru firmadan cevap bekliyor (DEVAM.md): sitede ve arama verisinde
+		 * gorunmez.
+		 */
+		'faq' => array(
+			'label'      => 'Sık Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'head.title',
+				'description' => 'head.text',
+			),
+			'components' => array(
+				'head'  => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
+						'text' => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Kereste, plaka, tomruk ve ahşap ambalaj hakkında en çok sorulanlar.' ),
+					),
+				),
+				'items' => array(
+					'label'  => 'Sorular',
+					'fields' => array(
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar',
+							'type'    => 'repeater',
+							'max'     => 40,
+							'hint'    => 'Cevabı boş soru sitede ve arama verisinde görünmez; cevabı firmadan gelince doldurun. Aynı grup adı bir başlık altında toplanır.',
+							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
+								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
+								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'group' => 'Ürünler', 'question' => 'Hangi ürünleri satıyorsunuz?', 'answer' => 'Kereste, tomruk, kalas ve çıta; OSB, kontrplak ve plywood plaka; ahşap palet, sandık ve kafes. Hepsi Çatalca’daki depomuzda.' ),
+								array( 'group' => 'Ürünler', 'question' => 'Kereste nedir, nerede kullanılır?', 'answer' => 'Kereste, tomrukların boyuna biçilmesiyle elde edilen, birbirine paralel iki yüzeyi olan ağaç parçasıdır. Yumuşak ve sert kereste olarak ikiye ayrılır; inşaat, ambalaj, mobilya ve dekorasyonda sıkça kullanılır.' ),
+								array( 'group' => 'Ürünler', 'question' => 'OSB ile kontrplak arasındaki fark nedir?', 'answer' => 'OSB, boyuna rendelenen ahşap yongalarının tutkalla, ısı ve basınçla birleştirilmesiyle üretilir; en çok çatı kaplamasında, ayrıca döşeme, duvar ve panolarda kullanılır. Kontrplak ise ağaç katmanlarının birbirine dik gelecek şekilde yapıştırılıp preslenmesiyle elde edilir; hafiftir, çatlamaya dirençlidir, suya dayanıklıdır ve vida tutar.' ),
+								array( 'group' => 'Ürünler', 'question' => 'Plywood nedir, nerede kullanılır?', 'answer' => 'Plywood, ince ağaç tabakalarının çapraz dik açıyla yapıştırılıp preslenmesiyle elde edilir. Hafif, dayanıklı ve düz yüzeylidir; bu yüzden kullanım alanı geniştir. İstenen ölçü ve ebata getirilebilir.' ),
+								array( 'group' => 'Ürünler', 'question' => 'Tomruk hangi ağaçlardan?', 'answer' => 'Ağırlıklı olarak kayın, kızılçam, meşe ve karaçam. Tomruk inşaatlık kereste ve palet üretiminde kullanılır; ağaç ev yapmak isteyenler de tercih eder.' ),
+								array( 'group' => 'Sipariş ve fiyat', 'question' => 'Özel ölçüde çıta ya da kalas hazırlanır mı?', 'answer' => 'Evet. Keresteyi ve plakayı istediğiniz boyda ve kalınlıkta kesiyoruz; çıtada standart ölçülerin yanında farklı boyutlarda özel üretim de yapılır.' ),
+								array( 'group' => 'Sipariş ve fiyat', 'question' => 'Fiyat neye göre belirlenir?', 'answer' => 'Kereste fiyatı ağaç türüne, ölçüye ve miktara göre değişir. Güncel fiyat için arayın ya da iletişim formundan ürün, ölçü ve adedi yazın.' ),
+								array( 'group' => 'Sipariş ve fiyat', 'question' => 'Sevkiyat süresi nedir, teslimat nasıl yapılıyor?', 'answer' => '' ),
+							),
+						),
+					),
+				),
+				'more'  => array(
+					'label'  => 'Kapanış',
+					'fields' => array(
+						'group_other' => array( 'label' => 'Grubu boş sorular için grup adı', 'type' => 'text', 'default' => 'Genel' ),
+						'text'        => array( 'label' => 'Kapanış satırı (yanındaki numara sitenin telefonudur)', 'type' => 'text', 'default' => 'Sorunuzun cevabı burada yoksa arayın:' ),
 					),
 				),
 			),

@@ -6,7 +6,7 @@
 defined( 'ABSPATH' ) || exit;
 
 $logo     = pc_logo();
-$menu     = nwcs_rows( 'global', 'header', 'menu' );
+$menu     = pc_hide_missing_sss( nwcs_rows( 'global', 'header', 'menu' ) );
 $phone    = pc_phone();
 $whatsapp = pc_whatsapp();
 $email    = trim( (string) nwcs_field( 'global', 'header', 'email' ) );

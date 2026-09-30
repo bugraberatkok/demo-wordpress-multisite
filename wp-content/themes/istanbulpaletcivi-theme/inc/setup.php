@@ -14,11 +14,14 @@
  * Idempotent: var olan sayfaya, yaziya ve dolu yonlendirme listesine
  * dokunmaz. Surum numarasi degisirse eksikleri tamamlamak icin bir kez
  * daha calisir.
+ *
+ * Surum 2: Sik Sorulan Sorular sayfasi (/sss/). Kurulu sitede (surum 1)
+ * yalnizca bu sayfa acilir; kurulumun geri kalani yeniden calismaz.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-const PC_SETUP_VERSION = '1';
+const PC_SETUP_VERSION = '2';
 
 add_action( 'after_switch_theme', 'pc_setup_site' );
 add_action( 'admin_init', 'pc_maybe_setup_site' );
@@ -30,9 +33,22 @@ function pc_maybe_setup_site(): void {
 		return;
 	}
 
-	if ( get_option( 'pc_setup_version' ) !== PC_SETUP_VERSION ) {
-		pc_setup_site();
+	$installed = (string) get_option( 'pc_setup_version' );
+
+	if ( PC_SETUP_VERSION === $installed ) {
+		return;
 	}
+
+	if ( '' !== $installed ) {
+		// Kurulu site: yalnizca sonradan eklenen sayfalar. Tam kurulum slogani,
+		// on sayfayi, kalici baglantiyi ve dili yeniden yazar; panelde yapilan
+		// degisiklikler ezilmesin.
+		pc_setup_page( 'sss', 'Sık Sorulan Sorular' );
+		update_option( 'pc_setup_version', PC_SETUP_VERSION );
+		return;
+	}
+
+	pc_setup_site();
 }
 
 function pc_setup_site(): void {
@@ -52,6 +68,7 @@ function pc_setup_site(): void {
 	pc_setup_page( 'hakkimizda', 'Hakkımızda' );
 	pc_setup_page( 'palet-civileri', 'Palet Çivileri' );
 	pc_setup_page( 'iletisim', 'İletişim' );
+	pc_setup_page( 'sss', 'Sık Sorulan Sorular' );
 
 	$parent = pc_setup_page( 'civiler', 'Çiviler' );
 

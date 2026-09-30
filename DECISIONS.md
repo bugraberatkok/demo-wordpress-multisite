@@ -1543,3 +1543,45 @@ küçük değişiklik.
 - **Akordeon ilk boyama:** `<html>`'e erken `k-js` sınıfı; kapalı paneller betik çalışmadan da
   kapalı (sıçrama yok). Betik yoksa sınıf da yok, paneller açık.
 
+## 30 Eylül 2026 — Sık sorulan sorular (7 site, tek model)
+
+Plan: `PLAN-sss.md` (§6b kullanıcı kararları bağlayıcı).
+
+- **Tek model:** manifest `faq` sayfası, `/sss/`, `seo_source.type = FAQPage`; grup + soru +
+  cevap satırları. Eklentide yalnızca okuyucu yardımcı (`nwcs_faq_rows`, `nwcs_faq_groups`);
+  kayıt yolu, panel ve SEO kodu değişmedi.
+- **SSS cevabı yalnızca firma kaynaklı metinden; tema için yazılmış süreç/teslimat/ödeme
+  metinleri SSS'de cevap olarak kullanılmaz** (bağımsız inceleme sonrası: Sanayi Palet
+  "Sipariş nasıl ilerler?" / "Teslimat nasıl yapılıyor?", Koçist "Ödeme nasıl yapılır?", Ahşap
+  Ambalaj "ISPM 15" / "Bir ambalaj işi nasıl ilerler?" cevapları boşaltıldı; Koçist teklif
+  cevabından süreç vaadi çıkarıldı).
+- **Cevap politikası:** cevap yalnızca sitenin kendi, firmadan gelmiş metninden türetildi
+  (ürün metinleri, teklif formu notu, belge bandı). Süre, rakam, vaat içeren
+  sorular (sevkiyat süresi, minimum sipariş, ödeme, teslimat bölgesi…) cevapsız; cevapsız soru
+  hiçbir yerde görünmez. Koçist'te metreküp formulü grubun kereste sitelerindeki (İthal Keresteci)
+  aritmetik örnekten; firma iddiası değil.
+- **Koçist:** 283 ürün sayfasında aynen basılan 5 soruluk `product.faq` kaldırıldı (kümese göre
+  yazılmıştı, kereste ürününde yanlıştı; ayrıca FAQPage işareti yoktu). Ürün sayfasında
+  akordeonun son satırı ürünün grubuna bağlantı: `/sss/#sss-<grup>` (SSS grup adı =
+  ürün grubu, `sanitize_title` ile eşlenir); grupta cevaplı soru yoksa `/sss/`.
+- **"Aynı gün" / garanti (seçenek A):** Koçist'te footer şeridi (YAZILI FİYAT TEKLİFİ, TOPTAN
+  SATIŞ), güven şeridi "Toptan satış", kategori ürünlü/ürünsüz metinleri, iletişim alt başlığı
+  ("yazılı teklif gönderelim"), ürün teslimat akordeonu ("Sevkiyat şekli ve süresi teklifle
+  birlikte yazılı olarak bildirilir."); İstanbul Keresteci'de fiyat şeridi, form açıklaması ve
+  form başarı mesajı nötrlendi. Panelde bu alanlara kayıt yapılmışsa eski metin görünmeye devam
+  eder; canlıda kontrol edilmeli.
+- **Tasarım:** her site kendi jetonlarıyla; soru listesi tipografik: kart ve numara yok, ince
+  çizgi, `<details>` (betik yok), + / −, cevap ≤ 70ch. Geniş ekranda grup adı solda yapışık
+  (Koçist, paletçi, keresteci, çivi, sanayi); Ahşap Ambalaj/Kasa tek kolon. Panel
+  önizlemesinde cevaplar açık, tıklanınca doğru satır (`_row`) açılır.
+- **Ana sayfaya seçme sorular yok** (kullanıcı kararı).
+- **Menü bağlantısı:** `/sss/` satırı, sayfa henüz açılmamışsa (yayında değilse) menü ve alt
+  bilgiden gizlenir (`*_hide_missing_sss`, Ahşap Ambalaj/Kasa'da `*_menu`); deploy ile yönetici
+  girişi arasındaki sürede ziyaretçi ve önbellek 404 bağlantısı görmesin. Panel önizlemesinde
+  satır kalır.
+- **Kurulu sitede sürüm artışı** yalnızca yeni sayfayı açar (İstanbul Keresteci, Sanayi Palet,
+  Palet Çivi); tam kurulum slogan, ön sayfa, kalıcı bağlantı ve dil ayarını yeniden yazmaz.
+  Koçist'te `kocist_ensure_pages` (sürüm 5) eskisi gibi tam listeyi idempotent çalıştırır.
+- Koçist ana sayfa süreç adımı 3 (`home.process`) teslimat akordeonuyla aynı nötr dile çekildi
+  (koordinatör talebi; ana sayfanın başka yerine dokunulmadı).
+

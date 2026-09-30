@@ -5,7 +5,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$menu     = nwcs_rows( 'global', 'header', 'menu' );
+$menu     = pc_hide_missing_sss( nwcs_rows( 'global', 'header', 'menu' ) );
 $logo     = pc_logo();
 $phone    = pc_phone();
 // Mobil alt cubuk urun sayfasinda o urunun mesajiyla acilir.

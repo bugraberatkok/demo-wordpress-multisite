@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 $logo      = nwcs_image( 'global', 'header', 'logo_image', 'medium' );
 $logo_text = (string) nwcs_field( 'global', 'header', 'logo_text' );
-$menu      = nwcs_rows( 'global', 'header', 'menu' );
+$menu      = ip_hide_missing_sss( nwcs_rows( 'global', 'header', 'menu' ) );
 $products  = ip_products();
 $hub_path  = ip_link_path( (string) ( ip_manifest()['pages']['products']['path'] ?? '/urunlerimiz/' ) );
 $phone     = array(

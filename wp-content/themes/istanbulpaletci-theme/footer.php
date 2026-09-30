@@ -6,7 +6,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$menu     = nwcs_rows( 'global', 'header', 'menu' );
+$menu     = ip_hide_missing_sss( nwcs_rows( 'global', 'header', 'menu' ) );
 $logo     = nwcs_image( 'global', 'footer', 'logo_image', 'medium' );
 $external = trim( (string) nwcs_field( 'global', 'footer', 'external_label' ) );
 

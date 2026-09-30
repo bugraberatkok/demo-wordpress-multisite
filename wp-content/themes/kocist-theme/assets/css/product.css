@@ -412,8 +412,7 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 /* ---------- Teknik ozellikler ---------- */
 .k-specs { padding: 34px 0 10px; }
 
-.k-specs__title,
-.k-faq__title {
+.k-specs__title {
 	margin: 0 0 16px;
 	font-size: clamp(21px, 2.1vw, 26px);
 	color: var(--forest);
@@ -463,80 +462,6 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	font-size: 15px;
 	line-height: 1.45;
 	color: var(--text);
-}
-
-/* ---------- Sikca sorulan sorular ---------- */
-.k-faq { padding: 34px 0 48px; }
-
-.k-faq__list {
-	border: 1px solid var(--line);
-	border-radius: 16px;
-	overflow: hidden;
-	background: #fff;
-}
-
-.k-faq__item + .k-faq__item { border-top: 1px solid var(--line); }
-
-.k-faq__heading { margin: 0; font-family: var(--font-sans); }
-
-.k-faq__question {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	width: 100%;
-	padding: 18px 22px;
-	border: 0;
-	background: none;
-	font-family: inherit;
-	font-size: 15.5px;
-	font-weight: 700;
-	text-align: left;
-	color: var(--text);
-	cursor: pointer;
-	transition: background .22s ease, color .22s ease;
-}
-
-.k-faq__question:hover { background: var(--paper-2); }
-
-.k-faq__item.is-open .k-faq__question {
-	background: var(--leaf-soft);
-	color: var(--forest);
-}
-
-.k-faq__chevron {
-	flex: none;
-	color: var(--muted);
-	transition: transform .3s cubic-bezier(.22, 1, .36, 1), color .22s ease;
-}
-
-.k-faq__item.is-open .k-faq__chevron {
-	transform: rotate(180deg);
-	color: var(--forest);
-}
-
-/*
- * Yukseklik animasyonu icin 0fr -> 1fr grid hilesi: cevabin yuksekligini
- * onceden bilmeye gerek birakmaz.
- *
- * Kapali hal yalnizca .is-ready varken uygulanir; betik calismazsa
- * cevaplar acik kalir ve icerik kaybolmaz.
- */
-.k-faq__list.is-ready .k-faq__panel {
-	display: grid;
-	grid-template-rows: 0fr;
-	transition: grid-template-rows .32s cubic-bezier(.22, 1, .36, 1);
-}
-
-.k-faq__list.is-ready .k-faq__item.is-open .k-faq__panel { grid-template-rows: 1fr; }
-.k-faq__list.is-ready .k-faq__answer { overflow: hidden; }
-
-.k-faq__answer p {
-	margin: 0;
-	padding: 0 22px 20px;
-	font-size: 15px;
-	line-height: 1.65;
-	color: var(--muted);
 }
 
 /* ---------- Havuz urunu: galeri + akordeon | ad + teklif formu ---------- */
@@ -787,6 +712,35 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 .k-acc__text > * { margin: 0; }
 .k-acc__text > * + * { margin-top: .85em; }
 
+/* Akordeonun son satiri: urunun grubundaki sik sorulan sorulara baglanti (/sss/#sss-<grup>). */
+.k-acc__faq { margin: 0; border-top: 1px solid var(--line); }
+
+.k-acc__faq-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	min-height: 44px;
+	padding: 18px 0;
+	color: var(--forest);
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.35;
+	text-decoration: none;
+	transition: color .2s ease;
+}
+
+.k-acc__faq-link:hover { color: var(--leaf-dark); }
+.k-acc__faq-link:hover span { text-decoration: underline; text-underline-offset: 3px; }
+
+.k-acc__faq-link:focus-visible {
+	outline: 3px solid var(--leaf);
+	outline-offset: -3px;
+	border-radius: 4px;
+}
+
+.k-acc__faq-link svg { flex: none; }
+
 .k-acc__text h2,
 .k-acc__text h3,
 .k-acc__text h4 {
@@ -906,8 +860,6 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	.k-ptable__scroll { margin: 0 -18px; padding: 0 18px; }
 	.k-ptable__table { font-size: 14.5px; }
 	.k-specs__card { padding: 20px 18px 6px; }
-	.k-faq__question { padding: 16px 18px; }
-	.k-faq__answer p { padding: 0 18px 18px; }
 }
 
 /* Telefonda gorsel kenardan kenara: birkac piksel kenar boslugu bile kucultuyor. */
@@ -929,13 +881,11 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	.k-product__arrow,
 	.k-zoom__badge,
 	.k-product__btn,
-	.k-faq__question,
-	.k-faq__chevron,
-	.k-faq__list.is-ready .k-faq__panel,
 	.k-acc__btn,
 	.k-acc__icon::before,
 	.k-acc__icon::after,
-	.k-pp__jump-link {
+	.k-pp__jump-link,
+	.k-acc__faq-link {
 		transition-duration: .01ms !important;
 	}
 }

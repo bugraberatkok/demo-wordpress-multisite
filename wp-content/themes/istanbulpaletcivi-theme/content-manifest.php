@@ -123,7 +123,7 @@ return array(
 	'seo_site_defaults' => array(
 		'name'        => 'İstanbul Palet Çivi',
 		'legal_name'  => '',
-		'description' => 'Rulo, tele dizili ve dökme palet çivisi. İstanbul başta olmak üzere tüm Türkiye’ye satış ve teslimat. Koçist Grup kuruluşu; grup 50 yıldır orman ürünleri alanında.',
+		'description' => 'Rulo, tele dizili ve dökme palet çivisi. Çatalca’dan satış ve sevkiyat. Koçist Grup kuruluşu; grup 50 yıldır orman ürünleri alanında.',
 		'phone'       => $phone_label,
 		'email'       => $email,
 		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
@@ -164,6 +164,7 @@ return array(
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
 								array( 'label' => 'Palet Çivileri', 'url' => '/palet-civileri/' ),
 								array( 'label' => 'Blog ve Haberler', 'url' => '/haberler-blog/' ),
+								array( 'label' => 'SSS', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -181,7 +182,7 @@ return array(
 				'footer' => array(
 					'label'  => 'Alt Bilgi',
 					'fields' => array(
-						'tagline'        => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'Rulo, tele dizili ve dökme palet çivisi. Koçist Grup kuruluşudur; Çatalca’dan Türkiye’nin her yerine teslim ediyoruz.' ),
+						'tagline'        => array( 'label' => 'Alt Bilgi Metni', 'type' => 'textarea', 'default' => 'Rulo, tele dizili ve dökme palet çivisi. Koçist Grup kuruluşudur; Çatalca’dan satış ve sevkiyat yapıyoruz.' ),
 						'mobile_label'   => array( 'label' => 'Cep Telefonu (görünen)', 'type' => 'text', 'default' => $mobile_label ),
 						'mobile_url'     => array( 'label' => 'Cep Telefonu Bağlantısı', 'type' => 'url', 'default' => $mobile_url ),
 						'address'        => array( 'label' => 'Adres', 'type' => 'textarea', 'default' => $address ),
@@ -223,7 +224,7 @@ return array(
 					'label'  => 'Giriş',
 					'fields' => array(
 						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Palet çivisi' ),
-						'lead'       => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Rulo, tele dizili ve dökme palet çivisi. İstanbul başta olmak üzere tüm Türkiye’ye satış ve teslimat yapıyoruz.' ),
+						'lead'       => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Rulo, tele dizili ve dökme palet çivisi. Çatalca’dan satış ve sevkiyat yapıyoruz.' ),
 						'call_label' => array( 'label' => 'Arama Düğmesi', 'type' => 'text', 'default' => 'Telefonla sipariş' ),
 						'wa_label'   => array( 'label' => 'WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp’tan yazın' ),
 						'image'      => array( 'label' => 'Fotoğraf', 'type' => 'image', 'default' => 0 ),
@@ -276,7 +277,7 @@ return array(
 				'group' => array(
 					'label'  => 'Koçist Grup Bandı',
 					'fields' => array(
-						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri olarak tüm Türkiye’ye palet çivi tedarik ediyoruz.' ),
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Koçist Orman Ürünleri olarak palet çivisi tedarik ediyoruz.' ),
 						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'İstanbul Palet Çivi, Koçist Grup kuruluşudur. Grup 50 yıldır orman ürünleri alanında çalışıyor; ahşap palet, sandık ve kafes üretiyor.' ),
 					),
 				),
@@ -482,6 +483,63 @@ return array(
 						'cta'      => array( 'label' => 'Sipariş Çağrısı', 'type' => 'textarea', 'default' => 'Palet çivisi siparişi ve fiyat için arayın ya da WhatsApp’tan yazın.' ),
 						'wa_label' => array( 'label' => 'WhatsApp Düğmesi', 'type' => 'text', 'default' => 'WhatsApp' ),
 						'others'   => array( 'label' => 'Diğer Yazılar Başlığı', 'type' => 'text', 'default' => 'Diğer yazılar' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Sik sorulan sorular (/sss/). Cevaplar yalnizca sitenin mevcut
+		 * metinlerinden (urun sayfalari, fiyat notu). Cevabi bos soru firmadan
+		 * cevap bekliyor (DEVAM.md): sitede ve arama verisinde gorunmez.
+		 */
+		'faq' => array(
+			'label'      => 'Sık Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'head.title',
+				'description' => 'head.lead',
+			),
+			'components' => array(
+				'head'  => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
+						'lead' => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Rulo, tele dizili ve dökme çivi; tabanca uyumu, çivi boyu ve sipariş hakkında en çok sorulanlar.' ),
+					),
+				),
+				'items' => array(
+					'label'  => 'Sorular',
+					'fields' => array(
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar',
+							'type'    => 'repeater',
+							'max'     => 40,
+							'hint'    => 'Cevabı boş soru sitede ve arama verisinde görünmez; cevabı firmadan gelince doldurun. Aynı grup adı bir başlık altında toplanır.',
+							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
+								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
+								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'group' => 'Çivi seçimi', 'question' => 'Rulo, tele dizili ve dökme çivi arasındaki fark nedir?', 'answer' => 'Üçü de palet, sandık ve kafes üretiminde kullanılır; fark nasıl çakıldıklarında. Rulo çivi ince tellerle bağlanıp rulo hâline getirilir ve rulo çivi tabancasıyla çakılır. Tele dizili çivi ince tellerle yan yana şerit hâlinde dizilir ve şerit çivi tabancasıyla çakılır. Dökme çivi dizilmemiştir; çekiçle ya da dökme çivi besleyen makinelerde kullanılır.' ),
+								array( 'group' => 'Çivi seçimi', 'question' => 'Tabancama hangi çivi uyar?', 'answer' => 'Rulo çivi tabancası rulo çiviyle, şerit çivi tabancası tele dizili çiviyle çalışır. Şeritler genellikle açılıdır; açı, tabancanın şarjörüne uygun seçilmelidir. Emin değilseniz tabancanızın modelini söyleyin, doğru çiviyi birlikte seçelim.' ),
+								array( 'group' => 'Çivi seçimi', 'question' => 'Çivi boyu nasıl seçilir?', 'answer' => 'Çivinin boyu ve kalınlığı, birleştirilecek tahtaların kalınlığına ve tabancanızın kabul ettiği ölçüye göre seçilir. Tabancanızın modelini ve çakacağınız tahtaların kalınlığını söylemeniz yeterli.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Fiyat ve stok nasıl öğrenilir?', 'answer' => 'Ölçü, stok ve fiyat bilgisi için bizi arayın ya da WhatsApp’tan yazın. Tabancanızın modelini ve çakacağınız tahtaların kalınlığını söylemeniz yeterli.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Koli ya da kutuda kaç çivi var?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'En az sipariş miktarı var mı, toptan satış yapıyor musunuz?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Teslimat nasıl ve ne kadar sürede yapılıyor?', 'answer' => '' ),
+							),
+						),
+					),
+				),
+				'more'  => array(
+					'label'  => 'Kapanış',
+					'fields' => array(
+						'group_other' => array( 'label' => 'Grubu boş sorular için grup adı', 'type' => 'text', 'default' => 'Genel' ),
+						'text'        => array( 'label' => 'Kapanış satırı (yanındaki numara sitenin telefonudur)', 'type' => 'text', 'default' => 'Sorunuzun cevabı burada yoksa arayın:' ),
 					),
 				),
 			),

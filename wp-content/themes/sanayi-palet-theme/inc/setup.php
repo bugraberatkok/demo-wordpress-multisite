@@ -16,11 +16,14 @@
  *
  * Idempotent: surum option'i tutulur, bir kez calisir. Kullanici bir sayfayi
  * ya da yaziyi silerse geri getirilmez.
+ *
+ * Surum 2: Sik Sorulan Sorular sayfasi (/sss/). Kurulu sitede (surum 1)
+ * yalnizca bu sayfa acilir; kurulumun geri kalani yeniden calismaz.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-const SANAYI_PALET_SETUP_VERSION = '1';
+const SANAYI_PALET_SETUP_VERSION = '2';
 
 add_action( 'after_switch_theme', 'sanayi_palet_setup_site' );
 add_action( 'admin_init', 'sanayi_palet_maybe_setup_site' );
@@ -38,9 +41,20 @@ function sanayi_palet_maybe_setup_site(): void {
 		return;
 	}
 
-	if ( SANAYI_PALET_SETUP_VERSION !== get_option( 'sanayi_palet_setup_version' ) ) {
-		sanayi_palet_setup_site();
+	$installed = (string) get_option( 'sanayi_palet_setup_version' );
+
+	if ( SANAYI_PALET_SETUP_VERSION === $installed ) {
+		return;
 	}
+
+	if ( '' !== $installed ) {
+		// Kurulu site: yalnizca sonradan eklenen sayfalar (sayfa listesi idempotent).
+		sanayi_palet_setup_pages();
+		update_option( 'sanayi_palet_setup_version', SANAYI_PALET_SETUP_VERSION );
+		return;
+	}
+
+	sanayi_palet_setup_site();
 }
 
 function sanayi_palet_setup_site(): void {
@@ -79,7 +93,8 @@ function sanayi_palet_setup_site(): void {
 }
 
 /**
- * Menu sayfalarini olusturur; slug zaten varsa (cop dahil) dokunmaz.
+ * Menu sayfalarini olusturur; slug zaten varsa dokunmaz (cop kutusundaki sayfa
+ * '__trashed' ekiyle adres degistirdigi icin sayilmaz; yerine yeni sayfa acilir).
  *
  * @return array<string,int> slug => sayfa kimligi
  */
@@ -90,6 +105,7 @@ function sanayi_palet_setup_pages(): array {
 		'hakkimizda' => 'Hakkımızda',
 		'blog'       => 'Blog',
 		'iletisim'   => 'İletişim',
+		'sss'        => 'Sık Sorulan Sorular',
 	);
 
 	$ids = array();

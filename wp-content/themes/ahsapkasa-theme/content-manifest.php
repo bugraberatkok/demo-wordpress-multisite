@@ -61,6 +61,7 @@ return array(
 								array( 'label' => 'Ana sayfa', 'url' => '/' ),
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
 								array( 'label' => 'Hizmetlerimiz', 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'SSS', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -270,6 +271,67 @@ return array(
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ürün grubumuz bunlarla sınırlı değil.' ),
 						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Özel boy ve ebatta kereste ile aradığınız başka bir ahşap ambalaj çözümü varsa yazın; üretilebilirliğini birlikte değerlendirelim.' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Sik sorulan sorular (/sss/). Cevaplar yalnizca sitenin mevcut
+		 * metinlerinden (hizmetler, hakkimizda, teklif formu). Cevabi bos
+		 * soru firmadan cevap bekliyor (DEVAM.md): sitede ve arama verisinde
+		 * gorunmez. Menudeki SSS baglantisi yalnizca cevapli soru varken
+		 * gorunur (functions.php).
+		 */
+		'faq' => array(
+			'label'      => 'Sık Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'head.title',
+				'description' => 'head.lead',
+			),
+			'components' => array(
+				'head'  => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
+						'lead' => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Ölçüye göre ahşap palet, sandık, kafes ve ambalaj hakkında en çok sorulanlar.' ),
+					),
+				),
+				'items' => array(
+					'label'  => 'Sorular',
+					'fields' => array(
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar',
+							'type'    => 'repeater',
+							'max'     => 40,
+							'hint'    => 'Cevabı boş soru sitede ve arama verisinde görünmez; cevabı firmadan gelince doldurun. Aynı grup adı bir başlık altında toplanır.',
+							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
+								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
+								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'group' => 'Ürünler', 'question' => 'Hangi ürünleri üretiyorsunuz?', 'answer' => 'Ahşap palet (standart dışı ölçülerde, kardonlu seçenekle), ahşap sandık (ihracata uygun, demonte sevk edilebilir), ahşap kafes (ürününüzün ölçüsüne göre) ve ihracat şartnamenize uygun ahşap ambalaj. Özel boy ve ebatta kereste ya da başka bir ahşap ambalaj çözümü arıyorsanız yazın; üretilebilirliğini birlikte değerlendirelim.' ),
+								array( 'group' => 'Ürünler', 'question' => 'Standart ölçüde ürününüz var mı?', 'answer' => 'Dört ürün grubunun hiçbirinde standart ölçü yok. Her iş, sizin verdiğiniz ölçüye göre üretilir.' ),
+								array( 'group' => 'Ürünler', 'question' => 'Kullandığım ambalajı örnek olarak gönderebilir miyim?', 'answer' => 'Evet. Elinizdeki ölçüleri, proje çizimini ya da hâlihazırda kullandığınız ambalajı iletin; ürününüze uygun paleti, sandığı veya kafesi tasarlayıp üretelim.' ),
+								array( 'group' => 'Ürünler', 'question' => 'İhracat için ısıl işlem (ISPM 15) yapıyor musunuz?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Teklif için ne göndermeliyim?', 'answer' => 'Ürünün eni, boyu, yüksekliği ve tahmini adedi yeterli; örneğin 120 × 80 × 100 cm, yaklaşık 50 adet. Çiziminiz varsa e-postayla gönderin, daha da hızlı ilerleriz.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Ürünler nasıl sevk ediliyor?', 'answer' => 'Tüm parçaları içeren demonte paketler hâlinde sevk ediyoruz.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Üretim ve teslim ne kadar sürer?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Teslimat hangi bölgelere yapılıyor?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Ödeme nasıl yapılır?', 'answer' => '' ),
+							),
+						),
+					),
+				),
+				'more'  => array(
+					'label'  => 'Kapanış',
+					'fields' => array(
+						'group_other' => array( 'label' => 'Grubu boş sorular için grup adı', 'type' => 'text', 'default' => 'Genel' ),
+						'text'        => array( 'label' => 'Kapanış satırı (yanındaki numara sitenin telefonudur)', 'type' => 'text', 'default' => 'Sorunuzun cevabı burada yoksa arayın:' ),
 					),
 				),
 			),

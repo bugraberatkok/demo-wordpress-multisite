@@ -713,6 +713,21 @@ add_filter( 'nwcs_seo_default_logo', fn() => nwcs_seo_theme_file_image( 'assets/
 `seo` bileşen adı ve `site_seo` sayfa adı eklentiye ayrılmıştır; temalar kullanmaz.
 Kararlar ve kontrol listesi: [DECISIONS.md](DECISIONS.md) → "SEO ve GEO — kalıcı ilke".
 
+### Sık sorulan sorular (`/sss/`)
+
+Kereste siteleri dışındaki yedi sitede (Koçist, İstanbul Paletçi, İstanbul Keresteci, Palet
+Çivi, Sanayi Palet, Ahşap Ambalaj, Ahşap Kasa) aynı model: manifestte `faq` sayfası
+(`head` + `items.rows` [grup, soru, cevap] + `more`), adres `/sss/`, şablon `page-sss.php`
+(Koçist'te `page.php` → `sections/faq.php`). Temalar satırları eklentinin
+`nwcs_faq_rows()` / `nwcs_faq_groups()` yardımcısından okur: **cevabı boş soru sitede,
+JSON-LD'de ve llms.txt'te görünmez**; firma cevabı gelince panelden doldurulur. Hiç cevaplı
+soru yoksa `FAQPage` işareti de yazılmaz. Sayfa, yönetici panele ilk girdiğinde temanın kurulum
+sürümüyle kendiliğinden açılır (canlıda WP-CLI gerekmez); açılana kadar menüdeki SSS satırı
+gizlidir. Deploy sonrası önce yöneticiyle panele girin, sonra önbelleği temizleyin. Ahşap Ambalaj
+ve Ahşap Kasa'da menüdeki SSS bağlantısı ayrıca yalnızca cevaplı soru varken görünür. Panelde kayıtlı menüsü olan sitede (yerelde
+İstanbul Paletçi, Ahşap Kasa) yeni "SSS" satırı panelden eklenir. Firmadan beklenen cevaplar:
+DEVAM.md.
+
 ### Uyumluluk puanı
 
 SEO ve GEO sekmesi her site için 0–100 puan gösterir (SEO ve GEO alt puanlarıyla).

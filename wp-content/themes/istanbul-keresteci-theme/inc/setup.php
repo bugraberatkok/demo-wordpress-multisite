@@ -13,11 +13,14 @@
  * Tetikleme: after_switch_theme (etkinlestirmeden sonraki ilk istekte,
  * sorgudan once) ve admin_init. Surum option'i (ik_setup_version) sayesinde
  * ayni surum ikinci kez calismaz.
+ *
+ * Surum 2: Sik Sorulan Sorular sayfasi (/sss/). Kurulu sitede (surum 1)
+ * yalnizca bu sayfa acilir; kurulumun geri kalani yeniden calismaz.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-const IK_SETUP_VERSION = 1;
+const IK_SETUP_VERSION = 2;
 
 add_action( 'after_switch_theme', 'ik_run_setup' );
 add_action( 'admin_init', 'ik_maybe_setup' );
@@ -30,9 +33,20 @@ function ik_maybe_setup(): void {
 		return;
 	}
 
-	if ( (int) get_option( 'ik_setup_version' ) < IK_SETUP_VERSION ) {
-		ik_run_setup();
+	$installed = (int) get_option( 'ik_setup_version' );
+
+	if ( $installed >= IK_SETUP_VERSION ) {
+		return;
 	}
+
+	if ( $installed >= 1 ) {
+		// Kurulu site: yalnizca sonradan eklenen sayfalar.
+		ik_setup_page( 'sss', 'Sık Sorulan Sorular' );
+		update_option( 'ik_setup_version', IK_SETUP_VERSION );
+		return;
+	}
+
+	ik_run_setup();
 }
 
 function ik_run_setup(): void {
@@ -51,6 +65,7 @@ function ik_run_setup(): void {
 		'urunlerimiz' => 'Ürünlerimiz',
 		'blog'        => 'Blog',
 		'iletisim'    => 'İletişim',
+		'sss'         => 'Sık Sorulan Sorular',
 	);
 
 	$ids = array();
@@ -90,7 +105,10 @@ function ik_run_setup(): void {
 }
 
 /**
- * Sayfayi olusturur; ayni yolda sayfa varsa (cop kutusu dahil) dokunmaz.
+ * Sayfayi olusturur; ayni yolda sayfa varsa dokunmaz. Not: get_page_by_path
+ * cop kutusundaki sayfayi bulmaz (WordPress cope atilan sayfanin adresine
+ * '__trashed' ekler); o durumda yeni sayfa acilir. 'trash' kontrolu yalnizca
+ * bu eki almamis eski kayitlar icin.
  */
 function ik_setup_page( string $slug, string $title, int $parent = 0 ): int {
 	$path = $parent ? get_page_uri( $parent ) . '/' . $slug : $slug;

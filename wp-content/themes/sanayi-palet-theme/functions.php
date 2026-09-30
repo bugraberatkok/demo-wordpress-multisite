@@ -102,6 +102,11 @@ function sanayi_palet_assets(): void {
 	if ( ! is_front_page() ) {
 		wp_enqueue_style( 'sanayi-palet-pages', get_theme_file_uri( 'assets/css/pages.css' ), array( 'sanayi-palet-home' ), $version );
 	}
+
+	// Sik sorulan sorular (/sss/). Surum dosya zamanindan: tema surumu artmadan da yenilensin.
+	if ( is_page( 'sss' ) ) {
+		wp_enqueue_style( 'sanayi-palet-faq', get_theme_file_uri( 'assets/css/faq.css' ), array( 'sanayi-palet-pages' ), (string) filemtime( get_theme_file_path( 'assets/css/faq.css' ) ) );
+	}
 }
 
 /**
@@ -855,5 +860,30 @@ function sanayi_favicon(): void {
 		esc_url( get_theme_file_uri( 'assets/favicon-32.png' ) ),
 		esc_url( get_theme_file_uri( 'assets/favicon.svg' ) ),
 		esc_url( get_theme_file_uri( 'assets/apple-touch-icon.png' ) )
+	);
+}
+
+/**
+ * Menu ve alt bilgi satirlarindan /sss/ baglantisini, sayfa henuz acilmamissa
+ * (yayinda degilse) cikarir. Sayfa yonetici panele ilk girdiginde acilir;
+ * o zamana kadar ziyaretci 404'e gitmesin, onbellege 404 baglantisi girmesin.
+ * Panel onizlemesinde satir kalir ki duzenlenebilsin. Anahtarlar korunur:
+ * panel isaretleri satir sirasini bunlardan okur.
+ */
+function sanayi_palet_hide_missing_sss( array $rows ): array {
+	static $has_page = null;
+
+	if ( null === $has_page ) {
+		$page     = get_page_by_path( 'sss', OBJECT, 'page' );
+		$has_page = $page && 'publish' === $page->post_status;
+	}
+
+	if ( $has_page || ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
+		return $rows;
+	}
+
+	return array_filter(
+		$rows,
+		static fn( $row ): bool => '/sss' !== untrailingslashit( (string) wp_parse_url( trim( (string) ( $row['url'] ?? '' ) ), PHP_URL_PATH ) )
 	);
 }

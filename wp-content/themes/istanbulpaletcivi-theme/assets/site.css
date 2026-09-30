@@ -111,9 +111,10 @@ p { margin: 0; }
 .pc-header__logo img { height: 2.25rem; width: auto; }
 
 .pc-nav { display: none; margin-left: 1rem; }
-.pc-nav ul { display: flex; gap: 1.75rem; margin: 0; padding: 0; list-style: none; }
+/* Alti menu ogesi (SSS eklendi) tek satirda kalsin: dar masaustunde aralik daralir. */
+.pc-nav ul { display: flex; gap: 1.25rem; margin: 0; padding: 0; list-style: none; }
 .pc-nav a {
-	display: block; padding-block: 0.5rem; border-bottom: 2px solid transparent;
+	display: block; padding-block: 0.5rem; border-bottom: 2px solid transparent; white-space: nowrap;
 	color: var(--ink); font-weight: 600; font-size: 0.9375rem; text-decoration: none;
 }
 .pc-nav a:hover { color: var(--navy); }
@@ -157,6 +158,7 @@ p { margin: 0; }
 }
 @media (min-width: 1280px) {
 	.pc-header__call .pc-num { display: inline; }
+	.pc-nav ul { gap: 1.75rem; }
 }
 
 /* ------------------------------------------------------------------ *
@@ -447,4 +449,61 @@ body { padding-bottom: 3.5rem; }
 
 @media (prefers-reduced-motion: reduce) {
 	*, *::before, *::after { transition: none !important; }
+}
+
+/* ------------------------------------------------------------------ *
+ * Sik sorulan sorular (/sss/, page-sss.php)
+ *
+ * Civi kutusu etiketi gibi: grup adi dar ve kalin, lacivert kalin ayracla
+ * ayrilir; sorular ince cizgiyle. Kart ve numara yok. Genis ekranda grup
+ * adi solda ve yapisik, sorular sagda. Acma kapama <details>; betik yok.
+ * ------------------------------------------------------------------ */
+.pc-sss__group {
+	display: grid;
+	gap: 0.75rem;
+	padding-block: 1.5rem 2.5rem;
+	border-top: 3px solid var(--navy);
+	scroll-margin-top: calc(var(--header) + 1rem);
+}
+
+.pc-sss__title { color: var(--navy); font-size: clamp(1.75rem, 3.6vw, 2.5rem); }
+
+.pc-sss__list { min-width: 0; }
+.pc-sss__item + .pc-sss__item { border-top: 1px solid var(--line); }
+
+.pc-sss__q {
+	display: flex; align-items: flex-start; justify-content: space-between; gap: 1.25rem;
+	min-height: 44px; padding-block: 1.125rem;
+	list-style: none; cursor: pointer;
+	font-size: 1.1875rem; font-weight: 700; line-height: 1.35; color: var(--ink);
+}
+.pc-sss__q::-webkit-details-marker { display: none; }
+.pc-sss__q::marker { content: ""; }
+.pc-sss__q:hover { color: var(--navy); }
+
+.pc-sss__icon { position: relative; flex: none; width: 16px; height: 16px; margin-top: 0.3rem; color: var(--navy); }
+.pc-sss__icon::before,
+.pc-sss__icon::after {
+	content: ""; position: absolute; top: 7px; left: 0;
+	width: 16px; height: 2px; background: currentColor;
+	transition: transform 0.2s ease;
+}
+.pc-sss__icon::after { transform: rotate(90deg); }
+.pc-sss__item[open] .pc-sss__icon::after { transform: rotate(0deg); }
+
+.pc-sss__a { max-width: 70ch; padding: 0 2.25rem 1.5rem 0; color: var(--muted); line-height: 1.65; }
+.pc-sss__a p + p { margin-top: 0.8em; }
+
+.pc-sss__more { padding-top: 1.75rem; border-top: 3px solid var(--navy); font-size: 1.1875rem; }
+.pc-sss__more a { margin-left: 0.25em; font-weight: 800; text-decoration-thickness: 2px; }
+
+@media (min-width: 900px) {
+	.pc-sss__group { grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: 3rem; }
+	.pc-sss__title { position: sticky; top: calc(var(--header) + 1.5rem); align-self: start; padding-top: 1rem; }
+	.pc-sss__more { padding-left: calc((100% - 3rem) / 3.4 + 3rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pc-sss__icon::before,
+	.pc-sss__icon::after { transition: none; }
 }

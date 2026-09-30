@@ -5,7 +5,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$menu = nwcs_rows( 'global', 'header', 'menu' );
+$menu = ahsapambalaj_menu();
 
 // Panelden yuklenen alt bilgi logosu; yoksa temanin acik renkli logosu.
 $footer_logo = nwcs_image( 'global', 'footer', 'logo_image', 'medium' );

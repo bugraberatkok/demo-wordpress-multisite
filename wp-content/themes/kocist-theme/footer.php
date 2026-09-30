@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 $ticker    = nwcs_rows( 'global', 'footer', 'ticker' );
 $social    = nwcs_rows( 'global', 'footer', 'social' );
 $links     = nwcs_rows( 'global', 'footer', 'links' );
-$corporate = nwcs_rows( 'global', 'footer', 'corporate' );
+$corporate = kocist_hide_missing_sss( nwcs_rows( 'global', 'footer', 'corporate' ) );
 $legal     = nwcs_rows( 'global', 'footer', 'legal' );
 $logo      = kocist_image_or_default( nwcs_image( 'global', 'header', 'logo_image', 'medium' ), 'logo.png', 'Koçist Orman Ürünleri logosu' );
 

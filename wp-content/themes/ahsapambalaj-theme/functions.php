@@ -97,6 +97,45 @@ function ahsapambalaj_preconnect(): void {
 }
 
 /**
+ * Ust menu ve alt bilgi satirlari. /sss/ baglantisi yalnizca sayfa acilmis
+ * (yayinda) ve en az bir cevapli soru varken gorunur (cevabi bos soru sitede
+ * gorunmez; bos ya da henuz olmayan sayfaya menuden gidilmesin). Panel onizlemesinde satir kalir ki
+ * duzenlenebilsin. Anahtarlar korunur: panel isaretleri satir sirasini
+ * bunlardan okur.
+ */
+function ahsapambalaj_menu(): array {
+	$menu = nwcs_rows( 'global', 'header', 'menu' );
+
+	$page = get_page_by_path( 'sss', OBJECT, 'page' );
+
+	if ( ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) || ( $page && 'publish' === $page->post_status && function_exists( 'nwcs_faq_rows' ) && nwcs_faq_rows( 'faq' ) ) ) {
+		return $menu;
+	}
+
+	return array_filter(
+		$menu,
+		static fn( $item ): bool => '/sss' !== untrailingslashit( (string) wp_parse_url( trim( (string) ( $item['url'] ?? '' ) ), PHP_URL_PATH ) )
+	);
+}
+
+/**
+ * Cok paragrafli cevap: bos satirla ayrilan her blok bir paragraf.
+ */
+function ahsapambalaj_paragraphs( string $text ): string {
+	$html = '';
+
+	foreach ( preg_split( '/\R\s*\R/u', trim( $text ) ) ?: array() as $block ) {
+		$block = trim( $block );
+
+		if ( '' !== $block ) {
+			$html .= '<p>' . nl2br( esc_html( $block ) ) . '</p>';
+		}
+	}
+
+	return $html;
+}
+
+/**
  * Bos baglantilari '#' yapar, koke gore yazilmis yollari site adresine baglar.
  * Alt dizin multisite'ta '/iletisim/' ag kokune gider; home_url ile duzeltiyoruz.
  */
@@ -247,7 +286,7 @@ function ahsapambalaj_image( array $image, string $group, ?int $index = null, ?i
  * dokunmaz, kullanicinin sayfasini ezmez.
  * ====================================================================== */
 
-const AHSAPAMBALAJ_SETUP_VERSION = '1';
+const AHSAPAMBALAJ_SETUP_VERSION = '2'; // 2: Sik Sorulan Sorular (/sss/).
 
 add_action( 'after_switch_theme', 'ahsapambalaj_setup_site' );
 add_action( 'admin_init', 'ahsapambalaj_maybe_setup_site' );
@@ -281,6 +320,7 @@ function ahsapambalaj_setup_site(): void {
 		'hakkimizda'    => 'Hakkımızda',
 		'hizmetlerimiz' => 'Hizmetlerimiz',
 		'iletisim'      => 'İletişim',
+		'sss'           => 'Sık Sorulan Sorular',
 	);
 
 	foreach ( $pages as $slug => $title ) {

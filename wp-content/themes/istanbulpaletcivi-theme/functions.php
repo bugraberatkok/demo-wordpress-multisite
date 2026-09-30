@@ -678,3 +678,28 @@ function pc_favicon(): void {
 		esc_url( get_theme_file_uri( 'assets/apple-touch-icon.png' ) )
 	);
 }
+
+/**
+ * Menu ve alt bilgi satirlarindan /sss/ baglantisini, sayfa henuz acilmamissa
+ * (yayinda degilse) cikarir. Sayfa yonetici panele ilk girdiginde acilir;
+ * o zamana kadar ziyaretci 404'e gitmesin, onbellege 404 baglantisi girmesin.
+ * Panel onizlemesinde satir kalir ki duzenlenebilsin. Anahtarlar korunur:
+ * panel isaretleri satir sirasini bunlardan okur.
+ */
+function pc_hide_missing_sss( array $rows ): array {
+	static $has_page = null;
+
+	if ( null === $has_page ) {
+		$page     = get_page_by_path( 'sss', OBJECT, 'page' );
+		$has_page = $page && 'publish' === $page->post_status;
+	}
+
+	if ( $has_page || ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
+		return $rows;
+	}
+
+	return array_filter(
+		$rows,
+		static fn( $row ): bool => '/sss' !== untrailingslashit( (string) wp_parse_url( trim( (string) ( $row['url'] ?? '' ) ), PHP_URL_PATH ) )
+	);
+}

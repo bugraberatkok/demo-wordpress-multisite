@@ -288,7 +288,7 @@ $manifest_data = array(
 	'seo_site_defaults' => array(
 		'name'        => 'Koçist Orman Ürünleri',
 		'legal_name'  => 'Koçist Orman Ürünleri İnş. ve İnş. Yap. Malz. San. Tic. Ltd. Şti.',
-		'description' => 'Koçist Orman Ürünleri: özel ölçüde kereste, palet, sandık ve kafes üretimi. Tedarik, üretim ve sevkiyat aynı çatı altında; İstanbul teslim.',
+		'description' => 'Koçist Orman Ürünleri: özel ölçüde kereste, palet, sandık ve kafes üretimi. Tedarik, üretim ve sevkiyat aynı çatı altında.',
 		'phone'       => '+90 549 648 19 19',
 		'email'       => 'info@kocist.com.tr',
 		'street'      => 'Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1',
@@ -324,7 +324,7 @@ $manifest_data = array(
 				'topbar' => array(
 					'label'  => 'Üst Bilgi Şeridi',
 					'fields' => array(
-						'note'        => array( 'label' => 'Şerit Metni', 'type' => 'text', 'default' => 'İstanbul Teslim' ),
+						'note'        => array( 'label' => 'Şerit Metni', 'type' => 'text', 'default' => 'Çatalca, İstanbul' ),
 						'hours'       => array( 'label' => 'Çalışma Saatleri', 'type' => 'text', 'default' => 'Çalışma: 08:00-19:00' ),
 						'bank_label'  => array( 'label' => 'Banka Bilgileri Metni', 'type' => 'text', 'default' => 'Banka Bilgilerimiz' ),
 						'bank_url'    => array( 'label' => 'Banka Bilgileri Bağlantısı', 'type' => 'url', 'default' => '/banka-bilgilerimiz/' ),
@@ -480,6 +480,7 @@ $manifest_data = array(
 								array( 'label' => 'İnsan Kaynakları', 'url' => '/insan-kaynaklari/' ),
 								array( 'label' => 'Referanslar', 'url' => '/kurumsal/' ),
 								array( 'label' => 'Blog – Haberler', 'url' => '/blog/' ),
+								array( 'label' => 'Sık Sorulan Sorular', 'url' => '/sss/' ),
 							),
 						),
 					),
@@ -524,9 +525,9 @@ $manifest_data = array(
 								array( 'text' => 'ÇATALCA ÜRETİM TESİSİ' ),
 								array( 'text' => 'İHRACATA UYGUN ISIL İŞLEM' ),
 								array( 'text' => 'ÖZEL ÖLÇÜ ÜRETİM' ),
-								array( 'text' => 'AYNI GÜN FİYAT' ),
-								array( 'text' => 'İSTANBUL VE ÇEVRE İLLERE SEVKİYAT' ),
-								array( 'text' => 'TOPTAN FİYAT GARANTİSİ' ),
+								array( 'text' => 'YAZILI FİYAT TEKLİFİ' ),
+								array( 'text' => 'ÇATALCA’DAN SEVKİYAT' ),
+								array( 'text' => 'TOPTAN SATIŞ' ),
 							),
 						),
 
@@ -583,6 +584,7 @@ $manifest_data = array(
 								array( 'label' => 'Blog – Haberler', 'url' => '/blog/' ),
 								array( 'label' => 'Belgelerimiz', 'url' => '/kurumsal/' ),
 								array( 'label' => 'Referanslar', 'url' => '/kurumsal/' ),
+								array( 'label' => 'Sık Sorulan Sorular', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -655,10 +657,10 @@ $manifest_data = array(
 								'label' => array( 'label' => 'Metin', 'type' => 'text' ),
 							),
 							'default' => array(
-								array( 'icon' => 'truck', 'label' => 'İstanbul ve çevre illere planlı sevkiyat' ),
+								array( 'icon' => 'truck', 'label' => 'Sevkiyat teklifle birlikte planlanır' ),
 								array( 'icon' => 'factory', 'label' => 'Çatalca tesisinde kendi üretimimiz' ),
 								array( 'icon' => 'shield', 'label' => 'İhracata uygun ısıl işlem' ),
-								array( 'icon' => 'check', 'label' => 'Toptan fiyat garantisi' ),
+								array( 'icon' => 'check', 'label' => 'Toptan satış' ),
 							),
 						),
 					),
@@ -734,7 +736,7 @@ $manifest_data = array(
 							'default' => array(
 								array( 'title' => 'Ölçü ve adedi iletin', 'text' => 'Ürünü, ölçüyü, adedi ve teslim adresini telefonla, e-postayla ya da iletişim formundan gönderin.' ),
 								array( 'title' => 'Yazılı teklifinizi alın', 'text' => 'Fiyatı ve teslim tarihini yazılı olarak iletiyoruz. Onayınızla sipariş üretime girer.' ),
-								array( 'title' => 'Üretim ve sevkiyat', 'text' => 'Siparişiniz Çatalca tesisinde hazırlanır, hafta içi planlı sevkiyatla İstanbul ve çevre illere teslim edilir.' ),
+								array( 'title' => 'Üretim ve sevkiyat', 'text' => 'Siparişiniz Çatalca tesisinde hazırlanır; sevkiyat şekli ve süresi teklifle birlikte yazılı olarak bildirilir.' ),
 							),
 						),
 						'cta_label' => array( 'label' => 'Buton Metni', 'type' => 'text', 'default' => 'Teklif isteyin' ),
@@ -799,7 +801,7 @@ $manifest_data = array(
 				'texts' => array(
 					'label'  => 'Grup ve Kategori Sayfaları (ortak)',
 					'fields' => array(
-						'lead_products'      => array( 'label' => 'Alt Metin: ürün varsa — {urun} ürün sayısı', 'type' => 'textarea', 'default' => '{urun} ürün listeleniyor. Fiyatlar ölçü ve adede göre değişir; aynı gün teklif veriyoruz.' ),
+						'lead_products'      => array( 'label' => 'Alt Metin: ürün varsa — {urun} ürün sayısı', 'type' => 'textarea', 'default' => '{urun} ürün listeleniyor. Fiyatlar ölçü ve adede göre değişir; ölçü ve adedi yazın, yazılı teklif gönderelim.' ),
 						'lead_sub_empty'     => array( 'label' => 'Alt Metin: ürünsüz kategori — {grup} grup adı', 'type' => 'textarea', 'default' => '{grup} grubunda, ölçü ve adede göre üretim ve tedarik.' ),
 						'lead_group_empty'   => array( 'label' => 'Alt Metin: ürünsüz grup — {kategori} kategori sayısı', 'type' => 'textarea', 'default' => '{kategori} kategoride ölçü ve adede göre üretim ve tedarik.' ),
 						'group_all'          => array( 'label' => 'Grubun Tümü Bağlantısı — {grup} grup adı', 'type' => 'text', 'default' => 'Tüm {grup} ürünleri' ),
@@ -812,7 +814,7 @@ $manifest_data = array(
 						'go_detail'          => array( 'label' => 'Kart Bağlantısı (detay sayfası varsa)', 'type' => 'text', 'default' => 'İncele' ),
 						'go_quote'           => array( 'label' => 'Kart Bağlantısı (detay sayfası yoksa)', 'type' => 'text', 'default' => 'Teklif iste' ),
 						'empty_title'        => array( 'label' => 'Ürün Yoksa Başlık — {ad} sayfa adı', 'type' => 'text', 'default' => '{ad} için listelenmiş ürün yok' ),
-						'empty_text'         => array( 'label' => 'Ürün Yoksa Metin', 'type' => 'textarea', 'default' => 'Bu kategorideki ürünleri siparişe göre hazırlıyoruz. Ölçü ve adedi yazın, aynı gün fiyat verelim.' ),
+						'empty_text'         => array( 'label' => 'Ürün Yoksa Metin', 'type' => 'textarea', 'default' => 'Bu kategorideki ürünleri siparişe göre hazırlıyoruz. Ölçü ve adedi yazın, yazılı teklif gönderelim.' ),
 						'empty_cta'          => array( 'label' => 'Ürün Yoksa Buton', 'type' => 'text', 'default' => 'Teklif isteyin' ),
 					),
 				),
@@ -1261,7 +1263,7 @@ $manifest_data = array(
 						'tab_desc'      => array( 'label' => 'Akordeon 2. başlık (ürünün detay metni ve tabloları)', 'type' => 'text', 'default' => 'Ürün Açıklaması' ),
 						'desc_empty'    => array( 'label' => 'Akordeon 2: detay metni olmayan üründe', 'type' => 'text', 'default' => 'Açıklama henüz girilmedi.' ),
 						'tab_delivery'  => array( 'label' => 'Akordeon 3. başlık', 'type' => 'text', 'default' => 'Lojistik ve Teslimat' ),
-						'delivery_text' => array( 'label' => 'Akordeon 3: metin (tüm ürünler)', 'type' => 'textarea', 'default' => 'Siparişiniz Çatalca tesisinde hazırlanır, hafta içi planlı sevkiyatla gönderilir. İstanbul ve çevre illere kendi araçlarımızla, diğer illere anlaşmalı nakliye ile teslim edilir.', 'hint' => 'Üründe "Lojistik ve Teslimat" adlı bir detay satırı varsa o ürünün sayfasında bu metin yerine o satır gösterilir.' ),
+						'delivery_text' => array( 'label' => 'Akordeon 3: metin (tüm ürünler)', 'type' => 'textarea', 'default' => 'Sevkiyat şekli ve süresi teklifle birlikte yazılı olarak bildirilir.', 'hint' => 'Üründe "Lojistik ve Teslimat" adlı bir detay satırı varsa o ürünün sayfasında bu metin yerine o satır gösterilir.' ),
 
 						// Fiyat yuvasi: fiyatli urunde fiyat, fiyatsizda rozet + neden.
 						'price_badge'   => array( 'label' => 'Fiyatı olmayan ürün: fiyat yerine rozet', 'type' => 'text', 'default' => 'Fiyat teklifle' ),
@@ -1332,42 +1334,96 @@ $manifest_data = array(
 						),
 					),
 				),
+			),
+		),
 
-				'faq' => array(
-					'label'  => 'Sık Sorulan Sorular (tüm ürün sayfaları)',
+		/*
+		 * Sik sorulan sorular (/sss/). Urun sayfalarindaki eski ortak SSS
+		 * bolumunun yerine gecer; urun sayfasinda yalnizca urunun grubuna
+		 * giden bir baglanti kalir (grup adi = urun grubu: Kereste, Ambalaj,
+		 * Dekorasyon, Hirdavat; baglanti #sss-<grup> capasina gider).
+		 *
+		 * Cevaplar yalnizca sitenin mevcut metinlerinden (siparis sureci,
+		 * banka notu, kurumsal profil, katalog). Cevabi bos sorular firmadan
+		 * cevap bekliyor (DEVAM.md): sitede ve arama verisinde gorunmezler.
+		 */
+		'faq' => array(
+			'label'      => 'Sık Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'page_head.title',
+				'description' => 'page_head.subtitle',
+			),
+			'components' => array(
+
+				'page_head' => array(
+					'label'  => 'Sayfa Başlığı',
 					'fields' => array(
-						'title' => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Sık Sorulan Sorular' ),
-						'items' => array(
-							'label'   => 'Sorular',
+						'breadcrumb' => array( 'label' => 'Yol Göstergesi', 'type' => 'text', 'default' => 'Ana Sayfa / Sık Sorulan Sorular' ),
+						'title'      => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
+						'subtitle'   => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Teklif, ödeme, özel ölçü üretim, kereste, ambalaj ve hırdavat hakkında en çok sorulanlar.' ),
+					),
+				),
+
+				'items' => array(
+					'label'  => 'Sorular',
+					'fields' => array(
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar (aynı grup adı bir başlık altında toplanır)',
 							'type'    => 'repeater',
-							'max'     => 12,
+							'max'     => 40,
+							'hint'    => 'Cevabı boş soru sitede ve arama verisinde görünmez; cevabı firmadan gelince doldurun. Grup adları ürün gruplarıyla aynı kalmalı (Kereste, Ambalaj, Dekorasyon, Hırdavat): ürün sayfasındaki bağlantı ürünün grubuna gider.',
 							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
 								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
 								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
 							),
 							'default' => array(
-								array(
-									'question' => 'Sevkiyat süresi nedir?',
-									'answer'   => 'Stoktaki modellerde normal koşullarda 3-5 iş günü içinde sevkiyat yapılır. Özel ölçü üretimlerde süre ölçüye göre değişir, sipariş onayında net tarih verilir.',
-								),
-								array(
-									'question' => 'Montaj dahil mi?',
-									'answer'   => 'Standart modeller kurulu teslim edilir; sahada ek montaj gerekmez. Büyük ölçülü üretimlerde parçalı sevkiyat ve yerinde kurulum yapılır.',
-								),
-								array(
-									'question' => 'Özel ölçü üretim yapıyor musunuz?',
-									'answer'   => 'Evet. Genişlik, uzunluk ve kapasite talebe göre değiştirilebilir.',
-								),
-								array(
-									'question' => 'Ahşap dış koşullara dayanıklı mı?',
-									'answer'   => 'Üretimde emprenyeli çam kerestesi kullanılır ve yüzey su bazlı boya ile korunur. Yılda bir kez bakım boyası önerilir.',
-								),
-								array(
-									'question' => 'Teslimat hangi illere yapılıyor?',
-									'answer'   => 'İstanbul ve çevre illere kendi araçlarımızla, diğer illere anlaşmalı nakliye ile gönderim yapılır.',
-								),
+								array( 'group' => 'Genel', 'question' => 'Fiyat teklifi nasıl alırım?', 'answer' => 'Ürünü, ölçüyü, adedi ve teslim adresini telefonla, e-postayla ya da iletişim formundan gönderin.' ),
+								array( 'group' => 'Genel', 'question' => 'Ödeme nasıl yapılır?', 'answer' => '' ),
+								array( 'group' => 'Genel', 'question' => 'Özel ölçüde üretim yapıyor musunuz?', 'answer' => 'Evet. Kereste, palet, sandık ve kafesi her ölçüde, ihtiyacınıza göre tasarlıyoruz. Kullandığınız ölçüleri, şartnameleri ya da proje çizimlerini gönderirseniz onlara göre üretime geçiyoruz.' ),
+								array( 'group' => 'Genel', 'question' => 'Tesisiniz nerede, ziyaret edebilir miyim?', 'answer' => 'Tesisimiz Kestanelik Mahallesi Eski Edirne Asfaltı Cad. 2125/1, Çatalca / İstanbul adresinde. Ziyarete de bekleriz.' ),
+								array( 'group' => 'Genel', 'question' => 'Sevkiyat süresi nedir?', 'answer' => '' ),
+								array( 'group' => 'Genel', 'question' => 'Teslimat hangi illere, nasıl yapılıyor?', 'answer' => '' ),
+								array( 'group' => 'Genel', 'question' => 'En az sipariş miktarı var mı?', 'answer' => '' ),
+								array( 'group' => 'Genel', 'question' => 'Toptan fiyat uygulanıyor mu?', 'answer' => '' ),
+
+								array( 'group' => 'Kereste', 'question' => 'Hangi kereste ve levha türleri var?', 'answer' => 'Kerestede kalas, çıta, rabıta (lambiri ve döşeme), maden direği, takoz ve inşaatlık / çatılık kereste; levhada OSB, kontrplak ve plywood. Güncel liste menüdeki Kereste kategorilerinde.' ),
+								array( 'group' => 'Kereste', 'question' => 'Kerestenin metreküpü nasıl hesaplanır?', 'answer' => 'Kalınlığı ve genişliği santimetreden metreye çevirin, boy ve adetle çarpın. Örneğin 5 × 20 cm kesitli, 4 m boyunda 50 adet kalas: 0,05 × 0,20 × 4 × 50 = 2 m³.' ),
+								array( 'group' => 'Kereste', 'question' => 'İstediğim ölçüde kesim yapılıyor mu?', 'answer' => '' ),
+								array( 'group' => 'Kereste', 'question' => 'Emprenyeli ya da fırınlanmış kereste var mı?', 'answer' => '' ),
+								array( 'group' => 'Kereste', 'question' => 'Levha ölçüleri nelerdir?', 'answer' => '' ),
+
+								array( 'group' => 'Ambalaj', 'question' => 'İhracat için ısıl işlem (ISPM 15) yapıyor musunuz?', 'answer' => 'Evet, ihracata uygun ısıl işlem uyguluyoruz. ISPM-15 ve HT yetki belgelerimiz ile ısıl işlem tesisimizin görselleri Katalog sayfasında.' ),
+								array( 'group' => 'Ambalaj', 'question' => 'Sandık ve kafes ölçüye göre yapılıyor mu?', 'answer' => 'Evet. Palet, sandık ve kafesi ihtiyacınıza göre tasarlıyor ya da mevcut ölçülerinizi, şartnamenizi veya proje çiziminizi alarak üretiyoruz. Tüm elemanları içeren demonte paketleri hazırlayıp sevk ediyoruz.' ),
+								array( 'group' => 'Ambalaj', 'question' => 'Euro paletin ölçüsü ve yük kapasitesi nedir?', 'answer' => '' ),
+								array( 'group' => 'Ambalaj', 'question' => 'İkinci el palet alıyor ya da satıyor musunuz?', 'answer' => '' ),
+								array( 'group' => 'Ambalaj', 'question' => 'Palet damgası teklifte belirtilir mi?', 'answer' => '' ),
+
+								array( 'group' => 'Dekorasyon', 'question' => 'Montaj dahil mi?', 'answer' => '' ),
+								array( 'group' => 'Dekorasyon', 'question' => 'Ahşap dış koşullara dayanıklı mı, bakım gerekir mi?', 'answer' => '' ),
+								array( 'group' => 'Dekorasyon', 'question' => 'Özel ölçüde yapılıyor mu?', 'answer' => '' ),
+								array( 'group' => 'Dekorasyon', 'question' => 'Sevkiyat süresi nedir?', 'answer' => '' ),
+								array( 'group' => 'Dekorasyon', 'question' => 'Teslimat hangi illere yapılıyor?', 'answer' => '' ),
+
+								array( 'group' => 'Hırdavat', 'question' => 'Katalog ya da ürün listesi var mı?', 'answer' => 'Vida, somun ve bits uç listemiz (2025) Katalog sayfasında, Belgeler sekmesinde.' ),
+								array( 'group' => 'Hırdavat', 'question' => 'Çivi ve zımba teli hangi tabancalara uyar?', 'answer' => '' ),
+								array( 'group' => 'Hırdavat', 'question' => 'Koli ve paket adetleri nedir?', 'answer' => '' ),
+								array( 'group' => 'Hırdavat', 'question' => 'Yalnızca toptan mı satıyorsunuz?', 'answer' => '' ),
 							),
 						),
+					),
+				),
+
+				'more' => array(
+					'label'  => 'Kapanış ve Bağlantılar',
+					'fields' => array(
+						'group_other'  => array( 'label' => 'Grubu boş sorular için grup adı', 'type' => 'text', 'default' => 'Genel' ),
+						'text'         => array( 'label' => 'Kapanış satırı (yanındaki numara üst şeritteki telefondur)', 'type' => 'text', 'default' => 'Sorunuzun cevabı burada yoksa arayın:' ),
+						'product_link' => array( 'label' => 'Ürün sayfasındaki bağlantı — {grup}: SSS grup adı', 'type' => 'text', 'default' => '{grup} ürünleriyle ilgili sık sorulan sorular' ),
+						'product_all'  => array( 'label' => 'Ürün sayfasındaki bağlantı (ürünün grubunda cevaplı soru yoksa)', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
 					),
 				),
 			),
@@ -1396,7 +1452,7 @@ $manifest_data = array(
 					'fields' => array(
 						'eyebrow'  => array( 'label' => 'Üst Etiket', 'type' => 'text', 'default' => 'İLETİŞİM' ),
 						'title'    => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Bize ulaşın' ),
-						'subtitle' => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Ölçülerinizi iletin, aynı gün fiyat verelim. Çatalca’daki tesisimize ziyarete de bekleriz.' ),
+						'subtitle' => array( 'label' => 'Alt Başlık', 'type' => 'textarea', 'default' => 'Ölçü ve adedi yazın, yazılı teklif gönderelim. Çatalca’daki tesisimize ziyarete de bekleriz.' ),
 					),
 				),
 

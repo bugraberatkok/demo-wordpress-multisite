@@ -99,6 +99,7 @@ return array(
 								array( 'label' => 'Ürünler', 'url' => '/urunler/' ),
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
 								array( 'label' => 'Blog', 'url' => '/blog/' ),
+								array( 'label' => 'SSS', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -127,6 +128,7 @@ return array(
 								array( 'label' => 'Ürünler', 'url' => '/urunler/' ),
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
 								array( 'label' => 'Blog', 'url' => '/blog/' ),
+								array( 'label' => 'Sık sorulan sorular', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -539,6 +541,65 @@ return array(
 						'list_title'  => array( 'label' => 'Liste Başlığı', 'type' => 'text', 'default' => 'Ne sağlar' ),
 						'list'        => array( 'label' => 'Liste (her satır bir madde)', 'type' => 'textarea', 'default' => "Pratik ve hızlı taşıma\nÜrünü dış etkenlerden korur\nNakliyedeki riski ve kaybı azaltır\nMalzemenin dağılmasını ve fazla yer kaplamasını önler" ),
 						'quote_label' => array( 'label' => 'Teklif Düğmesi', 'type' => 'text', 'default' => 'Kafes için teklif isteyin' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Sik sorulan sorular (/sss/). Cevaplar yalnizca sitenin mevcut
+		 * metinlerinden (siparis sureci, teklif listesi, belge bandi, urunler).
+		 * Cevabi bos soru firmadan cevap bekliyor (DEVAM.md): sitede ve arama
+		 * verisinde gorunmez.
+		 */
+		'faq' => array(
+			'label'      => 'Sık Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'head.title',
+				'description' => 'head.text',
+			),
+			'components' => array(
+				'head'  => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
+						'text' => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'ISPM 15, ölçüler, sandık ve kafes, teklif ve teslim hakkında en çok sorulanlar.' ),
+					),
+				),
+				'items' => array(
+					'label'  => 'Sorular',
+					'fields' => array(
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar',
+							'type'    => 'repeater',
+							'max'     => 40,
+							'hint'    => 'Cevabı boş soru sitede ve arama verisinde görünmez; cevabı firmadan gelince doldurun. Aynı grup adı bir başlık altında toplanır.',
+							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
+								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
+								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'group' => 'Ürünler ve ihracat', 'question' => 'ISPM 15 ısıl işlem yapıyor musunuz?', 'answer' => 'Evet. Tarım ve Orman Bakanlığı’nın verdiği işaretleme izniyle (Ahşap Ambalaj Malzemesi İşaretleme İzin Belgesi, TR-1080-HT) ihracat siparişlerini ısıl işlemden geçirip ISPM 15’e uygun olarak damgalıyoruz.' ),
+								array( 'group' => 'Ürünler ve ihracat', 'question' => 'Hangi ölçülerde üretiyorsunuz?', 'answer' => 'Standart ölçülerin yanında istediğiniz ebatta üretiyoruz. Paletlerde Euro palet (80 × 120 cm), kapalı palet (100 × 120 cm), 9 farklı boyutta CP palet, türpal ve ikinci el palet var. Özel ölçüde palet; yük durumu, yolculuk süresi ve taşınacak yükün ağırlığına göre tasarlanır.' ),
+								array( 'group' => 'Ürünler ve ihracat', 'question' => 'Sandık mı, kafes mi?', 'answer' => 'Ahşap sandık ağır yükleri korur; sevkiyat, yükleme, depolama ve yurt dışı taşımacılıkta kullanılır. Ahşap kafes, endüstri ve sanayide malzeme veya ürünlerin kolay sevkiyatı için tercih edilir; malzemenin dağılmasını ve fazla yer kaplamasını önler.' ),
+								array( 'group' => 'Sipariş ve teslim', 'question' => 'Teklif için ne göndermeliyim?', 'answer' => 'Ürün tipi (palet, sandık, kafes), ölçü (örneğin 1200 × 800 mm), adet, taşınacak yük (kilogram olarak), ihracat olup olmadığı (öyleyse ISPM 15 damgası gerekir) ve teslim yeri (adres ya da tesisten araca yükleme).' ),
+								array( 'group' => 'Sipariş ve teslim', 'question' => 'Sipariş nasıl ilerler?', 'answer' => '' ),
+								array( 'group' => 'Sipariş ve teslim', 'question' => 'Teslimat nasıl yapılıyor?', 'answer' => '' ),
+								array( 'group' => 'Sipariş ve teslim', 'question' => 'Üretim ve teslim ne kadar sürer?', 'answer' => '' ),
+								array( 'group' => 'Sipariş ve teslim', 'question' => 'Ödeme nasıl yapılır?', 'answer' => '' ),
+							),
+						),
+					),
+				),
+				'more'  => array(
+					'label'  => 'Kapanış',
+					'fields' => array(
+						'group_other' => array( 'label' => 'Grubu boş sorular için grup adı', 'type' => 'text', 'default' => 'Genel' ),
+						'text'        => array( 'label' => 'Kapanış satırı (yanındaki numara sitenin telefonudur)', 'type' => 'text', 'default' => 'Sorunuzun cevabı burada yoksa arayın:' ),
 					),
 				),
 			),

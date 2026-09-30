@@ -181,6 +181,7 @@ return array(
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
 								array( 'label' => 'Ürünlerimiz', 'url' => '/urunlerimiz/' ),
 								array( 'label' => 'Blog', 'url' => '/blog/' ),
+								array( 'label' => 'SSS', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -229,7 +230,7 @@ return array(
 					'label'  => 'Giriş (Hero)',
 					'fields' => array(
 						'title'           => array( 'label' => 'Başlık', 'type' => 'textarea', 'default' => "İsteğe özel ölçülerde\npalet üretimi" ),
-						'lead'            => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Ahşap palet, Euro palet, ahşap kafes ve sandık. 50 yıldır orman ürünleri sektöründe, zamanında teslimat ve müşteri memnuniyetiyle çalışıyoruz.' ),
+						'lead'            => array( 'label' => 'Alt Metin', 'type' => 'textarea', 'default' => 'Ahşap palet, Euro palet, ahşap kafes ve sandık. 50 yıldır orman ürünleri sektöründe, müşteri memnuniyetini esas alarak çalışıyoruz.' ),
 						'primary_label'   => array( 'label' => 'Birinci Düğme Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
 						'primary_url'     => array( 'label' => 'Birinci Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/#teklif' ),
 						'secondary_label' => array( 'label' => 'İkinci Düğme Metni', 'type' => 'text', 'default' => 'Ürünleri inceleyin' ),
@@ -281,7 +282,7 @@ return array(
 					'label'  => 'Ürün Çeşitlerimiz',
 					'fields' => array(
 						'title'      => array( 'label' => 'Bölüm Başlığı', 'type' => 'text', 'default' => 'Ürün çeşitlerimiz' ),
-						'text'       => array( 'label' => 'Bölüm Metni', 'type' => 'textarea', 'default' => 'İsteğe özel ve standart ölçülerde ahşap palet, ahşap kafes ve ahşap sandık üretiyoruz. Zamanında teslimat ve müşteri memnuniyeti çalışma kültürümüzün temeli.' ),
+						'text'       => array( 'label' => 'Bölüm Metni', 'type' => 'textarea', 'default' => 'İsteğe özel ve standart ölçülerde ahşap palet, ahşap kafes ve ahşap sandık üretiyoruz. Müşteri memnuniyeti çalışma kültürümüzün temeli.' ),
 						'link_label' => array( 'label' => 'Bağlantı Metni', 'type' => 'text', 'default' => 'Tüm ürünler' ),
 					),
 				),
@@ -571,6 +572,65 @@ return array(
 						'title'        => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Ürünlerimiz' ),
 						'button_label' => array( 'label' => 'Düğme Metni', 'type' => 'text', 'default' => 'Teklif alın' ),
 						'button_url'   => array( 'label' => 'Düğme Adresi', 'type' => 'url', 'default' => '/iletisim/#teklif' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Sik sorulan sorular (/sss/). Cevaplar yalnizca sitenin mevcut
+		 * metinlerinden (urun sayfalari, ihracat bandi, teklif formu). Cevabi
+		 * bos soru firmadan cevap bekliyor (DEVAM.md): sitede ve arama
+		 * verisinde gorunmez.
+		 */
+		'faq' => array(
+			'label'      => 'Sık Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'head.title',
+				'description' => 'head.lead',
+			),
+			'components' => array(
+				'head'  => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
+						'lead' => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Palet ölçüleri, Euro palet, ihracat ve teklif hakkında en çok sorulanlar.' ),
+					),
+				),
+				'items' => array(
+					'label'  => 'Sorular',
+					'fields' => array(
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar',
+							'type'    => 'repeater',
+							'max'     => 40,
+							'hint'    => 'Cevabı boş soru sitede ve arama verisinde görünmez; cevabı firmadan gelince doldurun. Aynı grup adı bir başlık altında toplanır.',
+							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
+								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
+								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'group' => 'Ürünler', 'question' => 'Hangi ölçülerde palet üretiyorsunuz?', 'answer' => 'İsteğe özel ve standart ölçülerde ahşap palet, kafes ve sandık üretiyoruz. Euro palette standart ölçüler 80 × 120, 100 × 120, 120 × 100 ve 60 × 80 cm; en çok tercih edilen 80 × 120 cm.' ),
+								array( 'group' => 'Ürünler', 'question' => 'Euro palet ile ahşap palet arasındaki fark nedir?', 'answer' => 'Euro palet, Uluslararası Demiryolları Birliği onayıyla ülkeler arası taşımada kullanılan, damgalı ve standart ölçülü bir palettir; damga onu diğer paletlerden ayırır. En çok tercih edilen 80 × 120 cm modeli yaklaşık 35 kg’dır ve 1500 kg yayılı yük taşır. Ahşap palet ise isteğe özel ölçüde, nakliyat, lojistik ve depolamada kullanılmak üzere üretilir.' ),
+								array( 'group' => 'Ürünler', 'question' => 'İhracat için damgalı palet var mı?', 'answer' => 'Evet. Damgalı Euro paletleri ve ihracat sandıklarını taşınacak yükün ağırlığına göre üretiyoruz.' ),
+								array( 'group' => 'Ürünler', 'question' => 'İkinci el palet satıyor musunuz?', 'answer' => 'Evet. Dilediğiniz ölçülerdeki paletleri sıfır ya da ikinci el olarak temin edebilirsiniz; ikinci el palet sıfıra göre daha uygun fiyatlıdır. Güncel stok ve fiyat için bizimle iletişime geçin.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Teklif için ne göndermeliyim?', 'answer' => 'Ürünü, en, boy ve yükseklik ölçülerini ve tahmini adedi yazmanız yeterli; örneğin 80 × 120 cm, 200 adet. Teklif formundan, telefonla ya da WhatsApp’tan iletebilirsiniz.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Teslimat ve nakliye nasıl yapılıyor?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Sevkiyat süresi nedir?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'En az kaç adet sipariş verilebilir?', 'answer' => '' ),
+							),
+						),
+					),
+				),
+				'more'  => array(
+					'label'  => 'Kapanış',
+					'fields' => array(
+						'group_other' => array( 'label' => 'Grubu boş sorular için grup adı', 'type' => 'text', 'default' => 'Genel' ),
+						'text'        => array( 'label' => 'Kapanış satırı (yanındaki numara sitenin telefonudur)', 'type' => 'text', 'default' => 'Sorunuzun cevabı burada yoksa arayın:' ),
 					),
 				),
 			),

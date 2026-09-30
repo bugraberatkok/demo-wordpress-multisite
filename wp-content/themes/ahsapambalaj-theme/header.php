@@ -10,7 +10,7 @@ $logo    = nwcs_image( 'global', 'header', 'logo_image', 'medium' );
 if ( empty( $logo['url'] ) ) {
 	$logo['url'] = get_theme_file_uri( 'assets/img/logo-ahsap-ambalaj.svg' );
 }
-$menu    = nwcs_rows( 'global', 'header', 'menu' );
+$menu    = ahsapambalaj_menu();
 $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms]', 'delay-[240ms]', 'delay-[290ms]' );
 ?>
 <!DOCTYPE html>

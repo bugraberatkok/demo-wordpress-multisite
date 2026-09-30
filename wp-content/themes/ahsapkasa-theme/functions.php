@@ -63,10 +63,92 @@ function ahsapkasa_assets(): void {
 	wp_enqueue_script( 'ahsapkasa-media', get_theme_file_uri( 'assets/media.js' ), array(), $ver( 'assets/media.js' ), true );
 }
 
+/*
+ * Temanin sonradan ekledigi sayfalar. Sayfalar ilk kurulumda betikle
+ * (scripts/seed-ahsapkasa.php) acildi; canlida WP-CLI olmadigi icin yeni
+ * sayfayi tema kendisi acar: yonetici panele ilk girdiginde, surum secenegi
+ * degismisse bir kez. Ayni adreste yayinda ya da taslak sayfa varsa dokunulmaz
+ * (cop kutusundaki sayfa '__trashed' ekiyle adres degistirdigi icin sayilmaz).
+ *
+ * Surum 1: Sik Sorulan Sorular (/sss/).
+ */
+const AHSAPKASA_PAGES_VERSION = '1';
+
+add_action( 'admin_init', 'ahsapkasa_maybe_ensure_pages' );
+function ahsapkasa_maybe_ensure_pages(): void {
+	// Yalnizca yonetici ya da WP-CLI: admin_init anonim admin-post.php
+	// (teklif formu) isteklerinde de tetiklenir.
+	if ( ! current_user_can( 'manage_options' ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		return;
+	}
+
+	if ( AHSAPKASA_PAGES_VERSION === get_option( 'ahsapkasa_pages_version' ) ) {
+		return;
+	}
+
+	$pages = array(
+		'sss' => 'Sık Sorulan Sorular',
+	);
+
+	foreach ( $pages as $slug => $title ) {
+		if ( ! get_page_by_path( $slug, OBJECT, 'page' ) ) {
+			wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_name'   => $slug,
+					'post_title'  => $title,
+				)
+			);
+		}
+	}
+
+	update_option( 'ahsapkasa_pages_version', AHSAPKASA_PAGES_VERSION );
+}
+
 add_action( 'wp_head', 'ahsapkasa_preconnect', 1 );
 function ahsapkasa_preconnect(): void {
 	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
 	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+}
+
+/**
+ * Ust menu ve alt bilgi satirlari. /sss/ baglantisi yalnizca sayfa acilmis
+ * (yayinda) ve en az bir cevapli soru varken gorunur (cevabi bos soru sitede
+ * gorunmez; bos ya da henuz olmayan sayfaya menuden gidilmesin). Panel onizlemesinde satir kalir ki
+ * duzenlenebilsin. Anahtarlar korunur: panel isaretleri satir sirasini
+ * bunlardan okur.
+ */
+function ahsapkasa_menu(): array {
+	$menu = nwcs_rows( 'global', 'header', 'menu' );
+
+	$page = get_page_by_path( 'sss', OBJECT, 'page' );
+
+	if ( ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) || ( $page && 'publish' === $page->post_status && function_exists( 'nwcs_faq_rows' ) && nwcs_faq_rows( 'faq' ) ) ) {
+		return $menu;
+	}
+
+	return array_filter(
+		$menu,
+		static fn( $item ): bool => '/sss' !== untrailingslashit( (string) wp_parse_url( trim( (string) ( $item['url'] ?? '' ) ), PHP_URL_PATH ) )
+	);
+}
+
+/**
+ * Cok paragrafli cevap: bos satirla ayrilan her blok bir paragraf.
+ */
+function ahsapkasa_paragraphs( string $text ): string {
+	$html = '';
+
+	foreach ( preg_split( '/\R\s*\R/u', trim( $text ) ) ?: array() as $block ) {
+		$block = trim( $block );
+
+		if ( '' !== $block ) {
+			$html .= '<p>' . nl2br( esc_html( $block ) ) . '</p>';
+		}
+	}
+
+	return $html;
 }
 
 /**

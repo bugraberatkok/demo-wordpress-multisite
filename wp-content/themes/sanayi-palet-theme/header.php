@@ -40,7 +40,7 @@ $sub  = nwcs_field( 'global', 'header', 'logo_sub' );
 		<div class="sp-header__panel" id="sp-menu">
 			<nav class="sp-nav" aria-label="Ana menü" <?php nwcs_edit_attr( 'global', 'header', 'menu' ); ?>>
 				<ul>
-					<?php foreach ( nwcs_rows( 'global', 'header', 'menu' ) as $index => $item ) : ?>
+					<?php foreach ( sanayi_palet_hide_missing_sss( nwcs_rows( 'global', 'header', 'menu' ) ) as $index => $item ) : ?>
 						<?php
 						$url     = (string) ( $item['url'] ?? '' );
 						$current = sanayi_palet_is_current( $url );

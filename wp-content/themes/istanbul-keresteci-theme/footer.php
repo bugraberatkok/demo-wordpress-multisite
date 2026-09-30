@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
 			<nav class="ik-footer__col" aria-labelledby="ik-footer-pages">
 				<h2 class="ik-footer__title" id="ik-footer-pages" <?php nwcs_edit_attr( 'global', 'footer', 'pages_title' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'pages_title' ) ); ?></h2>
 				<ul class="ik-footer__list" <?php nwcs_edit_attr( 'global', 'footer', 'links' ); ?>>
-					<?php foreach ( nwcs_rows( 'global', 'footer', 'links' ) as $link ) : ?>
+					<?php foreach ( ik_hide_missing_sss( nwcs_rows( 'global', 'footer', 'links' ) ) as $link ) : ?>
 						<li><a href="<?php echo esc_url( ik_link( $link['url'] ?? '' ) ); ?>"><?php echo esc_html( $link['label'] ?? '' ); ?></a></li>
 					<?php endforeach; ?>
 				</ul>

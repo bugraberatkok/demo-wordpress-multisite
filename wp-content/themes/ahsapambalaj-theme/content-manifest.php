@@ -53,6 +53,7 @@ $manifest_data = array(
 								array( 'label' => 'Ana sayfa', 'url' => '/' ),
 								array( 'label' => 'Hakkımızda', 'url' => '/hakkimizda/' ),
 								array( 'label' => 'Hizmetlerimiz', 'url' => '/hizmetlerimiz/' ),
+								array( 'label' => 'SSS', 'url' => '/sss/' ),
 								array( 'label' => 'İletişim', 'url' => '/iletisim/' ),
 							),
 						),
@@ -287,6 +288,67 @@ $manifest_data = array(
 					'fields' => array(
 						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Yükünüz bu dört gruba uymuyor mu?' ),
 						'text'  => array( 'label' => 'Metin', 'type' => 'textarea', 'default' => 'Proje sevkiyatı ya da alışılmadık bir yük için ölçüleri ve bir fotoğraf gönderin; nasıl ambalajlanacağını birlikte değerlendirelim.' ),
+					),
+				),
+			),
+		),
+
+		/*
+		 * Sik sorulan sorular (/sss/). Cevaplar yalnizca sitenin mevcut
+		 * metinlerinden (hizmetler, hakkimizda, teklif formu). Cevabi bos
+		 * soru firmadan cevap bekliyor (DEVAM.md): sitede ve arama verisinde
+		 * gorunmez. Menudeki SSS baglantisi yalnizca cevapli soru varken
+		 * gorunur (functions.php).
+		 */
+		'faq' => array(
+			'label'      => 'Sık Sorulan Sorular',
+			'path'       => '/sss/',
+			'seo_source' => array(
+				'type'        => 'FAQPage',
+				'questions'   => 'items.rows',
+				'title'       => 'head.title',
+				'description' => 'head.lead',
+			),
+			'components' => array(
+				'head'  => array(
+					'label'  => 'Sayfa Başlığı',
+					'fields' => array(
+						'title' => array( 'label' => 'Başlık', 'type' => 'text', 'default' => 'Sık sorulan sorular' ),
+						'lead' => array( 'label' => 'Açıklama', 'type' => 'textarea', 'default' => 'Sanayi ve ihracat yükleri için ahşap sandık, kafes ve palet hakkında en çok sorulanlar.' ),
+					),
+				),
+				'items' => array(
+					'label'  => 'Sorular',
+					'fields' => array(
+						'rows' => array(
+							'label'   => 'Soru ve Cevaplar',
+							'type'    => 'repeater',
+							'max'     => 40,
+							'hint'    => 'Cevabı boş soru sitede ve arama verisinde görünmez; cevabı firmadan gelince doldurun. Aynı grup adı bir başlık altında toplanır.',
+							'fields'  => array(
+								'group'    => array( 'label' => 'Grup', 'type' => 'text' ),
+								'question' => array( 'label' => 'Soru', 'type' => 'text' ),
+								'answer'   => array( 'label' => 'Cevap', 'type' => 'textarea' ),
+							),
+							'default' => array(
+								array( 'group' => 'Ürünler', 'question' => 'Hangi ahşap ambalajları üretiyorsunuz?', 'answer' => 'Ahşap palet (ağır ve standart dışı yükler için; kardonlu palet seçeneği de var), ahşap sandık (makineyi, kalıbı ya da yedek parçayı dört yandan koruyan kapalı sandık), ahşap kafes (açık iskelet, yükün ölçüsünde) ve ihracat şartnamenize göre ahşap ambalaj.' ),
+								array( 'group' => 'Ürünler', 'question' => 'İhracat ambalajı ISPM 15’e uygun mu?', 'answer' => '' ),
+								array( 'group' => 'Ürünler', 'question' => 'Yüküm bu gruplara uymuyorsa ne yapmalıyım?', 'answer' => 'Proje sevkiyatı ya da alışılmadık bir yük için ölçüleri ve bir fotoğraf gönderin; nasıl ambalajlanacağını birlikte değerlendirelim.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Teklif için ne göndermeliyim?', 'answer' => 'Yükün ölçüsü (en × boy × yükseklik), ağırlığı ve gideceği yer yeterli; örneğin 220 × 140 × 160 cm, 1.800 kg, 3 sandık. Çiziminiz ya da fotoğrafınız varsa e-postayla gönderin.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Bir ambalaj işi nasıl ilerler?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Büyük ambalajlar nasıl gönderiliyor?', 'answer' => 'Büyük ambalajları bütün parçalarıyla demonte paketler hâlinde gönderebiliriz.' ),
+								array( 'group' => 'Sipariş', 'question' => 'Üretim ve teslim ne kadar sürer?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Teslimat ve nakliye nasıl yapılıyor?', 'answer' => '' ),
+								array( 'group' => 'Sipariş', 'question' => 'Ödeme nasıl yapılır?', 'answer' => '' ),
+							),
+						),
+					),
+				),
+				'more'  => array(
+					'label'  => 'Kapanış',
+					'fields' => array(
+						'group_other' => array( 'label' => 'Grubu boş sorular için grup adı', 'type' => 'text', 'default' => 'Genel' ),
+						'text'        => array( 'label' => 'Kapanış satırı (yanındaki numara sitenin telefonudur)', 'type' => 'text', 'default' => 'Sorunuzun cevabı burada yoksa arayın:' ),
 					),
 				),
 			),

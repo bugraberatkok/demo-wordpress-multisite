@@ -5,7 +5,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$menu = nwcs_rows( 'global', 'header', 'menu' );
+$menu = ahsapkasa_menu();
 ?>
 </main>
 

@@ -62,8 +62,9 @@ function kocist_setup(): void {
  * Surum 2: Insan Kaynaklari ve Blog sayfalari, yazilar sayfasi ayari ve
  * ilk kurulum blog yazilari (inc/blog.php).
  * Surum 4: Banka Bilgilerimiz sayfasi.
+ * Surum 5: Sik Sorulan Sorular sayfasi (/sss/).
  */
-const KOCIST_PAGES_VERSION = '4';
+const KOCIST_PAGES_VERSION = '5';
 
 add_action( 'after_switch_theme', 'kocist_ensure_pages' );
 add_action( 'admin_init', 'kocist_maybe_ensure_pages' );
@@ -99,6 +100,7 @@ function kocist_ensure_pages(): void {
 		'blog'             => 'Blog – Haberler',
 		'katalog'          => 'Katalog',
 		'banka-bilgilerimiz' => 'Banka Bilgilerimiz',
+		'sss'              => 'Sık Sorulan Sorular',
 	);
 
 	$ids = array();
@@ -136,6 +138,9 @@ function kocist_ensure_pages(): void {
 
 /**
  * Sayfayi acar; ayni adres adinda sayfa varsa ona dokunmadan kimligini dondurur.
+ * Not: get_page_by_path cop kutusundaki sayfayi bulmaz (WordPress cope atilan
+ * sayfanin adresine '__trashed' ekler); o durumda yeni sayfa acilir. 'trash'
+ * kontrolu yalnizca bu eki almamis eski kayitlar icin.
  */
 function kocist_ensure_page( string $slug, string $title ): int {
 	$page = get_page_by_path( $slug, OBJECT, 'page' );
@@ -334,6 +339,16 @@ function kocist_assets(): void {
 		);
 	}
 
+	// Sik sorulan sorular.
+	if ( is_page( 'sss' ) ) {
+		wp_enqueue_style(
+			'kocist-faq',
+			get_theme_file_uri( 'assets/css/faq.css' ),
+			array( 'kocist-style' ),
+			(string) filemtime( get_theme_file_path( 'assets/css/faq.css' ) )
+		);
+	}
+
 	// Kurumsal ve Insan Kaynaklari sayfalari.
 	if ( is_page( array( 'kurumsal', 'insan-kaynaklari' ) ) ) {
 		wp_enqueue_style(
@@ -491,7 +506,7 @@ function kocist_menu_items(): array {
 				);
 			}
 		} elseif ( '' !== $submenu ) {
-			foreach ( nwcs_rows( 'global', $submenu, 'items' ) as $child_index => $child ) {
+			foreach ( kocist_hide_missing_sss( nwcs_rows( 'global', $submenu, 'items' ) ) as $child_index => $child ) {
 				$child_label = trim( (string) ( $child['label'] ?? '' ) );
 
 				if ( '' === $child_label ) {
@@ -1504,3 +1519,28 @@ add_filter(
 	'nwcs_seo_default_logo',
 	static fn() => function_exists( 'nwcs_seo_theme_file_image' ) ? nwcs_seo_theme_file_image( 'assets/img/logo.png', 'Koçist Orman Ürünleri' ) : 0
 );
+
+/**
+ * Menu ve alt bilgi satirlarindan /sss/ baglantisini, sayfa henuz acilmamissa
+ * (yayinda degilse) cikarir. Sayfa yonetici panele ilk girdiginde acilir;
+ * o zamana kadar ziyaretci 404'e gitmesin, onbellege 404 baglantisi girmesin.
+ * Panel onizlemesinde satir kalir ki duzenlenebilsin. Anahtarlar korunur:
+ * panel isaretleri satir sirasini bunlardan okur.
+ */
+function kocist_hide_missing_sss( array $rows ): array {
+	static $has_page = null;
+
+	if ( null === $has_page ) {
+		$page     = get_page_by_path( 'sss', OBJECT, 'page' );
+		$has_page = $page && 'publish' === $page->post_status;
+	}
+
+	if ( $has_page || ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
+		return $rows;
+	}
+
+	return array_filter(
+		$rows,
+		static fn( $row ): bool => '/sss' !== untrailingslashit( (string) wp_parse_url( trim( (string) ( $row['url'] ?? '' ) ), PHP_URL_PATH ) )
+	);
+}

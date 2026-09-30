@@ -1,0 +1,127 @@
+/*
+ * Sik sorulan sorular (/sss/).
+ *
+ * Soru listesi istif gibi: gruplar kabuk renginde kalin ayracla ayrilir
+ * (urun istifindeki ayraclarla ayni), sorular ince cizgiyle. Kart ve numara
+ * yok. Grup adi dar ve agir (basliklarin genislik ekseni), soru yari dar.
+ * Genis ekranda grup adi solda ve yapisik, sorular sagda.
+ */
+
+.ik-sss { padding-top: clamp(2.5rem, 6vw, 4.5rem); }
+
+.ik-sss__group {
+	display: grid;
+	gap: 0.75rem;
+	padding-block: 1.5rem 2.5rem;
+	border-top: 4px solid var(--kabuk);
+	scroll-margin-top: 6rem;
+}
+
+.ik-sss__title {
+	font-size: clamp(2rem, 4.4vw, 3rem);
+	font-weight: 900;
+	color: var(--golge);
+}
+
+.ik-sss__list { min-width: 0; }
+
+.ik-sss__item + .ik-sss__item { border-top: 1px solid var(--cizgi); }
+
+.ik-sss__q {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1.25rem;
+	min-height: 44px;
+	padding-block: 1.125rem;
+	list-style: none;
+	cursor: pointer;
+	font-size: 1.375rem;
+	font-weight: 700;
+	font-stretch: 75%;
+	font-variation-settings: "wdth" var(--yari-dar);
+	line-height: 1.2;
+	color: var(--murekkep);
+}
+
+.ik-sss__q::-webkit-details-marker { display: none; }
+.ik-sss__q::marker { content: ""; }
+
+.ik-sss__q:hover { color: var(--golge); }
+.ik-sss__q:hover > span:first-child { text-decoration: underline; text-decoration-color: var(--filiz); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+/* Arti / eksi */
+.ik-sss__icon {
+	position: relative;
+	flex: none;
+	width: 18px;
+	height: 18px;
+	margin-top: 0.2rem;
+	color: var(--kabuk);
+}
+
+.ik-sss__icon::before,
+.ik-sss__icon::after {
+	content: "";
+	position: absolute;
+	top: 8px;
+	left: 0;
+	width: 18px;
+	height: 2px;
+	background: currentColor;
+	transition: transform 0.2s ease;
+}
+
+.ik-sss__icon::after { transform: rotate(90deg); }
+.ik-sss__item[open] .ik-sss__icon::after { transform: rotate(0deg); }
+
+.ik-sss__a {
+	max-width: 70ch;
+	padding: 0 2.5rem 1.5rem 0;
+	color: var(--toz);
+	font-size: 1.125rem;
+	line-height: 1.6;
+}
+
+.ik-sss__a > p + p { margin-top: 0.75em; }
+
+.ik-sss__more {
+	padding-top: 1.75rem;
+	border-top: 4px solid var(--kabuk);
+	font-size: 1.1875rem;
+	line-height: 1.5;
+}
+
+.ik-sss__more a {
+	margin-left: 0.25em;
+	color: var(--murekkep);
+	font-weight: 800;
+	white-space: nowrap;
+	text-decoration: underline;
+	text-decoration-color: var(--recine);
+	text-decoration-thickness: 3px;
+	text-underline-offset: 4px;
+}
+
+.ik-sss__more a:hover { color: var(--golge); text-decoration-color: var(--recine-koyu); }
+
+@media (min-width: 900px) {
+	.ik-sss__group {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+		gap: 3rem;
+	}
+
+	.ik-sss__title {
+		position: sticky;
+		top: 6rem;
+		align-self: start;
+		padding-top: 1rem;
+	}
+
+	.ik-sss__more { padding-left: calc((100% - 3rem) / 3.4 + 3rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ik-sss__icon::before,
+	.ik-sss__icon::after { transition: none; }
+}

@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 
 			<nav class="sp-footer__nav" aria-label="Alt menü" <?php nwcs_edit_attr( 'global', 'footer', 'links' ); ?>>
 				<ul>
-					<?php foreach ( nwcs_rows( 'global', 'footer', 'links' ) as $index => $link ) : ?>
+					<?php foreach ( sanayi_palet_hide_missing_sss( nwcs_rows( 'global', 'footer', 'links' ) ) as $index => $link ) : ?>
 						<li><a href="<?php echo esc_url( sanayi_palet_link( $link['url'] ?? '' ) ); ?>" <?php nwcs_edit_attr( 'global', 'footer', 'links', (int) $index, 'label' ); ?>><?php echo esc_html( $link['label'] ?? '' ); ?></a></li>
 					<?php endforeach; ?>
 				</ul>

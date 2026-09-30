@@ -64,6 +64,50 @@ function ip_preconnect(): void {
 	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
 }
 
+/*
+ * Temanin sonradan ekledigi sayfalar. Sayfalar ilk kurulumda betikle
+ * (scripts/seed-istanbulpaletci.php) acildi; canlida WP-CLI olmadigi icin
+ * yeni sayfayi tema kendisi acar: yonetici panele ilk girdiginde, surum
+ * secenegi degismisse bir kez. Ayni adreste yayinda ya da taslak sayfa varsa
+ * dokunulmaz (cop kutusundaki sayfa '__trashed' ekiyle adres degistirdigi icin
+ * sayilmaz); surum secenegi yazildiktan sonra silinen sayfa geri gelmez.
+ *
+ * Surum 1: Sik Sorulan Sorular (/sss/).
+ */
+const IP_PAGES_VERSION = '1';
+
+add_action( 'admin_init', 'ip_maybe_ensure_pages' );
+function ip_maybe_ensure_pages(): void {
+	// Yalnizca yonetici ya da WP-CLI: admin_init anonim admin-post.php
+	// (teklif formu) isteklerinde de tetiklenir.
+	if ( ! current_user_can( 'manage_options' ) && ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		return;
+	}
+
+	if ( IP_PAGES_VERSION === get_option( 'ip_pages_version' ) ) {
+		return;
+	}
+
+	$pages = array(
+		'sss' => 'Sık Sorulan Sorular',
+	);
+
+	foreach ( $pages as $slug => $title ) {
+		if ( ! get_page_by_path( $slug, OBJECT, 'page' ) ) {
+			wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_name'   => $slug,
+					'post_title'  => $title,
+				)
+			);
+		}
+	}
+
+	update_option( 'ip_pages_version', IP_PAGES_VERSION );
+}
+
 /* ====================================================================== *
  * Genel yardimcilar
  * ====================================================================== */
@@ -747,5 +791,30 @@ function ip_favicon(): void {
 		esc_url( get_theme_file_uri( 'assets/favicon-32.png' ) ),
 		esc_url( get_theme_file_uri( 'assets/favicon.svg' ) ),
 		esc_url( get_theme_file_uri( 'assets/apple-touch-icon.png' ) )
+	);
+}
+
+/**
+ * Menu ve alt bilgi satirlarindan /sss/ baglantisini, sayfa henuz acilmamissa
+ * (yayinda degilse) cikarir. Sayfa yonetici panele ilk girdiginde acilir;
+ * o zamana kadar ziyaretci 404'e gitmesin, onbellege 404 baglantisi girmesin.
+ * Panel onizlemesinde satir kalir ki duzenlenebilsin. Anahtarlar korunur:
+ * panel isaretleri satir sirasini bunlardan okur.
+ */
+function ip_hide_missing_sss( array $rows ): array {
+	static $has_page = null;
+
+	if ( null === $has_page ) {
+		$page     = get_page_by_path( 'sss', OBJECT, 'page' );
+		$has_page = $page && 'publish' === $page->post_status;
+	}
+
+	if ( $has_page || ( function_exists( 'nwcs_is_preview' ) && nwcs_is_preview() ) ) {
+		return $rows;
+	}
+
+	return array_filter(
+		$rows,
+		static fn( $row ): bool => '/sss' !== untrailingslashit( (string) wp_parse_url( trim( (string) ( $row['url'] ?? '' ) ), PHP_URL_PATH ) )
 	);
 }
