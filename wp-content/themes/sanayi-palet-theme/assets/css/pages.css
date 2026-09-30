@@ -432,7 +432,11 @@ textarea.sp-field__input { resize: vertical; }
 
 .sp-group-product__media { border-radius: var(--kose); overflow: hidden; }
 
-.sp-group-product__image { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+/* Urun fotograflari 1280x1714 dikey (firmanin istegi): kutu da bu oranda. */
+.sp-group-product__image { width: 100%; aspect-ratio: 1280 / 1714; object-fit: cover; }
+.sp-group-product__image.nwcs-ph { aspect-ratio: 1280 / 1714 !important; }
+.sp-group-product__media { width: 100%; max-width: 30rem; margin-inline: auto; }
+@media (min-width: 900px) { .sp-group-product__media { justify-self: center; } }
 
 .sp-group-product__text { max-width: 36rem; margin-top: 1.25rem; font-size: 1.125rem; }
 

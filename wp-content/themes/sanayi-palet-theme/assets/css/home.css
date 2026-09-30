@@ -27,17 +27,20 @@
 	background: var(--beton-acik);
 }
 
+/* Urun fotograflari 1280x1714 dikey (firmanin istegi): kutu da bu oranda,
+   fotograf kirpilmaz. Yer tutucu (eklentinin satir ici 4:3 orani) ayni oranda. */
 .sp-range__image,
 .sp-range__media .sp-placeholder {
 	width: 100%;
-	aspect-ratio: 4 / 3;
+	aspect-ratio: 1280 / 1714;
 	object-fit: cover;
 }
+.sp-range__image.nwcs-ph { aspect-ratio: 1280 / 1714 !important; }
 
 .sp-range__noimage {
 	display: grid;
 	place-items: center;
-	aspect-ratio: 4 / 3;
+	aspect-ratio: 1280 / 1714;
 	background: var(--cam);
 	color: var(--yanik);
 }

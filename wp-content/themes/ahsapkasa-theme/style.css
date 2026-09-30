@@ -12,16 +12,22 @@ Text Domain: ahsapkasa
 /* Gorunum kurallarinin tamami assets/tailwind.css icindedir.
    Bu dosya yalnizca tema basligini tasir. */
 
-/* Urun kartlari (Hizmetlerimiz): gorsel buyudu. Mobilde ince serit yerine
-   kareye yakin; genis ekranda kart uzar ve gorsel kartin yarisindan fazlasini
-   alir. Katmansiz kural, Tailwind siniflarini (h-56, sm:w-[50%]) ezer. */
+/* Urun kartlari (Hizmetlerimiz): gorsel buyudu; urun fotograflari 1280x1714
+   dikey (firmanin istegi), kutu da bu oranda: fotograf kirpilmaz. Genis ekranda
+   gorsel kartin yarisindan fazlasini alir. Katmansiz kural, Tailwind
+   siniflarini (h-56, sm:w-[50%]) ezer. */
+.product-card__shot { height: auto; aspect-ratio: 1280 / 1714; }
+/* 72rem altinda kart dar: gorsel yazinin ustunde, kart genisliginde (yan
+   yanayken yazi dikey gorselden uzun kalip altinda bos alan birakiyordu). */
+@media (max-width: 71.99rem) {
+	.product-card { flex-direction: column-reverse; }
+	.product-card__shot { width: 100%; }
+}
 @media (max-width: 39.99rem) {
-	.product-card__shot { height: auto; aspect-ratio: 1 / 1; max-height: 26rem; }
+	.product-card__shot { max-width: 26rem; margin-inline: auto; }
 }
-@media (min-width: 40rem) {
-	.product-card { min-height: 22rem; }
-}
-@media (min-width: 64rem) {
-	.product-card { min-height: 30rem; }
+/* Kart yuksekligi dikey gorselden gelir (eski en az yukseklik, gorselin
+   altinda bos serit birakiyordu). */
+@media (min-width: 80rem) {
 	.product-card__shot { width: 56%; }
 }
