@@ -1328,7 +1328,7 @@ Kullanıcı kararı. Toplu Güncelleme kuralları genişletildi (`includes/admin
 - Tek telefon alanı olan temalarda (Koçist, İthal/Kavak Keresteci) cep numarası metin
   olarak görünmez, WhatsApp bağlantısında durur.
 
-Canlıda: Git deploy'dan sonra Ağ yönetimi → İçerik Stüdyosu → Toplu Güncelleme → Uygula
+Canlıda: Git deploy'dan sonra Ağ yönetimi → Geliştirici → Toplu Güncelleme → Uygula
 (veritabanı Git ile taşınmaz).
 
 ## Ürün Havuzu: detay başlıkları ve kategori bazlı Excel (0.21.0, 29 Eylül 2026)

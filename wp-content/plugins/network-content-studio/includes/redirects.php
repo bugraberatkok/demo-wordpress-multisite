@@ -5,7 +5,7 @@
  * Siteler yeni sunucuya tasinirken eski sitenin adresleri Google'da ve
  * baska sitelerdeki baglantilarda yasamaya devam eder. Her site kendi
  * listesini tutar (site secenegi 'nwcs_redirects', duz metin); liste ag
- * yonetiminde SEO ve GEO -> Yonlendirmeler sayfasindan duzenlenir.
+ * yonetiminde Gelistirici -> Yonlendirmeler sayfasindan duzenlenir.
  *
  * Satir bicimi (yollar sitenin kokune gore; alan adi degisse de gecerli):
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Ag yonetimi -> Icerik Studyosu -> Toplu Guncelleme.
+ * Ag yonetimi -> Gelistirici -> Toplu Guncelleme.
  *
  * Firma bilgisinin sitelerde tek tip olmasi icin kurala dayali guncelleme:
  * tek adres (Kestanelik / Catalca), firma yasi (50 yil) ve telefonlar (iki
@@ -61,7 +61,7 @@ const NWCS_BULK_KNOWN_PHONES = array(
 add_action( 'network_admin_menu', 'nwcs_register_bulk_menu', 30 );
 function nwcs_register_bulk_menu(): void {
 	add_submenu_page(
-		NWCS_MENU_SLUG,
+		NWCS_DEV_MENU_SLUG,
 		'Toplu Güncelleme',
 		'Toplu Güncelleme',
 		NWCS_CAPABILITY,

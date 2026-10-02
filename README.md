@@ -196,8 +196,11 @@ girme ihtiyacı yoktur.
 - Ürün alanları: ad, kart açıklaması, fiyat, **detay başlıkları** (teknik detaylar), kategoriler,
   **görseller (galeri)**, ürün açıklaması (detay sayfası metni).
 - Havuzun alt sayfaları, sırayla: **Ürünler** (liste ve form), **Kategoriler** (yeni kategori,
-  sitelerde yerleşim, Excel, son işlemler), **Detay başlıkları**, **Ürün açıklamaları**,
-  **Havuz Paketi** (kurulumlar arası taşıma, ileri düzey).
+  sitelerde yerleşim, Excel, son işlemler), **Ürün açıklamaları**, **Detay başlıkları**.
+- Ağ yönetimi sol menüsü: son kullanıcı menüleri art arda **İçerik Stüdyosu**, **Ürün Havuzu**,
+  **Medya Havuzu**; geliştirici ekranları en altta tek **Geliştirici** menüsünde: SEO ve GEO,
+  Yönlendirmeler, Toplu Güncelleme, Görsel Yer Tutucu, E-posta Testi, **Havuz Paketi**
+  (kurulumlar arası taşıma, ileri düzey). Sayfa adresleri (`admin.php?page=…`) değişmedi.
 - Ürün formundaki **Kategoriler** kutusundan ürünün kategorileri seçilir; kategori açma, ad
   değiştirme ve silme **Kategoriler** sayfasındadır.
 - **Arama, kategori filtresi ve sayfalama** listenin üstünde. Arama ürün adında ve kodunda
@@ -645,7 +648,7 @@ Ahşap Ambalaj'ın Tailwind kaynağı tema içindedir; `npm run build:ahsapambal
 
 ## SEO ve GEO
 
-**Ağ Yönetimi → SEO ve GEO**
+**Ağ Yönetimi → Geliştirici → SEO ve GEO**
 http://localhost:8080/wp-admin/network/admin.php?page=nwcs-seo
 
 Ağdaki bütün sitelerin arama motoru (SEO) ve yapay zekâ araması (GEO) ayarları tek
@@ -777,7 +780,7 @@ ayarlar) veritabanındadır ve panelden yönetilir; Git ile taşınmaz.
 
 ## Eski adres yönlendirmeleri (301)
 
-**Ağ Yönetimi → SEO ve GEO → Yönlendirmeler.** Her sitenin eski adres listesi: eski
+**Ağ Yönetimi → Geliştirici → Yönlendirmeler.** Her sitenin eski adres listesi: eski
 sitenin Google'daki ve başka sitelerdeki adresleri yeni sayfalara taşınır (301) ya da
 kaldırıldığı bildirilir (410). Kural yalnızca adres sitede bulunamadığında çalışır;
 var olan sayfayı etkilemez. Yollar sitenin köküne göredir, alan adı değişince de geçerli.

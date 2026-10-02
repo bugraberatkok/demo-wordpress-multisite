@@ -22,7 +22,7 @@ function nwcs_register_pool_menu(): void {
 		NWCS_POOL_SLUG,
 		'nwcs_render_pool',
 		'dashicons-screenoptions',
-		4
+		'3.1' // Icerik Studyosu'nun hemen alti (bkz. panel.php).
 	);
 }
 

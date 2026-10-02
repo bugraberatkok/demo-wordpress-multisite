@@ -18,7 +18,7 @@
  * JSON-LD); yonetim, besleme, REST. Herhangi bir adim basarisiz olursa sayfa
  * hic degistirilmeden gonderilir.
  *
- * Ac/kapa: Ag Yonetimi -> Icerik Studyosu -> Gorsel Yer Tutucu (site basina).
+ * Ac/kapa: Ag Yonetimi -> Gelistirici -> Gorsel Yer Tutucu (site basina).
  */
 
 defined( 'ABSPATH' ) || exit;

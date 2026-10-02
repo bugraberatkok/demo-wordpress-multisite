@@ -23,7 +23,7 @@ function nwcs_register_media_menu(): void {
 		NWCS_MEDIA_SLUG,
 		'nwcs_render_media',
 		'dashicons-format-gallery',
-		5
+		'3.2' // Urun Havuzu'nun hemen alti (bkz. panel.php).
 	);
 }
 

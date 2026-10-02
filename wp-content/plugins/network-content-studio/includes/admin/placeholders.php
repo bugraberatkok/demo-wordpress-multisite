@@ -1,6 +1,6 @@
 <?php
 /**
- * Ag Yonetimi -> Icerik Studyosu -> Gorsel Yer Tutucu: site basina ac/kapa
+ * Ag Yonetimi -> Gelistirici -> Gorsel Yer Tutucu: site basina ac/kapa
  * (bkz. includes/placeholders.php). Fotograflar silinmez; kapatinca geri gelir.
  */
 
@@ -10,7 +10,7 @@ const NWCS_PLACEHOLDER_SLUG = 'nwcs-placeholders';
 
 add_action( 'network_admin_menu', 'nwcs_register_placeholder_menu', 31 );
 function nwcs_register_placeholder_menu(): void {
-	add_submenu_page( NWCS_MENU_SLUG, 'Görsel Yer Tutucu', 'Görsel Yer Tutucu', NWCS_CAPABILITY, NWCS_PLACEHOLDER_SLUG, 'nwcs_render_placeholders' );
+	add_submenu_page( NWCS_DEV_MENU_SLUG, 'Görsel Yer Tutucu', 'Görsel Yer Tutucu', NWCS_CAPABILITY, NWCS_PLACEHOLDER_SLUG, 'nwcs_render_placeholders' );
 }
 
 add_action( 'admin_post_nwcs_placeholders_save', 'nwcs_placeholders_save' );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Ag Yonetimi -> Icerik Studyosu -> E-posta Testi.
+ * Ag Yonetimi -> Gelistirici -> E-posta Testi.
  *
  * Form bildirimlerinin (includes/forms.php) gercekten gidip gitmedigini canli
  * sitede form doldurmadan denemek icin: her site icin alici, gonderen adresi,
@@ -15,7 +15,7 @@ const NWCS_MAILTEST_RESULT = 'nwcs_mail_test_result';
 
 add_action( 'network_admin_menu', 'nwcs_register_mailtest_menu', 32 );
 function nwcs_register_mailtest_menu(): void {
-	add_submenu_page( NWCS_MENU_SLUG, 'E-posta Testi', 'E-posta Testi', NWCS_CAPABILITY, NWCS_MAILTEST_SLUG, 'nwcs_render_mailtest' );
+	add_submenu_page( NWCS_DEV_MENU_SLUG, 'E-posta Testi', 'E-posta Testi', NWCS_CAPABILITY, NWCS_MAILTEST_SLUG, 'nwcs_render_mailtest' );
 }
 
 /**

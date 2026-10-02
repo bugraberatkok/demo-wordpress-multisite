@@ -17,17 +17,27 @@ defined( 'ABSPATH' ) || exit;
 
 const NWCS_SEO_SLUG = 'nwcs-seo';
 
+/**
+ * "Gelistirici" ust menusu: son kullanicinin ihtiyac duymadigi ekranlar
+ * (SEO ve GEO, Yonlendirmeler, Toplu Guncelleme, Gorsel Yer Tutucu,
+ * E-posta Testi, Havuz Paketi) burada toplanir. Menunun kendi sayfasi
+ * SEO ve GEO'dur; boylece sayfa adresleri (admin.php?page=...) degismez.
+ */
+const NWCS_DEV_MENU_SLUG = NWCS_SEO_SLUG;
+
 add_action( 'network_admin_menu', 'nwcs_register_seo_menu' );
 function nwcs_register_seo_menu(): void {
 	add_menu_page(
 		'SEO ve GEO',
-		'SEO ve GEO',
+		'Geliştirici',
 		NWCS_CAPABILITY,
-		NWCS_SEO_SLUG,
+		NWCS_DEV_MENU_SLUG,
 		'nwcs_render_seo',
-		'dashicons-search',
-		5
+		'dashicons-admin-tools',
+		98 // Ag menusunun en alti (Ayarlar 25, ayirici 99).
 	);
+	// Ilk alt ogenin adi ust menuyle ayni olmasin diye acikca eklenir.
+	add_submenu_page( NWCS_DEV_MENU_SLUG, 'SEO ve GEO', 'SEO ve GEO', NWCS_CAPABILITY, NWCS_SEO_SLUG, 'nwcs_render_seo' );
 }
 
 add_action( 'admin_enqueue_scripts', 'nwcs_seo_admin_assets', 20 );

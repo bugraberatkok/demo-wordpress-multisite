@@ -16,7 +16,8 @@ defined( 'ABSPATH' ) || exit;
 
 const NWCS_HEADINGS_SLUG = 'nwcs-pool-headings';
 
-add_action( 'network_admin_menu', 'nwcs_register_headings_menu', 15 );
+// Urun Havuzu sirasi: Urunler, Kategoriler (12), Urun aciklamalari (16), Detay basliklari (17).
+add_action( 'network_admin_menu', 'nwcs_register_headings_menu', 17 );
 function nwcs_register_headings_menu(): void {
 	add_submenu_page( NWCS_POOL_SLUG, 'Detay başlıkları', 'Detay başlıkları', NWCS_CAPABILITY, NWCS_HEADINGS_SLUG, 'nwcs_render_headings' );
 }

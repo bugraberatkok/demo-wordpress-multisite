@@ -1,6 +1,6 @@
 <?php
 /**
- * Ag Yonetimi -> Urun Havuzu -> Havuz Paketi.
+ * Ag Yonetimi -> Gelistirici -> Havuz Paketi.
  *
  * Bir kurulumun havuzunu (urunler, kategoriler, sitelerin urun secimi ve
  * sirasi) tek bir JSON dosyasi olarak baska bir kuruluma tasir. Ornek: yerelde
@@ -33,9 +33,10 @@ const NWCS_PACKAGE_FORMAT  = 'nwcs-pool-package';
 const NWCS_PACKAGE_VERSION = 3;
 const NWCS_PACKAGE_REPORT  = 'nwcs_pool_package_report';
 
-add_action( 'network_admin_menu', 'nwcs_register_package_menu', 20 );
+// Gelistirici menusunun sonunda (E-posta Testi 32'den sonra).
+add_action( 'network_admin_menu', 'nwcs_register_package_menu', 33 );
 function nwcs_register_package_menu(): void {
-	add_submenu_page( NWCS_POOL_SLUG, 'Havuz Paketi', 'Havuz Paketi', NWCS_CAPABILITY, NWCS_PACKAGE_SLUG, 'nwcs_render_package' );
+	add_submenu_page( NWCS_DEV_MENU_SLUG, 'Havuz Paketi', 'Havuz Paketi', NWCS_CAPABILITY, NWCS_PACKAGE_SLUG, 'nwcs_render_package' );
 }
 
 /**

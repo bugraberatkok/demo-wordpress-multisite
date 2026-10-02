@@ -1,6 +1,6 @@
 <?php
 /**
- * Ag yonetimi -> SEO ve GEO -> Yonlendirmeler: her sitenin eski adres
+ * Ag yonetimi -> Gelistirici -> Yonlendirmeler: her sitenin eski adres
  * listesi (bkz. includes/redirects.php). Duz metin; bir satir bir kural.
  */
 
@@ -11,7 +11,7 @@ const NWCS_REDIRECTS_SLUG = 'nwcs-redirects';
 add_action( 'network_admin_menu', 'nwcs_register_redirects_menu', 20 );
 function nwcs_register_redirects_menu(): void {
 	add_submenu_page(
-		NWCS_SEO_SLUG,
+		NWCS_DEV_MENU_SLUG,
 		'Yönlendirmeler',
 		'Yönlendirmeler',
 		NWCS_CAPABILITY,

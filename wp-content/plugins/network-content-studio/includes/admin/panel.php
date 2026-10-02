@@ -23,6 +23,8 @@ function nwcs_register_menu(): void {
 		NWCS_MENU_SLUG,
 		'nwcs_render_panel',
 		'dashicons-edit-page',
+		// Son kullanici menuleri art arda: Icerik Studyosu (3), Urun Havuzu
+		// (3.1), Medya Havuzu (3.2). Gelistirici menusu en altta (seo.php).
 		3
 	);
 }
