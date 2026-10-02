@@ -1585,3 +1585,27 @@ Plan: `PLAN-sss.md` (§6b kullanıcı kararları bağlayıcı).
 - Koçist ana sayfa süreç adımı 3 (`home.process`) teslimat akordeonuyla aynı nötr dile çekildi
   (koordinatör talebi; ana sayfanın başka yerine dokunulmadı).
 
+## Fotoğraf Kutusu: dosya adı = ürün kodu (0.23.0, 2 Ekim 2026)
+
+- **Neden koda göre eşleme:** Excel'in anahtarı ürün kodu; fotoğrafın anahtarı da ürün kodu
+  olunca kullanıcı tek kural öğrenir. Görsel tanıma ya da ürün adına göre tahmin yok: yanlış
+  ürüne bağlanan fotoğraf sessiz hatadır. Ayraç serbest, önek + en uzun kod; 5+ karakter
+  kodlarda içerme yedeği (mevcut "woodpets-w-dog-v06-img010" adları çalışsın diye).
+- **Neden parti = medya kitaplığı (geçici klasör yok):** yükleme panelin WebP dönüşümünden
+  aynen geçer, ara boyutlar bir kez üretilir, uygulama yalnızca meta yazar. Bekleyen ekler
+  `_nwcs_photo_batch` ile işaretli; Medya Havuzu'nda gizli, 24 saatte süpürülür.
+- **Neden plan transient'ta saklanmaz:** önizleme her görünümde partideki eklerden ve havuzun o
+  anki kodlarından yeniden hesaplanır; bayat plan yoktur. Uygulama ilk iş bekleyen partiyi siler
+  (iki kez basma güvenli), ürün başına yazmadan önce kayda geçer (yarıda kesilirse geri alınır).
+- **Geri alma:** galeri uygulamadaki hâlindeyse eskisi yazılır, değilse dokunulmaz (kept);
+  yalnızca bu yüklemede gelen ve başka üründe kullanılmayan dosyalar silinir.
+- **Ürün kodu zorunlu; otomatik kod verilmez (kullanıcı kararı, 2 Ekim 2026).** Kodları firma
+  girer ve fotoğrafları buna göre adlandırır. Ürün formu boş kodla kaydetmez; Excel'de ÜRÜN KODU
+  boş satır hata verir ve yüklenmez; yeni ürüne URN kodu üretilmez (`nwcs_ensure_product_code`
+  artık çağrılmıyor). Yerelde 320 yayındaki ürünün 237'si kodsuz (Koçist ağırlıklı); kodları
+  girilene kadar bu ürünlere fotoğraf bağlanamaz, Excel'de satırları hata verir. Havuz Paketi
+  (geliştirici aracı) paketteki kodu yazar; kod boşsa ya da başka üründeyse ürünü kodsuz ekler,
+  otomatik kod vermez; ona dokunulmadı.
+- **C (Excel'e fotoğraf sütunu) ertelendi:** dosya adı kuralı yeterli görüldü.
+- **"Kitaplıktan ekle" arama oldu:** son-200 listesi yerine sunucu araması (JS'siz GET formu).
+  Stüdyo'daki site istisnası görsel listesi kapsam dışı (kullanıcı kararı).

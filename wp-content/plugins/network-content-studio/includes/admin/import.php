@@ -365,7 +365,7 @@ function nwcs_render_sync_preview( array $plan ): void {
 						<li>
 							<span class="nwcs-sync__line"><?php echo (int) $item['line']; ?>. satır</span>
 							<strong><?php echo esc_html( $item['data']['title'] ); ?></strong>
-							<span class="nwcs-sync__muted"><?php echo '' !== (string) $item['data']['code'] ? esc_html( (string) $item['data']['code'] ) : 'kod kendiliğinden verilecek'; ?></span>
+							<span class="nwcs-sync__muted"><?php echo esc_html( (string) $item['data']['code'] ); ?></span>
 							<span class="nwcs-sync__newfacts"><?php echo esc_html( nwcs_sync_new_facts( (array) $item['data'] ) ); ?></span>
 						</li>
 					<?php endforeach; ?>

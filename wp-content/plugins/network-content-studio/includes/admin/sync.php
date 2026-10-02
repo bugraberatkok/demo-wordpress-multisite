@@ -12,6 +12,7 @@
  *      yiginina girer (admin/history.php).
  *
  * Kurallar (PLAN-detay-basliklari.md, 4. bolum):
+ *   - ÜRÜN KODU zorunlu (0.23.0): bos kodlu satir yuklenmez; otomatik kod verilmez.
  *   - Eslesme: KİMLİK (cop dahil) > ÜRÜN KODU (cop dahil) > yeni urun.
  *   - Bos hucre = temizle (bos fiyat "Teklif al" olur). Zorunlu baslik bossa
  *     satir reddedilir; hatali satir yazilmaz, urun oldugu gibi kalir.
@@ -225,6 +226,149 @@ function nwcs_product_site_labels( int $product_id ): array {
 }
 
 /**
+ * Urunun her sitedeki durumu ve (varsa) tek tikla duzeltme. Temasi urun
+ * gostermeyen site listelenmez. Site basina ilk uyan kural:
+ *   trash            cop kutusunda                                  -> untrash
+ *   hidden           sitede gizlenmis (toplu islem)                 -> unhide
+ *   unplaced         secili degil, kategorisi o siteye yerlesmemis  -> place (Kategoriler)
+ *   unselected       secili degil                                   -> select
+ *   visible_unplaced gorunuyor ama kategori sayfasi yok             -> place
+ *   visible          gorunuyor: "WOODGarden › Kamelyalar · 12 / 59"
+ *
+ * @return array<int, array{site:string, state:string, reason:string, fix:string, url:string, category_url:string}>
+ */
+function nwcs_product_site_status( int $product_id ): array {
+	$pool    = nwcs_pool_products();
+	$product = $pool[ $product_id ] ?? null;
+	$trashed = in_array( $product_id, nwcs_pool_trashed_ids(), true );
+
+	if ( ! $product ) {
+		switch_to_blog( nwcs_pool_blog_id() );
+
+		$product = array(
+			'id'         => $product_id,
+			'slug'       => (string) get_post_field( 'post_name', $product_id ),
+			'body'       => (string) get_post_field( 'post_content', $product_id ),
+			'categories' => array(),
+		);
+
+		foreach ( wp_get_object_terms( $product_id, NWCS_PRODUCT_TAX ) as $term ) {
+			$product['categories'][ $term->slug ] = $term->name;
+		}
+
+		restore_current_blog();
+	}
+
+	$categories = nwcs_pool_categories();
+	$catalog    = nwcs_catalog_sites();
+	$tops       = nwcs_parent_categories();
+	$first      = (string) array_key_first( (array) $product['categories'] );
+	$cat_url    = '' !== $first ? nwcs_pool_categories_url( array( 'kategori' => $first ) ) : nwcs_pool_categories_url();
+	$names      = implode( ', ', (array) $product['categories'] );
+	$out        = array();
+
+	foreach ( nwcs_editable_sites() as $blog_id => $site ) {
+		$blog_id = (int) $blog_id;
+
+		if ( ! nwcs_site_supports_products( $blog_id ) ) {
+			continue;
+		}
+
+		$settings = nwcs_site_product_settings( $blog_id );
+		$row      = array( 'site' => (string) $site['label'], 'state' => 'visible', 'reason' => '', 'fix' => '', 'url' => '', 'category_url' => $cat_url );
+		$listed   = 'all' === $settings['mode'] || in_array( $product_id, $settings['selected'], true );
+		$key      = (string) ( $catalog[ $blog_id ]['site_key'] ?? '' );
+		$placed   = false;
+
+		foreach ( array_keys( (array) $product['categories'] ) as $slug ) {
+			if ( ( '' !== $key && '' !== ( $categories[ $slug ]['placement'][ $key ] ?? '' ) ) || isset( $tops[ $slug ][ $blog_id ] ) ) {
+				$placed = true;
+				break;
+			}
+		}
+
+		if ( $trashed ) {
+			$row = array_merge( $row, array( 'state' => 'trash', 'reason' => 'çöp kutusunda', 'fix' => 'untrash' ) );
+		} elseif ( ! empty( $settings['overrides'][ $product_id ]['hidden'] ) ) {
+			$row = array_merge( $row, array( 'state' => 'hidden', 'reason' => 'bu sitede gizlenmiş (Ürün Havuzu toplu işlemi)', 'fix' => 'unhide' ) );
+		} elseif ( ! $listed && '' !== $key && ! $placed ) {
+			$row = array_merge( $row, array( 'state' => 'unplaced', 'reason' => '' !== $names ? sprintf( 'kategorisi (%s) bu siteye yerleşmemiş', $names ) : 'kategorisi yok', 'fix' => 'place' ) );
+		} elseif ( ! $listed ) {
+			$row = array_merge( $row, array( 'state' => 'unselected', 'reason' => 'sitenin ürün listesinde değil', 'fix' => 'select' ) );
+		} else {
+			$list  = nwcs_site_products( $blog_id );
+			$index = array_search( $product_id, array_map( static fn( array $item ): int => (int) $item['id'], $list ), true );
+			$where = false !== $index ? sprintf( '%d / %d', $index + 1, count( $list ) ) : '';
+
+			if ( '' !== $key ) {
+				$place = nwcs_product_place( $product, $blog_id );
+
+				if ( null === $place['parent'] ) {
+					$row['state']  = 'visible_unplaced';
+					$row['fix']    = 'place';
+					$row['reason'] = 'görünüyor; kategori sayfası yok (kategorisi yerleşmemiş)' . ( ! empty( $catalog[ $blog_id ]['catalog']['hide_empty'] ) ? '. Bu sitede kategori sayfası ürün olunca açılır' : '' );
+				} else {
+					$parent = (string) ( nwcs_site_parents( $blog_id )[ $place['parent'] ]['label'] ?? $place['parent'] );
+					$child  = '';
+
+					if ( null !== $place['child'] ) {
+						$child = nwcs_category_site_name( (string) $place['child'], $blog_id );
+						$child = '' !== $child ? $child : (string) ( $categories[ $place['child'] ]['name'] ?? $place['child'] );
+					}
+
+					$where = $parent . ( '' !== $child ? ' › ' . $child : '' ) . ( '' !== $where ? ' · ' . $where : '' );
+				}
+			}
+
+			if ( 'visible' === $row['state'] ) {
+				$row['reason'] = $where;
+			}
+
+			if ( nwcs_product_has_page( $product, $blog_id ) ) {
+				$row['url'] = nwcs_product_url( (string) $product['slug'], $blog_id );
+			}
+		}
+
+		$out[ $blog_id ] = $row;
+	}
+
+	return $out;
+}
+
+/**
+ * Urunleri bir sitede gosterir ya da gizler. Toplu "göster/gizle" ve urun
+ * formundaki "Listeye ekle" / "Göster" ayni yaziciyi kullanir. Göster:
+ * gizleme kalkar; "Seçilenler" kipindeki sitede listenin sonuna eklenir.
+ *
+ * @param int[] $ids
+ */
+function nwcs_product_show_on_site( int $blog_id, array $ids, bool $show = true ): void {
+	switch_to_blog( $blog_id );
+
+	$settings = nwcs_site_product_settings();
+
+	foreach ( $ids as $id ) {
+		$override = $settings['overrides'][ $id ] ?? array();
+
+		if ( ! $show ) {
+			$override['hidden'] = 1;
+		} else {
+			$override['hidden'] = 0;
+
+			// "Secilenler" kipinde gosterebilmek icin listeye de eklenir.
+			if ( 'selected' === $settings['mode'] && ! in_array( $id, $settings['selected'], true ) ) {
+				$settings['selected'][] = $id;
+			}
+		}
+
+		$settings['overrides'][ $id ] = $override;
+	}
+
+	nwcs_save_site_product_settings( $settings );
+	restore_current_blog();
+}
+
+/**
  * Kategorideki yayindaki urunler, havuz sirasiyla.
  *
  * @return array<int, array> nwcs_pool_products() satirlari.
@@ -275,7 +419,7 @@ function nwcs_sync_build_template( string $slug ) {
 	$system   = nwcs_sync_system_columns();
 	$headings = nwcs_sync_category_headings( $slug );
 
-	$header  = array( $system['id'], $system['code'], $system['title'] . ' *', $system['price'], $system['short'] );
+	$header  = array( $system['id'], $system['code'] . ' *', $system['title'] . ' *', $system['price'], $system['short'] );
 	$columns = array(
 		0 => array( 'hidden' => true, 'width' => 8 ),
 		1 => array( 'width' => 16 ),
@@ -341,14 +485,15 @@ function nwcs_sync_help_rows( string $category ): array {
 	return array(
 		array( 'Bu dosya “' . $category . '” kategorisinin ürün listesidir.' ),
 		array( '1. “Ürünler” sayfasındaki satırları düzenleyin. Her satır bir üründür.' ),
-		array( '2. Yeni ürün için en alta bir satır ekleyin. ÜRÜN KODU boş kalırsa kod kendiliğinden verilir. Başka bir satırı kopyaladıysanız yeni satırın ÜRÜN KODU hücresini değiştirin ya da boşaltın.' ),
+		array( '2. Yeni ürün için en alta bir satır ekleyin. ÜRÜN KODU zorunludur: her ürüne bir kod yazın; fotoğraf adları bu kodla başlar (W-KAM-400DUB-1.jpg). Kod boş olan satır yüklenmez. Başka bir satırı kopyaladıysanız yeni satırın ÜRÜN KODU hücresine yeni ürünün kodunu yazın.' ),
 		array( '3. Yıldızlı (*) sütunlar zorunludur. Boş bırakılan satır yüklenmez; hangi satırda ne eksik olduğu panelde yazar.' ),
 		array( '4. Boş hücre o bilgiyi siler. FİYAT boşsa sitede “Teklif al” görünür.' ),
 		array( '5. Bir satırı silerseniz o ürün, onay verirseniz çöp kutusuna taşınır. Çöp kutusundan geri getirilebilir.' ),
 		array( '6. Yeni bir detay başlığı için sağa bir sütun ekleyin ve başlığını yazın. En az bir hücresi doluysa başlık olarak eklenir.' ),
 		array( '7. Sütun başlıklarını ve gizli sayfaları değiştirmeyin. Excel sayıları tarihe çevirebilir (örneğin 1/2): böyle hücreleri kontrol edin.' ),
 		array( '8. Bitince dosyayı .xlsx olarak kaydedin. Ürün Havuzu › Kategoriler sayfasında bu kategoriyi açıp “Yükle” ile yükleyin. Önce ne değişeceği gösterilir; onaylamadan hiçbir şey yazılmaz.' ),
-		array( 'Görseller, uzun açıklama, tablolar ve sitelere özel ayarlar bu dosyada yok; yüklemede değişmezler. Uzun açıklamalar için “Ürün açıklamaları” ekranını kullanın.' ),
+		array( 'Görseller, uzun açıklama, tablolar ve sitelere özel ayarlar bu dosyada yok; yüklemede değişmezler.' ),
+		array( 'Fotoğraflar bu dosyada yok. Fotoğraf dosyalarını ürün koduyla adlandırın (W-KAM-400DUB-1.jpg, -2.jpg …) ve aynı kategori sayfasındaki “Fotoğrafları yükleyin” alanına bırakın. Uzun açıklamalar için “Ürün açıklamaları” ekranını kullanın.' ),
 	);
 }
 
@@ -481,6 +626,11 @@ function nwcs_sync_plan( string $path, string $filename ) {
 		return new WP_Error( 'nwcs_cols', '“ÜRÜN ADI” sütunu bulunamadı. Sütun başlıklarını değiştirdiyseniz geri alın ya da taslağı yeniden indirin.' );
 	}
 
+	// Urun kodu zorunlu: her urunun kodu olur, fotograflar bu kodla eslesir.
+	if ( empty( $seen['code'] ) ) {
+		return new WP_Error( 'nwcs_cols', '“ÜRÜN KODU” sütunu bulunamadı. Her ürünün kodu olmalı; taslağı yeniden indirip ÜRÜN KODU sütununu doldurun.' );
+	}
+
 	foreach ( nwcs_required_headings() as $key => $label ) {
 		if ( empty( $seen[ 'h:' . $key ] ) ) {
 			return new WP_Error( 'nwcs_cols', sprintf( '“%s” sütunu dosyada yok. Bu başlık zorunlu. Taslağı yeniden indirip onu doldurun.', $label ) );
@@ -569,6 +719,18 @@ function nwcs_sync_plan( string $path, string $filename ) {
 			$plan['errors'][] = array( 'line' => $line, 'name' => $name, 'message' => $message, 'missing' => $missing );
 		};
 
+		// Kod zorunlu: bos kodlu satir yuklenmez (urun oldugu gibi kalir; cope de gitmez).
+		if ( '' === (string) $code ) {
+			$own = preg_match( '/^\d+$/', $raw_id ) ? nwcs_sync_product_post( (int) $raw_id ) : null;
+
+			if ( $own ) {
+				$matched[ $own->ID ] = true;
+			}
+
+			$fail( 'ÜRÜN KODU boş. Her ürünün kodu olmalı; fotoğraflar bu kodla eşleşir.' );
+			continue;
+		}
+
 		/* Eslesme: KIMLIK > KOD > yeni. */
 		$post = null;
 
@@ -588,7 +750,7 @@ function nwcs_sync_plan( string $path, string $filename ) {
 
 				if ( null === $code || $code === $own_code ) {
 					$matched[ $post->ID ] = true;
-					$fail( sprintf( 'Bu satır %d. satırdaki ürünün aynısı (aynı ürün kodu). Yeni ürün eklemek istiyorsanız ÜRÜN KODU hücresini değiştirin ya da boşaltın.', $by_id[ $post->ID ] ) );
+					$fail( sprintf( 'Bu satır %d. satırdaki ürünün aynısı (aynı ürün kodu). Yeni ürün eklemek istiyorsanız ÜRÜN KODU hücresine yeni ürünün kodunu yazın.', $by_id[ $post->ID ] ) );
 					continue;
 				}
 
@@ -606,7 +768,7 @@ function nwcs_sync_plan( string $path, string $filename ) {
 
 			if ( $post && isset( $by_id[ $post->ID ] ) ) {
 				$matched[ $post->ID ] = true;
-				$fail( sprintf( 'ÜRÜN KODU (%s) %d. satırdaki ürünün kodu. Kodlar tekil olmalı; farklı bir kod yazın ya da boş bırakın.', $code, $by_id[ $post->ID ] ) );
+				$fail( sprintf( 'ÜRÜN KODU (%s) %d. satırdaki ürünün kodu. Kodlar tekil olmalı; farklı bir kod yazın.', $code, $by_id[ $post->ID ] ) );
 				continue;
 			}
 
@@ -627,14 +789,14 @@ function nwcs_sync_plan( string $path, string $filename ) {
 
 		if ( null !== $code && '' !== $code ) {
 			if ( isset( $by_code[ $code ] ) ) {
-				$fail( sprintf( 'ÜRÜN KODU (%s) %d. satırda da var. Kodlar tekil olmalı; birini değiştirin ya da boş bırakın.', $code, $by_code[ $code ] ) );
+				$fail( sprintf( 'ÜRÜN KODU (%s) %d. satırda da var. Kodlar tekil olmalı; birini değiştirin.', $code, $by_code[ $code ] ) );
 				continue;
 			}
 
 			$owner = nwcs_product_id_by_code( $code, $post ? (int) $post->ID : 0 );
 
 			if ( $owner ) {
-				$fail( sprintf( 'ÜRÜN KODU (%s) başka bir üründe kullanılıyor: “%s”%s. Farklı bir kod yazın ya da boş bırakın (kod kendiliğinden verilir).', $code, get_the_title( $owner ), 'trash' === get_post_status( $owner ) ? ' (çöp kutusunda)' : '' ) );
+				$fail( sprintf( 'ÜRÜN KODU (%s) başka bir üründe kullanılıyor: “%s”%s. Farklı bir kod yazın.', $code, get_the_title( $owner ), 'trash' === get_post_status( $owner ) ? ' (çöp kutusunda)' : '' ) );
 				continue;
 			}
 
@@ -1011,6 +1173,14 @@ function nwcs_sync_apply( array $plan, bool $trash ): array {
 
 	foreach ( (array) $plan['create'] as $item ) {
 		$data = $item['data'];
+
+		// Kod plan sirasinda serbestti; arada baska urune verildiyse urun eklenmez
+		// (otomatik kod verilmez, kod zorunlu).
+		if ( '' === (string) $data['code'] || nwcs_product_id_by_code( (string) $data['code'] ) ) {
+			$record['skipped'][] = $data['title'];
+			continue;
+		}
+
 		$id   = (int) wp_insert_post(
 			array(
 				'post_type'   => NWCS_PRODUCT_TYPE,
@@ -1028,12 +1198,7 @@ function nwcs_sync_apply( array $plan, bool $trash ): array {
 		$record['created'][] = $id;
 		$save();
 
-		// Kod plan sirasinda serbestti; arada baska urune verildiyse otomatik kod.
-		if ( null !== $data['code'] && '' !== $data['code'] && ! nwcs_product_id_by_code( $data['code'], $id ) ) {
-			update_post_meta( $id, '_nwcs_code', $data['code'] );
-		} else {
-			nwcs_ensure_product_code( $id );
-		}
+		update_post_meta( $id, '_nwcs_code', $data['code'] );
 
 		update_post_meta( $id, '_nwcs_price', wp_slash( (string) $data['price'] ) );
 		update_post_meta( $id, '_nwcs_short', wp_slash( (string) $data['short'] ) );

@@ -281,6 +281,33 @@ function nwcs_render_repeater_row( string $field_key, array $sub_defs, array $ro
  * (nwcs_products_mode / _selected / _overrides). Bu yuzden ayri POST
  * anahtarlari kullanilir: products[...]
  */
+/**
+ * Studyo urun satirinda uc nokta: fotograf, aciklama, teknik detay (dolu /
+ * bos). Fotografi yoksa kategorinin Fotograf Kutusu'na baglanti.
+ */
+function nwcs_render_gap_dots( array $product ): void {
+	$gaps   = nwcs_product_gaps( $product );
+	$labels = nwcs_product_gap_labels();
+	$say    = $gaps ? 'Eksik: ' . implode( ', ', array_map( static fn( string $gap ): string => $labels[ $gap ], $gaps ) ) : 'Fotoğraf, açıklama ve detay var';
+	$dots   = '';
+
+	// Sira: fotograf, aciklama, detay. Dolu nokta = var. (Yuzlerce satir: isaretleme kisa tutulur.)
+	foreach ( array_keys( $labels ) as $key ) {
+		$dots .= in_array( $key, $gaps, true ) ? '<i></i>' : '<i class="is-on"></i>';
+	}
+
+	printf( ' <span class="nwcs-gaps" title="%1$s" aria-hidden="true">%2$s</span><span class="screen-reader-text">%1$s</span>', esc_attr( $say ), $dots ); // phpcs:ignore WordPress.Security.EscapingOutput -- sabit isaretleme.
+
+	$first = (string) array_key_first( (array) ( $product['categories'] ?? array() ) );
+
+	if ( in_array( 'photo', $gaps, true ) && '' !== $first ) {
+		printf(
+			' <a class="nwcs-gaps__add" href="%s" target="_blank" rel="noopener">Fotoğraf ekle ↗</a>',
+			esc_url( nwcs_pool_categories_url( array( 'kategori' => $first ) ) . '#nwcs-fotograf' )
+		);
+	}
+}
+
 function nwcs_render_products_field( array $definition, int $blog_id ): void {
 	$pool     = nwcs_pool_products();
 	$settings = nwcs_site_product_settings( $blog_id );
@@ -389,6 +416,7 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 										echo '' !== trim( $product['price'] )
 											? esc_html( $product['price'] )
 											: '<em>Teklif al</em>'; // phpcs:ignore WordPress.Security.EscapingOutput -- sabit metin.
+										nwcs_render_gap_dots( $product );
 										?>
 									</small>
 								</span>

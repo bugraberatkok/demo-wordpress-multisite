@@ -276,6 +276,34 @@
 
 	wrap.querySelectorAll( '.nwcs-field--products' ).forEach( filterProducts );
 
+	/**
+	 * Galeriye bir gorsel dugumu ekler (kitaplik aramasi ve eski secim kutusu).
+	 * Galeride zaten varsa eklemez; eklediyse true.
+	 */
+	function appendGalleryItem( gallery, id, thumb ) {
+		id = String( parseInt( id, 10 ) || 0 );
+
+		if ( ! gallery || '0' === id || gallery.querySelector( 'input[name="gallery[]"][value="' + id + '"]' ) ) {
+			return false;
+		}
+
+		var node = document.createElement( 'div' );
+		node.className = 'nwcs-gallery__item';
+		node.setAttribute( 'data-nwcs-gallery-item', '' );
+		node.innerHTML =
+			'<input type="hidden" name="gallery[]" value="' + id + '" />' +
+			'<img alt="" />' +
+			'<div class="nwcs-gallery__tools">' +
+			'<button type="button" class="nwcs-move" data-nwcs-gallery-move="up" aria-label="Öne al">↑</button>' +
+			'<button type="button" class="nwcs-move" data-nwcs-gallery-move="down" aria-label="Geri al">↓</button>' +
+			'<button type="button" class="nwcs-move nwcs-row__delete" data-nwcs-gallery-remove aria-label="Çıkar">×</button>' +
+			'</div>';
+		node.querySelector( 'img' ).src = thumb || '';
+		gallery.appendChild( node );
+
+		return true;
+	}
+
 	function reloadPreview() {
 		if ( ! frame ) {
 			return;
@@ -769,27 +797,14 @@
 			setDirty( true, changedForm );
 		}
 
-		// Galeriye kitapliktan gorsel ekle
+		// Galeriye kitapliktan gorsel ekle (eski secim kutusu kullanan sayfa kalirsa)
 		if ( event.target.matches( '[data-nwcs-gallery-add]' ) && event.target.value ) {
 			var picker = event.target;
-			var gallery = picker.closest( '.nwcs-field' ).querySelector( '[data-nwcs-gallery]' );
-			var exists = gallery.querySelector( 'input[value="' + picker.value + '"]' );
-
-			if ( ! exists ) {
-				var node = document.createElement( 'div' );
-				node.className = 'nwcs-gallery__item';
-				node.setAttribute( 'data-nwcs-gallery-item', '' );
-				node.innerHTML =
-					'<input type="hidden" name="gallery[]" value="' + picker.value + '" />' +
-					'<img src="' + picker.selectedOptions[0].getAttribute( 'data-thumb' ) + '" alt="" />' +
-					'<div class="nwcs-gallery__tools">' +
-					'<button type="button" class="nwcs-move" data-nwcs-gallery-move="up" aria-label="Öne al">↑</button>' +
-					'<button type="button" class="nwcs-move" data-nwcs-gallery-move="down" aria-label="Geri al">↓</button>' +
-					'<button type="button" class="nwcs-move nwcs-row__delete" data-nwcs-gallery-remove aria-label="Çıkar">×</button>' +
-					'</div>';
-				gallery.appendChild( node );
-			}
-
+			appendGalleryItem(
+				picker.closest( '.nwcs-field' ).querySelector( '[data-nwcs-gallery]' ),
+				picker.value,
+				picker.selectedOptions[0].getAttribute( 'data-thumb' )
+			);
 			picker.value = '';
 			return;
 		}
@@ -924,6 +939,84 @@
 			previewWrap.classList.remove( 'is-loading' );
 		} );
 	}
+	/* ---------------- kitaplik aramasi (urun galerisi) ---------------- */
+
+	( function () {
+		var input = wrap.querySelector( '[data-nwcs-media-find]' );
+		var finder = document.getElementById( 'nwcs-find-form' );
+
+		if ( ! input || ! finder ) {
+			return;
+		}
+
+		var box = input.closest( '[data-nwcs-media-find-box]' );
+		var list = box.querySelector( '[data-nwcs-media-find-list]' );
+		var gallery = box.closest( '.nwcs-field' ).querySelector( '[data-nwcs-gallery]' );
+		var timer = null;
+		var ticket = 0;
+
+		function inGallery() {
+			return Array.prototype.map.call( gallery.querySelectorAll( 'input[name="gallery[]"]' ), function ( field ) {
+				return field.value;
+			} );
+		}
+
+		function render( items ) {
+			list.innerHTML = '';
+
+			if ( ! items.length ) {
+				var empty = document.createElement( 'li' );
+				empty.className = 'nwcs-find__empty';
+				empty.textContent = 'Bu aramaya uyan görsel yok.';
+				list.appendChild( empty );
+				return;
+			}
+
+			items.forEach( function ( item ) {
+				var row = document.createElement( 'li' );
+				row.className = 'nwcs-find__item';
+				row.innerHTML =
+					'<span class="nwcs-find__pick"><img alt="" loading="lazy" />' +
+					'<span class="nwcs-find__name"><strong></strong> <small></small></span></span>' +
+					'<button type="button" class="button button-small">Ekle</button>';
+				row.querySelector( 'img' ).src = item.thumb || '';
+				row.querySelector( 'strong' ).textContent = item.title;
+				row.querySelector( 'small' ).textContent = item.name;
+				row.querySelector( 'button' ).setAttribute( 'aria-label', 'Galeriye ekle: ' + item.title );
+				row.querySelector( 'button' ).addEventListener( 'click', function () {
+					if ( appendGalleryItem( gallery, item.id, item.thumb ) ) {
+						setDirty( true );
+					}
+					row.remove();
+				} );
+				list.appendChild( row );
+			} );
+		}
+
+		function search() {
+			var mine = ++ticket;
+
+			post( 'nwcs_media_find', { q: input.value, haric: inGallery() } )
+				.then( function ( json ) {
+					if ( mine === ticket ) {
+						render( json && json.success ? json.data.items : [] );
+					}
+				} )
+				.catch( function () {} );
+		}
+
+		// JS'li durumda GET formu gonderilmez; sonuc yerinde gelir.
+		finder.addEventListener( 'submit', function ( event ) {
+			event.preventDefault();
+			search();
+		} );
+
+		input.addEventListener( 'input', function () {
+			clearTimeout( timer );
+			timer = setTimeout( search, 250 );
+		} );
+	}() );
+
 	/* ---------------- sayfa bulucu ---------------- */
 
 	( function () {

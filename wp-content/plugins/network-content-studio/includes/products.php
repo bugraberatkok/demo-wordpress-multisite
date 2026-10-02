@@ -195,6 +195,7 @@ function nwcs_search_fold( string $text ): string {
 function nwcs_pool_query( array $args = array() ): array {
 	$search   = trim( (string) ( $args['search'] ?? '' ) );
 	$category = trim( (string) ( $args['category'] ?? '' ) );
+	$missing  = trim( (string) ( $args['missing'] ?? '' ) );
 	$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
 	$per_page = max( 1, (int) ( $args['per_page'] ?? 20 ) );
 
@@ -202,9 +203,20 @@ function nwcs_pool_query( array $args = array() ): array {
 
 	$filtered = array_filter(
 		$all,
-		static function ( array $product ) use ( $search, $category ): bool {
+		static function ( array $product ) use ( $search, $category, $missing ): bool {
 			if ( '' !== $category && ! isset( $product['categories'][ $category ] ) ) {
 				return false;
+			}
+
+			// Eksik suzgeci: fotograf / aciklama / detay ya da hicbir sitede gorunmeyen.
+			if ( '' !== $missing ) {
+				$gone = 'nowhere' === $missing
+					? ! nwcs_product_site_labels( (int) $product['id'] )
+					: in_array( $missing, nwcs_product_gaps( $product ), true );
+
+				if ( ! $gone ) {
+					return false;
+				}
 			}
 
 			if ( '' === $search ) {
@@ -233,6 +245,45 @@ function nwcs_pool_query( array $args = array() ): array {
 		'total' => $total,
 		'pages' => $pages,
 		'page'  => $page,
+	);
+}
+
+/**
+ * Urunun eksikleri: 'photo' (gorsel yok), 'body' (uzun aciklama yok),
+ * 'details' (teknik detay yok; serbest not varsa dolu sayilir). Ornek
+ * gorsel (ornek-urun-*.png) fotograf sayilir. Liste, form ve Studyo ayni
+ * kurali kullanir.
+ *
+ * @return string[]
+ */
+function nwcs_product_gaps( array $product ): array {
+	$gaps = array();
+
+	if ( empty( $product['images'] ) ) {
+		$gaps[] = 'photo';
+	}
+
+	if ( '' === trim( wp_strip_all_tags( (string) ( $product['body'] ?? '' ) ) ) ) {
+		$gaps[] = 'body';
+	}
+
+	if ( empty( $product['details'] ) && '' === trim( (string) ( $product['spec'] ?? '' ) ) ) {
+		$gaps[] = 'details';
+	}
+
+	return $gaps;
+}
+
+/**
+ * Eksiklerin panel adlari.
+ *
+ * @return array<string, string>
+ */
+function nwcs_product_gap_labels(): array {
+	return array(
+		'photo'   => 'fotoğraf',
+		'body'    => 'açıklama',
+		'details' => 'detay',
 	);
 }
 

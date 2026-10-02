@@ -159,6 +159,9 @@ function nwcs_render_categories(): void {
 	// Yeni eklenen havuz tuketici site varsa yerlesim tohumu (tek seferlik).
 	nwcs_placement_seed();
 
+	// Uygulanmadan kalan fotograf partileri (24 saatten eski) silinir.
+	nwcs_photos_sweep();
+
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- gorunum secimi.
 	$categories = nwcs_pool_categories();
 	$current    = isset( $_GET['kategori'] ) ? sanitize_title( wp_unslash( $_GET['kategori'] ) ) : '';
@@ -191,8 +194,8 @@ function nwcs_render_categories(): void {
 		<?php nwcs_render_cache_note(); ?>
 
 		<?php
-		// Excel onizlemesi varken sayfa yalnizca onu gosterir: once karar.
-		if ( nwcs_render_sync_step() ) {
+		// Excel ya da fotograf onizlemesi varken sayfa yalnizca onu gosterir: once karar.
+		if ( nwcs_render_sync_step() || nwcs_render_photo_step() ) {
 			echo '</div>';
 
 			return;
@@ -470,6 +473,8 @@ function nwcs_render_category_detail( string $slug, array $term ): void {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- gorunum secimi.
 	$only     = isset( $_GET['degisen'] ) && $mine;
 	$here     = nwcs_pool_categories_url( array( 'kategori' => $slug ) );
+	$photos   = nwcs_history_latest( NWCS_PHOTO_KIND );
+	$photoed  = $photos && ( $photos['slug'] ?? '' ) === $slug ? array_map( 'intval', array_keys( (array) ( $photos['products'] ?? array() ) ) ) : array();
 	?>
 	<article class="nwcs-cat" aria-labelledby="nwcs-cat-title">
 		<header class="nwcs-cat__head">
@@ -536,6 +541,8 @@ function nwcs_render_category_detail( string $slug, array $term ): void {
 			<?php endif; ?>
 		</section>
 
+		<?php nwcs_render_photo_box( $slug, $products ); ?>
+
 		<section class="nwcs-cat__section" aria-labelledby="nwcs-sec-products">
 			<div class="nwcs-section__bar">
 				<h3 class="nwcs-section__title" id="nwcs-sec-products">Ürünler (<?php echo count( $products ); ?>)</h3>
@@ -562,6 +569,7 @@ function nwcs_render_category_detail( string $slug, array $term ): void {
 								<th scope="col">Ürün</th>
 								<th scope="col">Fiyat</th>
 								<th scope="col">Detay</th>
+								<th scope="col">Fotoğraf</th>
 								<th scope="col"><span class="screen-reader-text">Son yükleme</span></th>
 							</tr>
 						</thead>
@@ -579,7 +587,11 @@ function nwcs_render_category_detail( string $slug, array $term ): void {
 									<td><a href="<?php echo esc_url( nwcs_pool_url( array( 'urun' => (int) $id ) ) ); ?>"><?php echo esc_html( $product['title'] ); ?></a></td>
 									<td class="nwcs-nowrap"><?php echo '' !== trim( (string) $product['price'] ) ? esc_html( $product['price'] ) : '<em class="nwcs-quote">Teklif al</em>'; ?></td>
 									<td class="nwcs-nowrap"><?php echo esc_html( sprintf( '%d detay', count( (array) $product['details'] ) ) ); ?></td>
-									<td><?php echo '' !== $state ? '<span class="nwcs-badge nwcs-badge--' . ( 'yeni' === $state ? 'new' : 'changed' ) . '">' . esc_html( $state ) . '</span>' : ''; ?></td>
+									<td class="nwcs-nowrap"><?php echo $product['images'] ? esc_html( (string) count( (array) $product['images'] ) ) : '<span class="nwcs-cat__none">yok</span>'; ?></td>
+									<td>
+										<?php echo '' !== $state ? '<span class="nwcs-badge nwcs-badge--' . ( 'yeni' === $state ? 'new' : 'changed' ) . '">' . esc_html( $state ) . '</span>' : ''; ?>
+										<?php echo in_array( (int) $id, $photoed, true ) ? '<span class="nwcs-badge nwcs-badge--new">fotoğraf</span>' : ''; ?>
+									</td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>

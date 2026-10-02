@@ -205,6 +205,17 @@ girme ihtiyacı yoktur.
   değiştirme ve silme **Kategoriler** sayfasındadır.
 - **Arama, kategori filtresi ve sayfalama** listenin üstünde. Arama ürün adında ve kodunda
   yapılır; Türkçe harf ve büyük/küçük harf farkı gözetilmez ("civi" = "ÇİVİ").
+- **Eksik** sütunu ve süzgeci (0.23.0): her satırda eksikler küçük çip olarak yazar
+  (fotoğraf · açıklama · detay; tamsa "—"). Süzgeç: fotoğrafı olmayan, açıklaması olmayan,
+  teknik detayı olmayan, hiçbir sitede görünmeyen. Sayfalama ve toplu işlem süzgeci korur;
+  süzgeç yokken sayının yanında "N üründe fotoğraf yok" bağlantısı. Örnek görsel
+  (`ornek-urun-*.png`) fotoğraf sayılır.
+- **Sitelerde durum şeridi** (ürün formunun başı, 0.23.0): site başına "görünüyor ·
+  WOODGarden › Kamelyalar · 12 / 59" ya da "görünmüyor: neden" ve tek tık düzeltme:
+  **Listeye ekle** (seçili değil), **Göster** (toplu işlemle gizlenmiş), **Çöpten geri getir**;
+  kategorisi siteye yerleşmemişse Kategoriler sayfasına bağlantı (üst başlık seçimi gerekir,
+  otomatik yapılmaz). Görünen sitede "Sitede gör ↗". Altında eksikler. "Göster" toplu
+  işlemdeki "sitede göster" ile aynı yazıcıyı kullanır (`nwcs_product_show_on_site`).
 - **Toplu işlem**: birden çok ürünü seçip "çöp kutusuna taşı", "şu sitede göster/gizle" ya da
   "kategoriye ekle". İşlemden sonra liste aynı süzgeçle (kategori, arama) döner.
 - **Kategori bazlı Excel** (aşağıda): kategorinin dosyasını indir, düzenle, yükle. CSV ile giriş
@@ -218,6 +229,10 @@ girme ihtiyacı yoktur.
   formda geri gelir ve kodun hangi üründe kullanıldığı yazar.
 - **Görseller** ağ ana sitesinin WordPress medya kitaplığına yüklenir ve oradan silinir.
   Bir ürüne bağlı görsel silinemez; önce ürünün görselini değiştirmeniz gerekir.
+  Toplu fotoğraf için **Fotoğraf Kutusu** (aşağıda). Formdaki **Kitaplıktan ekle** bir arama
+  kutusudur (dosya adı, başlık, alt metin ya da ürün kodu; en çok 30 sonuç, en yeni önce;
+  boş aramada son 30). JavaScript kapalıyken kutu formu yeniden açar, sonuçlar işaretlenip
+  "Kaydet"le galerinin sonuna eklenir. Eski "son 200 görsel" açılır listesi kalktı.
 - **Fiyat boş bırakılırsa** sitede fiyat yerine **“Teklif al”** görünür.
 - Tabloda her ürünün hangi sitelerde göründüğü yazar.
 
@@ -291,8 +306,11 @@ alma, başlık) sitelerin sayfa önbelleği kendiliğinden temizlenir (`includes
 
 ## Ürün kodu
 
-Her ürünün kendine ait bir kodu vardır. Havuz formundan yazabilir, boş bırakırsanız
-`URN-0006` biçiminde kimliğinden üretilir. Aynı kod iki üründe kullanılamaz.
+**Ürün kodu zorunlu; otomatik kod verilmez (0.23.0).** Kodu firma girer; fotoğraf adları bu
+kodla başlar (Fotoğraf Kutusu). Ürün formunda kod alanı zorunludur: boş kodla kaydedilmez,
+girilenler formda kalır ve alan işaretlenir. Kodu olmayan eski ürünler formda açılınca kod
+yazılmadan kaydedilemez (bilinçli). Excel'de ÜRÜN KODU boş satır yüklenmez. Aynı kod iki üründe
+kullanılamaz. Eski `URN-0006` biçimli kodlar (önceki sürümlerin ürettiği) olduğu gibi kalır.
 
 Excel yüklemesinde eşleşme sırası: gizli **KİMLİK** sütunu, yoksa **ürün kodu**, ikisi de yoksa
 yeni ürün. Çöp kutusundaki ürünler de aranır: çöpteki bir ürünün kodu gelirse ürün geri
@@ -369,14 +387,17 @@ Kurallar:
 - Sistem sütunları harf farkı gözetmeden tanınır ("Fiyat" = "FİYAT").
 - **Zorunlu başlık boşsa** satır yüklenmez, ürün olduğu gibi kalır (satır numarası ve nedeni yazar).
   Adı boş satır, dosyada iki kez geçen kod, başka üründe kullanılan kod de aynı şekilde reddedilir.
-  **Kopyalanmış satır** (aynı gizli KİMLİK): kodu farklıysa ya da boşsa yeni ürün sayılır
-  (önizlemede not düşülür); kodu da aynıysa hata verir.
+  **ÜRÜN KODU boş** satır da yüklenmez ("ÜRÜN KODU boş. Her ürünün kodu olmalı; fotoğraflar bu
+  kodla eşleşir."); ürün olduğu gibi kalır, çöp kutusuna gitmez. Taslakta sütun "ÜRÜN KODU *"
+  olarak gelir; eski taslaklardaki "ÜRÜN KODU" başlığı da tanınır; sütun hiç yoksa dosya reddedilir.
+  **Kopyalanmış satır** (aynı gizli KİMLİK): kodu farklıysa yeni ürün sayılır (önizlemede not
+  düşülür); kodu da aynıysa hata verir.
 - **Dosyada olmayan ürün**: kategoride olup dosyada bulunmayan ürünler önizlemede kırmızı
   kutuda, diğer kategorileri ve göründükleri sitelerle listelenir. "Evet, bu N ürünü çöp
   kutusuna taşı" işaretlenirse çöp kutusuna gider; işaretlenmezse dokunulmaz.
 - **Yeni satır** yalnızca indirilen kategoriye eklenir ("eşlik eden kategori" kuralı 0.22.0'da
-  kalktı); kategorinin yerleştiği sitelerde seçilir (bkz. Görünürlük). Kodu boşsa kod
-  kendiliğinden verilir.
+  kalktı); kategorinin yerleştiği sitelerde seçilir (bkz. Görünürlük). Kod zorunlu; otomatik
+  kod verilmez. Önizlemeden sonra kod başka ürüne verildiyse satır eklenmez (atlananlarda yazar).
 - **Yeni sütun** (en az bir hücresi dolu) yeni detay başlığı olur.
 - Salt rakam fiyat (Excel'in sayı yaptığı ya da "3500" yazılan) "3.500 ₺" biçimine getirilir;
   "48.500 ₺", "450 TL" gibi metne dokunulmaz.
@@ -407,6 +428,50 @@ Paylaşılan kategorilere dikkat: Çardaklar, Kamelyalar ve Adirondack hem WOOD 
 ürünlerini içerir. Bu kategorinin dosyasından silinen satır iki sitede de ürünü kaldırır;
 önizlemedeki "Göründüğü siteler" bunu gösterir.
 
+## Fotoğraf Kutusu (0.23.0)
+
+**Ürün Havuzu → Kategoriler → kategori → Fotoğrafları yükleyin** (Excel kartının altında).
+Excel'in anahtarı ürün kodu; fotoğrafın anahtarı da ürün kodu.
+
+- **Dosya adı ürün koduyla başlar:** `W-KAM-400DUB-1.jpg`, `W-KAM-400DUB-2.jpg` … Ayraç serbest:
+  tire, alt çizgi, nokta, boşluk, parantez aynı sayılır (`w_kam_400dub (2).JPEG` olur). Koddan
+  sonraki ilk sayı galerideki sıradır; sayısız dosya numaralılardan sonra gelir; ilk fotoğraf
+  kartta kullanılır. Birden çok kod uyarsa en uzunu kazanır (`W-KAM-400` kodu
+  `W-KAM-400DUB-1`'i yakalamaz). Kod adın başında değilse, 5 karakterden uzun kodlar adın içinde
+  de aranır (`woodpets-w-dog-v06-img010.webp` → `W-DOG-V06`, sıra 10). Başka kategorideki bir
+  ürünün koduyla başlayan dosya o ürüne bağlanır (önizlemede ayrı grupta yazar).
+- **Kodu olmayan ürüne fotoğraf bağlanamaz.** Ürün kodu zorunlu; otomatik kod verilmez. Kart,
+  kategoride kaç ürünün kodu olmadığını yazar (yerelde 320 üründen 237'sinin kodu yok; çoğu
+  Koçist). Kodu firma ürün formundan ya da Excel'in ÜRÜN KODU sütunundan girer.
+- JPG, PNG, WebP ve iPhone HEIC; dosya başına ağ sınırı (Ağ Ayarları "En fazla yükleme dosya
+  boyutu"; **canlıda 1500 → 10240 KB şart**). Dosyalar tarayıcıdan tek tek, sırayla yüklenir
+  (ilerleme ve dosya başına sorun satırı); yükleme Medya Havuzu'yla aynı WebP dönüşümünden
+  geçer. Sunucu HEIC açamazsa dosya reddedilir ("sunucu HEIC açamadı; JPG olarak kaydedip
+  yükleyin"); tarayıcının gösteremeyeceği dosya galeriye girmez. GIF/SVG reddedilir.
+- **Önizleme** (hiçbir ürün değişmez): ürün başına yeni fotoğraflar sırasıyla (ölçü, yatay ya da
+  oranı farklıysa not), mevcut galeri soluk; dosya başına **Çıkar** kutusu; eşleşmeyen dosyalar
+  nedeniyle (kod bulunamadı, çöp kutusundaki ürünün kodu, tür, boyut). Mevcut galerisi olan
+  ürünlerde **Sona ekle** (varsayılan) ya da **Galeriyi değiştir** (eski fotoğraflar Medya
+  Havuzu'nda kalır).
+- **Fotoğrafları uygula:** galeri (`_nwcs_gallery`) ve öne çıkan görsel yazılır; ek başlığı
+  "<KOD> görsel NN", alt metin boşsa ürün adı. Eşleşmeyen ve çıkarılan dosyalar silinir.
+  "Son işlemler"e kayıt düşer; **Geri al** galerileri eski hâline getirir, bu yüklemede gelen
+  ve başka üründe kullanılmayan dosyaları siler; sonradan elle değişen ürüne dokunmaz.
+  İki kez basma, eski sekme, başka sekmede yeni yükleme güvenli (açık hata metni).
+- Dosyalar doğrudan havuzun medya kitaplığına "parti" işaretiyle (`_nwcs_photo_batch`) yüklenir;
+  kullanıcı başına tek bekleyen parti (1 saat). Bekleyen dosyalar Medya Havuzu'nda ve kitaplık
+  aramasında görünmez; uygulanmayan parti 24 saat sonra Kategoriler sayfası açılırken silinir.
+  Yeni yükleme başlatılırsa bekleyen eskisi silinir (kart bunu yazar).
+- **JavaScript kapalıyken:** çoklu dosya alanı + "Yükle" (bir seferde en çok `max_file_uploads`
+  dosya, toplam `post_max_size`; aşılırsa açık hata). Önizleme, Çıkar, Uygula, Geri al aynı.
+- Kod: `includes/photos.php` (eşleme, plan, uygula, geri al), `includes/admin/pool-photos.php`
+  (kart, önizleme, istekler), `assets/pool-photos.js`. Denemeler:
+  `scripts/dev/check-photo-match.php`, `scripts/dev/check-photo-flow.php`,
+  `scripts/dev/check-required-code.php` (zorunlu kod).
+
+İçerik Stüdyosu'ndaki ürün satırlarında kodun yanında üç nokta (fotoğraf, açıklama, teknik
+detay; dolu = var); fotoğrafı yoksa "Fotoğraf ekle ↗" kategorinin Fotoğraf Kutusu'nu açar.
+
 ## Ürün açıklamaları (toplu)
 
 **Ürün Havuzu → Ürün açıklamaları**: bir kategori (ya da tüm ürünler) seçilip Excel indirilir:
@@ -426,7 +491,10 @@ Paylaşılan kategorilere dikkat: Çardaklar, Kamelyalar ve Adirondack hem WOOD 
 - En fazla **20.000 satır**.
 - Sunucu yükleme sınırı `docker/php-uploads.ini` ile 32 MB'a çıkarılmıştır (WordPress imajının
   varsayılanı 2 MB'dır).
-- Görseller Excel'le taşınmaz; Medya Havuzu'ndan bağlanır.
+- Görseller Excel'le taşınmaz; Fotoğraf Kutusu'ndan (dosya adı = ürün kodu) ya da ürün
+  formundan bağlanır.
+- İçerik Stüdyosu'ndaki ürün satırının "Görsel (bu sitede)" listesi son 200 görseli gösterir;
+  ürün galerisi için havuz formundaki kitaplık aramasını kullanın.
 - `.xls` (eski biçim) ve `.csv` yüklenmez; Excel'de "Farklı Kaydet → .xlsx" seçin.
 - Excel, "1/2" gibi değerleri tarihe çevirebilir; talimat sayfası uyarır.
 
@@ -435,6 +503,8 @@ Paylaşılan kategorilere dikkat: Çardaklar, Kamelyalar ve Adirondack hem WOOD 
 **Ağ Yönetimi → Medya Havuzu**
 http://localhost:8080/wp-admin/network/admin.php?page=nwcs-media
 
+Site görselleri (logo, hero, blog) buraya yüklenir; **ürün fotoğrafları kategorinin Fotoğraf
+Kutusu'ndan** yüklenir (buradan yüklenen görsel ürüne kendiliğinden bağlanmaz).
 Görsellerin tek yerden yönetildiği sayfa: bir seferde birden fazla dosya yükleyin
 (isteğe bağlı ortak alt metinle), arayın, başlık ve alt metni düzenleyin, silin.
 Her görselin hangi üründe kullanıldığı kartında yazar (ürüne bağlantılı; çöp kutusundaki

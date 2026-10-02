@@ -3,7 +3,8 @@
  * Ürün Havuzu -> "Son işlemler": geri alinabilir islemlerin yigini.
  *
  * Kategori Excel'i (urunler), Ürün açıklamaları (aciklamalar), kategori
- * yerlesimi (yerlesim) ve kategori silme (kategori) her uygulamada bir kayit
+ * yerlesimi (yerlesim), kategori silme (kategori) ve Fotograf Kutusu
+ * (fotograflar) her uygulamada bir kayit
  * birakir. En yeni en ustte;
  * en fazla NWCS_HISTORY_MAX kayit tutulur. Yalnizca en ustteki geri alinir
  * (son giren ilk cikar): sonraki islemler once geri alindigindan "yuklemeden
@@ -177,6 +178,17 @@ function nwcs_history_describe( array $record ): array {
 			$facts = (array) ( $record['facts'] ?? array() );
 			break;
 
+		case 'fotograflar':
+			$what    = (string) ( $record['category'] ?? '' );
+			$kind    = 'fotoğraflar';
+			$facts[] = sprintf(
+				'%d fotoğraf, %d ürün (%s)',
+				(int) ( $counts['photos'] ?? 0 ),
+				(int) ( $counts['products'] ?? 0 ),
+				'replace' === ( $record['mode'] ?? '' ) ? 'galeri değişti' : 'sona eklendi'
+			);
+			break;
+
 		default:
 			$what = (string) ( $record['category'] ?? '' );
 			$kind = 'ürün Excel’i';
@@ -222,6 +234,10 @@ function nwcs_history_undo( string $id ) {
 
 		case 'kategori':
 			$report = nwcs_category_undelete( $top );
+			break;
+
+		case 'fotograflar':
+			$report = nwcs_photos_undo( $top );
 			break;
 
 		default:
@@ -399,6 +415,7 @@ function nwcs_render_history_result(): void {
 			'untrashed' => '%d ürün çöp kutusundan geri geldi',
 			'headings'  => '%d detay başlığı kaldırıldı',
 			'sites'     => '%d sitenin ürün seçimi eski hâline döndü',
+			'deleted_photos' => '%d fotoğraf dosyası silindi',
 		) as $field => $format
 	) {
 		if ( ! empty( $report[ $field ] ) ) {
@@ -432,7 +449,7 @@ function nwcs_render_history_card( string $back ): void {
 		<h3 class="nwcs-section__title" id="nwcs-history-title">Son işlemler</h3>
 
 		<?php if ( ! $list ) : ?>
-			<p class="nwcs-hint">Henüz geri alınabilecek bir işlem yok. Excel yüklemeleri ve sitelerdeki yerleşim değişiklikleri burada listelenir.</p>
+			<p class="nwcs-hint">Henüz geri alınabilecek bir işlem yok. Excel yüklemeleri, fotoğraf yüklemeleri ve sitelerdeki yerleşim değişiklikleri burada listelenir.</p>
 		<?php else : ?>
 			<p class="nwcs-hint">En yeniden eskiye. Yalnızca en üstteki geri alınır; daha eskisini geri almak için önce üsttekileri geri alın.</p>
 			<ol class="nwcs-history__list">

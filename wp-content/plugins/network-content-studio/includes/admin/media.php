@@ -113,6 +113,9 @@ function nwcs_media_query( string $search, int $page ): array {
 			's'              => $search,
 			'orderby'        => 'date',
 			'order'          => 'DESC',
+			// Fotograf Kutusu'nda bekleyen (henuz uygulanmamis) dosyalar listelenmez;
+			// "kullanilmayan gorsel" sanilip elle silinmesinler.
+			'meta_query'     => array( array( 'key' => NWCS_PHOTO_META, 'compare' => 'NOT EXISTS' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 		)
 	);
 
@@ -142,6 +145,99 @@ function nwcs_media_query( string $search, int $page ): array {
 		'total' => $total,
 		'pages' => max( 1, $pages ),
 	);
+}
+
+/**
+ * Urun formundaki "Kitaplıkta ara": dosya adi, baslik ya da alt metinde
+ * gecen gorseller (en cok 30, en yeni once). Bos aramada son 30 gorsel.
+ * Turkce harf katlamasi veritabaninda yapilamaz; arama hem yazildigi gibi
+ * hem sadelestirilmis haliyle ("Şezlong" ve "sezlong") denenir. Bekleyen
+ * Fotograf Kutusu dosyalari listelenmez.
+ *
+ * @param int[] $exclude Galeride zaten olanlar.
+ * @return array<int, array{id:int, title:string, name:string, thumb:string}>
+ */
+function nwcs_media_find( string $search, array $exclude = array(), int $limit = 30 ): array {
+	global $wpdb;
+
+	$search  = trim( $search );
+	$exclude = array_values( array_filter( array_map( 'absint', $exclude ) ) );
+	$terms   = array_values( array_unique( array_filter( array( $search, nwcs_search_fold( $search ) ) ) ) );
+
+	switch_to_blog( nwcs_pool_blog_id() );
+
+	$base = array(
+		'post_type'      => 'attachment',
+		'post_mime_type' => 'image',
+		'post_status'    => 'inherit',
+		'posts_per_page' => $limit,
+		'fields'         => 'ids',
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+		'post__not_in'   => $exclude,
+		'meta_query'     => array( array( 'key' => NWCS_PHOTO_META, 'compare' => 'NOT EXISTS' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+	);
+
+	$ids = array();
+
+	if ( ! $terms ) {
+		$ids = get_posts( $base );
+	} else {
+		foreach ( $terms as $term ) {
+			// Baslik, aciklama, alt metin (WordPress aramasi).
+			$ids = array_merge( $ids, get_posts( $base + array( 's' => $term ) ) );
+
+			// Dosya adi ve alt metin.
+			$like = '%' . $wpdb->esc_like( $term ) . '%';
+			$ids  = array_merge(
+				$ids,
+				array_map(
+					'intval',
+					$wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+						$wpdb->prepare(
+							"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key IN ( '_wp_attached_file', '_wp_attachment_image_alt' ) AND meta_value LIKE %s ORDER BY post_id DESC LIMIT %d",
+							$like,
+							$limit * 2
+						)
+					)
+				)
+			);
+		}
+
+		$ids = $ids ? get_posts( array_merge( $base, array( 'post__in' => array_values( array_unique( array_map( 'intval', $ids ) ) ) ) ) ) : array();
+	}
+
+	$out = array();
+
+	foreach ( $ids as $id ) {
+		$src  = wp_get_attachment_image_src( (int) $id, 'thumbnail' );
+		$file = (string) get_post_meta( (int) $id, '_wp_attached_file', true );
+
+		$out[] = array(
+			'id'    => (int) $id,
+			'title' => (string) get_the_title( (int) $id ),
+			'name'  => wp_basename( $file ),
+			'thumb' => $src ? (string) $src[0] : '',
+		);
+	}
+
+	restore_current_blog();
+
+	return $out;
+}
+
+add_action( 'wp_ajax_nwcs_media_find', 'nwcs_ajax_media_find' );
+function nwcs_ajax_media_find(): void {
+	check_ajax_referer( 'nwcs_panel', 'nonce' );
+
+	if ( ! current_user_can( NWCS_CAPABILITY ) ) {
+		wp_send_json_error( array( 'message' => 'Bu işlem için yetkiniz yok.' ), 403 );
+	}
+
+	$search  = isset( $_POST['q'] ) ? nwcs_clean_text( wp_unslash( $_POST['q'] ) ) : '';
+	$exclude = isset( $_POST['haric'] ) && is_array( $_POST['haric'] ) ? array_map( 'absint', wp_unslash( $_POST['haric'] ) ) : array();
+
+	wp_send_json_success( array( 'items' => nwcs_media_find( $search, $exclude ) ) );
 }
 
 /**
@@ -196,9 +292,9 @@ function nwcs_render_media(): void {
 		</header>
 
 		<p class="nwcs-help">
-			<span class="nwcs-help__step"><b>1</b> Görselleri buraya yükleyin (bir seferde birden fazla olabilir)</span>
-			<span class="nwcs-help__step"><b>2</b> Alt metni doldurun</span>
-			<span class="nwcs-help__step"><b>3</b> Ürün Havuzu'nda ürüne ekleyin</span>
+			<span class="nwcs-help__step"><b>1</b> Ürün fotoğrafları: <a href="<?php echo esc_url( nwcs_pool_categories_url() ); ?>">Ürün Havuzu › Kategoriler</a> › kategori › Fotoğrafları yükleyin; dosya adı ürün koduyla başlar</span>
+			<span class="nwcs-help__step"><b>2</b> Site görselleri (logo, hero, blog) buraya yüklenir</span>
+			<span class="nwcs-help__step"><b>3</b> Alt metni doldurun</span>
 		</p>
 
 		<?php nwcs_render_media_notices(); ?>
@@ -400,6 +496,7 @@ function nwcs_render_media(): void {
 									Fotoğraflar yüklenirken sitede hızlı açılacak şekilde küçültülür ve WebP'ye çevrilir.
 								<?php endif; ?>
 							</p>
+							<p class="nwcs-hint">Ürün fotoğrafı için kategorinin sayfasındaki Fotoğraf Kutusu’nu kullanın; buradan yüklenen görsel ürüne kendiliğinden bağlanmaz.</p>
 						</div>
 
 						<div class="nwcs-field">

@@ -57,12 +57,20 @@ function nwcs_admin_assets( string $hook ): void {
 		wp_enqueue_script( 'nwcs-overrides', NWCS_URL . 'assets/overrides.js', array( 'nwcs-admin' ), NWCS_VERSION, true );
 		wp_enqueue_script( 'nwcs-pool-tables', NWCS_URL . 'assets/pool-tables.js', array(), NWCS_VERSION, true );
 	}
+
+	// Fotograf Kutusu yalnizca Kategoriler sayfasinda.
+	if ( str_contains( $hook, NWCS_CATEGORIES_SLUG ) ) {
+		wp_enqueue_script( 'nwcs-pool-photos', NWCS_URL . 'assets/pool-photos.js', array( 'nwcs-admin' ), NWCS_VERSION, true );
+	}
 	wp_localize_script(
 		'nwcs-admin',
 		'nwcsPanel',
 		array(
 			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
 			'nonce'      => wp_create_nonce( 'nwcs_panel' ),
+			// Fotograf Kutusu: tarayici bu sinirdan buyuk dosyayi gondermez.
+			'uploadMax'     => wp_max_upload_size(),
+			'uploadMaxText' => size_format( wp_max_upload_size() ),
 			'text'       => array(
 				'confirmDiscard' => 'Kaydedilmemiş değişiklikleriniz var. Son kaydedilen hâle dönülsün mü?',
 				'confirmLeave'   => 'Kaydedilmemiş değişiklikleriniz var.',
