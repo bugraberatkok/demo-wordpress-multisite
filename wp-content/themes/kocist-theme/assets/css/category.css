@@ -163,8 +163,9 @@
 /* ---------- Urun kartlari ---------- */
 .k-plist {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-	gap: 22px;
+	/* Dikey urun gorselleri (1280x1714) icin genis kart: masaustunde 3 sutun. */
+	grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+	gap: 24px;
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -188,7 +189,8 @@
 
 .k-pcard__media {
 	display: block;
-	aspect-ratio: 4 / 3;
+	/* Urun gorselleri 1280x1714: kutu ayni oranda, gorsel kirpilmadan tam gorunur. */
+	aspect-ratio: 1280 / 1714;
 	overflow: hidden;
 	background: var(--paper-2);
 }
@@ -197,11 +199,8 @@
 .k-pcard__media img {
 	width: 100%;
 	height: 100%;
-	object-fit: cover;
-	transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+	object-fit: contain;
 }
-
-.k-pcard__link:hover .k-pcard__img { transform: scale(1.035); }
 
 .k-pcard__body {
 	display: flex;
@@ -427,7 +426,6 @@
 	.k-cats__link,
 	.k-cats__chevron,
 	.k-pcard__link,
-	.k-pcard__img,
 	.k-shelf__img,
 	.k-shelf__subs a,
 	.k-shelf__all svg { transition-duration: .01ms !important; }
