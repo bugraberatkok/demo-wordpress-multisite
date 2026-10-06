@@ -23,6 +23,12 @@
 				return;
 			}
 
+			// Oklar, buyutec rozeti ve sayac uzerinde buyutme yok: dugme gorunur kalsin.
+			if ( event.target.closest && event.target.closest( '.k-product__arrow, .k-zoom__badge, .k-product__counter' ) ) {
+				lensStage.classList.remove( 'is-lens' );
+				return;
+			}
+
 			var box = lensStage.getBoundingClientRect();
 
 			lensStage.style.setProperty( '--zx', ( ( event.clientX - box.left ) / box.width * 100 ) + '%' );
