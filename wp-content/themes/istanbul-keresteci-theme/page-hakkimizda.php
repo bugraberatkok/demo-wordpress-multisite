@@ -10,6 +10,9 @@ get_header();
 get_template_part( 'template-parts/page-head', null, array( 'page' => 'about' ) );
 
 $image = ik_image_or_default( nwcs_image( 'about', 'head', 'image', 'full' ), 'hero-orman.jpg', 'Orman yolunun kenarına istiflenmiş tomruklar' );
+// 3.2:1 fotograf 21:9 kutuyu yukseklikten doldurur: cizilen genislik kutunun
+// 1.37 kati (kutu en fazla 1240px).
+$image = ik_theme_srcset( $image, 'min(calc(137.2vw - 44px), 1701px)' );
 $items = nwcs_rows( 'about', 'values', 'items' );
 ?>
 <?php if ( ! empty( $image['url'] ) ) : ?>

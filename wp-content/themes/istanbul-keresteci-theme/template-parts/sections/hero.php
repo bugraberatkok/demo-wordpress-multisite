@@ -9,6 +9,13 @@
 defined( 'ABSPATH' ) || exit;
 
 $image = ik_image_or_default( nwcs_image( 'home', 'hero', 'image', 'full' ), 'hero-orman.jpg' );
+
+// Telefonda tema fotografinin dar kirpimi (hero-orman-telefon.webp, 520 x 500).
+// Kutu en az min(82vh, 46rem) yuksek; ekran 30em'den dar ve dikeyse (en/boy
+// <= 3/4) kutu orani en fazla 0.92, gorunen kisim fotografin %29'u. Kirpim
+// %32.5 genislikte ve object-position 40% ile ayni hizada (x = 0.4 x (1600 -
+// 520) = 432): ekranda ayni pikseller gorunur.
+$image = ik_theme_mobile_source( $image, '(max-width: 30em) and (max-aspect-ratio: 3/4)' );
 ?>
 <?php // Zemine (fotografa) tiklaninca fotograf alani acilir; yazilar kendi alanlarini acar. ?>
 <section class="ik-hero" aria-labelledby="ik-hero-title" <?php nwcs_edit_attr( 'home', 'hero', 'image' ); ?>>

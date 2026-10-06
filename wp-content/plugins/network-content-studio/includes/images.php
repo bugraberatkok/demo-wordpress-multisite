@@ -19,6 +19,12 @@ defined( 'ABSPATH' ) || exit;
 const NWCS_IMAGE_MAX_EDGE = 2560;
 
 /**
+ * WebP kalitesi. WordPress varsayilani 86 (JPEG 82); 86'da buyuk fotograflarin
+ * WebP'si bazen JPG'den buyuk cikiyordu. 82'de fark gozle secilmez.
+ */
+const NWCS_IMAGE_WEBP_QUALITY = 82;
+
+/**
  * WebP'ye cevrilen turler.
  *
  * @return string[]
@@ -81,9 +87,10 @@ function nwcs_image_convert_file( string $file ): ?string {
 		$editor->maybe_exif_rotate();
 	}
 
-	$size = $editor->get_size();
+	$size    = $editor->get_size();
+	$resized = max( (int) $size['width'], (int) $size['height'] ) > NWCS_IMAGE_MAX_EDGE;
 
-	if ( max( (int) $size['width'], (int) $size['height'] ) > NWCS_IMAGE_MAX_EDGE ) {
+	if ( $resized ) {
 		$editor->resize( NWCS_IMAGE_MAX_EDGE, NWCS_IMAGE_MAX_EDGE, false );
 	}
 
@@ -96,10 +103,26 @@ function nwcs_image_convert_file( string $file ): ?string {
 		return null;
 	}
 
+	// Kucultulmeyen ve WebP'si daha buyuk cikan (zaten iyi sikistirilmis) dosya oldugu gibi kalir.
+	// Bilerek image_editor_output_format kullanilmiyor: o, boyle bir JPG icin cekirdege daha buyuk
+	// bir tam boy WebP kopyasi urettirip asil dosya yapiyordu.
+	if ( ! $resized && filesize( $saved['path'] ) >= filesize( $file ) ) {
+		wp_delete_file( $saved['path'] );
+
+		return null;
+	}
+
 	wp_delete_file( $file );
 
 	return $saved['path'];
 }
+
+add_filter(
+	'wp_editor_set_quality',
+	static fn( $quality, $mime_type = '' ) => 'image/webp' === $mime_type ? NWCS_IMAGE_WEBP_QUALITY : $quality,
+	10,
+	2
+);
 
 /**
  * Asil zaten kucultuldu; WordPress ayrica "-scaled" kopya uretmesin.
@@ -107,21 +130,4 @@ function nwcs_image_convert_file( string $file ): ?string {
 add_filter(
 	'big_image_size_threshold',
 	static fn( $threshold ) => $threshold ? max( (int) $threshold, NWCS_IMAGE_MAX_EDGE ) : $threshold
-);
-
-/**
- * Donusumden kacan (yan yukleme, eski kayitlarin yeniden uretimi) JPG/PNG
- * asillarin ara boyutlari da WebP uretilir.
- */
-add_filter(
-	'image_editor_output_format',
-	static function ( array $formats ): array {
-		if ( nwcs_image_webp_supported() ) {
-			foreach ( nwcs_image_convertible_types() as $type ) {
-				$formats[ $type ] = 'image/webp';
-			}
-		}
-
-		return $formats;
-	}
 );

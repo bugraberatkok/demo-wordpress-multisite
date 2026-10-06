@@ -302,6 +302,35 @@ function ahsapambalaj_srcset_attrs( array $image, float $box_rem, float $scale =
 }
 
 /**
+ * Hero tema gorseli icin telefon kaynagi: <picture> icindeki <source>.
+ *
+ * Hero kutusu en az 32rem yuksek; ekran 30em'den darsa kutunun orani en fazla
+ * 30/32 = 0.9375. Gorsel object-cover ve ortada; bu oranda gorunen kisim
+ * gorselin ortadaki %53'u. "<ad>-telefon.webp" ayni fotografin ortadan, tam
+ * yukseklikte kesilmis 848 x 900 parcasi (1600 x 900'un ortasi; oran 0.94):
+ * telefonda ekranda gorunen pikseller ayni, dosya yaklasik yarisi. Parallax ve
+ * ken burns ayni kutuya uygulandigi icin sonuc degismez.
+ *
+ * Yalnizca tema yedek gorsellerinde (kimlik 0) ve dosya varsa; yoksa bos.
+ * Kirpimlar: Pillow, hero-N.jpg'den crop((376, 0, 1224, 900)), WebP q81.
+ */
+function ahsapambalaj_hero_mobile_source( array $image ): string {
+	$url = (string) ( $image['url'] ?? '' );
+
+	if ( (int) ( $image['id'] ?? 0 ) > 0 || ! preg_match( '~/assets/img/([a-z0-9-]+)\.webp$~', $url, $match ) ) {
+		return '';
+	}
+
+	$file = $match[1] . '-telefon.webp';
+
+	if ( ! file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+		return '';
+	}
+
+	return sprintf( '<source media="(max-width: 30em)" srcset="%s" type="image/webp" />', esc_url( get_theme_file_uri( 'assets/img/' . $file ) ) );
+}
+
+/**
  * Gorsel alani bossa temanin kendi gorselini (assets/img) dondurur.
  * Panelden secilen gorsel her zaman kazanir; yedek yalnizca bos alani doldurur.
  * Boylece tema, seed ya da medya yuklemesi olmadan da eksiksiz gorunur.

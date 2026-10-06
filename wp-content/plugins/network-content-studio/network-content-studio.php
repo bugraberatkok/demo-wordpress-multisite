@@ -56,6 +56,7 @@ require_once NWCS_DIR . 'includes/admin/bulk-content.php';
 require_once NWCS_DIR . 'includes/admin/bulk-update.php';
 require_once NWCS_DIR . 'includes/admin/placeholders.php';
 require_once NWCS_DIR . 'includes/admin/mail-test.php';
+require_once NWCS_DIR . 'includes/admin/webp-convert.php';
 
 // WordPress 6.9+ cekirdeginde Abilities API bulunur; yoksa sessizce atlanir.
 if ( function_exists( 'wp_register_ability' ) ) {

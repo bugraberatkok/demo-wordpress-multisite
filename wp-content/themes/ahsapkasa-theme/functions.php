@@ -295,6 +295,54 @@ function ahsapkasa_srcset_attrs( array $image, float $box_rem ): string {
 }
 
 /**
+ * Hero slaydi icin telefon kaynagi: <picture> icindeki <source>; yoksa bos.
+ *
+ * Hero kutusu en az 32rem yuksek; ekran 30em'den darsa kutunun orani en fazla
+ * 30/32 = 0.9375. Gorsel object-cover ve ortada (object-position 50%); ortadan,
+ * tam yukseklikte kesilmis ve orani 0.9375'ten az olmayan bir kopya ekranda ayni
+ * pikselleri gosterir, dosya yaklasik yarisi. Kopyalar manifestteki
+ * 'image_sizes' (ahsapkasa-hero-sm / -md) ile uretilir; yalnizca yandan
+ * kesilmis (orani asilinkinden kucuk ya da esit) olanlar kullanilir.
+ */
+function ahsapkasa_hero_mobile_source( array $image ): string {
+	$id   = (int) ( $image['id'] ?? 0 );
+	$full = $id > 0 ? wp_get_attachment_image_src( $id, 'full' ) : false;
+
+	if ( ! $full || empty( $full[1] ) || empty( $full[2] ) ) {
+		return '';
+	}
+
+	$ratio  = $full[1] / $full[2];
+	$aspect = null;
+	$set    = array();
+
+	foreach ( array( 'ahsapkasa-hero-sm', 'ahsapkasa-hero-md' ) as $name ) {
+		$size = image_get_intermediate_size( $id, $name );
+
+		if ( ! $size || empty( $size['width'] ) || empty( $size['height'] ) || empty( $size['url'] ) ) {
+			continue;
+		}
+
+		$a = $size['width'] / $size['height'];
+
+		// Kutudan dar ya da ustten/alttan kesilmis kopya olmaz; tek srcset'te tek oran.
+		if ( $a < 0.9375 || $a > $ratio + 0.005 || ( null !== $aspect && abs( $a - $aspect ) > 0.005 ) ) {
+			continue;
+		}
+
+		$aspect = $aspect ?? $a;
+		$set[]  = $size['url'] . ' ' . (int) $size['width'] . 'w';
+	}
+
+	if ( ! $set ) {
+		return '';
+	}
+
+	// Gorsel kutu yuksekligine (en az 32rem) gore cizilir: genislik = 32rem x oran.
+	return sprintf( '<source media="(max-width: 30em)" srcset="%s" sizes="%srem" />', esc_attr( implode( ', ', $set ) ), esc_attr( (string) round( 32 * $aspect, 2 ) ) );
+}
+
+/**
  * Panel gorselinin piksel olculeri (width/height ozellikleri icin). Gorsel
  * kutusu yuklenmeden once dogru oranda yer ayrilsin.
  *

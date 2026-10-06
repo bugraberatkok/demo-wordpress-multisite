@@ -14,6 +14,16 @@ return array(
 	// Panelde gorunen kisa ad (alan adi olmadan).
 	'panel_label'       => 'Ahşap Kasa',
 
+	// Ek gorsel boyutlari: ad => [ genislik, yukseklik, kirp ]. Panel
+	// yuklemeleri ve WebP donusturme ag yonetiminde calistigi (tema yuklu
+	// olmadigi) icin add_image_size yerine eklenti buradan okur. Hero'nun
+	// telefon kirpimlari: ortadan, tam yukseklikte, oran 0.9375 (bkz.
+	// ahsapkasa_hero_mobile_source).
+	'image_sizes'       => array(
+		'ahsapkasa-hero-sm' => array( 1080, 1152, true ),
+		'ahsapkasa-hero-md' => array( 1350, 1440, true ),
+	),
+
 	// SEO ve GEO sekmesindeki firma bilgisinin ilk degerleri: sitenin kendi
 	// iletisim ve alt bilgi alanlarindaki bilgiler. Konum bilinmedigi icin bos.
 	'seo_site_defaults' => array(

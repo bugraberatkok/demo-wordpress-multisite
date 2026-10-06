@@ -835,23 +835,110 @@ function ik_image_dims( array $image ): string {
 }
 
 /**
+ * Tema fotografinin (kimlik 0) kucuk genislikli WebP kopyalari varsa srcset
+ * ve sizes ekler: <ad>-640.webp, <ad>-960.webp, <ad>-1280.webp ve asil dosya.
+ * Telefon ekrana yetecek en kucuk dosyayi indirir; gorunum ayni (ayni
+ * fotograf, ayni kirpim). Panel gorsellerine dokunmaz.
+ *
+ * $sizes, gorselin cizildigi genislik (object-fit: cover kutuyu yukseklikten
+ * dolduruyorsa kutudan genis). Kopyalar: Pillow LANCZOS, WebP q81.
+ */
+function ik_theme_srcset( array $image, string $sizes ): array {
+	$path = ik_theme_image_path( $image );
+
+	if ( '' === $path ) {
+		return $image;
+	}
+
+	$info = pathinfo( $path );
+	$size = @getimagesize( get_theme_file_path( 'assets/img/' . $path ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	$set  = array();
+
+	foreach ( array( 640, 960, 1280 ) as $width ) {
+		$file = $info['filename'] . '-' . $width . '.webp';
+
+		if ( $size && $width < $size[0] && file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+			$set[] = get_theme_file_uri( 'assets/img/' . $file ) . ' ' . $width . 'w';
+		}
+	}
+
+	if ( $set ) {
+		$set[]           = $image['url'] . ' ' . $size[0] . 'w';
+		$image['srcset'] = implode( ', ', $set );
+		$image['sizes']  = $sizes;
+	}
+
+	return $image;
+}
+
+/**
+ * Tema fotografinin (kimlik 0) telefon kirpimi varsa <picture> kaynagi ekler:
+ * <ad>-telefon.webp, $media kosulunda kullanilir. Kirpim, o kosulda ekranda
+ * gorunen kismi tamamen kapsar (bkz. hero.php); gorunum ayni.
+ */
+function ik_theme_mobile_source( array $image, string $media ): array {
+	$path = ik_theme_image_path( $image );
+	$file = '' !== $path ? pathinfo( $path, PATHINFO_FILENAME ) . '-telefon.webp' : '';
+
+	if ( '' !== $file && file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+		$image['sources'] = array( array( 'media' => $media, 'srcset' => get_theme_file_uri( 'assets/img/' . $file ) ) );
+	}
+
+	return $image;
+}
+
+/**
+ * Gorsel tema klasorundeyse (assets/img) dosya adi; degilse bos.
+ */
+function ik_theme_image_path( array $image ): string {
+	$url   = (string) ( $image['url'] ?? '' );
+	$theme = get_theme_file_uri( 'assets/img/' );
+
+	if ( ! empty( $image['id'] ) || '' === $url || ! str_starts_with( $url, $theme ) ) {
+		return '';
+	}
+
+	$name = substr( $url, strlen( $theme ) );
+
+	return preg_match( '/^[a-z0-9-]+\.(?:jpe?g|png|webp)$/i', $name ) ? $name : '';
+}
+
+/**
  * Gorsel icin img etiketi; deger yoksa isaretli yer tutucu.
+ *
+ * $image icinde istege bagli: 'srcset' + 'sizes' (ik_theme_srcset) ve
+ * 'sources' (ik_theme_mobile_source; o zaman <picture> icinde basilir).
  */
 function ik_image_tag( array $image, string $class = '', ?string $alt = null, string $loading = 'lazy', string $attrs = '' ): string {
 	if ( ! empty( $image['url'] ) ) {
 		// Ilk ekrandaki (eager) gorsel LCP adayi: once indirilsin.
 		$priority = 'eager' === $loading ? ' fetchpriority="high"' : '';
+		$srcset   = ! empty( $image['srcset'] ) ? sprintf( ' srcset="%s" sizes="%s"', esc_attr( $image['srcset'] ), esc_attr( (string) ( $image['sizes'] ?? '100vw' ) ) ) : '';
 
-		return sprintf(
-			'<img src="%1$s" alt="%2$s" class="%3$s"%4$s loading="%5$s"%6$s decoding="async"%7$s />',
+		$tag = sprintf(
+			'<img src="%1$s"%8$s alt="%2$s" class="%3$s"%4$s loading="%5$s"%6$s decoding="async"%7$s />',
 			esc_url( $image['url'] ),
 			esc_attr( null === $alt ? $image['alt'] : $alt ),
 			esc_attr( $class ),
 			ik_image_dims( $image ),
 			esc_attr( $loading ),
 			$priority,
-			$attrs
+			$attrs,
+			$srcset
 		);
+
+		if ( empty( $image['sources'] ) ) {
+			return $tag;
+		}
+
+		$sources = '';
+
+		foreach ( (array) $image['sources'] as $source ) {
+			$sources .= sprintf( '<source media="%s" srcset="%s" type="image/webp" />', esc_attr( $source['media'] ), esc_url( $source['srcset'] ) );
+		}
+
+		// display: contents: sarmalayici kutu olusturmaz; img'nin yerlesimi (flex, absolute) degismez.
+		return '<picture style="display:contents">' . $sources . $tag . '</picture>';
 	}
 
 	return sprintf( '<div class="ik-placeholder %s" aria-hidden="true"%s></div>', esc_attr( $class ), $attrs );
