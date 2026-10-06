@@ -315,33 +315,27 @@ p { margin: 0; }
 /* Urun karti                                                          */
 /* ------------------------------------------------------------------ */
 
-.wk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1.25rem; }
-@media (max-width: 599px) { .wk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.625rem; } }
-/* Panel onizlemesi uzerine gelinen duzenlenebilir ogeye yari saydam zemin verir;
-   beyaz yuzeyler (kart) saydam gorunmesin, cerceve yine gosterir. */
-.nwcs-preview-mode .wk-card[data-nwcs-edit], .nwcs-preview-mode .wk-card[data-nwcs-edit]:hover { background-color: var(--card); }
-.wk-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-.wk-card:hover { border-color: #d9c1b8; box-shadow: var(--lift); }
-.wk-card__media { display: block; aspect-ratio: 4 / 3; text-decoration: none; margin: 0.5rem 0.5rem 0; overflow: hidden; background: var(--frame); }
-.wk-card__media img { width: 100%; height: 100%; object-fit: cover; }
-.wk-card__body { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; padding: 0.85rem 1rem 1rem; }
-.wk-card__code { color: var(--mahogany); font-size: 0.8125rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.wk-card__title { font-size: 1rem; font-weight: 700; font-stretch: 100%; line-height: 1.3; letter-spacing: 0; }
+.wk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 2rem 1.5rem; }
+@media (max-width: 599px) { .wk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 0.75rem; } }
+/* Canlidaki kart: cercevesiz; dikey urun fotografi (1280x1714) kirpilmadan,
+   altinda ad (normal kalinlik) ve kiremit renkli fiyat + KDV notu. */
+.wk-card { display: flex; flex-direction: column; min-width: 0; background: none; }
+.wk-card__media { display: block; aspect-ratio: 1280 / 1714; overflow: hidden; background: var(--frame); text-decoration: none; }
+.wk-card__media img { width: 100%; height: 100%; object-fit: contain; }
+.wk-card__body { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; padding: 1rem 0 0.5rem; }
+.wk-card__title { font-size: 1.125rem; font-weight: 400; font-stretch: 100%; line-height: 1.4; letter-spacing: 0; }
 .wk-card__title a { color: var(--ink); text-decoration: none; }
 .wk-card__title a:hover { color: var(--brick); text-decoration: underline; }
-.wk-card__specs { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.15rem 0 0; padding: 0; list-style: none; }
-.wk-card__specs li { padding: 0.1rem 0.5rem; border-radius: 3px; background: var(--paper); color: var(--muted); font-size: 0.8125rem; }
-.wk-card__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem; margin-top: auto; padding-top: 0.75rem; }
-.wk-card__price { color: var(--wine); font-size: 1.1875rem; font-weight: 800; line-height: 1.2; }
-.wk-card__price small { display: block; color: var(--muted); font-size: 0.75rem; font-weight: 500; }
-.wk-card__price--ask { color: var(--muted); font-size: 0.9375rem; font-weight: 600; }
-.wk-card__foot .wk-btn { min-height: 2.5rem; padding: 0.45rem 0.8rem; font-size: 0.875rem; }
+.wk-card:has(.wk-card__media:hover) .wk-card__title a { color: var(--brick); }
+/* #ad4d3e: canlidaki kiremit, beyaz/krem zeminde AA. */
+.wk-card__price { color: #ad4d3e; font-size: 1rem; font-weight: 400; line-height: 1.3; }
+.wk-card__price small { color: #ad4d3e; font-size: 0.875rem; font-weight: 400; }
+.wk-card__price--ask { color: var(--muted); font-size: 0.9375rem; }
 @media (max-width: 599px) {
-	.wk-card__body { padding: 0.7rem 0.7rem 0.8rem; }
+	.wk-card__body { padding-top: 0.6rem; }
 	.wk-card__title { font-size: 0.9375rem; }
-	.wk-card__specs { display: none; }
-	.wk-card__foot, .wk-card__foot .wk-add { width: 100%; }
-	.wk-card__foot .wk-btn { width: 100%; }
+	.wk-card__price { font-size: 0.875rem; }
+	.wk-card__price small { font-size: 0.75rem; }
 }
 
 /* Kod plakasi: gorsel yokken urun kodu yakma damgasi gibi */

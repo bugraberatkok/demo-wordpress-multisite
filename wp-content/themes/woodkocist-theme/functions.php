@@ -431,22 +431,6 @@ function wk_product_has_page( array $product ): bool {
 	return function_exists( 'nwcs_product_has_page' ) ? nwcs_product_has_page( $product ) : '' !== trim( (string) ( $product['body'] ?? '' ) );
 }
 
-/**
- * Karttaki kisa ozellikler: urunu ayirt eden birkac deger.
- */
-function wk_card_specs( array $product ): array {
-	$wanted = array( 'Boyut Sınıfı', 'Kapasite', 'Zemin Ölçüsü', 'Ahşap Cinsi' );
-	$out    = array();
-
-	foreach ( wk_product_specs( $product ) as $pair ) {
-		if ( in_array( $pair[0], $wanted, true ) && count( $out ) < 2 ) {
-			$out[] = $pair;
-		}
-	}
-
-	return $out;
-}
-
 function wk_image( array $product ): array {
 	foreach ( (array) ( $product['images'] ?? array() ) as $image ) {
 		if ( ! empty( $image['url'] ) ) {
