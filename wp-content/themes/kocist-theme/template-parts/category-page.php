@@ -84,7 +84,7 @@ else :
 	$products = kocist_catalog_products_in( $group['slug'], $sub['slug'] ?? '' );
 	$title    = $sub['name'] ?? $group['name'];
 	?>
-	<div class="k-pagehead">
+	<div class="k-pagehead k-pagehead--browse">
 		<div class="k-wrap">
 			<?php kocist_the_trail( kocist_catalog_trail( $group['slug'], $sub['slug'] ?? '' ), 'k-crumbs--on-dark' ); ?>
 			<?php

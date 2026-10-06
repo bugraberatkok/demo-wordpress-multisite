@@ -49,11 +49,42 @@
 .k-crumbs--on-dark a:hover { color: #fff; }
 .k-crumbs--on-dark [aria-current="page"] { color: #fff; }
 
+/*
+ * Urun listeli kategori basligi: alttaki liste + urunler alaniyla ayni
+ * genislikte (kart kenari kategori listesinin sol kenarina hizali) ve alcak;
+ * urunler ekranda daha yukarida baslar.
+ */
+.k-pagehead--browse { padding-top: 18px; }
+
+.k-pagehead.k-pagehead--browse > .k-wrap {
+	max-width: 1640px;
+	padding: 30px 52px 34px;
+}
+
+.k-pagehead--browse .k-crumbs--on-dark { margin-bottom: 10px; }
+
+.k-pagehead--browse .k-pagehead__title {
+	max-width: none;
+	margin-bottom: 8px;
+	font-size: clamp(26px, 2.8vw, 38px);
+	line-height: 1.1;
+}
+
+.k-pagehead--browse .k-pagehead__sub { font-size: 16px; }
+
+@media (max-width: 640px) {
+	.k-pagehead--browse { padding-top: 12px; }
+	.k-pagehead.k-pagehead--browse > .k-wrap { padding: 22px 34px 26px; }
+	.k-pagehead--browse .k-pagehead__sub { font-size: 15px; }
+}
+
 /* ---------- Kategori listesi + urunler ---------- */
+/* Sayfa genisliginden (--maxw) genis: liste sola yaslanir, kartlar (gorseller) buyur. */
 .k-browse {
 	display: grid;
-	grid-template-columns: 250px minmax(0, 1fr);
-	gap: 40px;
+	max-width: 1640px;
+	grid-template-columns: 220px minmax(0, 1fr);
+	gap: 32px;
 	align-items: start;
 	padding-top: 12px;
 }
@@ -169,6 +200,34 @@
 	margin: 0;
 	padding: 0;
 	list-style: none;
+}
+
+/*
+ * Kategori sayfasi: 1024px'te 3, 1280px ve ustunde 4 kart; satirda en fazla 4.
+ * Kart en az 220px ya da satirin dortte biri (3 bosluk = 66px), hangisi buyukse.
+ */
+.k-browse .k-plist {
+	grid-template-columns: repeat(auto-fill, minmax(max(min(220px, 100%), calc((100% - 66px) / 4)), 1fr));
+	gap: 22px;
+}
+
+.k-browse .k-pcard__body { padding: 16px 16px 18px; }
+
+/* Mobil: yan yana 2 kart; yazilar dar karta gore kuculur, fiyat ve baglanti alt alta. */
+@media (max-width: 860px) {
+	.k-browse .k-plist { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
+}
+
+@media (max-width: 560px) {
+	.k-browse .k-pcard__link { border-radius: 12px; }
+	.k-browse .k-pcard__body { gap: 4px; padding: 12px 12px 14px; }
+	.k-browse .k-pcard__kind { font-size: 12px; }
+	.k-browse .k-pcard__title { font-size: 15px; }
+	.k-browse .k-pcard__text { font-size: 13px; line-height: 1.4; }
+	.k-browse .k-pcard__foot { flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 10px; }
+	.k-browse .k-pcard__price { font-size: 15px; }
+	.k-browse .k-pcard__price.is-quote,
+	.k-browse .k-pcard__go { font-size: 13px; }
 }
 
 .k-pcard__link {
