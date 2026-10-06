@@ -31,14 +31,17 @@ manifest varsayılanlarını okur. Yalnızca panelden düzenleme olmaz.
 Bütün renkler tek dosyada: `assets/css/tokens.css`. Şablonlarda ve diğer CSS dosyalarında
 renk kodu yok.
 
+Sayfaya yüklenen stil, `assets/css` kaynaklarının birleşmiş hâlidir (`assets/css/site-*.css`).
+Herhangi bir CSS kaynağını değiştirdikten sonra `python tools/build-css.py` çalıştırın.
+
 | Jeton | Değer | İşi |
 | --- | --- | --- |
 | `--beton` | `#e3e4e0` | sayfa zemini (saha betonu) |
 | `--beton-acik` | `#f4f4f1` | yükseltilmiş yüzey, bant |
 | `--cam` | `#d9ae6c` | ahşap: damga, yapı çizgileri, adım numaraları, teklif şeridi |
 | `--yanik` | `#2b2019` | metin, damga mürekkebi, footer |
-| `--toz` | `#6e6660` | ikincil metin |
-| `--yesil` | `#3c7f2b` | yalnızca eylem: düğme, bağlantı, odak |
+| `--toz` | `#6c645f` | ikincil metin |
+| `--yesil` | `#367327` | yalnızca eylem: düğme, bağlantı, odak |
 
 Kural: yeşil tıklanabilir demektir, çam rengi ahşap ya da yapı demektir. Gölge ve degrade yok.
 

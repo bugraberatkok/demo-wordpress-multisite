@@ -11,7 +11,7 @@ $image = ik_image_or_default( nwcs_image( 'products', 'help', 'image', 'medium_l
 <?php // Kutunun zeminine tiklaninca arka plan fotografi alani acilir. ?>
 <a class="ik-help" href="<?php echo esc_url( ik_link( nwcs_field( 'products', 'help', 'number_url' ) ) ); ?>" target="_blank" rel="noopener" <?php nwcs_edit_attr( 'products', 'help', 'image' ); ?>>
 	<?php if ( ! empty( $image['url'] ) ) : ?>
-		<img class="ik-help__image" <?php nwcs_edit_attr( 'products', 'help', 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="" loading="lazy" decoding="async" />
+		<img class="ik-help__image" <?php nwcs_edit_attr( 'products', 'help', 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt=""<?php echo ik_image_dims( $image ); // phpcs:ignore WordPress.Security.EscapingOutput ?> loading="lazy" decoding="async" />
 	<?php endif; ?>
 	<span class="ik-help__icon"><?php ik_icon( 'whatsapp', 34 ); ?></span>
 	<span class="ik-help__title" <?php nwcs_edit_attr( 'products', 'help', 'title' ); ?>><?php echo esc_html( nwcs_field( 'products', 'help', 'title' ) ); ?></span>

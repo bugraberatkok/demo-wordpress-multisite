@@ -15,7 +15,7 @@ $values = nwcs_rows( 'about', 'values', 'rows' );
 
 	<div class="mx-auto grid max-w-[78rem] items-start gap-10 px-5 pt-12 md:px-8 md:pt-16 lg:grid-cols-[1fr_1fr] lg:gap-14">
 		<div class="shot aspect-[16/10]" <?php nwcs_edit_attr( 'about', 'story', 'image' ); ?>>
-			<?php echo kr_image_tag( $photo, '', 'Kereste sevkiyatı' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+			<?php echo kr_image_tag( $photo, '', 'Kereste sevkiyatı', true ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</div>
 
 		<div class="reading text-lg leading-relaxed">

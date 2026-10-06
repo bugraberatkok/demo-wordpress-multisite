@@ -32,7 +32,7 @@
 	--color-bone-deep:    #dcdfd8;
 	--color-dust:         #dcdfd8;
 	--color-line:         #cdd3c9;
-	--color-moss:         #6b716b;
+	--color-moss:         #696e69; /* AA: bone uzerinde 4.54:1 (eski #6b716b 4.36) */
 	--color-ink:          #1a221d;
 	--color-ink-soft:     #2c362f;
 	/* Alt bilgi ve hero perdesi: notr koyu. Yesil yalnizca eylem rengi kalsin. */

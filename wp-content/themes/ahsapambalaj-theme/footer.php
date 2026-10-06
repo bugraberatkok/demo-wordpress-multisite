@@ -24,7 +24,8 @@ if ( empty( $footer_logo['url'] ) ) {
 				<p <?php nwcs_edit_attr( 'global', 'footer', 'logo_image' ); ?>>
 					<img src="<?php echo esc_url( $footer_logo['url'] ); ?>"
 						alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
-						width="280" height="44" class="block h-11 w-auto" />
+						<?php $footer_logo_size = ahsapambalaj_image_dimensions( $footer_logo, 'medium' ) ?? array( 280, 44 ); ?>
+						width="<?php echo (int) $footer_logo_size[0]; ?>" height="<?php echo (int) $footer_logo_size[1]; ?>" class="block h-11 w-auto" />
 				</p>
 				<p class="reading mt-4 text-base/relaxed text-bone/70" <?php nwcs_edit_attr( 'global', 'footer', 'tagline' ); ?>>
 					<?php echo esc_html( nwcs_field( 'global', 'footer', 'tagline' ) ); ?>

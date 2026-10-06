@@ -24,7 +24,7 @@ $heading  = $featured ? 'h2' : 'h3';
 <article class="sp-post<?php echo $featured ? ' sp-post--featured' : ''; ?>">
 	<div class="sp-post__media">
 		<?php if ( $image ) : ?>
-			<img class="sp-post__image" src="<?php echo esc_url( $image['url'] ); ?>" alt="" loading="lazy" decoding="async" />
+			<img class="sp-post__image" src="<?php echo esc_url( $image['url'] ); ?>" alt=""<?php echo sanayi_palet_image_dims( $image ); // phpcs:ignore WordPress.Security.EscapingOutput ?> loading="lazy" decoding="async" />
 		<?php else : ?>
 			<span class="sp-range__noimage sp-post__noimage"><?php sanayi_palet_icon( 'box', 48 ); ?></span>
 		<?php endif; ?>

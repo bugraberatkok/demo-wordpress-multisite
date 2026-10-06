@@ -20,8 +20,14 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $row ) {
 
 	<?php if ( $slides ) : ?>
 		<div class="absolute inset-0 -z-20" data-slideshow <?php nwcs_edit_attr( 'home', 'hero', 'slides' ); ?>>
-			<?php foreach ( $slides as $index => $slide ) : ?>
+			<?php
+			// Ilk kare sayfanin en buyuk ogesi (LCP): oncelikli ve tembel degil;
+			// digerleri tembel. srcset/sizes: kutu en fazla 40rem yuksek (md), gorsel
+			// object-cover ile ekrandan genis kirpilabilir; boyut buna gore secilir.
+			foreach ( $slides as $index => $slide ) :
+				?>
 				<img src="<?php echo esc_url( $slide['url'] ); ?>"
+					<?php echo ahsapkasa_srcset_attrs( $slide, 40 ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					alt="<?php echo esc_attr( $slide['alt'] ?: 'Koçist üretiminden bir kare' ); ?>"
 					data-slide
 					class="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-out <?php echo 0 === $index ? 'opacity-100' : 'opacity-0'; ?>"

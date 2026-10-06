@@ -1,7 +1,8 @@
 /*
  * Sanayi Palet — tasarim jetonlari.
  *
- * Renk degistirmek icin YALNIZCA bu dosyadaki degerleri duzenleyin.
+ * Renk degistirmek icin YALNIZCA bu dosyadaki degerleri duzenleyin, sonra
+ * python tools/build-css.py calistirin (sayfaya assets/css/site-*.css yuklenir).
  * Diger CSS dosyalari ve sablonlar renk kodu tasimaz, hep bu degiskenleri kullanir.
  *
  * Renk kurali: yesil = tiklanabilir, cam = ahsap / yapi.
@@ -13,8 +14,8 @@
 	--beton-acik: #f4f4f1;   /* yukseltilmis yuzey: kart, form, bant */
 	--cam: #d9ae6c;          /* ahsap: damga blogu, yapi cizgileri */
 	--yanik: #2b2019;        /* metin, damga murekkebi, footer zemini */
-	--toz: #6e6660;          /* ikincil metin */
-	--yesil: #3c7f2b;        /* yalnizca eylem: dugme, baglanti, odak */
+	--toz: #6c645f;          /* ikincil metin (onceki #6e6660; beton zeminde WCAG AA 4.5:1 icin koyulastirildi) */
+	--yesil: #367327;        /* yalnizca eylem: dugme, baglanti, odak (onceki #3c7f2b; beton zeminde metin ve dugme yazisi WCAG AA 4.5:1 icin koyulastirildi) */
 
 	/* Turetilmis tonlar: yukaridakilerden hesaplanir, ayrica duzenlemek gerekmez */
 	--yesil-koyu: color-mix(in srgb, var(--yesil) 82%, black);

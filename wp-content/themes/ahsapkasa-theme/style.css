@@ -31,3 +31,9 @@ Text Domain: ahsapkasa
 @media (min-width: 80rem) {
 	.product-card__shot { width: 56%; }
 }
+
+/* Hero slayt noktalari: gorunen nokta 10px kalir, basilabilir alan 24px
+   (WCAG 2.5.8). Noktalar arasi 10px -> 14px: merkezler 24px arayla durur. */
+[data-slideshow-dots] { gap: 14px; }
+[data-slide-dot] { position: relative; }
+[data-slide-dot]::before { content: ""; position: absolute; inset: -7px; }

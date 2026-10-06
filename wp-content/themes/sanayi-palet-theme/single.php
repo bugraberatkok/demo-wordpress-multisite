@@ -38,7 +38,7 @@ while ( have_posts() ) :
 
 		<?php if ( $image ) : ?>
 			<div class="sp-wrap">
-				<img class="sp-article__cover" <?php sanayi_palet_post_edit_attr( $current, 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+				<img class="sp-article__cover" <?php sanayi_palet_post_edit_attr( $current, 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>"<?php echo sanayi_palet_image_dims( $image ); // phpcs:ignore WordPress.Security.EscapingOutput ?> fetchpriority="high" decoding="async" />
 			</div>
 		<?php endif; ?>
 

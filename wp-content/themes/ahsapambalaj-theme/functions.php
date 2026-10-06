@@ -65,35 +65,81 @@ function ahsapambalaj_assets(): void {
 	$files   = array_merge( glob( get_theme_file_path( 'assets/*.{css,js}' ), GLOB_BRACE ) ?: array(), glob( get_theme_file_path( 'assets/*/*.{css,js}' ), GLOB_BRACE ) ?: array() );
 	$version = wp_get_theme()->get( 'Version' ) . '.' . ( $files ? max( array_map( 'filemtime', $files ) ) : 0 );
 
-	wp_enqueue_style(
-		'ahsapambalaj-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
-		array(),
-		null
-	);
+	// Tek CSS dosyasi: assets/site.css (scripts/build-css.mjs uretir). Icinde
+	// sirasiyla yerel Archivo (assets/fonts/fonts.css), derlenmis Tailwind,
+	// style.css ve elle yazilmis duzeltmeler (assets/theme.css) var. Dosya yoksa
+	// (ya da yerelde kaynaklardan biri ondan yeniyse) ayni dosyalar ayni sirayla
+	// ayri ayri yuklenir.
+	$bundle  = 'assets/site.css';
+	$sources = ahsapambalaj_css_sources();
 
-	wp_enqueue_style(
-		'ahsapambalaj-tailwind',
-		get_theme_file_uri( 'assets/tailwind.css' ),
-		array( 'ahsapambalaj-fonts' ),
-		$version
-	);
+	if ( ahsapambalaj_css_bundle_ready( $bundle, $sources ) ) {
+		wp_enqueue_style( 'ahsapambalaj-site', get_theme_file_uri( $bundle ), array(), wp_get_theme()->get( 'Version' ) . '.' . (int) filemtime( get_theme_file_path( $bundle ) ) );
+	} else {
+		$previous = array();
 
-	// style.css yalnizca tema basligini tasir; kuyruga alinmasi WordPress adeti.
-	wp_enqueue_style( 'ahsapambalaj-style', get_stylesheet_uri(), array( 'ahsapambalaj-tailwind' ), $version );
-
-	// Derlenmis Tailwind'de olmayan elle yazilmis duzeltmeler.
-	wp_enqueue_style( 'ahsapambalaj-theme', get_theme_file_uri( 'assets/theme.css' ), array( 'ahsapambalaj-tailwind' ), $version );
+		foreach ( $sources as $handle => $file ) {
+			wp_enqueue_style( $handle, get_theme_file_uri( $file ), $previous, wp_get_theme()->get( 'Version' ) . '.' . (int) @filemtime( get_theme_file_path( $file ) ) );
+			$previous = array( $handle );
+		}
+	}
 
 	wp_enqueue_script( 'ahsapambalaj-nav', get_theme_file_uri( 'assets/nav.js' ), array(), $version, true );
 	wp_enqueue_script( 'ahsapambalaj-media', get_theme_file_uri( 'assets/media.js' ), array(), $version, true );
 	wp_enqueue_script( 'ahsapambalaj-motion', get_theme_file_uri( 'assets/motion.js' ), array(), $version, true );
 }
 
-add_action( 'wp_head', 'ahsapambalaj_preconnect', 1 );
-function ahsapambalaj_preconnect(): void {
-	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
-	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+/**
+ * Tek CSS dosyasinin kaynaklari, yukleme sirasiyla (tutamac => dosya).
+ * scripts/build-css.mjs ayni sirayi kullanir.
+ */
+function ahsapambalaj_css_sources(): array {
+	return array(
+		'ahsapambalaj-fonts'    => 'assets/fonts/fonts.css',
+		'ahsapambalaj-tailwind' => 'assets/tailwind.css',
+		'ahsapambalaj-style'    => 'style.css',
+		'ahsapambalaj-theme'    => 'assets/theme.css',
+	);
+}
+
+/**
+ * Tek dosya kullanilabilir mi: dosya var ve (yalnizca yerelde) kaynaklardan
+ * eski degil. Canlida dosya varsa her zaman o yuklenir.
+ */
+function ahsapambalaj_css_bundle_ready( string $bundle, array $sources ): bool {
+	$path = get_theme_file_path( $bundle );
+
+	if ( ! is_readable( $path ) ) {
+		return false;
+	}
+
+	if ( 'local' !== wp_get_environment_type() ) {
+		return true;
+	}
+
+	$built = (int) filemtime( $path );
+
+	foreach ( $sources as $file ) {
+		if ( (int) @filemtime( get_theme_file_path( $file ) ) > $built ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Archivo yerelden geliyor: Turkce metin hem latin hem latin-ext alt kumesini
+ * kullandigi icin (ı latin'de; ş, ğ, İ latin-ext'te) ikisi de erken istenir.
+ */
+add_action( 'wp_head', 'ahsapambalaj_preload_fonts', 1 );
+function ahsapambalaj_preload_fonts(): void {
+	foreach ( array( 'archivo-latin.woff2', 'archivo-latin-ext.woff2' ) as $font ) {
+		printf(
+			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+			esc_url( get_theme_file_uri( 'assets/fonts/' . $font ) )
+		);
+	}
 }
 
 /**
@@ -208,6 +254,54 @@ function ahsapambalaj_image_tag( array $image, string $class = '', string $alt_f
 }
 
 /**
+ * Panel gorselinin piksel olculeri (width/height ozellikleri icin). Tema
+ * yedek gorsellerinde (kimlik 0) null doner.
+ *
+ * @return array{0:int,1:int}|null
+ */
+function ahsapambalaj_image_dimensions( array $image, string $size = 'full' ): ?array {
+	$id  = (int) ( $image['id'] ?? 0 );
+	$src = $id > 0 ? wp_get_attachment_image_src( $id, $size ) : false;
+
+	if ( ! $src || empty( $src[1] ) || empty( $src[2] ) ) {
+		return null;
+	}
+
+	return array( (int) $src[1], (int) $src[2] );
+}
+
+/**
+ * Panel gorseli icin srcset ve sizes: tarayici ekrana yetecek en kucuk
+ * WordPress boyutunu indirir (gorunum ayni, dosya kucuk). Tema yedek
+ * gorsellerinde (tek boyut) ya da srcset uretilemezse bos doner.
+ *
+ * Gorsel object-cover ile tam genislik bir kutuyu doldurur; kutu yuksekligi
+ * ($box_rem, en buyuk kirilimdaki yukseklik) orana gore ekran genisligini
+ * asarsa gorsel ekrandan genis cizilir. $scale: kutuya uygulanan buyutme
+ * (hero'da parallax 1.08 x ken burns 1.12). sizes bu genisligi soyler; yoksa
+ * tarayici telefonda bulanik kalacak kucuk bir boyut secerdi.
+ */
+function ahsapambalaj_srcset_attrs( array $image, float $box_rem, float $scale = 1.0 ): string {
+	$id     = (int) ( $image['id'] ?? 0 );
+	$srcset = $id > 0 ? wp_get_attachment_image_srcset( $id, 'full' ) : false;
+	$size   = ahsapambalaj_image_dimensions( $image );
+
+	if ( ! $srcset || ! $size ) {
+		return '';
+	}
+
+	$cover = ceil( $box_rem * $size[0] / $size[1] * $scale );
+
+	return sprintf(
+		' srcset="%1$s" sizes="(max-width: %2$srem) %3$srem, %4$svw"',
+		esc_attr( $srcset ),
+		esc_attr( (string) ceil( $cover / $scale ) ),
+		esc_attr( (string) $cover ),
+		esc_attr( (string) ceil( 100 * $scale ) )
+	);
+}
+
+/**
  * Gorsel alani bossa temanin kendi gorselini (assets/img) dondurur.
  * Panelden secilen gorsel her zaman kazanir; yedek yalnizca bos alani doldurur.
  * Boylece tema, seed ya da medya yuklemesi olmadan da eksiksiz gorunur.
@@ -226,24 +320,26 @@ function ahsapambalaj_image_or_default( array $image, string $file, string $alt 
 
 /**
  * Yedek gorseller: hangi alan bos kalirsa hangi dosya ve alt metin gelir.
- * Tekrarli alanlarda sira numarasina gore secilir.
+ * Tekrarli alanlarda sira numarasina gore secilir. Dosyalar WebP (ayni piksel
+ * boyutu); eski JPG/PNG kopyalari assets/img'de duruyor (SEO paylasim gorseli
+ * hero-1.jpg'yi kullaniyor, eski adresler de calismaya devam etsin).
  */
 function ahsapambalaj_default_images(): array {
 	$img = array(
-		'logo'   => array( 'logo.png', 'Koçist Orman Ürünleri logosu' ),
-		'hero-1' => array( 'hero-1.jpg', 'Farklı ölçülerde üretilmiş ahşap sandık ve kasalar' ),
-		'hero-2' => array( 'hero-2.jpg', 'Tesis önünde sevkiyata hazır bekleyen ahşap sandıklar' ),
-		'hero-3' => array( 'hero-3.jpg', 'Atölyede istiflenmiş ahşap kasa ve sandıklar' ),
-		'atolye' => array( 'atolye.jpg', 'Çatalca atölyesinde ölçüye göre üretilen ahşap sandık' ),
-		'palet'  => array( 'palet.jpg', 'Üst üste dizilmiş ahşap paletler' ),
-		'sandik' => array( 'sandik.jpg', 'Sevkiyata hazır kapalı ahşap sandık' ),
-		'kafes'  => array( 'kafes.jpg', 'Ölçüye göre üretilmiş ahşap kafes' ),
+		'logo'   => array( 'logo.webp', 'Koçist Orman Ürünleri logosu' ),
+		'hero-1' => array( 'hero-1.webp', 'Farklı ölçülerde üretilmiş ahşap sandık ve kasalar' ),
+		'hero-2' => array( 'hero-2.webp', 'Tesis önünde sevkiyata hazır bekleyen ahşap sandıklar' ),
+		'hero-3' => array( 'hero-3.webp', 'Atölyede istiflenmiş ahşap kasa ve sandıklar' ),
+		'atolye' => array( 'atolye.webp', 'Çatalca atölyesinde ölçüye göre üretilen ahşap sandık' ),
+		'palet'  => array( 'palet.webp', 'Üst üste dizilmiş ahşap paletler' ),
+		'sandik' => array( 'sandik.webp', 'Sevkiyata hazır kapalı ahşap sandık' ),
+		'kafes'  => array( 'kafes.webp', 'Ölçüye göre üretilmiş ahşap kafes' ),
 	);
 
 	return array(
 		'logo'     => $img['logo'],
 		// Hakkimizda hero'su: tek kareli atolye fotografi (kolaj degil), koyu perde altinda da okunur.
-		'about'    => array( 'atolye.jpg', 'Çatalca atölyesinde kereste istifleri önünde üretilmiş ahşap sandık' ),
+		'about'    => array( 'atolye.webp', 'Çatalca atölyesinde kereste istifleri önünde üretilmiş ahşap sandık' ),
 		'slides'   => array( $img['hero-1'], $img['hero-2'], $img['hero-3'] ),
 		'family'   => array( $img['palet'], $img['sandik'], $img['kafes'], $img['atolye'] ),
 		// Hizmetler: her urunun kapak + ek gorselleri (image, image_2, image_3).

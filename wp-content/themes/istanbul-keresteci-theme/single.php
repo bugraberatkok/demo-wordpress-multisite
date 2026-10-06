@@ -43,7 +43,7 @@ while ( have_posts() ) :
 			<div class="ik-wrap ik-article__grid">
 				<div class="ik-article__main">
 					<?php if ( ! empty( $image['url'] ) ) : ?>
-						<img class="ik-article__cover" <?php ik_post_edit_attr( $current, 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+						<img class="ik-article__cover" <?php ik_post_edit_attr( $current, 'image' ); ?> src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>"<?php echo ik_image_dims( $image ); // phpcs:ignore WordPress.Security.EscapingOutput ?> fetchpriority="high" decoding="async" />
 					<?php endif; ?>
 					<div class="ik-prose ik-prose--page" <?php ik_post_edit_attr( $current, 'body' ); ?>>
 						<?php the_content(); ?>

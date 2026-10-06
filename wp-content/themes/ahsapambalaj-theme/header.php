@@ -39,7 +39,9 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 			<?php // Logo gorseli zaten firma adini tasiyor; yazi tekrarlanmaz. ?>
 			<img src="<?php echo esc_url( $logo['url'] ); ?>"
 				alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
-				width="280" height="44"
+				<?php // Panel logosunun kendi olculeri; tema SVG'si 280x44. Gorunen boyutu CSS belirler. ?>
+				<?php $logo_size = ahsapambalaj_image_dimensions( $logo, 'medium' ) ?? array( 280, 44 ); ?>
+				width="<?php echo (int) $logo_size[0]; ?>" height="<?php echo (int) $logo_size[1]; ?>"
 				class="h-11 w-auto transition-all duration-300 ease-out group-data-[stuck=true]:h-8" />
 		</a>
 

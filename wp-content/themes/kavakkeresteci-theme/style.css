@@ -26,3 +26,13 @@ Text Domain: kavakkeresteci
 	/* Koyu zeminde logo ust satiri: Koçist logosunun acik yesili. */
 	--site-mark-bright: #98c840;
 }
+
+/*
+ * Kontrast (WCAG AA): isaret yesili zemindeki ikincil metin (ana sayfa teklif
+ * seridi, text-paper/85 = #e5ece1) bu yesilde 3,88:1 kaliyordu; beyazin %97 karisimi #fafbf9: 4,51:1.
+ * Ithal Keresteci'nin petrol zemininde %85 yeterli (6,0:1), o yuzden kural
+ * yalnizca burada.
+ */
+.bg-mark .text-paper\/85 {
+	color: #fafbf9;
+}

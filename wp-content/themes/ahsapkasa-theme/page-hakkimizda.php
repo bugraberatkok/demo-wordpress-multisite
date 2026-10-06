@@ -17,7 +17,9 @@ $blocks = array( 'purpose', 'quality' );
 	<section class="relative isolate flex min-h-[24rem] items-center justify-center overflow-hidden md:min-h-[30rem]">
 
 		<?php if ( ! empty( $image['url'] ) ) : ?>
+			<?php // srcset/sizes: kutu en fazla 30rem yuksek (md); gorsel object-cover ile kirpilir. ?>
 			<img src="<?php echo esc_url( $image['url'] ); ?>"
+				<?php echo ahsapkasa_srcset_attrs( $image, 30 ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 				alt="<?php echo esc_attr( $image['alt'] ?: '' ); ?>"
 				class="absolute inset-0 -z-20 h-full w-full object-cover"
 				fetchpriority="high" decoding="async" />

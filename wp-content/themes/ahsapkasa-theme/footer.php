@@ -83,7 +83,7 @@ $menu = ahsapkasa_menu();
 			</div>
 		</div>
 
-		<div class="mt-14 flex flex-col gap-2 border-t border-bone/12 pt-6 text-sm text-bone/50 sm:flex-row sm:items-center sm:justify-between">
+		<div class="mt-14 flex flex-col gap-2 border-t border-bone/12 pt-6 text-sm text-bone/51 sm:flex-row sm:items-center sm:justify-between">
 			<p <?php nwcs_edit_attr( 'global', 'footer', 'copyright' ); ?>>
 				© <?php echo esc_html( gmdate( 'Y' ) ); ?> <?php echo esc_html( nwcs_field( 'global', 'footer', 'copyright' ) ); ?>. <span <?php nwcs_edit_attr( 'global', 'footer', 'rights_text' ); ?>><?php echo esc_html( nwcs_field( 'global', 'footer', 'rights_text' ) ); ?></span>
 			</p>

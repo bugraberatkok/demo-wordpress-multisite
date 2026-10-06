@@ -12,7 +12,7 @@ $image = sanayi_palet_image( nwcs_image( 'home', 'hero', 'image', 'full' ), 'her
 ?>
 <section class="sp-hero" data-nwcs-section="hero">
 	<?php if ( ! empty( $image['url'] ) ) : ?>
-		<img class="sp-hero__photo" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" fetchpriority="high" <?php nwcs_edit_attr( 'home', 'hero', 'image' ); ?> />
+		<img class="sp-hero__photo" src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>"<?php echo sanayi_palet_image_dims( $image ); // phpcs:ignore WordPress.Security.EscapingOutput ?> fetchpriority="high" <?php nwcs_edit_attr( 'home', 'hero', 'image' ); ?> />
 	<?php endif; ?>
 
 	<div class="sp-wrap sp-hero__inner">
