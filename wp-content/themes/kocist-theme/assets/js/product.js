@@ -29,10 +29,14 @@
 				return;
 			}
 
-			var box = lensStage.getBoundingClientRect();
+			// Konum gorsele gore: sahnede gorselin etrafinda bosluk olabilir.
+			var box = lensStage.querySelector( '.k-product__photo' ).getBoundingClientRect();
+			var at  = function ( value ) {
+				return Math.min( 100, Math.max( 0, value * 100 ) ) + '%';
+			};
 
-			lensStage.style.setProperty( '--zx', ( ( event.clientX - box.left ) / box.width * 100 ) + '%' );
-			lensStage.style.setProperty( '--zy', ( ( event.clientY - box.top ) / box.height * 100 ) + '%' );
+			lensStage.style.setProperty( '--zx', at( ( event.clientX - box.left ) / box.width ) );
+			lensStage.style.setProperty( '--zy', at( ( event.clientY - box.top ) / box.height ) );
 			lensStage.classList.add( 'is-lens' );
 		};
 
