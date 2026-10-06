@@ -528,12 +528,81 @@ html:not(.k-lb-ready) .k-zoom { display: none; }
 	aspect-ratio: 1280 / 1714;
 }
 
-/* Tablette dikey gorsel ve yer tutucu ekran boyunu asmaz; oran korunur, genislik daralir. */
+/*
+ * Gorsel boyutu WOOD KOCIST ile ayni: masaustunde galeri sutunu en fazla
+ * ~690px (Wood'un 1280px sayfadaki gorsel sutunu), gorsel sutunu kenardan
+ * kenara doldurur, kendi oraninda. Tablette ekran boyunu asmaz.
+ */
+@media (min-width: 1024px) {
+	.k-pp > .k-pp__gallery { justify-self: center; width: 100%; max-width: 690px; }
+}
+
 @media (min-width: 600px) and (max-width: 1023.98px) {
-	.k-pp .k-product__stage { width: fit-content; max-width: 100%; margin-inline: auto; }
+	.k-pp > .k-pp__gallery { justify-self: center; width: fit-content; max-width: 100%; }
 	.k-pp .k-product__photo { width: auto; max-width: 100%; max-height: calc(100svh - 220px); margin-inline: auto; }
 	.k-pp .k-product__stage .k-placeholder { width: min(100%, calc((100svh - 220px) * 1280 / 1714)); margin-inline: auto; }
-	.k-pp .k-product__stage:has(.k-placeholder) { width: 100%; }
+	.k-pp > .k-pp__gallery:has(.k-placeholder) { width: 100%; }
+}
+
+/*
+ * Kucuk resimler WOOD KOCIST'teki gibi: buyuk gorselin ustune bindirilmis,
+ * ustten 40px, ortali bir sira; secili olmayanlar soluk. Sira tiklamayi
+ * yalnizca kucuk resimlerde yakalar, aradaki bosluklar gorselin buyutecine gecer.
+ */
+.k-pp .k-product__gallery { position: relative; }
+
+.k-pp .k-product__thumbs {
+	position: absolute;
+	z-index: 3;
+	top: 40px;
+	right: 40px;
+	left: 40px;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 15px;
+	margin: 0;
+	overflow: visible;
+	pointer-events: none;
+}
+
+.k-pp .k-product__thumb {
+	width: 60px;
+	height: 60px;
+	padding: 2px;
+	border: 0;
+	border-radius: 6px;
+	background: #faf6f5;
+	opacity: .3;
+	pointer-events: auto;
+	transition: opacity .15s ease;
+}
+
+/* 1024-1279px: galeri sutunu dar; kucuk resimler tek satira sigsin diye biraz kuculur. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+	.k-pp .k-product__thumbs { gap: 8px; }
+	.k-pp .k-product__thumb { width: 50px; height: 50px; }
+}
+
+.k-pp .k-product__thumb img { border-radius: 4px; }
+.k-pp .k-product__thumb:hover,
+.k-pp .k-product__thumb.is-active { opacity: 1; transform: none; }
+.k-pp .k-product__thumb:focus-visible { opacity: 1; }
+
+/* Telefonda 44px (dokunma hedefi); sigmazsa tek satirda yana kayar. */
+@media (max-width: 599.98px) {
+	.k-pp .k-product__thumbs {
+		top: 16px;
+		right: 56px;
+		left: 0;
+		flex-wrap: nowrap;
+		justify-content: safe center;
+		gap: 8px;
+		padding: 3px 3px 3px 12px;
+		overflow-x: auto;
+		pointer-events: auto;
+	}
+
+	.k-pp .k-product__thumb { width: 44px; height: 44px; }
 }
 
 /* Dokunmatikte oklar 44px. */
