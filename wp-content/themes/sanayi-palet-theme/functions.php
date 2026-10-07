@@ -887,3 +887,11 @@ function sanayi_palet_hide_missing_sss( array $rows ): array {
 		static fn( $row ): bool => '/sss' !== untrailingslashit( (string) wp_parse_url( trim( (string) ( $row['url'] ?? '' ) ), PHP_URL_PATH ) )
 	);
 }
+
+/*
+ * Search Console: WordPress'in on yukleme kurallarindaki /wp-*.php,
+ * /wp-content/* gibi kaliplari Google adres sanip 404 raporluyor; RSD
+ * baglantisi (xmlrpc.php?rsd) sunucuda kapali oldugu icin 403 donuyor.
+ */
+add_filter( 'wp_speculation_rules_configuration', '__return_null' );
+remove_action( 'wp_head', 'rsd_link' );

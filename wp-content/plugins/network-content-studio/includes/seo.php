@@ -390,7 +390,7 @@ function nwcs_seo_theme_file_image( string $relative, string $alt = '' ): array 
 /**
  * Bu istek icin SEO bilgisi: manifest sayfasi, temanin bildirdigi ek sayfa,
  * blog yazisi ya da WordPress'in kendi sayfalari (blog listesi, arsiv, diger
- * sayfalar). Manifestsiz sitede ya da 404'te bos; o zaman WordPress'in
+ * sayfalar). Manifestsiz sitede, beslemede ya da 404'te bos; o zaman WordPress'in
  * varsayilanlari gecerli kalir.
  */
 function nwcs_seo_context(): array {
@@ -402,7 +402,9 @@ function nwcs_seo_context(): array {
 
 	$context = array();
 
-	if ( is_admin() || is_404() || empty( nwcs_manifest()['pages'] ) ) {
+	// Beslemede sayfa bilgisi kullanilmaz; olmayan yazinin beslemesi (/x/feed/)
+	// 404 sayilmaz ve sorgulanan yazi bos gelir.
+	if ( is_admin() || is_feed() || is_404() || empty( nwcs_manifest()['pages'] ) ) {
 		return $context;
 	}
 

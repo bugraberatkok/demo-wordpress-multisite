@@ -615,3 +615,11 @@ function ahsapambalaj_favicon(): void {
 		esc_url( get_theme_file_uri( 'assets/apple-touch-icon.png' ) )
 	);
 }
+
+/*
+ * Search Console: WordPress'in on yukleme kurallarindaki /wp-*.php,
+ * /wp-content/* gibi kaliplari Google adres sanip 404 raporluyor; RSD
+ * baglantisi (xmlrpc.php?rsd) sunucuda kapali oldugu icin 403 donuyor.
+ */
+add_filter( 'wp_speculation_rules_configuration', '__return_null' );
+remove_action( 'wp_head', 'rsd_link' );
