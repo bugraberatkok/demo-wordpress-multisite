@@ -34,8 +34,13 @@ $delays  = array( 'delay-[40ms]', 'delay-[90ms]', 'delay-[140ms]', 'delay-[190ms
 		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center gap-3" <?php nwcs_edit_attr( 'global', 'header', 'logo_text' ); ?>>
 			<?php if ( ! empty( $logo['url'] ) ) : ?>
 				<?php // Logo gorseli zaten firma adini tasiyor; yazi tekrarlanmaz. ?>
+				<?php // width/height: yuklenmeden once dogru oranda yer ayrilir; gorunen boyutu CSS (h-11 w-auto) belirler. ?>
+				<?php $logo_size = ahsapkasa_image_dimensions( $logo, 'medium' ); ?>
 				<img src="<?php echo esc_url( $logo['url'] ); ?>"
 					alt="<?php echo esc_attr( trim( nwcs_field( 'global', 'header', 'logo_text' ) . ' ' . nwcs_field( 'global', 'header', 'logo_sub' ) ) ); ?>"
+					<?php if ( $logo_size ) : ?>
+						width="<?php echo (int) $logo_size[0]; ?>" height="<?php echo (int) $logo_size[1]; ?>"
+					<?php endif; ?>
 					class="h-11 w-auto transition-all duration-300 ease-out group-data-[stuck=true]:h-8" />
 			<?php else : ?>
 				<span aria-hidden="true" class="flex h-9 w-9 items-center justify-center rounded-sm bg-forest transition-all duration-300 ease-out group-data-[stuck=true]:h-7 group-data-[stuck=true]:w-7">

@@ -14,12 +14,14 @@ $sheet = nwcs_image( 'home', 'hero', 'sheet_image', 'large' );
 $rows  = nwcs_rows( 'home', 'hero', 'sheet_rows' );
 $facts = nwcs_rows( 'home', 'facts', 'items' );
 $bg    = nwcs_image( 'home', 'hero', 'bg_image', 'full' );
+// Telefonda tam boy dosya yerine ekran genisligine uygun boy indirilsin (LCP).
+$bg_set = $bg['id'] ? (string) wp_get_attachment_image_srcset( $bg['id'], 'full' ) : '';
 $note  = trim( (string) nwcs_field( 'home', 'hero', 'bg_note' ) );
 ?>
 <section class="on-dark hero-field <?php echo $bg['url'] ? 'hero-field--photo' : ''; ?> relative isolate overflow-hidden text-sheet">
 	<?php if ( $bg['url'] ) : ?>
 		<div class="absolute inset-0 -z-10" <?php nwcs_edit_attr( 'home', 'hero', 'bg_image' ); ?>>
-			<img src="<?php echo esc_url( $bg['url'] ); ?>" alt="<?php echo esc_attr( $bg['alt'] ); ?>" class="h-full w-full object-cover" fetchpriority="high" decoding="async" />
+			<img src="<?php echo esc_url( $bg['url'] ); ?>"<?php if ( $bg_set ) : ?> srcset="<?php echo esc_attr( $bg_set ); ?>" sizes="100vw"<?php endif; ?> alt="<?php echo esc_attr( $bg['alt'] ); ?>" class="h-full w-full object-cover" fetchpriority="high" decoding="async" />
 			<div class="hero-field__veil absolute inset-0" aria-hidden="true"></div>
 		</div>
 	<?php endif; ?>

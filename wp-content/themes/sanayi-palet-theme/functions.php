@@ -70,42 +70,46 @@ function sanayi_palet_assets(): void {
 	$version = wp_get_theme()->get( 'Version' ) . '.' . ( $files ? max( array_map( 'filemtime', $files ) ) : 0 );
 
 	/*
-	 * Ag geneli ortak font Archivo (baslik ve damga dar kesimde, bkz.
-	 * tokens.css). Onceki: Big Shoulders, Big Shoulders Stencil, Instrument Sans.
-	 * Surum null: URL'e ?ver eklenmesin, Google Fonts onbellegi bozulmasin.
+	 * Stiller sayfa turune gore tek dosyada (assets/css/site-*.css). Kaynaklar assets/css
+	 * altinda; sira eskisiyle ayni: fonts (Archivo, tema icinden; onceki
+	 * fontlar icin bkz. tokens.css), tokens, style.css, base, header, footer,
+	 * [hero: ana sayfa ve Hakkimizda], home, [pages: ana sayfa disi].
+	 * Kaynak degisince: python tools/build-css.py
 	 */
-	wp_enqueue_style(
-		'sanayi-palet-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
-		array(),
-		null
-	);
+	if ( is_front_page() ) {
+		$bundle = 'assets/css/site-front.css';
+	} elseif ( is_page( 'hakkimizda' ) ) {
+		$bundle = 'assets/css/site-about.css';
+	} else {
+		$bundle = 'assets/css/site-inner.css';
+	}
 
-	// Renkler tek dosyada: tokens.css. Diger butun stiller ona baglidir.
-	wp_enqueue_style( 'sanayi-palet-tokens', get_theme_file_uri( 'assets/css/tokens.css' ), array( 'sanayi-palet-fonts' ), $version );
-	wp_enqueue_style( 'sanayi-palet-style', get_stylesheet_uri(), array( 'sanayi-palet-tokens' ), $version );
-	wp_enqueue_style( 'sanayi-palet-base', get_theme_file_uri( 'assets/css/base.css' ), array( 'sanayi-palet-style' ), $version );
-	wp_enqueue_style( 'sanayi-palet-header', get_theme_file_uri( 'assets/css/header.css' ), array( 'sanayi-palet-base' ), $version );
-	wp_enqueue_style( 'sanayi-palet-footer', get_theme_file_uri( 'assets/css/footer.css' ), array( 'sanayi-palet-base' ), $version );
+	wp_enqueue_style( 'sanayi-palet-site', get_theme_file_uri( $bundle ), array(), (string) filemtime( get_theme_file_path( $bundle ) ) );
 
 	wp_enqueue_script( 'sanayi-palet-nav', get_theme_file_uri( 'assets/js/nav.js' ), array(), $version, true );
 
-	// Damga (hero.css) ana sayfada ve Hakkimizda'da kullanilir.
-	if ( is_front_page() || is_page( 'hakkimizda' ) ) {
-		wp_enqueue_style( 'sanayi-palet-hero', get_theme_file_uri( 'assets/css/hero.css' ), array( 'sanayi-palet-base' ), $version );
-	}
-
-	// Ana sayfa bolumleri; teklif seridi ve blog kartlari ic sayfalarda da kullanilir.
-	wp_enqueue_style( 'sanayi-palet-home', get_theme_file_uri( 'assets/css/home.css' ), array( 'sanayi-palet-base' ), $version );
-
-	// Ic sayfalar: Hakkimizda, Iletisim, Blog listesi, yazi.
-	if ( ! is_front_page() ) {
-		wp_enqueue_style( 'sanayi-palet-pages', get_theme_file_uri( 'assets/css/pages.css' ), array( 'sanayi-palet-home' ), $version );
-	}
-
 	// Sik sorulan sorular (/sss/). Surum dosya zamanindan: tema surumu artmadan da yenilensin.
 	if ( is_page( 'sss' ) ) {
-		wp_enqueue_style( 'sanayi-palet-faq', get_theme_file_uri( 'assets/css/faq.css' ), array( 'sanayi-palet-pages' ), (string) filemtime( get_theme_file_path( 'assets/css/faq.css' ) ) );
+		wp_enqueue_style( 'sanayi-palet-faq', get_theme_file_uri( 'assets/css/faq.css' ), array( 'sanayi-palet-site' ), (string) filemtime( get_theme_file_path( 'assets/css/faq.css' ) ) );
+	}
+}
+
+/**
+ * Head'in basi: JS varsa no-js sinifi ilk boyamadan once kalkar. Yoksa
+ * .no-js kurali menu panelini nav.js gelene kadar acik (static) gosterir,
+ * sonra kapanir ve sayfa yukari kayar (CLS). JS'siz ziyaretcide panel acik
+ * kalmaya devam eder. Ardindan Archivo latin ve latin-ext preload: Turkce
+ * harfler (ş, ğ, İ) latin-ext'te, ikisi de her sayfada gerekiyor.
+ */
+add_action( 'wp_head', 'sanayi_palet_head_early', 1 );
+function sanayi_palet_head_early(): void {
+	echo "<script>document.documentElement.classList.remove('no-js');</script>\n";
+
+	foreach ( array( 'archivo-latin', 'archivo-latin-ext' ) as $font ) {
+		printf(
+			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin />' . "\n",
+			esc_url( get_theme_file_uri( 'assets/fonts/' . $font . '.woff2' ) )
+		);
 	}
 }
 
@@ -143,6 +147,7 @@ function sanayi_palet_post_image( WP_Post $post, string $size = 'medium_large' )
 	}
 
 	return array(
+		'id'  => $id,
 		'url' => $src[0],
 		'alt' => (string) get_post_meta( $id, '_wp_attachment_image_alt', true ),
 	);
@@ -764,9 +769,66 @@ function sanayi_palet_image_or_default( array $image, string $file, string $alt 
 
 	return array(
 		'id'  => 0,
-		'url' => get_theme_file_uri( 'assets/img/' . $file ),
+		'url' => get_theme_file_uri( 'assets/img/' . sanayi_palet_webp_file( $file ) ),
 		'alt' => '' !== ( $image['alt'] ?? '' ) ? $image['alt'] : $alt,
 	);
+}
+
+/**
+ * Tema fotografinin WebP kopyasi varsa onun adi (palet-duvari.jpg ->
+ * palet-duvari.webp). JPG'ler yerinde kalir: kurulum medya kitapligina JPG
+ * ekler, paylasim (og:image) gorseli JPG'dir.
+ */
+function sanayi_palet_webp_file( string $file ): string {
+	$webp = (string) preg_replace( '/\.(jpe?g|png)$/i', '.webp', $file );
+
+	return $webp !== $file && file_exists( get_theme_file_path( 'assets/img/' . $webp ) ) ? $webp : $file;
+}
+
+/**
+ * img icin width/height nitelikleri (tarayici yeri onceden ayirsin). Olcu tema
+ * dosyasindan ya da medya kaydindan okunur; bulunamazsa bos.
+ */
+function sanayi_palet_image_dims( array $image ): string {
+	static $cache = array();
+
+	$url = (string) ( $image['url'] ?? '' );
+
+	if ( '' === $url ) {
+		return '';
+	}
+
+	if ( isset( $cache[ $url ] ) ) {
+		return $cache[ $url ];
+	}
+
+	$name  = wp_basename( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+	$dims  = array();
+	$theme = get_theme_file_uri( 'assets/img/' );
+
+	if ( str_starts_with( $url, $theme ) ) {
+		$size = @getimagesize( get_theme_file_path( 'assets/img/' . $name ) );
+		$dims = $size ? array( $size[0], $size[1] ) : array();
+	} elseif ( ! empty( $image['id'] ) ) {
+		$meta = wp_get_attachment_metadata( (int) $image['id'] );
+
+		if ( is_array( $meta ) ) {
+			if ( wp_basename( (string) ( $meta['file'] ?? '' ) ) === $name ) {
+				$dims = array( $meta['width'] ?? 0, $meta['height'] ?? 0 );
+			}
+
+			foreach ( (array) ( $meta['sizes'] ?? array() ) as $size ) {
+				if ( ( $size['file'] ?? '' ) === $name ) {
+					$dims = array( $size['width'] ?? 0, $size['height'] ?? 0 );
+					break;
+				}
+			}
+		}
+	}
+
+	$cache[ $url ] = ( $dims && $dims[0] > 0 && $dims[1] > 0 ) ? sprintf( ' width="%d" height="%d"', $dims[0], $dims[1] ) : '';
+
+	return $cache[ $url ];
 }
 
 /**
@@ -799,14 +861,17 @@ function sanayi_palet_image( array $image, string $key ): array {
 
 /**
  * Gorsel alani icin img etiketi; deger yoksa isaretli yer tutucu.
+ * $eager: ilk ekrandaki (LCP adayi) gorsel; lazy olmaz, once indirilir.
  */
-function sanayi_palet_image_tag( array $image, string $class = '', string $placeholder = 'Örnek görsel' ): string {
+function sanayi_palet_image_tag( array $image, string $class = '', string $placeholder = 'Örnek görsel', bool $eager = false ): string {
 	if ( ! empty( $image['url'] ) ) {
 		return sprintf(
-			'<img src="%1$s" alt="%2$s" class="%3$s" loading="lazy" decoding="async" />',
+			'<img src="%1$s" alt="%2$s" class="%3$s"%4$s%5$s decoding="async" />',
 			esc_url( $image['url'] ),
 			esc_attr( $image['alt'] ),
-			esc_attr( $class )
+			esc_attr( $class ),
+			sanayi_palet_image_dims( $image ),
+			$eager ? ' fetchpriority="high"' : ' loading="lazy"'
 		);
 	}
 

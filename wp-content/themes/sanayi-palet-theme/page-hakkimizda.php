@@ -20,7 +20,7 @@ $doc_full   = sanayi_palet_image( nwcs_image( 'about', 'group', 'image', 'full' 
 			<h1 class="sp-abouthead__title" <?php nwcs_edit_attr( 'about', 'head', 'title' ); ?>><?php echo esc_html( nwcs_field( 'about', 'head', 'title' ) ); ?></h1>
 		</div>
 		<div class="sp-abouthead__media" <?php nwcs_edit_attr( 'about', 'head', 'image' ); ?>>
-			<?php echo sanayi_palet_image_tag( $head_image, 'sp-abouthead__image' ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
+			<?php echo sanayi_palet_image_tag( $head_image, 'sp-abouthead__image', 'Örnek görsel', true ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 		</div>
 	</div>
 </header>
@@ -61,7 +61,7 @@ $doc_full   = sanayi_palet_image( nwcs_image( 'about', 'group', 'image', 'full' 
 		<figure class="sp-aboutgroup__doc" <?php nwcs_edit_attr( 'about', 'group', 'image' ); ?>>
 			<?php if ( ! empty( $doc['url'] ) ) : ?>
 				<a class="sp-cert__doc-link" href="<?php echo esc_url( $doc_full['url'] ); ?>">
-					<img src="<?php echo esc_url( $doc['url'] ); ?>" alt="<?php echo esc_attr( $doc['alt'] ); ?>" loading="lazy" decoding="async" />
+					<img src="<?php echo esc_url( $doc['url'] ); ?>" alt="<?php echo esc_attr( $doc['alt'] ); ?>"<?php echo sanayi_palet_image_dims( $doc ); // phpcs:ignore WordPress.Security.EscapingOutput ?> loading="lazy" decoding="async" />
 					<span class="screen-reader-text">Belgeyi büyük boyutta açın</span>
 				</a>
 			<?php endif; ?>

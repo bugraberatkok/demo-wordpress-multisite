@@ -22,13 +22,28 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $slide_index => $row ) {
 
 	<?php if ( $slides ) : ?>
 		<div class="parallax absolute inset-0 -z-20" data-slideshow data-parallax <?php nwcs_edit_attr( 'home', 'hero', 'slides' ); ?>>
-			<?php foreach ( $slides as $index => $slide ) : ?>
+			<?php
+			// Ilk kare sayfanin en buyuk ogesi (LCP): oncelikli ve tembel degil;
+			// digerleri tembel. srcset/sizes yalnizca panel gorsellerinde: kutu en
+			// fazla 40rem yuksek (md), parallax ve ken burns ~1.2 buyutur.
+			// Tema yedek gorsellerinde telefon icin ortadan kesilmis dar kopya
+			// (ahsapambalaj_hero_mobile_source); gorunen kisim ayni.
+			foreach ( $slides as $index => $slide ) :
+				$mobile = ahsapambalaj_hero_mobile_source( $slide );
+				?>
+				<?php if ( $mobile ) : ?>
+					<picture style="display:contents"><?php echo $mobile; // phpcs:ignore WordPress.Security.EscapingOutput ?>
+				<?php endif; ?>
 				<img src="<?php echo esc_url( $slide['url'] ); ?>"
+					<?php echo ahsapambalaj_srcset_attrs( $slide, 40, 1.2 ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					alt="<?php echo esc_attr( $slide['alt'] ?: 'Ahşap ambalaj üretiminden bir kare' ); ?>"
 					data-slide
 					class="kenburns absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-out <?php echo 0 === $index ? 'opacity-100' : 'opacity-0'; ?>"
 					<?php echo 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
 					decoding="async" />
+				<?php if ( $mobile ) : ?>
+					</picture>
+				<?php endif; ?>
 			<?php endforeach; ?>
 		</div>
 	<?php else : ?>

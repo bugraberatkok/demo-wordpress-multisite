@@ -42,26 +42,42 @@ function ip_assets(): void {
 	// degisir, tarayici ve onbellek eski CSS/JS'i gostermez.
 	$ver = static fn( string $file ): string => wp_get_theme()->get( 'Version' ) . '.' . (int) @filemtime( get_theme_file_path( $file ) );
 
-	wp_enqueue_style(
-		'ip-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
-		array(),
-		null
-	);
+	// Tek CSS dosyasi: yerel Archivo + Tailwind + style.css, bu sirayla
+	// (scripts/build-css.mjs uretir). Yerelde kaynaklardan biri site.css'ten
+	// yeniyse (derleme unutulduysa) kaynaklar eskisi gibi ayri yuklenir; gorunum
+	// ayni, duzenleme hemen gorunur. Canlida dosya tarihleri yuklemeye gore
+	// degistigi icin bu kiyas yapilmaz: site.css varsa o kullanilir.
+	$built = (int) @filemtime( get_theme_file_path( 'assets/site.css' ) );
+	$fresh = $built > 0;
 
-	wp_enqueue_style( 'ip-tailwind', get_theme_file_uri( 'assets/tailwind.css' ), array( 'ip-fonts' ), $ver( 'assets/tailwind.css' ) );
+	if ( $fresh && 'local' === wp_get_environment_type() ) {
+		foreach ( array( 'assets/fonts/archivo.css', 'assets/tailwind.css', 'style.css' ) as $source ) {
+			if ( (int) @filemtime( get_theme_file_path( $source ) ) > $built ) {
+				$fresh = false;
+			}
+		}
+	}
 
-	// style.css yalnizca tema basligini tasir; kuyruga alinmasi WordPress adeti.
-	wp_enqueue_style( 'ip-style', get_stylesheet_uri(), array( 'ip-tailwind' ), $ver( 'style.css' ) );
+	if ( $fresh ) {
+		wp_enqueue_style( 'ip-site', get_theme_file_uri( 'assets/site.css' ), array(), $ver( 'assets/site.css' ) );
+	} else {
+		wp_enqueue_style( 'ip-fonts', get_theme_file_uri( 'assets/fonts/archivo.css' ), array(), $ver( 'assets/fonts/archivo.css' ) );
+		wp_enqueue_style( 'ip-tailwind', get_theme_file_uri( 'assets/tailwind.css' ), array( 'ip-fonts' ), $ver( 'assets/tailwind.css' ) );
+		wp_enqueue_style( 'ip-site', get_stylesheet_uri(), array( 'ip-tailwind' ), $ver( 'style.css' ) );
+	}
 
 	wp_enqueue_script( 'ip-nav', get_theme_file_uri( 'assets/nav.js' ), array(), $ver( 'assets/nav.js' ), true );
 	wp_enqueue_script( 'ip-media', get_theme_file_uri( 'assets/media.js' ), array(), $ver( 'assets/media.js' ), true );
 }
 
-add_action( 'wp_head', 'ip_preconnect', 1 );
-function ip_preconnect(): void {
-	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
-	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+// Yazi tipi yerelde (assets/fonts). Turkce metnin cogu latin alt kumesinde;
+// CSS'i beklemeden indirilsin diye on yukleme.
+add_action( 'wp_head', 'ip_preload_font', 1 );
+function ip_preload_font(): void {
+	printf(
+		'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+		esc_url( get_theme_file_uri( 'assets/fonts/archivo-latin.woff2' ) )
+	);
 }
 
 /*

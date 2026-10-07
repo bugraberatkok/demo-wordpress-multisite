@@ -51,19 +51,29 @@ function kr_assets(): void {
 	// degisir, tarayici ve onbellek eski CSS/JS'i gostermez.
 	$base  = wp_get_theme( get_template() )->get( 'Version' );
 	$ver   = static fn( string $file ): string => $base . '.' . (int) @filemtime( get_template_directory() . '/' . $file );
-	$child = wp_get_theme()->get( 'Version' ) . '.' . (int) @filemtime( get_stylesheet_directory() . '/style.css' );
 
-	wp_enqueue_style(
-		'kr-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
-		array(),
-		null
-	);
+	// Tek CSS dosyasi ana temadan: yerel Archivo + Tailwind, bu sirayla
+	// (scripts/build-css.mjs uretir); iki keresteci sitesi de ayni dosyayi
+	// kullanir. Yerelde kaynaklardan biri site.css'ten yeniyse (derleme
+	// unutulduysa) kaynaklar eskisi gibi ayri yuklenir; canlida dosya tarihleri
+	// yuklemeye gore degistigi icin kiyas yapilmaz.
+	$built = (int) @filemtime( get_template_directory() . '/assets/site.css' );
+	$fresh = $built > 0;
 
-	// Ortak stil ana temadan; cocuk temanin style.css'i sonra gelir ve yalnizca
-	// parti boyasini (vurgu rengi) tanimlar.
-	wp_enqueue_style( 'kr-tailwind', get_template_directory_uri() . '/assets/tailwind.css', array( 'kr-fonts' ), $ver( 'assets/tailwind.css' ) );
-	wp_enqueue_style( 'kr-site', get_stylesheet_uri(), array( 'kr-tailwind' ), $child );
+	if ( $fresh && 'local' === wp_get_environment_type() ) {
+		foreach ( array( 'assets/fonts/archivo.css', 'assets/tailwind.css' ) as $source ) {
+			if ( (int) @filemtime( get_template_directory() . '/' . $source ) > $built ) {
+				$fresh = false;
+			}
+		}
+	}
+
+	if ( $fresh ) {
+		wp_enqueue_style( 'kr-tailwind', get_template_directory_uri() . '/assets/site.css', array(), $ver( 'assets/site.css' ) );
+	} else {
+		wp_enqueue_style( 'kr-fonts', get_template_directory_uri() . '/assets/fonts/archivo.css', array(), $ver( 'assets/fonts/archivo.css' ) );
+		wp_enqueue_style( 'kr-tailwind', get_template_directory_uri() . '/assets/tailwind.css', array( 'kr-fonts' ), $ver( 'assets/tailwind.css' ) );
+	}
 
 	// Yakinlastirma motoru yalnizca urun sayfalarinda (buyutulen galeri orada).
 	$site_deps = array();
@@ -97,13 +107,28 @@ function kr_assets(): void {
 		);
 	}
 
+	// Cocuk temanin style.css'i yalnizca parti boyasini (renk degiskenleri)
+	// tanimlar (~1 KB); ayri istek yerine satir ici, eskisi gibi en sonda.
+	// Yorumlar (tema basligi dahil) atilir.
+	$child_css = (string) @file_get_contents( get_stylesheet_directory() . '/style.css' );
+	$child_css = trim( (string) preg_replace( '#/\*.*?\*/#s', '', $child_css ) );
+
+	if ( '' !== $child_css ) {
+		wp_add_inline_style( 'kr-tailwind', $child_css );
+	}
+
 	wp_enqueue_script( 'kr-site', get_template_directory_uri() . '/assets/site.js', $site_deps, $ver( 'assets/site.js' ), true );
 }
 
-add_action( 'wp_head', 'kr_preconnect', 1 );
-function kr_preconnect(): void {
-	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
-	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+// Yazi tipi ana temada yerelde (assets/fonts); iki keresteci sitesi de ayni
+// dosyalari kullanir. Turkce metnin cogu latin alt kumesinde; CSS'i
+// beklemeden indirilsin diye on yukleme.
+add_action( 'wp_head', 'kr_preload_font', 1 );
+function kr_preload_font(): void {
+	printf(
+		'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+		esc_url( get_template_directory_uri() . '/assets/fonts/archivo-latin.woff2' )
+	);
 }
 
 /* ====================================================================== *

@@ -69,39 +69,49 @@ function ik_assets(): void {
 	$version = wp_get_theme()->get( 'Version' );
 
 	/*
-	 * Archivo: tek aile. Basliklar dar genislikte (wdth 62-75) ve agir,
-	 * govde normal genislikte. Surum null: Google Fonts onbellegi bozulmasin.
+	 * Stiller tek dosyada: assets/css/site-front.css (ana sayfa) ya da site-inner.css
+	 * (diger sayfalar). Kaynaklar assets/css altinda; sira ayni: fonts (Archivo,
+	 * tema icinden), tokens, style.css, base, header, footer, home, [pages].
+	 * Kaynak degisince: python tools/build-css.py. Surum dosya zamanindan.
 	 */
-	wp_enqueue_style(
-		'ik-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap',
-		array(),
-		null
-	);
-
-	// Renkler tek dosyada: tokens.css. Diger butun stiller ona baglidir.
-	wp_enqueue_style( 'ik-tokens', get_theme_file_uri( 'assets/css/tokens.css' ), array( 'ik-fonts' ), $version );
-	wp_enqueue_style( 'ik-style', get_stylesheet_uri(), array( 'ik-tokens' ), $version );
-	wp_enqueue_style( 'ik-base', get_theme_file_uri( 'assets/css/base.css' ), array( 'ik-style' ), $version );
-	wp_enqueue_style( 'ik-header', get_theme_file_uri( 'assets/css/header.css' ), array( 'ik-base' ), $version );
-	wp_enqueue_style( 'ik-footer', get_theme_file_uri( 'assets/css/footer.css' ), array( 'ik-base' ), $version );
-
-	// Urun istifi, blog kartlari ve fiyat seridi ic sayfalarda da kullanilir.
-	wp_enqueue_style( 'ik-home', get_theme_file_uri( 'assets/css/home.css' ), array( 'ik-base' ), $version );
-
-	if ( ! is_front_page() ) {
-		wp_enqueue_style( 'ik-pages', get_theme_file_uri( 'assets/css/pages.css' ), array( 'ik-home' ), $version );
-	}
+	$bundle = is_front_page() ? 'assets/css/site-front.css' : 'assets/css/site-inner.css';
+	wp_enqueue_style( 'ik-site', get_theme_file_uri( $bundle ), array(), ik_file_version( $bundle ) );
 
 	// Sik sorulan sorular (/sss/). Surum dosya zamanindan: tema surumu artmadan da yenilensin.
 	if ( is_page( 'sss' ) ) {
-		wp_enqueue_style( 'ik-faq', get_theme_file_uri( 'assets/css/faq.css' ), array( 'ik-pages' ), (string) filemtime( get_theme_file_path( 'assets/css/faq.css' ) ) );
+		wp_enqueue_style( 'ik-faq', get_theme_file_uri( 'assets/css/faq.css' ), array( 'ik-site' ), ik_file_version( 'assets/css/faq.css' ) );
 	}
 
 	wp_enqueue_script( 'ik-nav', get_theme_file_uri( 'assets/js/nav.js' ), array(), $version, true );
 
 	if ( is_front_page() || is_page( 'hakkimizda' ) ) {
 		wp_enqueue_script( 'ik-process', get_theme_file_uri( 'assets/js/process.js' ), array(), $version, true );
+	}
+}
+
+/**
+ * Tema dosyasinin surumu: degisim zamani. Dosya degisince adres degisir,
+ * tarayici ve onbellek eski dosyayi gostermez.
+ */
+function ik_file_version( string $file ): string {
+	return (string) ( @filemtime( get_theme_file_path( $file ) ) ?: wp_get_theme()->get( 'Version' ) );
+}
+
+/**
+ * Head'in basi: JS varsa no-js sinifi ilk boyamadan once kalkar (menu paneli
+ * once acik gorunup sonra kapanarak sayfayi kaydirmasin). Ardindan Archivo
+ * latin ve latin-ext dosyalari preload edilir: Turkce harfler (ş, ğ, İ)
+ * latin-ext'te, ikisi de her sayfada gerekiyor.
+ */
+add_action( 'wp_head', 'ik_head_early', 1 );
+function ik_head_early(): void {
+	echo "<script>document.documentElement.classList.remove('no-js');</script>\n";
+
+	foreach ( array( 'archivo-latin', 'archivo-latin-ext' ) as $font ) {
+		printf(
+			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin />' . "\n",
+			esc_url( get_theme_file_uri( 'assets/fonts/' . $font . '.woff2' ) )
+		);
 	}
 }
 
@@ -748,7 +758,7 @@ function ik_image_or_default( array $image, string $file, string $alt = '' ): ar
 
 	return array(
 		'id'  => 0,
-		'url' => get_theme_file_uri( 'assets/img/' . $file ),
+		'url' => get_theme_file_uri( 'assets/img/' . ik_webp_file( $file ) ),
 		'alt' => '' !== ( $image['alt'] ?? '' ) ? $image['alt'] : $alt,
 	);
 }
@@ -767,18 +777,168 @@ function ik_paragraphs( string $text, string $class = '' ): void {
 }
 
 /**
+ * Tema fotografinin WebP kopyasi varsa onun adi (urun-kereste.jpg ->
+ * urun-kereste.webp). JPG'ler yerinde kalir: kurulum medya kitapligina JPG
+ * ekler, paylasim (og:image) gorselleri JPG'dir. WebP'si daha buyuk cikan
+ * fotograflarin kopyasi yoktur; onlarda JPG kullanilir.
+ */
+function ik_webp_file( string $file ): string {
+	$webp = (string) preg_replace( '/\.(jpe?g|png)$/i', '.webp', $file );
+
+	return $webp !== $file && file_exists( get_theme_file_path( 'assets/img/' . $webp ) ) ? $webp : $file;
+}
+
+/**
+ * img icin width/height nitelikleri (tarayici yeri onceden ayirsin). Olcu tema
+ * dosyasindan ya da medya kaydindan okunur; bulunamazsa bos.
+ */
+function ik_image_dims( array $image ): string {
+	static $cache = array();
+
+	$url = (string) ( $image['url'] ?? '' );
+
+	if ( '' === $url ) {
+		return '';
+	}
+
+	if ( isset( $cache[ $url ] ) ) {
+		return $cache[ $url ];
+	}
+
+	$name  = wp_basename( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+	$dims  = array();
+	$theme = get_theme_file_uri( 'assets/img/' );
+
+	if ( str_starts_with( $url, $theme ) ) {
+		$size = @getimagesize( get_theme_file_path( 'assets/img/' . $name ) );
+		$dims = $size ? array( $size[0], $size[1] ) : array();
+	} elseif ( ! empty( $image['id'] ) ) {
+		$meta = wp_get_attachment_metadata( (int) $image['id'] );
+
+		if ( is_array( $meta ) ) {
+			if ( wp_basename( (string) ( $meta['file'] ?? '' ) ) === $name ) {
+				$dims = array( $meta['width'] ?? 0, $meta['height'] ?? 0 );
+			}
+
+			foreach ( (array) ( $meta['sizes'] ?? array() ) as $size ) {
+				if ( ( $size['file'] ?? '' ) === $name ) {
+					$dims = array( $size['width'] ?? 0, $size['height'] ?? 0 );
+					break;
+				}
+			}
+		}
+	}
+
+	$cache[ $url ] = ( $dims && $dims[0] > 0 && $dims[1] > 0 ) ? sprintf( ' width="%d" height="%d"', $dims[0], $dims[1] ) : '';
+
+	return $cache[ $url ];
+}
+
+/**
+ * Tema fotografinin (kimlik 0) kucuk genislikli WebP kopyalari varsa srcset
+ * ve sizes ekler: <ad>-640.webp, <ad>-960.webp, <ad>-1280.webp ve asil dosya.
+ * Telefon ekrana yetecek en kucuk dosyayi indirir; gorunum ayni (ayni
+ * fotograf, ayni kirpim). Panel gorsellerine dokunmaz.
+ *
+ * $sizes, gorselin cizildigi genislik (object-fit: cover kutuyu yukseklikten
+ * dolduruyorsa kutudan genis). Kopyalar: Pillow LANCZOS, WebP q81.
+ */
+function ik_theme_srcset( array $image, string $sizes ): array {
+	$path = ik_theme_image_path( $image );
+
+	if ( '' === $path ) {
+		return $image;
+	}
+
+	$info = pathinfo( $path );
+	$size = @getimagesize( get_theme_file_path( 'assets/img/' . $path ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	$set  = array();
+
+	foreach ( array( 640, 960, 1280 ) as $width ) {
+		$file = $info['filename'] . '-' . $width . '.webp';
+
+		if ( $size && $width < $size[0] && file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+			$set[] = get_theme_file_uri( 'assets/img/' . $file ) . ' ' . $width . 'w';
+		}
+	}
+
+	if ( $set ) {
+		$set[]           = $image['url'] . ' ' . $size[0] . 'w';
+		$image['srcset'] = implode( ', ', $set );
+		$image['sizes']  = $sizes;
+	}
+
+	return $image;
+}
+
+/**
+ * Tema fotografinin (kimlik 0) telefon kirpimi varsa <picture> kaynagi ekler:
+ * <ad>-telefon.webp, $media kosulunda kullanilir. Kirpim, o kosulda ekranda
+ * gorunen kismi tamamen kapsar (bkz. hero.php); gorunum ayni.
+ */
+function ik_theme_mobile_source( array $image, string $media ): array {
+	$path = ik_theme_image_path( $image );
+	$file = '' !== $path ? pathinfo( $path, PATHINFO_FILENAME ) . '-telefon.webp' : '';
+
+	if ( '' !== $file && file_exists( get_theme_file_path( 'assets/img/' . $file ) ) ) {
+		$image['sources'] = array( array( 'media' => $media, 'srcset' => get_theme_file_uri( 'assets/img/' . $file ) ) );
+	}
+
+	return $image;
+}
+
+/**
+ * Gorsel tema klasorundeyse (assets/img) dosya adi; degilse bos.
+ */
+function ik_theme_image_path( array $image ): string {
+	$url   = (string) ( $image['url'] ?? '' );
+	$theme = get_theme_file_uri( 'assets/img/' );
+
+	if ( ! empty( $image['id'] ) || '' === $url || ! str_starts_with( $url, $theme ) ) {
+		return '';
+	}
+
+	$name = substr( $url, strlen( $theme ) );
+
+	return preg_match( '/^[a-z0-9-]+\.(?:jpe?g|png|webp)$/i', $name ) ? $name : '';
+}
+
+/**
  * Gorsel icin img etiketi; deger yoksa isaretli yer tutucu.
+ *
+ * $image icinde istege bagli: 'srcset' + 'sizes' (ik_theme_srcset) ve
+ * 'sources' (ik_theme_mobile_source; o zaman <picture> icinde basilir).
  */
 function ik_image_tag( array $image, string $class = '', ?string $alt = null, string $loading = 'lazy', string $attrs = '' ): string {
 	if ( ! empty( $image['url'] ) ) {
-		return sprintf(
-			'<img src="%1$s" alt="%2$s" class="%3$s" loading="%4$s" decoding="async"%5$s />',
+		// Ilk ekrandaki (eager) gorsel LCP adayi: once indirilsin.
+		$priority = 'eager' === $loading ? ' fetchpriority="high"' : '';
+		$srcset   = ! empty( $image['srcset'] ) ? sprintf( ' srcset="%s" sizes="%s"', esc_attr( $image['srcset'] ), esc_attr( (string) ( $image['sizes'] ?? '100vw' ) ) ) : '';
+
+		$tag = sprintf(
+			'<img src="%1$s"%8$s alt="%2$s" class="%3$s"%4$s loading="%5$s"%6$s decoding="async"%7$s />',
 			esc_url( $image['url'] ),
 			esc_attr( null === $alt ? $image['alt'] : $alt ),
 			esc_attr( $class ),
+			ik_image_dims( $image ),
 			esc_attr( $loading ),
-			$attrs
+			$priority,
+			$attrs,
+			$srcset
 		);
+
+		if ( empty( $image['sources'] ) ) {
+			return $tag;
+		}
+
+		$sources = '';
+
+		foreach ( (array) $image['sources'] as $source ) {
+			$sources .= sprintf( '<source media="%s" srcset="%s" type="image/webp" />', esc_attr( $source['media'] ), esc_url( $source['srcset'] ) );
+		}
+
+		// display: contents: sarmalayici kutu olusturmaz; img'nin yerlesimi (flex, absolute) degismez.
+		return '<picture style="display:contents">' . $sources . $tag . '</picture>';
 	}
 
 	return sprintf( '<div class="ik-placeholder %s" aria-hidden="true"%s></div>', esc_attr( $class ), $attrs );
@@ -1114,7 +1274,7 @@ function ik_zoom_assets(): void {
 
 	$ver = static fn( string $file ): string => (string) @filemtime( get_theme_file_path( $file ) );
 
-	wp_enqueue_style( 'ik-zoom', get_theme_file_uri( 'assets/css/zoom.css' ), array( 'ik-base' ), $ver( 'assets/css/zoom.css' ) );
+	wp_enqueue_style( 'ik-zoom', get_theme_file_uri( 'assets/css/zoom.css' ), array( 'ik-site' ), $ver( 'assets/css/zoom.css' ) );
 	wp_enqueue_script( 'ik-zoom-engine', get_theme_file_uri( 'assets/js/zoom.js' ), array(), $ver( 'assets/js/zoom.js' ), true );
 	wp_enqueue_script( 'ik-product-zoom', get_theme_file_uri( 'assets/js/product-zoom.js' ), array( 'ik-zoom-engine' ), $ver( 'assets/js/product-zoom.js' ), true );
 }

@@ -515,8 +515,9 @@ sayfa sayfa silin.
 
 **WebP'ye çevirme (0.22.2, `includes/images.php`):** panelden yüklenen JPG, PNG ve HEIC
 fotoğraflar yükleme anında en fazla 2560 px'e küçültülür, yönü düzeltilir ve WebP olarak
-kaydedilir; orijinal saklanmaz (temalar "full" boyutu da kullanıyor), EXIF/konum düşer. Ara
-boyutlar da WebP. GIF ve SVG'ye, ziyaretci form eklerine dokunulmaz; sunucu WebP yazamazsa
+kaydedilir (kalite 82); orijinal saklanmaz (temalar "full" boyutu da kullanıyor), EXIF/konum
+düşer. Ara boyutlar da WebP. Küçültülmeyen ve WebP'si daha büyük çıkan (zaten iyi sıkıştırılmış)
+dosya olduğu gibi kalır. GIF ve SVG'ye, ziyaretci form eklerine dokunulmaz; sunucu WebP yazamazsa
 dosya olduğu gibi kalır. Eski görseller kendiliğinden çevrilmez.
 Yükleme sınırı: ağda **Ayarlar → En fazla yükleme dosya boyutu** varsayılanı 1500 KB; telefon
 fotoğrafları için 10240 KB yapın (PHP `upload_max_filesize` / `post_max_size` da en az bu kadar

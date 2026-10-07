@@ -76,11 +76,46 @@ check( 'buyuk JPG: orijinal jpg silindi', ! glob( dirname( $file ) . '/zz-deneme
 check( 'buyuk JPG: full adresi webp', str_ends_with( (string) wp_get_attachment_image_url( $id, 'full' ), '.webp' ) );
 printf( "     boyut: %s -> %s\n", size_format( $src_size ), size_format( filesize( $file ) ) );
 
-// 2) Seffaf PNG -> WebP (kucultme yok).
-$id        = sideload( make_image( 'png', 800, 600 ), 'zz-deneme-logo.png' );
+// 2) PNG: fotograf benzeri PNG WebP'ye cevrilir (olcu korunur); duz renkli kucuk PNG'nin
+//    WebP'si buyuk cikarsa PNG kalir.
+$photo = imagecreatetruecolor( 800, 600 );
+for ( $x = 0; $x < 800; $x++ ) {
+	for ( $y = 0; $y < 600; $y++ ) {
+		imagesetpixel( $photo, $x, $y, ( ( $x / 4 + random_int( 0, 20 ) ) << 16 ) | ( ( $y / 3 + random_int( 0, 20 ) ) << 8 ) | random_int( 40, 80 ) );
+	}
+}
+$photo_path = tempnam( sys_get_temp_dir(), 'nwcs' ) . '.png';
+imagepng( $photo, $photo_path );
+$id        = sideload( $photo_path, 'zz-deneme-foto.png' );
 $created[] = $id;
 $meta      = wp_get_attachment_metadata( $id );
-check( 'PNG: webp ve olcu korunmus', 'image/webp' === get_post_mime_type( $id ) && 800 === (int) $meta['width'] );
+check( 'foto PNG: webp ve olcu korunmus', 'image/webp' === get_post_mime_type( $id ) && 800 === (int) $meta['width'] );
+
+$flat      = make_image( 'png', 800, 600 );
+$flat_size = filesize( $flat );
+$id        = sideload( $flat, 'zz-deneme-logo.png' );
+$created[] = $id;
+$file      = get_attached_file( $id );
+check( 'duz PNG: sonuc orijinalden buyuk degil', file_exists( $file ) && filesize( $file ) <= $flat_size );
+
+// 2b) WebP kalitesi 82; WebP'si daha buyuk cikan sikistirilmis kucuk JPG oldugu gibi kalir.
+check( 'WebP kalitesi 82', 82 === apply_filters( 'wp_editor_set_quality', 86, 'image/webp' ) );
+check( 'JPEG kalitesine dokunulmadi', 82 === apply_filters( 'wp_editor_set_quality', 82, 'image/jpeg' ) );
+
+$noise = imagecreatetruecolor( 1000, 750 );
+for ( $x = 0; $x < 1000; $x++ ) {
+	for ( $y = 0; $y < 750; $y++ ) {
+		imagesetpixel( $noise, $x, $y, random_int( 0, 0xFFFFFF ) );
+	}
+}
+$noisy = tempnam( sys_get_temp_dir(), 'nwcs' ) . '.jpg';
+imagejpeg( $noise, $noisy, 20 );
+$id        = sideload( $noisy, 'zz-deneme-sikistirilmis.jpg' );
+$created[] = $id;
+$meta      = wp_get_attachment_metadata( $id );
+check( 'buyuyen WebP: asil jpg kaldi', 'image/jpeg' === get_post_mime_type( $id ) && file_exists( get_attached_file( $id ) ) );
+check( 'buyuyen WebP: asil dosya .jpg (tam boy webp kopyasi yok)', str_ends_with( get_attached_file( $id ), '.jpg' ) && empty( $meta['original_image'] ) );
+check( 'buyuyen WebP: artik .webp dosyasi yok', ! glob( dirname( get_attached_file( $id ) ) . '/zz-deneme-sikistirilmis*.webp' ) );
 
 // 3) Ziyaretci (yetkisiz) yuklemesi: dokunulmaz.
 wp_set_current_user( 0 );

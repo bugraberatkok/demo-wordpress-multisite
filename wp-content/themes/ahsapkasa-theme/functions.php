@@ -42,22 +42,23 @@ function ahsapkasa_assets(): void {
 	// degisir, tarayici ve onbellek eski CSS/JS'i gostermez.
 	$ver = static fn( string $file ): string => wp_get_theme()->get( 'Version' ) . '.' . (int) @filemtime( get_theme_file_path( $file ) );
 
-	wp_enqueue_style(
-		'ahsapkasa-fonts',
-		'https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap',
-		array(),
-		null
-	);
+	// Tek CSS dosyasi: assets/site.css (scripts/build-css.mjs uretir). Icinde
+	// sirasiyla yerel Archivo (assets/fonts/fonts.css), derlenmis Tailwind ve
+	// style.css var. Dosya yoksa (ya da yerelde kaynaklardan biri ondan yeniyse)
+	// ayni dosyalar ayni sirayla ayri ayri yuklenir.
+	$bundle  = 'assets/site.css';
+	$sources = ahsapkasa_css_sources();
 
-	wp_enqueue_style(
-		'ahsapkasa-tailwind',
-		get_theme_file_uri( 'assets/tailwind.css' ),
-		array( 'ahsapkasa-fonts' ),
-		$ver( 'assets/tailwind.css' )
-	);
+	if ( ahsapkasa_css_bundle_ready( $bundle, $sources ) ) {
+		wp_enqueue_style( 'ahsapkasa-site', get_theme_file_uri( $bundle ), array(), $ver( $bundle ) );
+	} else {
+		$previous = array();
 
-	// style.css yalnizca tema basligini tasir; kuyruga alinmasi WordPress adeti.
-	wp_enqueue_style( 'ahsapkasa-style', get_stylesheet_uri(), array( 'ahsapkasa-tailwind' ), $ver( 'style.css' ) );
+		foreach ( $sources as $handle => $file ) {
+			wp_enqueue_style( $handle, get_theme_file_uri( $file ), $previous, $ver( $file ) );
+			$previous = array( $handle );
+		}
+	}
 
 	wp_enqueue_script( 'ahsapkasa-nav', get_theme_file_uri( 'assets/nav.js' ), array(), $ver( 'assets/nav.js' ), true );
 	wp_enqueue_script( 'ahsapkasa-media', get_theme_file_uri( 'assets/media.js' ), array(), $ver( 'assets/media.js' ), true );
@@ -106,10 +107,56 @@ function ahsapkasa_maybe_ensure_pages(): void {
 	update_option( 'ahsapkasa_pages_version', AHSAPKASA_PAGES_VERSION );
 }
 
-add_action( 'wp_head', 'ahsapkasa_preconnect', 1 );
-function ahsapkasa_preconnect(): void {
-	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
-	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+/**
+ * Tek CSS dosyasinin kaynaklari, yukleme sirasiyla (tutamac => dosya).
+ * scripts/build-css.mjs ayni sirayi kullanir.
+ */
+function ahsapkasa_css_sources(): array {
+	return array(
+		'ahsapkasa-fonts'    => 'assets/fonts/fonts.css',
+		'ahsapkasa-tailwind' => 'assets/tailwind.css',
+		'ahsapkasa-style'    => 'style.css',
+	);
+}
+
+/**
+ * Tek dosya kullanilabilir mi: dosya var ve (yalnizca yerelde) kaynaklardan
+ * eski degil. Canlida dosya varsa her zaman o yuklenir.
+ */
+function ahsapkasa_css_bundle_ready( string $bundle, array $sources ): bool {
+	$path = get_theme_file_path( $bundle );
+
+	if ( ! is_readable( $path ) ) {
+		return false;
+	}
+
+	if ( 'local' !== wp_get_environment_type() ) {
+		return true;
+	}
+
+	$built = (int) filemtime( $path );
+
+	foreach ( $sources as $file ) {
+		if ( (int) @filemtime( get_theme_file_path( $file ) ) > $built ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Archivo yerelden geliyor: Turkce metin hem latin hem latin-ext alt kumesini
+ * kullandigi icin (ı latin'de; ş, ğ, İ latin-ext'te) ikisi de erken istenir.
+ */
+add_action( 'wp_head', 'ahsapkasa_preload_fonts', 1 );
+function ahsapkasa_preload_fonts(): void {
+	foreach ( array( 'archivo-latin.woff2', 'archivo-latin-ext.woff2' ) as $font ) {
+		printf(
+			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+			esc_url( get_theme_file_uri( 'assets/fonts/' . $font ) )
+		);
+	}
 }
 
 /**
@@ -221,6 +268,95 @@ function ahsapkasa_image_tag( array $image, string $class = '', string $alt_fall
 		esc_attr( $class ),
 		esc_html( $alt_fallback ?: 'Görsel eklenmedi' )
 	);
+}
+
+/**
+ * Panel gorseli icin srcset ve sizes: tarayici ekrana yetecek en kucuk
+ * WordPress boyutunu indirir (gorunum ayni, dosya kucuk). Gorsel kimligi
+ * yoksa ya da WordPress srcset uretemezse bos doner.
+ *
+ * Gorsel object-cover ile tam genislik bir kutuyu doldurur; kutu yuksekligi
+ * ($box_rem, en buyuk kirilimdaki yukseklik) orana gore ekran genisligini
+ * asarsa gorsel ekrandan genis cizilir. sizes bu genisligi soyler; yoksa
+ * tarayici telefonda bulanik kalacak kucuk bir boyut secerdi.
+ */
+function ahsapkasa_srcset_attrs( array $image, float $box_rem ): string {
+	$id     = (int) ( $image['id'] ?? 0 );
+	$srcset = $id > 0 ? wp_get_attachment_image_srcset( $id, 'full' ) : false;
+	$size   = ahsapkasa_image_dimensions( $image );
+
+	if ( ! $srcset || ! $size ) {
+		return '';
+	}
+
+	$cover = (string) ceil( $box_rem * $size[0] / $size[1] );
+
+	return sprintf( ' srcset="%s" sizes="(max-width: %2$srem) %2$srem, 100vw"', esc_attr( $srcset ), esc_attr( $cover ) );
+}
+
+/**
+ * Hero slaydi icin telefon kaynagi: <picture> icindeki <source>; yoksa bos.
+ *
+ * Hero kutusu en az 32rem yuksek; ekran 30em'den darsa kutunun orani en fazla
+ * 30/32 = 0.9375. Gorsel object-cover ve ortada (object-position 50%); ortadan,
+ * tam yukseklikte kesilmis ve orani 0.9375'ten az olmayan bir kopya ekranda ayni
+ * pikselleri gosterir, dosya yaklasik yarisi. Kopyalar manifestteki
+ * 'image_sizes' (ahsapkasa-hero-sm / -md) ile uretilir; yalnizca yandan
+ * kesilmis (orani asilinkinden kucuk ya da esit) olanlar kullanilir.
+ */
+function ahsapkasa_hero_mobile_source( array $image ): string {
+	$id   = (int) ( $image['id'] ?? 0 );
+	$full = $id > 0 ? wp_get_attachment_image_src( $id, 'full' ) : false;
+
+	if ( ! $full || empty( $full[1] ) || empty( $full[2] ) ) {
+		return '';
+	}
+
+	$ratio  = $full[1] / $full[2];
+	$aspect = null;
+	$set    = array();
+
+	foreach ( array( 'ahsapkasa-hero-sm', 'ahsapkasa-hero-md' ) as $name ) {
+		$size = image_get_intermediate_size( $id, $name );
+
+		if ( ! $size || empty( $size['width'] ) || empty( $size['height'] ) || empty( $size['url'] ) ) {
+			continue;
+		}
+
+		$a = $size['width'] / $size['height'];
+
+		// Kutudan dar ya da ustten/alttan kesilmis kopya olmaz; tek srcset'te tek oran.
+		if ( $a < 0.9375 || $a > $ratio + 0.005 || ( null !== $aspect && abs( $a - $aspect ) > 0.005 ) ) {
+			continue;
+		}
+
+		$aspect = $aspect ?? $a;
+		$set[]  = $size['url'] . ' ' . (int) $size['width'] . 'w';
+	}
+
+	if ( ! $set ) {
+		return '';
+	}
+
+	// Gorsel kutu yuksekligine (en az 32rem) gore cizilir: genislik = 32rem x oran.
+	return sprintf( '<source media="(max-width: 30em)" srcset="%s" sizes="%srem" />', esc_attr( implode( ', ', $set ) ), esc_attr( (string) round( 32 * $aspect, 2 ) ) );
+}
+
+/**
+ * Panel gorselinin piksel olculeri (width/height ozellikleri icin). Gorsel
+ * kutusu yuklenmeden once dogru oranda yer ayrilsin.
+ *
+ * @return array{0:int,1:int}|null
+ */
+function ahsapkasa_image_dimensions( array $image, string $size = 'full' ): ?array {
+	$id  = (int) ( $image['id'] ?? 0 );
+	$src = $id > 0 ? wp_get_attachment_image_src( $id, $size ) : false;
+
+	if ( ! $src || empty( $src[1] ) || empty( $src[2] ) ) {
+		return null;
+	}
+
+	return array( (int) $src[1], (int) $src[2] );
 }
 
 /**

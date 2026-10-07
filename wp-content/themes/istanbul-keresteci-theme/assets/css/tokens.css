@@ -1,7 +1,8 @@
 /*
  * Istanbul Keresteci — tasarim jetonlari.
  *
- * Renk degistirmek icin YALNIZCA bu dosyadaki degerleri duzenleyin.
+ * Renk degistirmek icin YALNIZCA bu dosyadaki degerleri duzenleyin, sonra
+ * python tools/build-css.py calistirin (sayfaya assets/css/site-*.css yuklenir).
  * Diger CSS dosyalari ve sablonlar renk kodu tasimaz.
  *
  * Renk kurali: recine = tiklanabilir eylem, filiz = marka (logo, odak,

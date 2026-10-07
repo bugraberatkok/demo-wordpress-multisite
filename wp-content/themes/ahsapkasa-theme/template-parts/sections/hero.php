@@ -20,13 +20,28 @@ foreach ( nwcs_rows( 'home', 'hero', 'slides' ) as $row ) {
 
 	<?php if ( $slides ) : ?>
 		<div class="absolute inset-0 -z-20" data-slideshow <?php nwcs_edit_attr( 'home', 'hero', 'slides' ); ?>>
-			<?php foreach ( $slides as $index => $slide ) : ?>
+			<?php
+			// Ilk kare sayfanin en buyuk ogesi (LCP): oncelikli ve tembel degil;
+			// digerleri tembel. srcset/sizes: kutu en fazla 40rem yuksek (md), gorsel
+			// object-cover ile ekrandan genis kirpilabilir; boyut buna gore secilir.
+			// Telefonda ortadan kesilmis dar kopya (ahsapkasa_hero_mobile_source);
+			// gorunen kisim ayni.
+			foreach ( $slides as $index => $slide ) :
+				$mobile = ahsapkasa_hero_mobile_source( $slide );
+				?>
+				<?php if ( $mobile ) : ?>
+					<picture style="display:contents"><?php echo $mobile; // phpcs:ignore WordPress.Security.EscapingOutput ?>
+				<?php endif; ?>
 				<img src="<?php echo esc_url( $slide['url'] ); ?>"
+					<?php echo ahsapkasa_srcset_attrs( $slide, 40 ); // phpcs:ignore WordPress.Security.EscapingOutput ?>
 					alt="<?php echo esc_attr( $slide['alt'] ?: 'Koçist üretiminden bir kare' ); ?>"
 					data-slide
 					class="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-out <?php echo 0 === $index ? 'opacity-100' : 'opacity-0'; ?>"
 					<?php echo 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"'; ?>
 					decoding="async" />
+				<?php if ( $mobile ) : ?>
+					</picture>
+				<?php endif; ?>
 			<?php endforeach; ?>
 		</div>
 	<?php else : ?>

@@ -9,6 +9,10 @@
 defined( 'ABSPATH' ) || exit;
 
 $image = ik_image_or_default( nwcs_image( 'home', 'about', 'image', 'large' ), 'tomruk-orman.jpg', 'Ormanda yere serilmiş, kabuğu yer yer soyulmuş çam tomrukları' );
+
+// Kare fotograf 4:5 kutuyu yukseklikten doldurur: cizilen genislik kutunun
+// 1.25 kati (genis ekranda kutu en fazla 580px).
+$image = ik_theme_srcset( $image, '(min-width: 900px) min(62.5vw, 725px), calc(125vw - 40px)' );
 ?>
 <section class="ik-section ik-about" aria-labelledby="ik-about-title">
 	<div class="ik-wrap ik-about__grid">

@@ -14,7 +14,7 @@ $full  = sanayi_palet_image( nwcs_image( 'home', 'certificate', 'image', 'full' 
 		<figure class="sp-cert__doc" <?php nwcs_edit_attr( 'home', 'certificate', 'image' ); ?>>
 			<?php if ( ! empty( $image['url'] ) ) : ?>
 				<a href="<?php echo esc_url( $full['url'] ); ?>" class="sp-cert__doc-link">
-					<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" loading="lazy" decoding="async" />
+					<img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>"<?php echo sanayi_palet_image_dims( $image ); // phpcs:ignore WordPress.Security.EscapingOutput ?> loading="lazy" decoding="async" />
 					<span class="screen-reader-text">Belgeyi büyük boyutta açın</span>
 				</a>
 			<?php else : ?>
