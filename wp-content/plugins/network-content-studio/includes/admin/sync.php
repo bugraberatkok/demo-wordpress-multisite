@@ -296,7 +296,7 @@ function nwcs_product_site_status( int $product_id ): array {
 		if ( $trashed ) {
 			$row = array_merge( $row, array( 'state' => 'trash', 'reason' => 'çöp kutusunda', 'fix' => 'untrash' ) );
 		} elseif ( ! empty( $settings['overrides'][ $product_id ]['hidden'] ) ) {
-			$row = array_merge( $row, array( 'state' => 'hidden', 'reason' => 'bu sitede gizlenmiş (Ürün Havuzu toplu işlemi ya da Excel SİTE sütunu)', 'fix' => 'unhide' ) );
+			$row = array_merge( $row, array( 'state' => 'hidden', 'reason' => 'bu sitede gizlenmiş (Ürün Havuzu toplu işlemi, ürün formundaki Siteler ya da Excel SİTE sütunu)', 'fix' => 'unhide' ) );
 		} elseif ( ! $listed && '' !== $key && ! $placed ) {
 			$row = array_merge( $row, array( 'state' => 'unplaced', 'reason' => '' !== $names ? sprintf( 'kategorisi (%s) bu siteye yerleşmemiş', $names ) : 'kategorisi yok', 'fix' => 'place' ) );
 		} elseif ( ! $listed ) {

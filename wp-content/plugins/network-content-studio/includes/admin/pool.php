@@ -447,6 +447,8 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 				<p class="nwcs-hint">Ürün, kategorilerinin yerleştiği sitelerde görünür. Yerleşim <a href="<?php echo esc_url( nwcs_pool_categories_url() ); ?>">Kategoriler</a> sayfasından seçilir.</p>
 			</div>
 
+			<?php nwcs_render_product_sites_field( $product ); ?>
+
 			<div class="nwcs-field">
 				<span class="nwcs-field__label">Görseller</span>
 				<p class="nwcs-hint">
@@ -519,6 +521,66 @@ function nwcs_render_pool_form( ?array $product, array $categories, bool $is_new
 	<?php
 }
 
+/**
+ * Urun formundaki "Siteler" kutulari: Excel'deki SİTE sutununun formdaki
+ * karsiligi (ayni siteler, ayni yazici: nwcs_sync_apply_sites). Isaretli
+ * sitede gosterilir, isaretsizde gizlenir (silinmez). Acilistaki hal
+ * sites_before ile gelir; isaretler degismediyse hicbir sey yazilmaz
+ * (Excel'deki "bos = degismez"), yeni urun kategorinin yerlesimine kalir.
+ */
+function nwcs_render_product_sites_field( ?array $product ): void {
+	$sites = nwcs_sync_sites();
+
+	if ( ! $sites ) {
+		return;
+	}
+
+	$id      = (int) ( $product['id'] ?? 0 );
+	$checked = isset( $product['sites'] ) ? array_map( 'intval', (array) $product['sites'] ) : ( $id ? nwcs_sync_product_sites( $id ) : array() );
+	$before  = isset( $product['sites_before'] ) ? array_map( 'intval', (array) $product['sites_before'] ) : $checked;
+	?>
+	<div class="nwcs-field">
+		<span class="nwcs-field__label" id="nwcs-p-sites-label">Siteler</span>
+		<input type="hidden" name="sites_before" value="<?php echo esc_attr( implode( ',', $before ) ); ?>" />
+		<div class="nwcs-tags" role="group" aria-labelledby="nwcs-p-sites-label">
+			<?php foreach ( $sites as $blog_id => $label ) : ?>
+				<?php $on = in_array( (int) $blog_id, $checked, true ); ?>
+				<label class="nwcs-tag<?php echo $on ? ' is-active' : ''; ?>">
+					<input type="checkbox" name="sites[]" value="<?php echo (int) $blog_id; ?>" <?php checked( $on ); ?> data-nwcs-tag />
+					<?php echo esc_html( $label ); ?>
+				</label>
+			<?php endforeach; ?>
+		</div>
+		<p class="nwcs-hint">
+			Ürün işaretli sitelerde görünür; işaretsiz sitede gizlenir (silinmez, yeniden işaretleyince geri gelir).
+			<?php if ( ! $id ) : ?>
+				Hiçbirini işaretlemezseniz kategorinin yerleştiği sitelerde görünür.
+			<?php endif; ?>
+			Kategori o siteye yerleşmemişse ürün orada listelenir ama kategori sayfasında görünmez.
+		</p>
+	</div>
+	<?php
+}
+
+/**
+ * Formdan gelen site secimi: degistiyse blog_id listesi, degismediyse null.
+ *
+ * @return int[]|null
+ */
+function nwcs_posted_product_sites(): ?array {
+	// phpcs:disable WordPress.Security.NonceVerification.Missing -- cagiran denetledi.
+	if ( ! isset( $_POST['sites_before'] ) ) {
+		return null;
+	}
+
+	$known  = array_keys( nwcs_sync_sites() );
+	$pick   = static fn( array $ids ): array => array_values( array_intersect( $known, array_map( 'absint', $ids ) ) );
+	$before = $pick( explode( ',', (string) wp_unslash( $_POST['sites_before'] ) ) );
+	$now    = $pick( isset( $_POST['sites'] ) && is_array( $_POST['sites'] ) ? array_filter( wp_unslash( $_POST['sites'] ), 'is_scalar' ) : array() );
+	// phpcs:enable
+
+	return $now === $before ? null : $now;
+}
 
 /**
  * Formun ustundeki durum seridi: urun hangi sitede gorunuyor, gorunmuyorsa
@@ -812,6 +874,13 @@ function nwcs_handle_pool_save(): void {
 		nwcs_placement_reveal( array( $id ), $gained );
 	}
 
+	// Siteler: isaretler degistiyse, yerlesimden sonra (Excel SİTE sutunuyla ayni yazici).
+	$sites = nwcs_posted_product_sites();
+
+	if ( null !== $sites ) {
+		nwcs_sync_apply_sites( array( $id => $sites ) );
+	}
+
 	if ( $missing ) {
 		wp_safe_redirect( nwcs_pool_url( array( 'nwcs_pool' => 'saved_missing', 'urun' => $id, 'adet' => $missing ) ) );
 		exit;
@@ -845,6 +914,8 @@ function nwcs_pool_keep_draft( int $id, string $error, string $taken_by = '' ): 
 		'categories'   => isset( $_POST['categories'] ) && is_array( $_POST['categories'] ) ? array_map( 'sanitize_title', array_filter( wp_unslash( $_POST['categories'] ), 'is_scalar' ) ) : array(),
 		'gallery'      => isset( $_POST['gallery'] ) && is_array( $_POST['gallery'] ) ? array_values( array_filter( array_map( 'absint', array_filter( $_POST['gallery'], 'is_scalar' ) ) ) ) : array(),
 		'tables'       => nwcs_sanitize_product_tables( (array) json_decode( $field( 'tables_json' ), true ) ),
+		'sites'        => isset( $_POST['sites'] ) && is_array( $_POST['sites'] ) ? array_values( array_filter( array_map( 'absint', array_filter( $_POST['sites'], 'is_scalar' ) ) ) ) : array(),
+		'sites_before' => array_values( array_filter( array_map( 'absint', explode( ',', $field( 'sites_before' ) ) ) ) ),
 		'had_upload'   => ! empty( $_FILES['gallery_upload']['name'][0] ),
 		'taken_by'     => $taken_by,
 		'error'        => $error,
@@ -908,6 +979,8 @@ function nwcs_pool_take_draft( ?array $product ): ?array {
 			'categories'   => $categories,
 			'images'       => $images,
 			'tables'       => $draft['tables'],
+			'sites'        => $draft['sites'] ?? array(),
+			'sites_before' => $draft['sites_before'] ?? array(),
 			'new_category' => $draft['new_category'],
 			'had_upload'   => $draft['had_upload'],
 			'taken_by'     => $draft['taken_by'],
