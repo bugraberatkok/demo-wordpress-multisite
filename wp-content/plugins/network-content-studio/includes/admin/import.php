@@ -175,6 +175,9 @@ function nwcs_render_sync_step(): bool {
 					<li><?php echo (int) $counts['updated']; ?> ürün güncellendi</li>
 					<li><?php echo (int) $counts['created']; ?> yeni ürün eklendi</li>
 					<li><?php echo (int) $counts['trashed']; ?> ürün çöp kutusuna taşındı</li>
+					<?php if ( ! empty( $counts['sites'] ) ) : ?>
+						<li><?php echo (int) $counts['sites']; ?> ürünün sitesi değişti (SİTE sütunu)</li>
+					<?php endif; ?>
 					<?php if ( $counts['errors'] ) : ?>
 						<li class="is-warn"><?php echo (int) $counts['errors']; ?> hatalı satır yüklenmedi</li>
 					<?php endif; ?>
@@ -186,7 +189,7 @@ function nwcs_render_sync_step(): bool {
 					</p>
 				<?php endif; ?>
 				<?php if ( $counts['created'] && $labels ) : ?>
-					<p><?php echo esc_html( sprintf( 'Yeni ürünler %s sitelerinde görünüyor.', nwcs_join_and( array_values( $labels ) ) ) ); ?></p>
+					<p><?php echo esc_html( sprintf( 'Yeni ürünler %s sitelerinde görünüyor%s.', nwcs_join_and( array_values( $labels ) ), ! empty( $counts['sites'] ) ? '; SİTE sütunu yazılanlar yalnızca yazılan sitelerde' : '' ) ); ?></p>
 				<?php elseif ( $counts['created'] ) : ?>
 					<p class="nwcs-sync__warn">Bu kategori hiçbir siteye yerleşmedi; yeni ürünler sitede görünmez. Aşağıdaki “Sitelerde” kutusundan yerleştirin.</p>
 				<?php endif; ?>
@@ -242,6 +245,9 @@ function nwcs_render_sync_preview( array $plan ): void {
 	$nothing = ! $update && ! $create && ( ! $trash || ! empty( $plan['trash_off'] ) );
 	$labels  = array_values( (array) ( $plan['sites'] ?? array() ) );
 	$order   = nwcs_history_order_note();
+	// SİTE sutunuyla sitesi belirlenen satir var mi (yeni urun ya da site degisikligi).
+	$by_site = (bool) array_filter( $create, static fn( array $item ): bool => is_array( $item['data']['sites'] ?? null ) )
+		|| (bool) array_filter( $update, static fn( array $item ): bool => '' !== (string) ( $item['moves'] ?? '' ) );
 	?>
 	<section class="nwcs-sync" id="nwcs-excel-result" aria-labelledby="nwcs-sync-title">
 		<header class="nwcs-sync__head">
@@ -254,7 +260,7 @@ function nwcs_render_sync_preview( array $plan ): void {
 			</p>
 			<p class="nwcs-sync__lead">Henüz hiçbir şey değişmedi. Aşağıyı kontrol edin, doğruysa <strong>Değişiklikleri uygula</strong>’ya basın.</p>
 			<?php if ( $labels ) : ?>
-				<p class="nwcs-sync__sites"><?php echo esc_html( sprintf( 'Bu ürünler %s sitelerinde görünecek.', nwcs_join_and( $labels ) ) ); ?></p>
+				<p class="nwcs-sync__sites"><?php echo esc_html( sprintf( 'Bu ürünler %s sitelerinde görünecek%s.', nwcs_join_and( $labels ), $by_site ? '; SİTE sütunu yazılanlar yalnızca yazılan sitelerde' : '' ) ); ?></p>
 			<?php else : ?>
 				<p class="nwcs-sync__warn">Bu kategori hiçbir siteye yerleşmedi; ürünler yüklenir ama sitede görünmez. Yükledikten sonra kategorinin “Sitelerde” kutusundan yerleştirin.</p>
 			<?php endif; ?>
@@ -331,6 +337,9 @@ function nwcs_render_sync_preview( array $plan ): void {
 										<?php echo $item['restore'] ? 'çöp kutusundan geri gelecek, ' : ''; ?>
 										<?php echo count( $item['changes'] ); ?> değişiklik<?php echo ! empty( $item['sites'] ) ? ', ' . esc_html( implode( ', ', $item['sites'] ) ) . ' sitesinde' : ''; ?>
 									</span>
+									<?php if ( '' !== (string) ( $item['moves'] ?? '' ) ) : ?>
+										<span class="nwcs-sync__moves"><?php echo esc_html( $item['moves'] ); ?></span>
+									<?php endif; ?>
 								</summary>
 								<?php if ( $item['changes'] ) : ?>
 									<table class="nwcs-sync__diff">
@@ -358,7 +367,7 @@ function nwcs_render_sync_preview( array $plan ): void {
 				<h3>Eklenecek yeni ürünler (<?php echo count( $create ); ?>)</h3>
 				<p class="nwcs-sync__muted">
 					Yalnızca “<?php echo esc_html( $plan['term_name'] ); ?>” kategorisine eklenir.
-					<?php echo $labels ? esc_html( sprintf( 'Görüneceği siteler: %s.', nwcs_join_and( $labels ) ) ) : 'Kategori hiçbir siteye yerleşmediği için sitede görünmez.'; ?>
+					<?php echo $labels ? esc_html( sprintf( 'Görüneceği siteler: %s%s.', nwcs_join_and( $labels ), $by_site ? ' (SİTE yazılan satırlarda yazılan siteler)' : '' ) ) : 'Kategori hiçbir siteye yerleşmediği için sitede görünmez.'; ?>
 				</p>
 				<ul class="nwcs-sync__list">
 					<?php foreach ( $create as $item ) : ?>
@@ -478,6 +487,11 @@ function nwcs_sync_common_missing( array $errors ): string {
  */
 function nwcs_sync_new_facts( array $data ): string {
 	$parts = array( '' !== (string) ( $data['price'] ?? '' ) ? (string) $data['price'] : 'fiyat yok (“Teklif al”)' );
+
+	// SİTE yazildiysa kategorinin yerlesimi yerine bu siteler.
+	if ( is_array( $data['sites'] ?? null ) ) {
+		$parts[] = 'Site: ' . nwcs_sync_sites_text( $data['sites'] );
+	}
 
 	foreach ( nwcs_required_headings() as $key => $label ) {
 		$value = (string) ( $data['details'][ $key ] ?? '' );

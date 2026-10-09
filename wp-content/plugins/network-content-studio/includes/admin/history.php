@@ -193,7 +193,7 @@ function nwcs_history_describe( array $record ): array {
 			$what = (string) ( $record['category'] ?? '' );
 			$kind = 'ürün Excel’i';
 
-			foreach ( array( 'updated' => '%d güncellendi', 'created' => '%d yeni', 'trashed' => '%d çöp kutusuna' ) as $key => $format ) {
+			foreach ( array( 'updated' => '%d güncellendi', 'created' => '%d yeni', 'trashed' => '%d çöp kutusuna', 'sites' => '%d ürünün sitesi değişti' ) as $key => $format ) {
 				if ( ! empty( $counts[ $key ] ) ) {
 					$facts[] = sprintf( $format, (int) $counts[ $key ] );
 				}

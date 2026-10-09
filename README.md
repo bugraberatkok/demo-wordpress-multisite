@@ -328,7 +328,22 @@ açıklaması, fiyat ya da öne çıkan görsel isteniyorsa, Ürün Havuzu'nda �
 - **Özelleştirmeyi kaldır** o sitenin bütün istisnalarını siler, ürün havuzdaki hâline döner.
 - Temasında ürün bölümü olmayan siteler burada listelenmez, ayrıca belirtilir.
 
-Ürünün hangi sitede görüneceği burada değil, İçerik Stüdyosu'ndaki ürün bölümünden seçilir.
+### Ürün sayfası adresi (site başına)
+
+Ürün sayfası `/urun/<adres>/` ilk eklendiğinde ürün adından otomatik oluşur (havuzdaki
+adres). Her site için ayrı ayrı değiştirilebilir: Ürün Havuzu → ürün formu →
+**Özelleştirmeler** → ilgili sitenin kutusu → **Sayfa adresi** → Kaydet.
+
+- Yazılan adres temizlenir: Türkçe harfler sadeleşir (ş→s, ı→i…), boşluklar tire olur.
+- Aynı sitede başka bir ürünün adresi (otomatik adresi dahil) ya da bir sayfanın adresi (ör. `iletisim`) alınamaz;
+  panel düz Türkçe bir hata gösterir ve hiçbir alanı kaydetmez.
+- Eski adresler kaybolmaz: havuzdaki adres ve o sitede daha önce kullanılmış adresler (en
+  fazla 20) güncel adrese **301** ile yönlenir; Yönlendirmeler listesine elle kayıt gerekmez.
+- **Otomatiğe dön** yalnızca adresi havuzdaki adrese döndürür; özel adres de yönlenmeye devam eder.
+- Kartlar, menüler, site haritası, canonical, Product verisi, llms.txt ve Koçist teklif formu
+  kendiliğinden yeni adresi kullanır. Diğer sitelerde ürünün adresi değişmez.
+- İçerik Stüdyosu'ndaki ürün satırı adresi yalnızca gösterir; **değiştir ↗** bu kutuya götürür.
+- Excel'de adres sütunu yoktur; `/urun/` kökü sabittir.
 
 ## Detay başlıkları
 
@@ -362,7 +377,7 @@ Temalar değerleri `nwcs_product_pairs( $product )` ile okur (ürünün kendi s�
 Ürün Havuzu → **Kategoriler** → kategori → **Ürünleri Excel ile girin** → **Excel indir**. İnen dosya
 (`urunler-<kategori>-<tarih>.xlsx`):
 
-- **Ürünler** sayfası: `KİMLİK` (gizli) · `ÜRÜN KODU` · `ÜRÜN ADI *` · `FİYAT` · `KISA AÇIKLAMA` ·
+- **Ürünler** sayfası: `KİMLİK` (gizli) · `ÜRÜN KODU *` · `ÜRÜN ADI *` · `SİTE` · `FİYAT` · `KISA AÇIKLAMA` ·
   zorunlu başlıklar (`*`) · kategorinin ürünlerinde kullanılan diğer başlıklar. Hücreler metin
   biçiminde; başlık satırı dondurulmuş.
 - **Nasıl kullanılır** sayfası: numaralı 1–8 adım.
@@ -399,6 +414,18 @@ Kurallar:
   kalktı); kategorinin yerleştiği sitelerde seçilir (bkz. Görünürlük). Kod zorunlu; otomatik
   kod verilmez. Önizlemeden sonra kod başka ürüne verildiyse satır eklenmez (atlananlarda yazar).
 - **Yeni sütun** (en az bir hücresi dolu) yeni detay başlığı olur.
+- **SİTE** (zorunlu değil): ürünün görüneceği site. `Hepsi` (havuzu kullanan bütün siteler:
+  bugün Koçist ve WOOD KOCIST; yeni katalog sitesi kendiliğinden girer) ya da site adları
+  virgülle/noktalı virgülle. Yazım serbest: `Koçist`, `KOÇİST`, `kocist`, `WOOD KOCIST`,
+  `wood kocist`, `woodkocist.com.tr`. Anlaşılmayan değer satır hatasıdır ("SİTE değeri
+  anlaşılamadı: “kocis”. Yazılabilecekler: Hepsi, Koçist, WOOD KOCIST (virgülle birden fazla).").
+  **Boş = değişmez** (bu sütunda "boş = temizle" ürünü her yerden gizlerdi); yeni üründe boşsa
+  kategorinin yerleşimi geçerli. Yazılmayan sitede ürün **gizlenir** (toplu "gizle" ile aynı
+  istisna; silinmez, durum şeridinden ya da yeniden "Hepsi" yazarak geri gelir), yazılan sitede
+  gösterilir. Taslakta SİTE bugünkü hâliyle dolu gelir ("Hepsi" ya da adlar; hiçbir sitede
+  değilse boş, önizleme bunu not eder). Önizleme ürün başına "Koçist’ten kalkacak",
+  "WOOD KOCIST’e eklenecek" yazar; yazılan siteye kategori yerleşmemişse uyarır. Geri alma
+  görünürlüğü birebir eski hâline getirir.
 - Salt rakam fiyat (Excel'in sayı yaptığı ya da "3500" yazılan) "3.500 ₺" biçimine getirilir;
   "48.500 ₺", "450 TL" gibi metne dokunulmaz.
 - Dosyada olmayan alanlara dokunulmaz: görseller, uzun açıklama, tablolar, sıra, diğer

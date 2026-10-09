@@ -26,14 +26,20 @@ function nwcs_override_get( int $blog_id, int $product_id ): array {
 
 /**
  * Istisna kaydini yazar; bos kalirsa kaydi tamamen kaldirir.
+ *
+ * Sayfa adresi (slug, slug_old) $values icinde verilmezse kayittaki hali
+ * korunur; adres yalnizca nwcs_override_set_slug() ile degisir.
  */
 function nwcs_override_put( int $blog_id, int $product_id, array $values ): void {
 	$settings  = nwcs_site_product_settings( $blog_id );
 	$overrides = $settings['overrides'];
+	$current   = is_array( $overrides[ $product_id ] ?? null ) ? $overrides[ $product_id ] : array();
+
+	$values = array_merge( array_intersect_key( $current, array_flip( array( 'slug', 'slug_old' ) ) ), $values );
 
 	$values = array_filter(
 		$values,
-		static fn( $value ): bool => '' !== $value && null !== $value && false !== $value && 0 !== $value
+		static fn( $value ): bool => '' !== $value && null !== $value && false !== $value && 0 !== $value && array() !== $value
 	);
 
 	if ( $values ) {
@@ -66,6 +72,194 @@ function nwcs_override_image_choices( array $product ): array {
 	return $choices;
 }
 
+/**
+ * Kayittaki ozellestirme sayisi (eski adres listesi sayilmaz: o yalnizca
+ * yonlendirme icin tutulur).
+ */
+function nwcs_override_count( array $override ): int {
+	unset( $override['slug_old'] );
+
+	return count( array_filter( $override, static fn( $v ): bool => '' !== $v && 0 !== $v && null !== $v && array() !== $v ) );
+}
+
+/* ====================================================================== *
+ * Sayfa adresi (site basina /urun/<adres>/)
+ * ====================================================================== */
+
+/** Bir urun icin tutulan en fazla eski adres. */
+const NWCS_SLUG_OLD_MAX = 20;
+
+/**
+ * Urunun havuzdaki (otomatik) adresi. Cop kutusundaki urun de bulunur.
+ */
+function nwcs_override_pool_slug( int $product_id ): string {
+	$pool = nwcs_pool_products();
+
+	if ( isset( $pool[ $product_id ] ) ) {
+		return (string) $pool[ $product_id ]['slug'];
+	}
+
+	switch_to_blog( nwcs_pool_blog_id() );
+	$post = get_post( $product_id );
+	restore_current_blog();
+
+	if ( ! $post || NWCS_PRODUCT_TYPE !== $post->post_type ) {
+		return '';
+	}
+
+	// Cop kutusundaki yazinin adi "__trashed" ekiyle tutulur.
+	return (string) preg_replace( '/__trashed(-\d+)?$/', '', (string) $post->post_name );
+}
+
+/**
+ * Bu sitede $slug adresini kullanan baska bir sey varsa duz Turkce hata
+ * metni; yoksa bos. Bakilan: diger urunlerin guncel adresleri (ozel ya da
+ * otomatik) ve sitenin sayfalari.
+ */
+function nwcs_override_slug_conflict( int $blog_id, int $product_id, string $slug ): string {
+	$overrides = nwcs_site_product_settings( $blog_id )['overrides'];
+
+	foreach ( nwcs_pool_products() as $id => $product ) {
+		if ( (int) $id === $product_id ) {
+			continue;
+		}
+
+		$override = is_array( $overrides[ $id ] ?? null ) ? $overrides[ $id ] : array();
+		$custom   = nwcs_override_slug( $override );
+
+		$name = '' !== (string) ( $override['title'] ?? '' ) ? (string) $override['title'] : (string) $product['title'];
+
+		if ( ( '' !== $custom ? $custom : (string) $product['slug'] ) === $slug ) {
+			return sprintf( 'Bu adres bu sitede başka bir ürünün adresi: %s. Başka bir adres yazın.', $name );
+		}
+
+		// O urun bu sitede ozel adres kullansa da havuzdaki adresi ona yonlenir
+		// (arama motorunda kayitli olabilir); baska urune verilmez.
+		if ( (string) $product['slug'] === $slug ) {
+			return sprintf( 'Bu adres başka bir ürünün otomatik adresi: %s. O ürünün eski bağlantıları bu adresten ona yönlenir. Başka bir adres yazın.', $name );
+		}
+	}
+
+	// Cop kutusundaki urunlerin bu sitedeki ozel adresleri de dolu sayilir:
+	// geri getirilince adresleri cakismasin.
+	foreach ( $overrides as $id => $override ) {
+		if ( (int) $id !== $product_id && is_array( $override ) && nwcs_override_slug( $override ) === $slug ) {
+			return 'Bu adres bu sitede çöp kutusundaki bir ürünün adresi. Başka bir adres yazın.';
+		}
+	}
+
+	switch_to_blog( $blog_id );
+	$page = get_page_by_path( $slug );
+	restore_current_blog();
+
+	if ( $page ) {
+		return sprintf( 'Bu adres bu sitede bir sayfanın adresi: %s. Başka bir adres yazın.', '' !== $page->post_title ? $page->post_title : $slug );
+	}
+
+	return '';
+}
+
+/**
+ * Urunun bu sitedeki adresini degistirir. $raw bos ya da havuzdaki adresle
+ * ayniysa otomatik adrese doner. Onceki ozel adres eski adresler listesine
+ * girer (yeni adrese 301 ile yonlenir); yeni adres baska bir urunun eski
+ * adresleri arasindaysa oradan duser.
+ *
+ * @return array{ok:bool, message:string, slug:string, auto:string, url:string, old:string[], changed:bool}
+ */
+function nwcs_override_set_slug( int $blog_id, int $product_id, string $raw ): array {
+	$auto      = nwcs_override_pool_slug( $product_id );
+	$settings  = nwcs_site_product_settings( $blog_id );
+	$overrides = $settings['overrides'];
+	$override  = is_array( $overrides[ $product_id ] ?? null ) ? $overrides[ $product_id ] : array();
+	$custom    = nwcs_override_slug( $override );
+	$current   = '' !== $custom ? $custom : $auto;
+	$old       = nwcs_override_slug_old( $override );
+
+	$result = static function ( bool $ok, string $message, string $slug, array $old, bool $changed = false ) use ( $auto, $blog_id ): array {
+		return array(
+			'ok'      => $ok,
+			'message' => $message,
+			'slug'    => $slug,
+			'auto'    => $auto,
+			'url'     => nwcs_product_url( $slug, $blog_id ),
+			'old'     => array_values( array_diff( array_unique( array_merge( $auto !== $slug ? array( $auto ) : array(), $old ) ), array( $slug ) ) ),
+			'changed' => $changed,
+		);
+	};
+
+	if ( '' === $auto ) {
+		return $result( false, 'Ürün bulunamadı.', $current, $old );
+	}
+
+	$target = nwcs_slug_clean( $raw );
+
+	if ( '' !== trim( $raw ) && '' === $target ) {
+		return $result( false, 'Adres harf ya da rakam içermeli. Örneğin: verandali-kopek-kulubesi', $current, $old );
+	}
+
+	$target = '' !== $target ? $target : $auto;
+
+	if ( $target === $current ) {
+		return $result( true, '', $current, $old );
+	}
+
+	$conflict = nwcs_override_slug_conflict( $blog_id, $product_id, $target );
+
+	if ( '' !== $conflict ) {
+		if ( $target === $auto ) {
+			// "Otomatiğe dön" icin: baska adres yazmak degil, digerini degistirmek gerekir.
+			$conflict = str_replace(
+				array( 'Bu adres', 'Başka bir adres yazın.' ),
+				array( 'Otomatik adres (' . $auto . ')', 'Önce onun adresini değiştirin.' ),
+				$conflict
+			);
+		}
+
+		return $result( false, $conflict, $current, $old );
+	}
+
+	// Onceki ozel adres eski adreslere; havuz adresi zaten hep yonlenir.
+	if ( $current !== $auto ) {
+		$old[] = $current;
+	}
+
+	$old = array_values( array_diff( array_unique( $old ), array( $target, $auto ) ) );
+	$old = array_slice( $old, -NWCS_SLUG_OLD_MAX );
+
+	$override['slug']     = $target !== $auto ? $target : '';
+	$override['slug_old'] = $old;
+
+	// Yeni adres baska bir urunun eski adresiyse o urunden duser (yonlendirme karismasin).
+	foreach ( $overrides as $id => $row ) {
+		if ( (int) $id === $product_id || ! is_array( $row ) ) {
+			continue;
+		}
+
+		$their = nwcs_override_slug_old( $row );
+
+		if ( in_array( $target, $their, true ) ) {
+			$overrides[ $id ]['slug_old'] = array_values( array_diff( $their, array( $target ) ) );
+
+			if ( ! $overrides[ $id ]['slug_old'] ) {
+				unset( $overrides[ $id ]['slug_old'] );
+			}
+		}
+	}
+
+	$override = array_filter( $override, static fn( $v ): bool => '' !== $v && array() !== $v && null !== $v );
+
+	if ( $override ) {
+		$overrides[ $product_id ] = $override;
+	} else {
+		unset( $overrides[ $product_id ] );
+	}
+
+	update_blog_option( $blog_id, NWCS_OPTION_OVERRIDES, $overrides );
+
+	return $result( true, '', $target, $old, true );
+}
+
 /* ====================================================================== *
  * Arayuz
  * ====================================================================== */
@@ -96,6 +290,7 @@ function nwcs_render_product_customizations( ?array $product, array $media ): vo
 		$sites[] = array(
 			'blog_id'  => $blog_id,
 			'label'    => $site['label'],
+			'home'     => untrailingslashit( preg_replace( '#^https?://#', '', get_home_url( $blog_id ) ) ),
 			'visible'  => 'all' === $settings['mode'] || in_array( $id, $settings['selected'], true ),
 			'override' => nwcs_override_get( $blog_id, $id ),
 		);
@@ -112,9 +307,12 @@ function nwcs_render_product_customizations( ?array $product, array $media ): vo
 
 		<?php foreach ( $sites as $site ) :
 			$override = $site['override'];
-			$count    = count( array_filter( $override, static fn( $v ): bool => '' !== $v && 0 !== $v ) );
+			$count    = nwcs_override_count( $override );
+			$custom   = nwcs_override_slug( $override );
+			$auto     = (string) $product['slug'];
+			$moved    = array_values( array_diff( array_unique( array_merge( '' !== $custom ? array( $auto ) : array(), nwcs_override_slug_old( $override ) ) ), array( $custom ) ) );
 			?>
-			<details class="nwcs-ovr" <?php echo $count ? 'open' : ''; ?> data-blog="<?php echo esc_attr( (string) $site['blog_id'] ); ?>">
+			<details class="nwcs-ovr" id="nwcs-ovr-<?php echo esc_attr( (string) $site['blog_id'] ); ?>" <?php echo $count ? 'open' : ''; ?> data-blog="<?php echo esc_attr( (string) $site['blog_id'] ); ?>">
 				<summary class="nwcs-ovr__head">
 					<span class="nwcs-ovr__name"><?php echo esc_html( $site['label'] ); ?></span>
 
@@ -128,6 +326,26 @@ function nwcs_render_product_customizations( ?array $product, array $media ): vo
 				</summary>
 
 				<div class="nwcs-ovr__body">
+					<div class="nwcs-field nwcs-slug" data-ovr-slug-box data-auto="<?php echo esc_attr( $auto ); ?>">
+						<?php $slug_id = 'nwcs-slug-' . $site['blog_id']; ?>
+						<label class="nwcs-sublabel" for="<?php echo esc_attr( $slug_id ); ?>">Sayfa adresi</label>
+						<div class="nwcs-slug__bar">
+							<span class="nwcs-slug__base"><?php echo esc_html( $site['home'] ); ?>/urun/</span>
+							<input class="nwcs-input nwcs-slug__input" type="text" id="<?php echo esc_attr( $slug_id ); ?>" data-ovr="slug"
+								value="<?php echo esc_attr( $custom ); ?>" placeholder="<?php echo esc_attr( $auto ); ?>"
+								autocomplete="off" spellcheck="false" />
+							<button type="button" class="button" data-ovr-slug-reset <?php disabled( '' === $custom ); ?>>Otomatiğe dön</button>
+						</div>
+						<p class="nwcs-hint" data-ovr-slug-note>
+							Otomatik: <code><?php echo esc_html( $auto ); ?></code>. Boş bırakırsanız otomatik adres kullanılır.
+							Türkçe harfler sadeleşir, boşluklar tire olur.
+							<?php if ( $moved ) : ?>
+								<br />Eski <?php echo 1 === count( $moved ) ? 'adres' : 'adresler'; ?>
+								(<?php echo esc_html( implode( ', ', $moved ) ); ?>) güncel adrese yönlenir.
+							<?php endif; ?>
+						</p>
+					</div>
+
 					<div class="nwcs-field">
 						<label class="nwcs-sublabel">Ürün adı</label>
 						<input class="nwcs-input" type="text" data-ovr="title"
@@ -215,6 +433,17 @@ add_action( 'wp_ajax_nwcs_override_save', 'nwcs_ajax_override_save' );
 function nwcs_ajax_override_save(): void {
 	list( $blog_id, $product_id ) = nwcs_override_guard();
 
+	// Once adres: hataliysa (cakisma) hicbir alan kaydedilmez.
+	$address = null;
+
+	if ( isset( $_POST['slug'] ) ) {
+		$address = nwcs_override_set_slug( $blog_id, $product_id, (string) wp_unslash( $_POST['slug'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- nwcs_slug_clean temizler.
+
+		if ( ! $address['ok'] ) {
+			wp_send_json_error( array( 'message' => $address['message'], 'field' => 'slug' ) );
+		}
+	}
+
 	$price_override = ! empty( $_POST['price_override'] );
 
 	$values = array(
@@ -241,12 +470,38 @@ function nwcs_ajax_override_save(): void {
 	nwcs_override_put( $blog_id, $product_id, $store );
 	nwcs_pool_flush_cache();
 
-	$count = count( array_filter( $store, static fn( $v ): bool => '' !== $v && 0 !== $v ) );
+	$count = nwcs_override_count( nwcs_override_get( $blog_id, $product_id ) );
 
 	wp_send_json_success(
 		array(
 			'message' => $count ? 'Kaydedildi' : 'Özelleştirme kalmadı',
 			'count'   => $count,
+			'address' => $address ?? nwcs_override_set_slug( $blog_id, $product_id, nwcs_override_slug( nwcs_override_get( $blog_id, $product_id ) ) ),
+		)
+	);
+}
+
+/**
+ * "Otomatiğe dön": yalnizca sayfa adresini havuzdaki adrese dondurur; diger
+ * ozellestirmelere dokunmaz. Ozel adres eski adreslere girer, yonlenir.
+ */
+add_action( 'wp_ajax_nwcs_override_slug_reset', 'nwcs_ajax_override_slug_reset' );
+function nwcs_ajax_override_slug_reset(): void {
+	list( $blog_id, $product_id ) = nwcs_override_guard();
+
+	$address = nwcs_override_set_slug( $blog_id, $product_id, '' );
+
+	if ( ! $address['ok'] ) {
+		wp_send_json_error( array( 'message' => $address['message'], 'field' => 'slug' ) );
+	}
+
+	nwcs_pool_flush_cache();
+
+	wp_send_json_success(
+		array(
+			'message' => 'Otomatik adrese dönüldü',
+			'count'   => nwcs_override_count( nwcs_override_get( $blog_id, $product_id ) ),
+			'address' => $address,
 		)
 	);
 }
@@ -255,8 +510,15 @@ add_action( 'wp_ajax_nwcs_override_clear', 'nwcs_ajax_override_clear' );
 function nwcs_ajax_override_clear(): void {
 	list( $blog_id, $product_id ) = nwcs_override_guard();
 
+	// Ozel adres de kalkar (otomatige doner); eski adresler yonlenmeye devam eder.
+	$address = nwcs_override_set_slug( $blog_id, $product_id, '' );
+
+	if ( ! $address['ok'] ) {
+		wp_send_json_error( array( 'message' => $address['message'], 'field' => 'slug' ) );
+	}
+
 	nwcs_override_put( $blog_id, $product_id, array() );
 	nwcs_pool_flush_cache();
 
-	wp_send_json_success( array( 'message' => 'Kaldırıldı' ) );
+	wp_send_json_success( array( 'message' => 'Kaldırıldı', 'address' => $address ) );
 }

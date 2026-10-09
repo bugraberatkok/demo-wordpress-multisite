@@ -704,6 +704,8 @@ function kocist_catalog_seo_pages( array $pages ): array {
 			'description' => $product['short'] ?: ( trim( (string) $product['body'] ) ? wp_strip_all_tags( $product['body'] ) : $product['title'] ),
 			'image'       => $image['url'] ? array( 'url' => $image['url'], 'alt' => $image['alt'] ) : 0,
 			'type'        => 'Product',
+			// Site haritasina girer (/urun/<slug>/ WordPress sayfasi degil).
+			'sitemap'     => true,
 			'sku'         => (string) ( $product['code'] ?? '' ),
 			// Yalnizca duz tutar (kocist_price_number); fiyatsiz ya da "...'den baslayan" urunde 0: offers yazilmaz.
 			'price'       => $product['has_price'] ? kocist_price_number( (string) $product['price'] ) : 0,

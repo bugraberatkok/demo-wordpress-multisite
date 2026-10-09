@@ -253,6 +253,11 @@ function kocist_quote_product(): ?array {
 		return null;
 	}
 
+	// Adres panelde degistirildiyse eski baglanti (havuz adresi ya da onceki adres) de bulunur.
+	if ( function_exists( 'nwcs_product_slug_resolve' ) ) {
+		$slug = nwcs_product_slug_resolve( $slug ) ?: $slug;
+	}
+
 	foreach ( kocist_catalog_products() as $candidate ) {
 		if ( (string) ( $candidate['slug'] ?? '' ) === $slug ) {
 			$product = $candidate;

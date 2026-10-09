@@ -423,7 +423,7 @@ function nwcs_render_headings(): void {
 		'deleted' => array( 'success', 'Başlık silindi.' ),
 		'invalid' => array( 'error', 'Başlık adı en az bir harf içermeli.' ),
 		'exists'  => array( 'error', 'Bu adda bir başlık zaten var. İki başlığı tek yapmak için “Birleştir”i kullanın.' ),
-		'reserved' => array( 'error', 'Bu ad Excel dosyasındaki bir sistem sütunuyla aynı (Kimlik, Ürün kodu, Ürün adı, Fiyat, Kısa açıklama). Başka bir ad yazın, örneğin “Fiyat (Tek)”.' ),
+		'reserved' => array( 'error', 'Bu ad Excel dosyasındaki bir sistem sütunuyla aynı (Kimlik, Ürün kodu, Ürün adı, Site, Fiyat, Kısa açıklama). Başka bir ad yazın, örneğin “Fiyat (Tek)”.' ),
 		'pick'    => array( 'error', 'Birleştirmek için listeden başka bir başlık seçin.' ),
 		'in_use'  => array( 'error', 'Bu başlık ürünlerde kullanılıyor; silinemez. Önce başka bir başlıkla birleştirin.' ),
 	);

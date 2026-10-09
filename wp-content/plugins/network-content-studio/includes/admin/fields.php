@@ -435,6 +435,16 @@ function nwcs_render_products_field( array $definition, int $blog_id ): void {
 								Kod, özellikler, detay metni ve görseller tüm sitelerde ortak:
 								<a href="<?php echo esc_url( nwcs_pool_url( array( 'urun' => $id ) ) ); ?>" target="_blank" rel="noopener">Ürün Havuzu’nda düzenle ↗</a>
 							</p>
+							<?php
+							// Sayfa adresi burada yalnizca gosterilir; tek duzenleme yeri
+							// Urun Havuzu -> urun formu -> Ozellestirmeler (bu sitenin kutusu).
+							$custom_slug = nwcs_override_slug( $override );
+							$site_slug   = '' !== $custom_slug ? $custom_slug : (string) $product['slug'];
+							?>
+							<p class="nwcs-product__address">
+								Sayfa adresi: <code>/urun/<?php echo esc_html( $site_slug ); ?>/</code><?php echo '' !== $custom_slug ? ' (bu siteye özel)' : ''; ?>
+								— <a href="<?php echo esc_url( nwcs_pool_url( array( 'urun' => $id ) ) . '#nwcs-ovr-' . $blog_id ); ?>" target="_blank" rel="noopener">değiştir<span class="screen-reader-text"> (yeni sekmede açılır)</span> ↗</a>
+							</p>
 							<?php if ( ! empty( $override['hidden'] ) ) : ?>
 								<?php // Gizleme Urun Havuzu'ndaki toplu islemden yonetilir; deger burada korunur. ?>
 								<input type="hidden" name="products[overrides][<?php echo esc_attr( (string) $id ); ?>][hidden]" value="1" />

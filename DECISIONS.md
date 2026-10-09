@@ -1609,3 +1609,67 @@ Plan: `PLAN-sss.md` (§6b kullanıcı kararları bağlayıcı).
 - **C (Excel'e fotoğraf sütunu) ertelendi:** dosya adı kuralı yeterli görüldü.
 - **"Kitaplıktan ekle" arama oldu:** son-200 listesi yerine sunucu araması (JS'siz GET formu).
   Stüdyo'daki site istisnası görsel listesi kapsam dışı (kullanıcı kararı).
+
+## Ürün sayfası adresi: site başına düzenlenebilir (8 Ekim 2026)
+
+Plan: `PLAN-urun-adresi.md`. Yeni sistem yok; mevcut site istisnalarına (`nwcs_products_overrides`)
+iki alan eklendi: `slug` (bu sitedeki özel adres; boşsa havuzdaki `post_name`) ve `slug_old`
+(o sitede daha önce kullanılmış özel adresler, en fazla 20).
+
+- **Tek kaynak:** `nwcs_site_products()` satırın `slug` ve `url`'ini özel adresle değiştirir,
+  havuz adresi `pool_slug` olarak kalır. Bu yüzden temalarda değişiklik gerekmedi: kartlar, SEO
+  (sayfa listesi temadan `url` ile gelir), Koçist teklif formu (`kc_product` = satırın slug'ı)
+  ve WOOD KOCIST sepeti (ürün kimliğiyle çalışır) olduğu gibi doğru. Durum şeridindeki
+  "Sitede gör" havuz ürününden hesaplandığı için `nwcs_product_site_slug()` ile düzeltildi.
+- **301 sırası:** `/urun/<x>/` sitede bulunamazsa önce ürün adres geçmişine (`pool_slug`,
+  `slug_old`) bakılır, sonra Yönlendirmeler listesine, en son 404. Hedef her zaman güncel
+  adres; zincir yok (eski adres → güncel, tek adım). Sorgu dizesi korunur.
+- **Çakışma kuralı (aynı site):** başka ürünün güncel adresi (özel ya da otomatik), çöp
+  kutusundaki ürünün özel adresi ve sitenin sayfaları reddedilir. Başka ürünün havuz
+  (otomatik) adresi, o ürün sitede özel adres kullansa bile alınamaz: o adres eski ürüne 301
+  verir ve arama motorunda kayıtlı olabilir. Başka ürünün *eski özel* adresi alınabilir; o adres
+  diğer üründen düşer. "Otomatiğe dön" de aynı kontrolden geçer.
+- **Sonradan aynı adla havuz ürünü:** havuz `post_name` yalnızca havuzda tekildir; bir sitede
+  özel adresle çakışırsa `nwcs_site_product_by_slug()` özel adresi tercih eder.
+- **Adres alanını yalnızca Özelleştirmeler yazar.** `nwcs_save_site_product_settings()` (Stüdyo,
+  toplu göster/gizle, Havuz Paketi) kayıttaki `slug`/`slug_old`'u aynen korur; "Özelleştirmeyi
+  kaldır" adresi otomatiğe döndürür ama eski adresleri tutar (yönlenmeye devam eder).
+- **Eski teklif bağlantıları:** `nwcs_product_slug_resolve()` bir adresin güncel karşılığını
+  verir (güncel, havuz ya da eski adres). Koçist `?urun=` ön dolgusu (`inc/quote.php`) ve
+  ürün formu (`inc/form.php`, `kc_product`) eşleşmeden önce bunu çağırır.
+- **Sürüm 0.23.2:** canlıda statik dosyalar bir yıl önbellekte (immutable); `overrides.js` ve
+  `admin.css` değiştiği için sürüm artırıldı.
+- Ürün çöpe gidip geri gelince adres korunur (istisna kaydı silinmez). Kalıcı silmede istisna
+  kaydıyla birlikte gider.
+- Kapsam dışı (kullanıcı kararı): Excel sütunu, `/urun/` kökünü değiştirmek, Stüdyo'da ikinci
+  bir adres formu.
+
+## Ortak ürünlerde asıl site: vazgeçildi (8 Ekim 2026)
+
+`PLAN-asil-site.md` uygulandı, müşteri isteğiyle tamamen geri alındı: iki sitede de görünen
+ürünün iki sayfası da kendini canonical gösterir, ikisi de aranabilir. Kalan tek parça:
+Koçist ürün sayfaları (`/urun/<slug>/`) site haritasına girer (`kocist-theme/inc/catalog.php`,
+`'sitemap' => true`); önceden hiç girmiyordu.
+
+## Kategori Excel'inde SİTE sütunu (8 Ekim 2026)
+
+Müşteri aynı ürünün siteye göre ayrı yazılmış kopyalarını açacak; Excel'de hangi ürünün hangi
+sitede olduğunu görmek ve seçmek istiyor. Kod: `includes/admin/sync.php` (SİTE bölümü),
+önizleme `includes/admin/import.php`, kontrol `scripts/dev/check-site-column.php`.
+
+- **Siteler:** `nwcs_catalog_sites()` içinde teması ürün gösteren siteler (`nwcs_sync_sites()`).
+  "Hepsi" bunların tamamı; yeni katalog sitesi kendiliğinden girer.
+- **Okuma:** virgül/noktalı virgül; her parça `nwcs_search_fold` + harf/rakam dışı atılır;
+  alan adı yazıldıysa ilk parçası. Tanınan: panel adı, `site_key`, alt klasör, (ağ alan adından
+  farklıysa) alan adı. İki siteye uyan yazım tanınmaz. `SİTE` ayrılmış başlık anahtarıdır
+  (`site`); bu adla detay başlığı açılmaz.
+- **Boş = değişmez** (diğer sütunlardaki "boş = temizle"nin bilinçli istisnası).
+- **Yazım:** gizleme `hidden` istisnası, gösterme `nwcs_product_show_on_site()` (gizlemeyi
+  kaldırır, "Seçilenler" kipinde seçime ekler). Seçimden çıkarmak yerine gizleme seçildi: iki
+  kipte de çalışır, kategori yerleşimi ürünü yeniden seçime eklese de gizli kalır, durum
+  şeridinde "gizlenmiş" diye görünür. Uygulamanın sonunda (yerleşim eklemesinden sonra), site
+  başına en fazla iki yazım.
+- **Geri alma:** kayıt `visibility` = site → ürün → önceki `hidden` ve seçimde olup olmadığı
+  (yalnızca değişenler). Geri alınan ürünlerde gizleme aynen konur, işlemin seçime eklediği
+  çıkarılır. Sonradan elle düzenlendiği için geri alınmayan ürünün sitesi de değişmez.
+- Sütun ÜRÜN ADI'ndan sonra (4. sütun); eski taslaklar (SİTE'siz) aynen çalışır.

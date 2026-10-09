@@ -20,6 +20,11 @@
  *     isaretliyse cop kutusuna gider.
  *   - Dosyada olmayan alanlara dokunulmaz: gorseller, uzun aciklama,
  *     tablolar, sira, diger kategoriler, site ozellestirmeleri.
+ *   - SİTE (istege bagli): urunun gorunecegi siteler ("Hepsi" ya da site
+ *     adlari virgulle). Bos hucre = degismez (temizle degil: bos = her yerde
+ *     gizle olurdu). Listede olmayan sitede urun gizlenir (hidden istisnasi),
+ *     listedekinde gosterilir (nwcs_product_show_on_site). Yeni urunde bossa
+ *     kategorinin yerlesimi gecerli.
  *
  * Ortak yardimcilar (gecici klasor, metin sadelestirme) da burada; Ürün
  * Açıklamaları ekrani da bunlari kullanir.
@@ -179,6 +184,7 @@ function nwcs_sync_system_columns(): array {
 		'id'    => 'KİMLİK',
 		'code'  => 'ÜRÜN KODU',
 		'title' => 'ÜRÜN ADI',
+		'site'  => 'SİTE',
 		'price' => 'FİYAT',
 		'short' => 'KISA AÇIKLAMA',
 	);
@@ -290,7 +296,7 @@ function nwcs_product_site_status( int $product_id ): array {
 		if ( $trashed ) {
 			$row = array_merge( $row, array( 'state' => 'trash', 'reason' => 'çöp kutusunda', 'fix' => 'untrash' ) );
 		} elseif ( ! empty( $settings['overrides'][ $product_id ]['hidden'] ) ) {
-			$row = array_merge( $row, array( 'state' => 'hidden', 'reason' => 'bu sitede gizlenmiş (Ürün Havuzu toplu işlemi)', 'fix' => 'unhide' ) );
+			$row = array_merge( $row, array( 'state' => 'hidden', 'reason' => 'bu sitede gizlenmiş (Ürün Havuzu toplu işlemi ya da Excel SİTE sütunu)', 'fix' => 'unhide' ) );
 		} elseif ( ! $listed && '' !== $key && ! $placed ) {
 			$row = array_merge( $row, array( 'state' => 'unplaced', 'reason' => '' !== $names ? sprintf( 'kategorisi (%s) bu siteye yerleşmemiş', $names ) : 'kategorisi yok', 'fix' => 'place' ) );
 		} elseif ( ! $listed ) {
@@ -325,7 +331,8 @@ function nwcs_product_site_status( int $product_id ): array {
 			}
 
 			if ( nwcs_product_has_page( $product, $blog_id ) ) {
-				$row['url'] = nwcs_product_url( (string) $product['slug'], $blog_id );
+				// Siteye ozel adres varsa "Sitede gör" onu acar.
+				$row['url'] = nwcs_product_url( nwcs_product_site_slug( $product_id, (string) $product['slug'], $blog_id ), $blog_id );
 			}
 		}
 
@@ -366,6 +373,337 @@ function nwcs_product_show_on_site( int $blog_id, array $ids, bool $show = true 
 
 	nwcs_save_site_product_settings( $settings );
 	restore_current_blog();
+}
+
+/* ====================================================================== *
+ * SİTE sutunu: urunun gorunecegi siteler
+ * ====================================================================== */
+
+/**
+ * SİTE sutununun siteleri: havuzu kategori yerlesimiyle tuketen ve temasi
+ * urun gosteren siteler (bugun Koçist, WOOD KOCIST), sirayla: blog_id => ad.
+ * Yeni katalog sitesi kendiliginden girer ("Hepsi" onu da kapsar).
+ *
+ * @return array<int, string>
+ */
+function nwcs_sync_sites(): array {
+	$out = array();
+
+	foreach ( nwcs_catalog_sites() as $blog_id => $site ) {
+		if ( nwcs_site_supports_products( (int) $blog_id ) ) {
+			$out[ (int) $blog_id ] = (string) $site['label'];
+		}
+	}
+
+	return $out;
+}
+
+/**
+ * Site adinin karsilastirma hali: buyuk/kucuk harf, Turkce harf ve bosluk
+ * farki yok; alan adi yazildiysa ilk parcasi ("https://www.woodkocist.com.tr/"
+ * -> "woodkocist").
+ */
+function nwcs_sync_site_fold( string $text ): string {
+	$text = nwcs_search_fold( trim( $text ) );
+	$text = (string) preg_replace( '#^[a-z]+://#', '', $text );
+	$text = (string) preg_replace( '/^www\./', '', $text );
+	$text = (string) strtok( $text . '/', '/' );
+
+	if ( preg_match( '/^([^.]+)\.[a-z]{2,}/', $text, $match ) ) {
+		$text = $match[1];
+	}
+
+	return (string) preg_replace( '/[^a-z0-9]/', '', $text );
+}
+
+/**
+ * Taninan yazimlar: sade ad => blog_id. Panel adi, site anahtari, alt
+ * klasor ve (ag alan adindan farkliysa) alan adi. Iki siteye uyan yazim
+ * belirsizdir, taninmaz.
+ *
+ * @return array<string, int>
+ */
+function nwcs_sync_site_aliases(): array {
+	$network = nwcs_sync_site_fold( (string) get_network()->domain );
+	$catalog = nwcs_catalog_sites();
+	$out     = array();
+	$clash   = array();
+
+	foreach ( nwcs_sync_sites() as $blog_id => $label ) {
+		$site  = get_site( $blog_id );
+		$names = array( $label, (string) ( $catalog[ $blog_id ]['site_key'] ?? '' ) );
+
+		if ( $site ) {
+			$names[] = trim( (string) $site->path, '/' );
+			$names[] = (string) $site->domain;
+		}
+
+		foreach ( $names as $name ) {
+			$key = nwcs_sync_site_fold( $name );
+
+			if ( '' === $key || $key === $network ) {
+				continue;
+			}
+
+			if ( isset( $out[ $key ] ) && $out[ $key ] !== $blog_id ) {
+				$clash[ $key ] = true;
+			}
+
+			$out[ $key ] = $blog_id;
+		}
+	}
+
+	return array_diff_key( $out, $clash );
+}
+
+/**
+ * SİTE hucresini okur. Bos: null (degismez). "Hepsi" butun siteler; site
+ * adlari virgul ya da noktali virgulle. Anlasilmayan ad: hata.
+ *
+ * @return int[]|null|WP_Error blog_id listesi, site sirasiyla.
+ */
+function nwcs_sync_parse_sites( string $value ) {
+	static $aliases = null;
+
+	$sites   = nwcs_sync_sites();
+	$aliases = $aliases ?? nwcs_sync_site_aliases();
+	$wanted  = array();
+	$unknown = array();
+
+	foreach ( preg_split( '/[,;\n]+/u', $value ) as $part ) {
+		$part = trim( (string) $part );
+		$key  = nwcs_sync_site_fold( $part );
+
+		if ( '' === $key ) {
+			continue;
+		}
+
+		if ( in_array( $key, array( 'hepsi', 'hepsinde', 'tumu', 'tum', 'tumsiteler', 'butunsiteler' ), true ) ) {
+			$wanted = array_merge( $wanted, array_keys( $sites ) );
+		} elseif ( isset( $aliases[ $key ] ) ) {
+			$wanted[] = $aliases[ $key ];
+		} else {
+			$unknown[] = $part;
+		}
+	}
+
+	if ( $unknown ) {
+		return new WP_Error(
+			'nwcs_site',
+			sprintf(
+				'SİTE değeri anlaşılamadı: %s. Yazılabilecekler: Hepsi, %s (virgülle birden fazla).',
+				'“' . implode( '”, “', $unknown ) . '”',
+				implode( ', ', $sites )
+			)
+		);
+	}
+
+	return $wanted ? array_values( array_intersect( array_keys( $sites ), $wanted ) ) : null;
+}
+
+/**
+ * Urunun gorundugu SİTE siteleri (gizli degil ve "hepsi" kipinde ya da
+ * secili). Site ayarlari istek boyunca bir kez okunur; yazdiktan sonra
+ * $reset ile yenilenir.
+ *
+ * @return int[]
+ */
+function nwcs_sync_product_sites( int $product_id, bool $reset = false ): array {
+	static $settings = null;
+
+	if ( $reset || null === $settings ) {
+		$settings = array();
+
+		foreach ( array_keys( nwcs_sync_sites() ) as $blog_id ) {
+			$row                  = nwcs_site_product_settings( $blog_id );
+			$row['selected']      = array_flip( $row['selected'] );
+			$settings[ $blog_id ] = $row;
+		}
+	}
+
+	$out = array();
+
+	foreach ( $settings as $blog_id => $row ) {
+		if ( empty( $row['overrides'][ $product_id ]['hidden'] ) && ( 'all' === $row['mode'] || isset( $row['selected'][ $product_id ] ) ) ) {
+			$out[] = (int) $blog_id;
+		}
+	}
+
+	return $out;
+}
+
+/**
+ * SİTE hucresine yazilan hal: butun sitelerdeyse "Hepsi", degilse adlar
+ * virgulle; hicbir sitede degilse bos.
+ *
+ * @param int[] $blog_ids
+ */
+function nwcs_sync_sites_text( array $blog_ids ): string {
+	$sites    = nwcs_sync_sites();
+	$blog_ids = array_map( 'intval', $blog_ids );
+
+	if ( count( $sites ) > 1 && ! array_diff( array_keys( $sites ), $blog_ids ) ) {
+		return 'Hepsi';
+	}
+
+	return implode( ', ', array_intersect_key( $sites, array_flip( $blog_ids ) ) );
+}
+
+/**
+ * Onizlemedeki site degisikligi: "Koçist’ten kalkacak, WOOD KOCIST’e eklenecek".
+ *
+ * @param int[] $now
+ * @param int[] $wanted
+ */
+function nwcs_sync_site_moves( array $now, array $wanted ): string {
+	$parts = array();
+
+	foreach ( nwcs_sync_sites() as $blog_id => $label ) {
+		$was  = in_array( $blog_id, $now, true );
+		$will = in_array( $blog_id, $wanted, true );
+
+		if ( $was && ! $will ) {
+			$parts[] = nwcs_ablative( $label ) . ' kalkacak';
+		} elseif ( ! $was && $will ) {
+			$parts[] = nwcs_dative( $label ) . ' eklenecek';
+		}
+	}
+
+	return implode( ', ', $parts );
+}
+
+/**
+ * Turkce ayrilma eki: "Koçist" -> "Koçist’ten", "WOOD KOCIST" -> "WOOD KOCIST’ten".
+ */
+function nwcs_ablative( string $name ): string {
+	$low    = mb_strtolower( str_replace( 'I', 'i', $name ), 'UTF-8' );
+	$vowels = preg_replace( '/[^aeıioöuü]/u', '', $low );
+	$front  = in_array( '' !== $vowels ? mb_substr( $vowels, -1 ) : 'e', array( 'e', 'i', 'ö', 'ü' ), true );
+	$hard   = in_array( mb_substr( $low, -1 ), array( 'f', 's', 't', 'k', 'ç', 'ş', 'h', 'p' ), true );
+
+	return $name . '’' . ( $hard ? 't' : 'd' ) . ( $front ? 'en' : 'an' );
+}
+
+/**
+ * Turkce yonelme eki: "Koçist" -> "Koçist’e", "Ahşap Kasa" -> "Ahşap Kasa’ya".
+ */
+function nwcs_dative( string $name ): string {
+	$low    = mb_strtolower( str_replace( 'I', 'i', $name ), 'UTF-8' );
+	$vowels = preg_replace( '/[^aeıioöuü]/u', '', $low );
+	$front  = in_array( '' !== $vowels ? mb_substr( $vowels, -1 ) : 'e', array( 'e', 'i', 'ö', 'ü' ), true );
+	$vowel  = in_array( mb_substr( $low, -1 ), array( 'a', 'e', 'ı', 'i', 'o', 'ö', 'u', 'ü' ), true );
+
+	return $name . '’' . ( $vowel ? 'y' : '' ) . ( $front ? 'e' : 'a' );
+}
+
+/**
+ * Urunleri istenen sitelerde gosterir, digerlerinde gizler. Site basina en
+ * fazla iki yazim (goster, gizle; nwcs_product_show_on_site). Yalnizca
+ * gercekten degisenlerin onceki hali doner (geri alma icin).
+ *
+ * @param array<int, int[]> $wanted urun => blog_id listesi
+ * @return array<int, array<int, array{hidden:int, selected:int}>> blog_id => urun => onceki hal
+ */
+function nwcs_sync_apply_sites( array $wanted ): array {
+	$before = array();
+
+	if ( ! $wanted ) {
+		return $before;
+	}
+
+	// Yeni urunler havuz onbellegine girsin (site ayari yazici havuzda olmayani atar).
+	nwcs_pool_flush_cache();
+
+	foreach ( array_keys( nwcs_sync_sites() ) as $blog_id ) {
+		$settings = nwcs_site_product_settings( $blog_id );
+		$selected = array_flip( $settings['selected'] );
+		$show     = array();
+		$hide     = array();
+
+		foreach ( $wanted as $id => $sites ) {
+			$id      = (int) $id;
+			$hidden  = ! empty( $settings['overrides'][ $id ]['hidden'] );
+			$visible = ! $hidden && ( 'all' === $settings['mode'] || isset( $selected[ $id ] ) );
+			$want    = in_array( $blog_id, array_map( 'intval', (array) $sites ), true );
+
+			if ( $want === $visible ) {
+				continue;
+			}
+
+			$before[ $blog_id ][ $id ] = array( 'hidden' => $hidden ? 1 : 0, 'selected' => isset( $selected[ $id ] ) ? 1 : 0 );
+
+			if ( $want ) {
+				$show[] = $id;
+			} else {
+				$hide[] = $id;
+			}
+		}
+
+		if ( $show ) {
+			nwcs_product_show_on_site( $blog_id, $show, true );
+		}
+
+		if ( $hide ) {
+			nwcs_product_show_on_site( $blog_id, $hide, false );
+		}
+	}
+
+	nwcs_sync_product_sites( 0, true );
+
+	return $before;
+}
+
+/**
+ * Site gorunurlugunu kayittaki onceki haline getirir (yalnizca $ids).
+ * Gizleme bayragi aynen; islem secime eklediyse secimden cikar. Site basina
+ * bir yazim.
+ *
+ * @param array<int, array<int, array{hidden:int, selected:int}>> $visibility
+ * @param int[]                                                    $ids
+ * @return int Eski haline donen urun-site sayisi.
+ */
+function nwcs_sync_undo_sites( array $visibility, array $ids ): int {
+	$ids   = array_flip( array_map( 'intval', $ids ) );
+	$count = 0;
+
+	foreach ( $visibility as $blog_id => $rows ) {
+		$rows = array_intersect_key( (array) $rows, $ids );
+
+		if ( ! $rows ) {
+			continue;
+		}
+
+		switch_to_blog( (int) $blog_id );
+
+		$settings = nwcs_site_product_settings();
+		$remove   = array();
+
+		foreach ( $rows as $id => $row ) {
+			$id = (int) $id;
+
+			$settings['overrides'][ $id ] = array_merge( (array) ( $settings['overrides'][ $id ] ?? array() ), array( 'hidden' => (int) ( $row['hidden'] ?? 0 ) ) );
+
+			if ( empty( $row['selected'] ) ) {
+				$remove[] = $id;
+			}
+
+			++$count;
+		}
+
+		$settings['selected'] = array_values( array_diff( $settings['selected'], $remove ) );
+		nwcs_save_site_product_settings( $settings );
+
+		// Yazici cop kutusundaki urunu onceki secimdeki yerine geri koyar; burada cikmali.
+		if ( $remove ) {
+			update_option( NWCS_OPTION_SELECTED, array_values( array_diff( array_map( 'intval', (array) get_option( NWCS_OPTION_SELECTED, array() ) ), $remove ) ) );
+		}
+
+		restore_current_blog();
+	}
+
+	nwcs_sync_product_sites( 0, true );
+
+	return $count;
 }
 
 /**
@@ -419,13 +757,14 @@ function nwcs_sync_build_template( string $slug ) {
 	$system   = nwcs_sync_system_columns();
 	$headings = nwcs_sync_category_headings( $slug );
 
-	$header  = array( $system['id'], $system['code'] . ' *', $system['title'] . ' *', $system['price'], $system['short'] );
+	$header  = array( $system['id'], $system['code'] . ' *', $system['title'] . ' *', $system['site'], $system['price'], $system['short'] );
 	$columns = array(
 		0 => array( 'hidden' => true, 'width' => 8 ),
 		1 => array( 'width' => 16 ),
 		2 => array( 'width' => 38 ),
-		3 => array( 'width' => 14 ),
-		4 => array( 'width' => 44, 'wrap' => true ),
+		3 => array( 'width' => 22 ),
+		4 => array( 'width' => 14 ),
+		5 => array( 'width' => 44, 'wrap' => true ),
 	);
 
 	foreach ( $headings as $row ) {
@@ -436,7 +775,7 @@ function nwcs_sync_build_template( string $slug ) {
 	$rows = array( $header );
 
 	foreach ( nwcs_sync_category_products( $slug ) as $product ) {
-		$line = array( (string) $product['id'], (string) $product['code'], (string) $product['title'], (string) $product['price'], (string) $product['short'] );
+		$line = array( (string) $product['id'], (string) $product['code'], (string) $product['title'], nwcs_sync_sites_text( nwcs_sync_product_sites( (int) $product['id'] ) ), (string) $product['price'], (string) $product['short'] );
 
 		foreach ( array_keys( $headings ) as $key ) {
 			$line[] = nwcs_details_value( (array) $product['details'], $key );
@@ -488,6 +827,7 @@ function nwcs_sync_help_rows( string $category ): array {
 		array( '2. Yeni ürün için en alta bir satır ekleyin. ÜRÜN KODU zorunludur: her ürüne bir kod yazın; fotoğraf adları bu kodla başlar (W-KAM-400DUB-1.jpg). Kod boş olan satır yüklenmez. Başka bir satırı kopyaladıysanız yeni satırın ÜRÜN KODU hücresine yeni ürünün kodunu yazın.' ),
 		array( '3. Yıldızlı (*) sütunlar zorunludur. Boş bırakılan satır yüklenmez; hangi satırda ne eksik olduğu panelde yazar.' ),
 		array( '4. Boş hücre o bilgiyi siler. FİYAT boşsa sitede “Teklif al” görünür.' ),
+		array( 'SİTE: ürünün görüneceği site. Hepsi ya da site adları virgülle: ' . implode( ', ', nwcs_sync_sites() ) . '. Boş bırakırsanız değişmez (yeni ürün kategorinin yerleştiği sitelerde görünür). Yazılmayan sitede ürün gizlenir; silinmez.' ),
 		array( '5. Bir satırı silerseniz o ürün, onay verirseniz çöp kutusuna taşınır. Çöp kutusundan geri getirilebilir.' ),
 		array( '6. Yeni bir detay başlığı için sağa bir sütun ekleyin ve başlığını yazın. En az bir hücresi doluysa başlık olarak eklenir.' ),
 		array( '7. Sütun başlıklarını ve gizli sayfaları değiştirmeyin. Excel sayıları tarihe çevirebilir (örneğin 1/2): böyle hücreleri kontrol edin.' ),
@@ -694,6 +1034,10 @@ function nwcs_sync_plan( string $path, string $filename ) {
 	$by_code = array(); // kod => satir no
 	$matched = array(); // bu dosyada karsiligi olan urunler (hatali satirlar dahil)
 
+	$site_column = ! empty( $seen['site'] );
+	$site_rows   = array(); // SİTE'si yazilan (degisen ya da yeni) satirlarin siteleri
+	$nowhere     = array(); // SİTE bos ve hicbir sitede gorunmeyen urunler
+
 	foreach ( $rows as $offset => $row ) {
 		$line = $offset + 2;
 
@@ -824,12 +1168,21 @@ function nwcs_sync_plan( string $path, string $filename ) {
 			continue;
 		}
 
+		// SİTE: bos ya da sutun yok = degismez (null).
+		$sites = null === $cell( 'site' ) ? null : nwcs_sync_parse_sites( (string) $cell( 'site' ) );
+
+		if ( is_wp_error( $sites ) ) {
+			$fail( $sites->get_error_message() );
+			continue;
+		}
+
 		$data = array(
 			'title'   => $title,
 			'code'    => $code,
 			'price'   => null,
 			'short'   => null === $cell( 'short' ) ? null : nwcs_clean_text( (string) $cell( 'short' ), true ),
 			'details' => $values,
+			'sites'   => $sites,
 		);
 
 		foreach ( $columns as $index => $column ) {
@@ -846,6 +1199,11 @@ function nwcs_sync_plan( string $path, string $filename ) {
 
 		if ( ! $post ) {
 			$plan['create'][] = array( 'line' => $line, 'data' => $data );
+
+			if ( null !== $sites ) {
+				$site_rows[] = $sites;
+			}
+
 			continue;
 		}
 
@@ -884,6 +1242,18 @@ function nwcs_sync_plan( string $path, string $filename ) {
 
 		$data['details_changed'] = $details_changed;
 
+		// Site: yalnizca gorundugu siteler degisecekse.
+		$now_sites = nwcs_sync_product_sites( (int) $post->ID );
+		$moves     = '';
+
+		if ( null !== $sites && $sites !== $now_sites ) {
+			$changes[]   = array( 'Site', '' !== nwcs_sync_sites_text( $now_sites ) ? nwcs_sync_sites_text( $now_sites ) : 'hiçbir sitede', nwcs_sync_sites_text( $sites ), 'site' );
+			$moves       = nwcs_sync_site_moves( $now_sites, $sites );
+			$site_rows[] = $sites;
+		} elseif ( null === $sites && $site_column && ! $now_sites ) {
+			$nowhere[] = $post->post_title;
+		}
+
 		$item = array(
 			'id'       => (int) $post->ID,
 			'line'     => $line,
@@ -893,6 +1263,7 @@ function nwcs_sync_plan( string $path, string $filename ) {
 			'changes'  => $changes,
 			'data'     => $data,
 			'sites'    => nwcs_product_site_labels( (int) $post->ID ),
+			'moves'    => $moves,
 		);
 
 		if ( $item['restore'] ) {
@@ -943,6 +1314,33 @@ function nwcs_sync_plan( string $path, string $filename ) {
 
 	/* ---------- Yeni urunlerin gorunecegi siteler: kategorinin yerlesimi ---------- */
 	$plan['sites'] = nwcs_placement_labels( $slug );
+
+	/* ---------- SİTE sutunu notlari ---------- */
+	$all_sites = nwcs_sync_sites();
+	$unplaced  = array();
+
+	foreach ( $site_rows as $row_sites ) {
+		foreach ( $row_sites as $blog_id ) {
+			if ( ! isset( $plan['sites'][ $blog_id ] ) && isset( $all_sites[ $blog_id ] ) ) {
+				$unplaced[ $blog_id ] = $all_sites[ $blog_id ];
+			}
+		}
+	}
+
+	if ( $unplaced ) {
+		$plan['notes'][] = sprintf(
+			'SİTE sütununda yazılan %s bu kategori yerleşmemiş: ürün orada listelenir ama kategori sayfasında görünmez. Kategorinin “Sitelerde” kutusundan yerleştirin.',
+			nwcs_join_and( array_map( 'nwcs_dative', array_values( $unplaced ) ) )
+		);
+	}
+
+	if ( $nowhere ) {
+		$plan['notes'][] = sprintf(
+			'%d ürünün SİTE hücresi boş ve hiçbir sitede görünmüyor: %s. Göstermek için SİTE’ye site adını ya da Hepsi yazın.',
+			count( $nowhere ),
+			implode( ', ', array_slice( $nowhere, 0, 10 ) ) . ( count( $nowhere ) > 10 ? '…' : '' )
+		);
+	}
 
 	return $plan;
 }
@@ -1094,6 +1492,8 @@ function nwcs_sync_apply( array $plan, bool $trash ): array {
 			'trashed' => count( $record['trashed'] ),
 			'skipped' => count( $record['skipped'] ),
 			'errors'  => count( (array) $plan['errors'] ),
+			// SİTE sutunuyla sitesi degisen urunler.
+			'sites'   => count( array_unique( array_merge( array(), ...array_map( 'array_keys', array_values( (array) ( $record['visibility'] ?? array() ) ) ) ) ) ),
 		);
 
 		nwcs_history_save( $record );
@@ -1122,6 +1522,7 @@ function nwcs_sync_apply( array $plan, bool $trash ): array {
 	switch_to_blog( nwcs_pool_blog_id() );
 
 	$returned = array(); // cop kutusundan geri gelenler (gorunurlukte yeni urun gibi)
+	$visible  = array(); // SİTE sutunu: urun => istenen siteler (en sonda, toplu yazilir)
 
 	/* Guncellemeler. */
 	foreach ( (array) $plan['update'] as $item ) {
@@ -1165,6 +1566,10 @@ function nwcs_sync_apply( array $plan, bool $trash ): array {
 			nwcs_product_write_details( $id, nwcs_sync_merge_details( nwcs_product_details( $id ), (array) $data['details'], $labels ) );
 		}
 
+		if ( is_array( $data['sites'] ?? null ) ) {
+			$visible[ $id ] = $data['sites'];
+		}
+
 		$save();
 	}
 
@@ -1204,6 +1609,10 @@ function nwcs_sync_apply( array $plan, bool $trash ): array {
 		update_post_meta( $id, '_nwcs_short', wp_slash( (string) $data['short'] ) );
 		nwcs_product_write_details( $id, nwcs_sync_merge_details( array(), (array) $data['details'], $labels ) );
 		wp_set_object_terms( $id, $term_ids, NWCS_PRODUCT_TAX, false );
+
+		if ( is_array( $data['sites'] ?? null ) ) {
+			$visible[ $id ] = $data['sites'];
+		}
 	}
 
 	/* Dosyada olmayanlar: cop kutusuna (site secimleri korunur; geri gelince yerine doner). */
@@ -1230,6 +1639,12 @@ function nwcs_sync_apply( array $plan, bool $trash ): array {
 	// Cop kutusundan geri gelen urun de, sitenin seciminde yoksa, yeni urun gibi eklenir.
 	if ( $record['created'] || $returned ) {
 		$record['sites'] = nwcs_placement_reveal( array_merge( $record['created'], $returned ), array( (string) $plan['slug'] ) );
+		$save();
+	}
+
+	/* SİTE sutunu: kategorinin yerlesiminden sonra (yeni urunde onu duzeltir). Site basina toplu. */
+	if ( $visible ) {
+		$record['visibility'] = nwcs_sync_apply_sites( $visible );
 		$save();
 	}
 
@@ -1352,6 +1767,11 @@ function nwcs_sync_undo( array $record ) {
 		$selected = nwcs_site_product_settings()['selected'];
 		update_option( NWCS_OPTION_SELECTED, array_values( array_diff( $selected, array_map( 'intval', (array) $ids ) ) ) );
 		restore_current_blog();
+	}
+
+	// SİTE sutunuyla degisen gorunurluk (yalnizca geri alinabilen urunlerde) eski haline.
+	if ( ! empty( $record['visibility'] ) ) {
+		nwcs_sync_undo_sites( (array) $record['visibility'], $undone );
 	}
 
 	nwcs_pool_flush_cache();

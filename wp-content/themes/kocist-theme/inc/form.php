@@ -139,6 +139,11 @@ function kocist_handle_quote(): void {
 	$product = '';
 	$slug    = sanitize_title( wp_unslash( $_POST['kc_product'] ?? '' ) );
 
+	// Adres panelde degistirildiyse eski adres (havuz ya da onceki) de kabul edilir.
+	if ( '' !== $slug && function_exists( 'nwcs_product_slug_resolve' ) ) {
+		$slug = nwcs_product_slug_resolve( $slug ) ?: $slug;
+	}
+
 	if ( '' !== $slug && function_exists( 'kocist_catalog_products' ) ) {
 		foreach ( kocist_catalog_products() as $candidate ) {
 			if ( (string) ( $candidate['slug'] ?? '' ) === $slug ) {

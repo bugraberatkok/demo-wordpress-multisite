@@ -9,7 +9,12 @@
  * Her alt site kendi option'inda yalnizca su bilgiyi tutar:
  *   nwcs_products_mode      'all' | 'selected'
  *   nwcs_products_selected  [ urun_id, ... ]   (sira = gosterim sirasi)
- *   nwcs_products_overrides [ urun_id => [ title, short, price, image, hidden ] ]
+ *   nwcs_products_overrides [ urun_id => [ title, short, price, image, hidden, slug, slug_old ] ]
+ *
+ * Adres kurali: urun sayfasi /urun/<slug>/. slug bos ise havuzdaki adres
+ * (post_name) kullanilir; doluysa yalnizca o sitede ozel adres gecerlidir.
+ * slug_old o sitede daha once kullanilmis adreslerdir; havuz adresi ile
+ * birlikte guncel adrese 301 ile yonlenir (nwcs_product_template).
  *
  * Fiyat kurali: fiyat serbest metindir. Bos birakilirsa site fiyat yerine
  * "Teklif al" gosterir. Kural hem havuz degeri hem site istisnasi icin gecerlidir.
@@ -567,6 +572,26 @@ function nwcs_save_site_product_settings( array $settings ): void {
 		$overrides[ $id ] = $clean;
 	}
 
+	// Sayfa adresi (slug, slug_old) yalnizca Urun Havuzu -> Ozellestirmeler'den
+	// yazilir (includes/admin/overrides.php). Buraya gelen ayar dizileri (Icerik
+	// Studyosu, toplu islemler) onu tasimaz; kayitli deger aynen korunur.
+	$stored = get_option( NWCS_OPTION_OVERRIDES, array() );
+
+	foreach ( is_array( $stored ) ? $stored : array() as $id => $row ) {
+		$id = absint( $id );
+
+		if ( ! $id || ! isset( $pool[ $id ] ) || ! is_array( $row ) ) {
+			continue;
+		}
+
+		$address = array_intersect_key( $row, array_flip( array( 'slug', 'slug_old' ) ) );
+		$address = array_filter( $address, static fn( $value ): bool => '' !== $value && array() !== $value && null !== $value );
+
+		if ( $address ) {
+			$overrides[ $id ] = array_merge( $overrides[ $id ] ?? array(), $address );
+		}
+	}
+
 	update_option( NWCS_OPTION_MODE, $mode );
 	update_option( NWCS_OPTION_SELECTED, $selected );
 	update_option( NWCS_OPTION_OVERRIDES, $overrides );
@@ -792,9 +817,16 @@ function nwcs_site_products( ?int $blog_id = null ): array {
 
 		$image = $images ? $images[0] : nwcs_image_by_id( 0 );
 
+		// Bu siteye ozel sayfa adresi varsa satirin adresi odur; havuzdaki
+		// adres pool_slug olarak kalir (eski adres yonlendirmesi icin).
+		$slug = nwcs_override_slug( $override );
+		$slug = '' !== $slug ? $slug : $product['slug'];
+
 		$out[] = array(
 			'id'          => $product['id'],
-			'slug'        => $product['slug'],
+			'slug'        => $slug,
+			'pool_slug'   => $product['slug'],
+			'custom_slug' => $slug !== $product['slug'],
 			'title'       => $title,
 			'short'       => $short,
 			'body'        => $product['body'],
@@ -806,7 +838,7 @@ function nwcs_site_products( ?int $blog_id = null ): array {
 			'price_label' => '' !== trim( $price ) ? $price : 'Teklif al',
 			'image'       => $image,
 			'images'      => $images,
-			'url'         => nwcs_product_url( $product['slug'], $blog_id ),
+			'url'         => nwcs_product_url( $slug, $blog_id ),
 			'categories'  => $product['categories'],
 			'tables'      => $product['tables'] ?? array(),
 		);
@@ -851,13 +883,149 @@ function nwcs_product_url( string $slug, ?int $blog_id = null ): string {
  * Slug'a gore tek urun (site istisnalari uygulanmis).
  */
 function nwcs_site_product_by_slug( string $slug, ?int $blog_id = null ): ?array {
+	$found = null;
+
 	foreach ( nwcs_site_products( $blog_id ) as $product ) {
-		if ( $product['slug'] === $slug ) {
+		if ( $product['slug'] !== $slug ) {
+			continue;
+		}
+
+		// Ozel adres, sonradan ayni adla eklenen bir havuz urununun otomatik
+		// adresinden once gelir: sitede elle verilmis adres el degistirmesin.
+		if ( ! empty( $product['custom_slug'] ) ) {
 			return $product;
+		}
+
+		$found = $found ?? $product;
+	}
+
+	return $found;
+}
+
+/* ------------------------------------------------------------------ */
+/* Site basina sayfa adresi                                             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Adres metnini temizler: Turkce harfler sadelesir (ş→s, ı→i...), bosluklar
+ * tire olur, kucuk harfe cevrilir. "Verandalı Köpek Kulübesi" ->
+ * "verandali-kopek-kulubesi". Tam adres yapistirilirsa yalnizca son parca alinir.
+ */
+function nwcs_slug_clean( string $text ): string {
+	$text = strtr(
+		trim( $text ),
+		array(
+			'İ' => 'i', 'I' => 'i', 'ı' => 'i', 'Ğ' => 'g', 'ğ' => 'g', 'Ü' => 'u', 'ü' => 'u',
+			'Ş' => 's', 'ş' => 's', 'Ö' => 'o', 'ö' => 'o', 'Ç' => 'c', 'ç' => 'c',
+			'Â' => 'a', 'â' => 'a', 'Î' => 'i', 'î' => 'i', 'Û' => 'u', 'û' => 'u',
+		)
+	);
+
+	$text = trim( strtok( $text, '?#' ) ?: '', '/ ' );
+
+	if ( false !== strpos( $text, '/' ) ) {
+		$parts = array_values( array_filter( explode( '/', $text ), 'strlen' ) );
+		$text  = (string) end( $parts );
+	}
+
+	$slug = sanitize_title( remove_accents( $text ) );
+
+	// sanitize_title yuzde kodlu karakter birakabilir (emoji vb.); adres sade kalsin.
+	$slug = (string) preg_replace( '/%[0-9a-f]{2}/i', '', $slug );
+	$slug = (string) preg_replace( '/-{2,}/', '-', $slug );
+
+	return trim( substr( $slug, 0, 190 ), '-' );
+}
+
+/**
+ * Istisna kaydindaki ozel adres (yoksa bos).
+ */
+function nwcs_override_slug( array $override ): string {
+	return is_string( $override['slug'] ?? null ) ? (string) $override['slug'] : '';
+}
+
+/**
+ * Istisna kaydindaki eski adresler (en yenisi sonda).
+ *
+ * @return string[]
+ */
+function nwcs_override_slug_old( array $override ): array {
+	$old = $override['slug_old'] ?? array();
+
+	return is_array( $old ) ? array_values( array_filter( array_map( 'strval', $old ), 'strlen' ) ) : array();
+}
+
+/**
+ * Urunun bu sitedeki adresi (ozel adres ya da havuzdaki).
+ */
+function nwcs_product_site_slug( int $product_id, string $pool_slug, ?int $blog_id = null ): string {
+	$override = nwcs_site_product_settings( $blog_id ?? get_current_blog_id() )['overrides'][ $product_id ] ?? array();
+	$slug     = nwcs_override_slug( is_array( $override ) ? $override : array() );
+
+	return '' !== $slug ? $slug : $pool_slug;
+}
+
+/**
+ * Bir adresin bu sitedeki guncel karsiligi: adres bir urunun guncel adresiyse
+ * kendisi; havuzdaki adresi ya da eski ozel adreslerinden biriyse o urunun
+ * guncel adresi; hicbiri degilse bos. Temalar eski baglantilari (ornegin
+ * Kocist teklif formu ?urun=<adres>) bununla cozer.
+ */
+function nwcs_product_slug_resolve( string $slug, ?int $blog_id = null ): string {
+	if ( '' === $slug ) {
+		return '';
+	}
+
+	$blog_id  = $blog_id ?? get_current_blog_id();
+	$products = nwcs_site_products( $blog_id );
+
+	foreach ( $products as $product ) {
+		if ( $product['slug'] === $slug ) {
+			return $slug;
 		}
 	}
 
-	return null;
+	$overrides = nwcs_site_product_settings( $blog_id )['overrides'];
+
+	foreach ( $products as $product ) {
+		$override = $overrides[ $product['id'] ] ?? array();
+
+		if ( $product['pool_slug'] === $slug || in_array( $slug, nwcs_override_slug_old( is_array( $override ) ? $override : array() ), true ) ) {
+			return (string) $product['slug'];
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Bulunamayan /urun/<slug>/ icin guncel adres: slug bu sitede bir urunun
+ * havuzdaki adresi ya da eski ozel adreslerinden biriyse o urunun guncel
+ * sayfasi; degilse bos. Eski adreslerin hepsi dogrudan guncel adrese gider
+ * (zincir yok).
+ */
+function nwcs_product_moved_url( string $slug, ?int $blog_id = null ): string {
+	if ( '' === $slug ) {
+		return '';
+	}
+
+	$blog_id   = $blog_id ?? get_current_blog_id();
+	$overrides = nwcs_site_product_settings( $blog_id )['overrides'];
+
+	foreach ( nwcs_site_products( $blog_id ) as $product ) {
+		if ( $product['slug'] === $slug || ! nwcs_product_has_page( $product, $blog_id ) ) {
+			continue;
+		}
+
+		$override = $overrides[ $product['id'] ] ?? array();
+		$old      = nwcs_override_slug_old( is_array( $override ) ? $override : array() );
+
+		if ( $product['pool_slug'] === $slug || in_array( $slug, $old, true ) ) {
+			return (string) $product['url'];
+		}
+	}
+
+	return '';
 }
 
 /* ------------------------------------------------------------------ */
@@ -889,6 +1057,20 @@ function nwcs_product_template(): void {
 	// Bu sitede gosterilmeyen urunun sayfasi yoktur; detay metni girilmemis
 	// urunun sayfasi yalnizca temasi bunu isteyen sitede acilir
 	// (nwcs_product_has_page). Aksi halde /urun/<slug>/ bos sayfa donerdi.
+	// Adres bu sitede degistirilmisse eski adres (havuzdaki ya da onceki ozel
+	// adres) yeni adrese kalici yonlenir. Yonlendirme listesinden once bakilir;
+	// hedef her zaman guncel adrestir, zincir olusmaz.
+	if ( ! $product ) {
+		$moved = nwcs_product_moved_url( sanitize_title( (string) $slug ) );
+
+		if ( '' !== $moved ) {
+			$query = isset( $_SERVER['QUERY_STRING'] ) ? (string) wp_unslash( $_SERVER['QUERY_STRING'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- adrese aynen eklenir, wp_redirect temizler.
+
+			wp_redirect( $moved . ( '' !== $query ? '?' . $query : '' ), 301, 'Network Content Studio' ); // phpcs:ignore WordPress.Security.SafeRedirect -- ayni sitenin adresi.
+			exit;
+		}
+	}
+
 	if ( ! $product || ! nwcs_product_has_page( $product ) ) {
 		global $wp_query;
 

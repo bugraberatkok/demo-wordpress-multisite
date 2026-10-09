@@ -50,12 +50,12 @@ function nwcs_detail_clean_value( string $value ): string {
 
 /**
  * Excel'deki sistem sutunlarinin anahtarlari (KİMLİK, ÜRÜN KODU, ÜRÜN ADI,
- * FİYAT, KISA AÇIKLAMA). Bu anahtarla yeni detay basligi acilmaz; Excel
+ * FİYAT, KISA AÇIKLAMA, SİTE). Bu anahtarla yeni detay basligi acilmaz; Excel
  * basligi sistem sutunu sayilir. Kayitta zaten bu anahtarla olan baslik
  * (Kocist zimba verisindeki "Fiyat") korunur, Excel'de "(detay)" ekiyle yazilir.
  */
 function nwcs_heading_reserved_keys(): array {
-	return array( 'kimlik', 'urunkodu', 'urunadi', 'fiyat', 'kisaaciklama' );
+	return array( 'kimlik', 'urunkodu', 'urunadi', 'fiyat', 'kisaaciklama', 'site' );
 }
 
 /**
